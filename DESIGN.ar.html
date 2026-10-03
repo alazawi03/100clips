@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نظام تصميم 100clips</title>
+<meta name="description" content="مرجع التصميم لمنصة 100clips: الألوان والخطوط والمسافات والمكوّنات وملف الثيم للمطورين.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500&family=Inter:wght@400;500&display=swap">
+<style>
+:root {
+  --primary: #6D4AFF;
+  --primary-hover: #5B38F0;
+  --primary-soft: #EFEAFF;
+  --primary-on-soft: #4B2FC9;
+  --on-primary: #FFFFFF;
+  --background: #FFFFFF;
+  --surface: #F4F2FA;
+  --border: #EEEDF3;
+  --text: #14121C;
+  --text-muted: #8A8794;
+  --icon-inactive: #A6A3B3;
+  --success: #16A34A;
+  --success-soft: #E7F6EC;
+  --error: #E5484D;
+  --error-soft: #FDECEC;
+  --warning: #F5A524;
+  --warning-soft: #FEF4E2;
+  --gradient-start: #A78BFA;
+  --gradient-end: #6D4AFF;
+  --overlay: #00000066;
+  --scrim: #00000066;
+  --on-media: #FFFFFF;
+  --font-sans: Inter, "Thmanyah Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-arabic: "Thmanyah Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-latin: Inter, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+  --button-height-mobile: 44px;
+  --button-height-web: 40px;
+  --input-height: 44px;
+  --chip-height: 32px;
+  --touch-target: 44px;
+  --avatar-sm: 32px;
+  --avatar-md: 40px;
+  --avatar-lg: 56px;
+  --avatar-xl: 80px;
+  --icon-inline: 16px;
+  --icon-default: 20px;
+  --icon-nav: 24px;
+  --sidebar-width: 240px;
+  --content-max: 1200px;
+  --gutter-web: 24px;
+  --margin-mobile: 16px;
+  --bp-sm: 640px;
+  --bp-md: 1024px;
+  --bp-lg: 1280px;
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #8B6CFF;
+    --primary-hover: #9D82FF;
+    --primary-soft: #2A2245;
+    --primary-on-soft: #C9BCFF;
+    --on-primary: #FFFFFF;
+    --background: #0E0C14;
+    --surface: #1A1724;
+    --border: #2A2635;
+    --text: #F5F4FA;
+    --text-muted: #9A97A6;
+    --icon-inactive: #6B6878;
+    --success: #22C55E;
+    --success-soft: #14301F;
+    --error: #F2555A;
+    --error-soft: #3A1A1C;
+    --warning: #F7B547;
+    --warning-soft: #3A2C12;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+    --primary: #8B6CFF;
+    --primary-hover: #9D82FF;
+    --primary-soft: #2A2245;
+    --primary-on-soft: #C9BCFF;
+    --on-primary: #FFFFFF;
+    --background: #0E0C14;
+    --surface: #1A1724;
+    --border: #2A2635;
+    --text: #F5F4FA;
+    --text-muted: #9A97A6;
+    --icon-inactive: #6B6878;
+    --success: #22C55E;
+    --success-soft: #14301F;
+    --error: #F2555A;
+    --error-soft: #3A1A1C;
+    --warning: #F7B547;
+    --warning-soft: #3A2C12;
+    color-scheme: dark;
+}
+
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--background); color: var(--text); font-family: var(--font-sans); font-size: 15px; line-height: 24px; -webkit-font-smoothing: antialiased; }
+code { white-space: nowrap; font-family: var(--font-mono); font-size: 13px; direction: ltr; unicode-bidi: isolate; background: var(--surface); padding: 1px 6px; border-radius: 6px; }
+a { color: var(--primary); }
+
+.layout { display: grid; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); max-width: 1200px; margin: 0 auto; gap: var(--space-10); padding-inline: var(--space-6); }
+.toc { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding-block: var(--space-6); display: flex; flex-direction: column; gap: 2px; }
+.toc-brand { padding: var(--space-2) var(--space-3) var(--space-4); }
+.toc-brand .hc-wordmark { font-size: 24px; }
+.toc a { display: block; padding: 6px var(--space-3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; }
+.toc a:hover { background: var(--surface); }
+.toc a.active { background: var(--primary-soft); color: var(--primary-on-soft); font-weight: 500; }
+.theme { display: flex; gap: var(--space-1); margin-top: var(--space-4); padding-inline: var(--space-3); }
+.theme button { height: 32px; padding-inline: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-full); background: var(--background); color: var(--text-muted); font: inherit; font-size: 13px; cursor: pointer; }
+.theme button[aria-pressed="true"] { background: var(--primary-soft); border-color: var(--primary-soft); color: var(--primary-on-soft); }
+.theme button:focus-visible, .copy:focus-visible, .toc a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+main { min-width: 0; padding-block: var(--space-6) var(--space-12); }
+.hero { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-6); min-height: 288px; padding-block: var(--space-6) var(--space-8); border-bottom: 1px solid var(--border); overflow: hidden; }
+.hero-words { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--space-2); max-width: 440px; }
+.hero h1 { margin: 0; font-size: 32px; line-height: 40px; font-weight: 500; text-wrap: balance; }
+.hero p { margin: 0; color: var(--text-muted); }
+.hero .lede { color: var(--text); }
+.hero-art { flex: none; width: 400px; max-width: 100%; height: 288px; margin-block: calc(var(--space-6) * -1) calc(var(--space-8) * -1); }
+.hero-art svg { display: block; width: 100%; height: 100%; }
+.hero-art .primary { fill: var(--primary); } .hero-art .soft { fill: var(--primary-soft); } .hero-art .ink { fill: var(--text); } .hero-art .tint { fill: var(--gradient-start); }
+.hero-art .pill { fill: var(--primary); } .hero-art .ring-new { fill: var(--primary); } .hero-art .ring-seen { fill: var(--border); }
+.hero-art .gap { fill: var(--background); } .hero-art .face { fill: var(--primary-soft); }
+
+section { padding-block: var(--space-10) var(--space-4); border-bottom: 1px solid var(--border); }
+section:last-child { border-bottom: 0; }
+h2 { margin: 0 0 var(--space-4); font-size: 24px; line-height: 32px; font-weight: 500; }
+h3 { margin: var(--space-8) 0 var(--space-3); font-size: 20px; line-height: 28px; font-weight: 500; }
+h4 { margin: var(--space-6) 0 var(--space-3); font-size: 16px; line-height: 24px; font-weight: 500; }
+p, ul, ol { margin: 0 0 var(--space-3); max-width: 68ch; }
+ul, ol { padding-inline-start: var(--space-5); }
+li { margin-bottom: var(--space-1); }
+li::marker { color: var(--text-muted); }
+blockquote { margin: 0 0 var(--space-4); padding: var(--space-3) var(--space-4); background: var(--surface); border-radius: var(--radius-md); max-width: 68ch; }
+.table { overflow-x: auto; margin-bottom: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: start; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-weight: 500; color: var(--text-muted); background: var(--surface); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td { font-variant-numeric: tabular-nums; }
+
+.code { position: relative; margin-bottom: var(--space-4); }
+.code pre { margin: 0; padding: var(--space-4); padding-top: var(--space-10); overflow-x: auto; background: var(--surface); border-radius: var(--radius-md); text-align: left; }
+.code pre code { white-space: pre; background: none; padding: 0; font-size: 13px; line-height: 20px; }
+.copy { position: absolute; top: var(--space-2); inset-inline-end: var(--space-2); height: 28px; padding-inline: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-full); background: var(--background); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }
+
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--space-3); margin-top: var(--space-6); }
+.swatch { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; }
+.swatch--wide { grid-column: 1 / -1; }
+.sw-fill { height: 72px; display: flex; align-items: flex-end; padding: var(--space-2); }
+.sw-fill.split { padding: 0; }
+.sw-fill.split > div { flex: 1; display: flex; align-items: flex-end; padding: var(--space-2); }
+.sw-fill span { font-family: var(--font-mono); font-size: 11px; line-height: 16px; padding: 1px 6px; border-radius: 6px; background: #ffffffd9; color: #14121C; }
+.sw-body { padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); }
+.sw-body code { align-self: flex-start; }
+.sw-body p { margin: 0; font-size: 13px; line-height: 20px; color: var(--text-muted); }
+
+.specimens { margin-top: var(--space-6); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.spec { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: var(--space-4); align-items: baseline; padding: var(--space-4); border-bottom: 1px solid var(--border); }
+.spec:last-child { border-bottom: 0; }
+.spec-meta { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--text-muted); }
+.spec-meta code { align-self: flex-start; }
+.spec p { margin: 0; max-width: none; }
+
+.viz { margin-top: var(--space-4); }
+.spacing { display: flex; flex-direction: column; gap: var(--space-2); }
+.sp-row { display: grid; grid-template-columns: 96px 56px 1fr; align-items: center; gap: var(--space-3); }
+.sp-bar { height: 16px; background: var(--primary-soft); border-radius: 4px; justify-self: start; }
+.sp-val, .rd span, .mo span { font-size: 13px; color: var(--text-muted); }
+.radii { display: flex; flex-wrap: wrap; gap: var(--space-6); }
+.rd { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
+.rd-box { width: 72px; height: 72px; background: var(--surface); border: 1px solid var(--border); }
+
+.motion { display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-4); }
+.mo { display: grid; grid-template-columns: minmax(0, 1fr) 120px 56px; align-items: center; gap: var(--space-3); }
+.mo-track { position: relative; height: 24px; background: var(--surface); border-radius: var(--radius-full); }
+.mo-dot { position: absolute; top: 4px; inset-inline-start: 4px; width: 16px; height: 16px; border-radius: var(--radius-full); background: var(--primary); transition: inset-inline-start var(--d) ease-out; }
+.motion.go .mo-dot { inset-inline-start: calc(100% - 20px); }
+
+.comps { display: flex; flex-direction: column; gap: var(--space-6); margin-top: var(--space-6); }
+.comp { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.comp-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); }
+.comp-head h3 { margin: 0; font-size: 16px; line-height: 24px; }
+.comp-head span { font-size: 13px; color: var(--text-muted); }
+.comp-preview { background: var(--background); border-bottom: 1px solid var(--border); overflow-x: auto; }
+.comp-guide { padding: var(--space-4); background: var(--surface); }
+.comp-guide h4 { margin-top: 0; }
+.comp-guide code, .comp-guide blockquote { background: var(--background); }
+.comp-guide .table { background: var(--background); }
+
+@media (max-width: 1023px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding-inline: var(--space-4); }
+  .toc { position: static; max-height: none; flex-direction: row; flex-wrap: wrap; gap: var(--space-1); padding-block: var(--space-4) 0; }
+  .toc-brand { width: 100%; padding-inline: 0; }
+  .toc a { padding: 4px var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-full); font-size: 13px; }
+  .theme { width: 100%; padding-inline: 0; margin-top: var(--space-2); }
+  .hero-art { display: none; }
+  .hero { min-height: 0; }
+}
+@media (max-width: 639px) {
+  .spec { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+  .mo { grid-template-columns: minmax(0, 1fr) 56px; }
+  .mo code { display: none; }
+}
+
+/* ---- component classes (same as components/bundle.css in the published system) ---- */
+
+/* 100clips — component classes (prefix hc-). Every value comes from tokens.css. */
+
+
+/* preview stage */
+.hc-stage { direction: rtl; display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; padding: var(--space-4); }
+.hc-stage--col { flex-direction: column; align-items: stretch; }
+.hc-stage--top { align-items: flex-start; }
+.hc-note { width: 100%; margin: 0; font-size: 11px; line-height: 16px; color: var(--text-muted); }
+.hc-icon { width: var(--icon-default); height: var(--icon-default); flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.hc-icon--inline { width: var(--icon-inline); height: var(--icon-inline); }
+.hc-icon--nav { width: var(--icon-nav); height: var(--icon-nav); }
+.hc-ltr { direction: ltr; unicode-bidi: isolate; }
+
+:where(.hc-btn, .hc-chip, .hc-tab, .hc-nav-item, .hc-icon-btn, .hc-check input):focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Button */
+.hc-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: var(--button-height-web); padding-inline: var(--space-4); border: 0; border-radius: var(--radius-md); font: inherit; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background-color var(--duration-fast) ease-out, transform var(--duration-fast) ease-out; }
+.hc-btn:active { transform: scale(0.98); }
+.hc-btn--mobile { height: var(--button-height-mobile); }
+.hc-btn--hero { background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%); color: var(--on-primary); }
+.hc-btn--primary { background: var(--primary); color: var(--on-primary); }
+.hc-btn--primary:hover { background: var(--primary-hover); }
+.hc-btn--secondary { background: var(--surface); color: var(--text); }
+.hc-btn--secondary:hover { background: var(--border); }
+.hc-btn--ghost { background: transparent; color: var(--primary); }
+.hc-btn--ghost:hover { background: var(--primary-soft); }
+.hc-btn--destructive { background: transparent; color: var(--error); }
+.hc-btn--destructive:hover { background: var(--error-soft); }
+.hc-icon-btn { display: inline-grid; place-items: center; width: var(--touch-target); height: var(--touch-target); border: 0; border-radius: var(--radius-full); background: transparent; color: var(--text); cursor: pointer; }
+.hc-icon-btn:hover { background: var(--surface); }
+
+/* Chip */
+.hc-chip { display: inline-flex; align-items: center; gap: var(--space-1); height: var(--chip-height); padding-inline: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-full); background: var(--background); color: var(--text-muted); font: inherit; font-size: 13px; line-height: 20px; cursor: pointer; transition: background-color var(--duration-fast) ease-out; }
+.hc-chip[aria-pressed="true"] { background: var(--primary-soft); border-color: var(--primary-soft); color: var(--primary-on-soft); }
+
+/* Input */
+.hc-field { display: flex; flex-direction: column; gap: var(--space-2); flex: 1 1 240px; min-width: 0; }
+.hc-field__label { font-weight: 500; }
+.hc-input { box-sizing: border-box; width: 100%; height: var(--input-height); padding-inline: var(--space-3); border: 1px solid transparent; border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font: inherit; }
+.hc-input::placeholder { color: var(--text-muted); }
+.hc-input:focus { outline: 2px solid var(--primary); outline-offset: 0; }
+.hc-input[aria-invalid="true"] { border-color: var(--error); }
+.hc-field__help { display: flex; align-items: center; gap: var(--space-1); margin: 0; font-size: 13px; line-height: 20px; color: var(--text-muted); }
+.hc-field__help--error { color: var(--error); }
+
+/* Status badge */
+.hc-badge { display: inline-flex; align-items: center; height: 24px; padding-inline: var(--space-2); border-radius: var(--radius-full); font-size: 13px; line-height: 20px; font-weight: 500; white-space: nowrap; }
+.hc-badge--draft { background: var(--surface); color: var(--text-muted); }
+.hc-badge--success { background: var(--success-soft); color: var(--success); }
+.hc-badge--warning { background: var(--warning-soft); color: var(--warning); }
+.hc-badge--error { background: var(--error-soft); color: var(--error); }
+.hc-badge--completed { background: var(--primary-soft); color: var(--primary-on-soft); }
+
+/* Card */
+.hc-card { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); min-width: 0; flex: 1 1 240px; }
+.hc-card--surface { background: var(--surface); border-color: transparent; }
+.hc-card--feature { border-radius: var(--radius-lg); }
+.hc-card__row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.hc-card__title { margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; }
+.hc-card__meta { margin: 0; font-size: 13px; line-height: 20px; color: var(--text-muted); }
+
+/* Avatar + story ring */
+.hc-avatar { --size: var(--avatar-md); box-sizing: border-box; display: inline-grid; place-items: center; width: var(--size); height: var(--size); flex: none; border-radius: var(--radius-full); background: var(--primary-soft); color: var(--primary-on-soft); font-weight: 500; font-size: calc(var(--size) * 0.4); line-height: 1; }
+.hc-avatar--sm { --size: var(--avatar-sm); }
+.hc-avatar--lg { --size: var(--avatar-lg); }
+.hc-avatar--xl { --size: var(--avatar-xl); }
+.hc-ring { display: inline-grid; padding: 2px; border-radius: var(--radius-full); background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%); }
+.hc-ring--seen { background: var(--border); }
+.hc-ring__gap { display: grid; padding: 2px; border-radius: var(--radius-full); background: var(--background); }
+.hc-person { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); font-size: 11px; line-height: 16px; color: var(--text-muted); }
+
+/* Video card */
+.hc-video { display: flex; flex-direction: column; gap: var(--space-2); width: 148px; min-width: 0; }
+.hc-video__media { position: relative; direction: ltr; aspect-ratio: 9 / 16; max-width: 100%; border-radius: var(--radius-md); background: var(--surface); overflow: hidden; color: var(--text-muted); display: grid; place-items: center; }
+.hc-video__media--wide { aspect-ratio: 16 / 9; }
+.hc-video__media--square { aspect-ratio: 1 / 1; }
+.hc-video__scrim { position: absolute; inset-inline: 0; bottom: 0; display: flex; justify-content: space-between; align-items: center; padding: var(--space-1) var(--space-2); background: var(--scrim); color: var(--on-media); font-size: 11px; line-height: 16px; }
+.hc-video__scrim span { display: inline-flex; align-items: center; gap: 2px; }
+.hc-video__title { margin: 0; font-size: 15px; line-height: 24px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hc-video__handle { margin: 0; font-size: 13px; line-height: 20px; color: var(--text-muted); }
+
+/* Mobile tab bar */
+.hc-tabbar { direction: rtl; box-sizing: border-box; display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; width: 100%; max-width: 390px; height: 64px; padding-inline: var(--space-2); border-top: 1px solid var(--border); background: var(--background); }
+.hc-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: var(--touch-target); border: 0; background: none; color: var(--icon-inactive); font: inherit; font-size: 11px; line-height: 16px; cursor: pointer; }
+.hc-tab[aria-current="page"] { color: var(--text); }
+.hc-tab__post { display: grid; place-items: center; width: 48px; height: 40px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%); color: var(--on-primary); }
+
+/* Web sidebar */
+.hc-sidebar { direction: rtl; box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-1); width: var(--sidebar-width); max-width: 100%; padding: var(--space-4); border-inline-start: 1px solid var(--border); background: var(--background); }
+.hc-sidebar__brand { padding: var(--space-2) var(--space-3) var(--space-4); }
+.hc-nav-item { display: flex; align-items: center; gap: var(--space-3); height: var(--button-height-web); padding-inline: var(--space-3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; font-size: 15px; }
+.hc-nav-item .hc-icon { color: var(--icon-inactive); }
+.hc-nav-item:hover { background: var(--surface); }
+.hc-nav-item[aria-current="page"] { background: var(--primary-soft); color: var(--primary-on-soft); font-weight: 500; }
+.hc-nav-item[aria-current="page"] .hc-icon { color: var(--primary-on-soft); }
+
+/* Top bar */
+.hc-topbar { direction: rtl; box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); width: 100%; height: 64px; padding-inline: var(--space-6); border-bottom: 1px solid var(--border); background: var(--background); }
+.hc-topbar__title { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; flex: none; }
+.hc-topbar__search { display: flex; align-items: center; gap: var(--space-2); flex: 1 1 auto; max-width: 360px; min-width: 0; height: var(--button-height-web); margin-inline-start: auto; padding-inline: var(--space-3); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-muted); font-size: 15px; }
+.hc-topbar__lang { height: 32px; padding-inline: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-full); background: transparent; color: var(--text); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+/* Wordmark */
+.hc-wordmark { direction: ltr; display: inline-block; margin: 0; font-family: var(--font-latin); font-weight: 500; letter-spacing: -0.4px; line-height: 1.1; background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hc-wordmark--white { background: none; color: var(--on-primary); }
+.hc-brand-tile { display: grid; place-items: center; padding: var(--space-6) var(--space-8); border-radius: var(--radius-lg); background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%); }
+
+/* Empty state */
+.hc-empty { direction: rtl; display: flex; flex-direction: column; align-items: center; gap: var(--space-2); max-width: 420px; margin-inline: auto; padding: var(--space-10) var(--space-4); text-align: center; }
+.hc-empty__title { margin: 0; font-size: 32px; line-height: 40px; font-weight: 500; text-wrap: balance; }
+.hc-empty__text { margin: 0 0 var(--space-4); color: var(--text-muted); }
+
+/* Content rules */
+.hc-rules { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface); flex: 1 1 320px; min-width: 0; }
+.hc-rules__title { margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; }
+.hc-rules__list { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.hc-rules__list li { display: flex; align-items: flex-start; gap: var(--space-2); }
+.hc-rules__list .hc-icon { margin-top: 4px; color: var(--primary); }
+.hc-check { display: flex; align-items: center; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--border); font-weight: 500; cursor: pointer; }
+.hc-check input { width: 20px; height: 20px; margin: 0; accent-color: var(--primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hc-btn, .hc-chip { transition: none; }
+  .hc-btn:active { transform: none; }
+}
+
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="المحتويات">
+  <div class="toc-brand"><span class="hc-wordmark">100clips</span></div>
+  <a href="#s1">المبادئ</a><a href="#s2">الألوان</a><a href="#s3">الخطوط</a><a href="#s4">التخطيط والمسافات</a><a href="#s5">الاتجاه واللغتان</a><a href="#s6">الأيقونات</a><a href="#s7">المكوّنات</a><a href="#s8">الحركة</a><a href="#s9">قواعد المحتوى في الواجهة</a><a href="#s10">الأسلوب والنصوص</a><a href="#s11">سهولة الوصول</a><a href="#dev">للمطورين</a>
+  <div class="theme" role="group" aria-label="المظهر">
+    <button type="button" data-theme="system" aria-pressed="true">تلقائي</button>
+    <button type="button" data-theme="light" aria-pressed="false">فاتح</button>
+    <button type="button" data-theme="dark" aria-pressed="false">داكن</button>
+  </div>
+</nav>
+<main>
+<header class="hero">
+  <div class="hero-words">
+    <h1>نظام تصميم 100clips</h1>
+    <p>100clips منصة محتوى من صنع المستخدمين (UGC) تربط العلامات التجارية بصنّاع المحتوى المحليين في الخليج. هذا المرجع هو المصدر الوحيد للتصميم في كل شاشة، في لوحة العلامات التجارية (ويب) وفي تطبيق صنّاع المحتوى (جوال).</p>
+<blockquote>اسم التطبيق قد يتغير. احفظ الاسم في ثابت واحد (<code>APP_NAME</code>) وكل قيم التصميم في ملف ثيم واحد (<code>theme.ts</code>)، حتى يكون تغيير الهوية تعديلًا صغيرًا. الكود الكامل في قسم «للمطورين».</blockquote>
+  </div>
+  <div class="hero-art" aria-hidden="true"><svg viewBox="0 0 480 288" preserveAspectRatio="xMidYMid slice">
+
+<rect class="primary tile" x="16" y="-32" width="112" height="200" rx="12"/>
+<rect class="soft tile" x="144" y="48" width="112" height="200" rx="12"/>
+<rect class="ink tile" x="272" y="-8" width="112" height="200" rx="12"/>
+<rect class="tint tile" x="400" y="72" width="112" height="200" rx="12"/>
+<rect class="pill" x="160" y="212" width="64" height="8" rx="4"/>
+<rect class="pill" x="160" y="228" width="40" height="8" rx="4"/>
+<circle class="ring-new" cx="40" cy="228" r="20"/><circle class="gap" cx="40" cy="228" r="18"/><circle class="face" cx="40" cy="228" r="16"/>
+<circle class="ring-new" cx="88" cy="228" r="20"/><circle class="gap" cx="88" cy="228" r="18"/><circle class="face" cx="88" cy="228" r="16"/>
+<circle class="ring-new" cx="304" cy="240" r="20"/><circle class="gap" cx="304" cy="240" r="18"/><circle class="face" cx="304" cy="240" r="16"/>
+<circle class="ring-seen" cx="352" cy="240" r="20"/><circle class="gap" cx="352" cy="240" r="18"/><circle class="face" cx="352" cy="240" r="16"/>
+</svg></div>
+</header>
+<section id="s1"><h2>المبادئ</h2><ol><li><strong>المحتوى أولًا.</strong> الفيديوهات والصور المصغرة هي التي تحمل الألوان، والواجهة تبقى هادئة حولها.</li><li><strong>بسيط، لكن اجتماعي.</strong> أبيض ورمادي في كل مكان، والبنفسجي فقط للإجراءات والإبرازات.</li><li><strong>العربية أولًا.</strong> التخطيط من اليمين لليسار هو الأساس، والإنجليزية تعكسه، وليس العكس.</li><li><strong>القيم ظاهرة.</strong> قواعد المحتوى (بدون موسيقى، لباس محتشم، معلنون حلال) جزء من المنتج، تظهر بوضوح ولا تختفي في الشروط.</li><li><strong>طريقة واحدة لكل شيء.</strong> أعد استخدام نفس المكوّنات والمسافات والأنماط في كل مكان.</li></ol></section>
+<section id="s2"><h2>الألوان</h2><h3>تدرّج الهوية</h3>
+<div class="code"><button class="copy" type="button">نسخ</button><pre dir="ltr"><code>background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+/* #A78BFA → #6D4AFF */</code></pre></div>
+<p>استخدم التدرّج <strong>فقط</strong> في هذه الأماكن:</p>
+<ul><li>الشعار والاسم المكتوب (مكوّن <code>Wordmark</code>)</li><li>زر الإجراء الرئيسي الوحيد في الشاشة، مثل «أنشئ حملة» أو «انشر مقطع» (زر <code>Hero</code>)</li><li>حلقات القصص حول صور صنّاع المحتوى</li><li>شاشة البداية وشاشات التعريف بالتطبيق</li><li>لحظات الاحتفال، مثل «المقطع مقبول» أو «الحملة انطلقت»</li></ul>
+<p>القواعد:</p>
+<ul><li>دائمًا بزاوية 135°، ودائمًا بهذين اللونين.</li><li>لا تضع نصًا صغيرًا على التدرّج. الأبيض على <code>gradient-start</code> تباينه 2.72:1 فقط.</li><li>لا تعكس التدرّج في RTL. هو علامة الهوية ويبقى نفسه في اللغتين.</li><li>يبقى كما هو في الوضع الداكن.</li><li>عنصر واحد بالتدرّج كحد أقصى في كل شاشة.</li></ul>
+<h3>أدوار الألوان</h3>
+<p>القيم الفاتحة والداكنة لكل لون موجودة في البطاقات أسفل هذا القسم. هذه أدوارها:</p>
+<div class="table"><table><thead><tr><th>اللون</th><th>الاستخدام</th></tr></thead><tbody><tr><td><code>primary</code></td><td>الأزرار العادية، الروابط، الحالة النشطة، حلقة التركيز</td></tr><tr><td><code>primary-hover</code></td><td>المرور والضغط على <code>primary</code></td></tr><tr><td><code>primary-soft</code></td><td>الرقائق المختارة، خلفيات الإبراز الخفيفة</td></tr><tr><td><code>primary-on-soft</code></td><td>النص والأيقونات فوق <code>primary-soft</code></td></tr><tr><td><code>on-primary</code></td><td>النص فوق <code>primary</code> وفوق التدرّج</td></tr><tr><td><code>background</code></td><td>خلفية الصفحة</td></tr><tr><td><code>surface</code></td><td>البطاقات، الحقول، خلفية الصور المصغرة</td></tr><tr><td><code>border</code></td><td>الفواصل وحدود البطاقات</td></tr><tr><td><code>text</code></td><td>النص الأساسي</td></tr><tr><td><code>text-muted</code></td><td>النص الثانوي، البيانات الوصفية، التعليقات</td></tr><tr><td><code>icon-inactive</code></td><td>أيقونات التبويبات والتنقل غير النشطة</td></tr><tr><td><code>success</code> / <code>success-soft</code></td><td>مقبول، مدفوع، مباشر</td></tr><tr><td><code>error</code> / <code>error-soft</code></td><td>مرفوض، فشل، إجراء حذف</td></tr><tr><td><code>warning</code> / <code>warning-soft</code></td><td>بانتظار المراجعة، مطلوب تعديلات</td></tr></tbody></table></div>
+<p>ألوان الحالة منفصلة عن البنفسجي حتى لا تُخلط مع إجراءات الهوية.</p>
+<h3>قواعد الألوان</h3>
+<ul><li>حوالي 90% من أي شاشة أبيض ورمادي ولون النص. البنفسجي هو الاستثناء.</li><li>لا نص ملوّن إلا الروابط وشارات الحالة.</li><li>لا ظلال ولا تدرّجات إضافية.</li></ul><div class="swatches"><div class="swatch swatch--wide"><div class="sw-fill" style="background:linear-gradient(135deg,#A78BFA 0%,#6D4AFF 100%)"><span><bdi dir="ltr">135° · #A78BFA → #6D4AFF</bdi></span></div><div class="sw-body"><code>gradient-brand</code><p>تدرّج الهوية. نفس القيمة في الوضعين، ولا يُعكس في RTL.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#6D4AFF"><span>فاتح <bdi dir="ltr">#6D4AFF</bdi></span></div><div style="background:#8B6CFF"><span>داكن <bdi dir="ltr">#8B6CFF</bdi></span></div></div><div class="sw-body"><code>primary</code><p>الأزرار العادية والروابط والحالة النشطة وحلقة التركيز. كنص: على background (5.15:1 فاتح، 5.26:1 داكن) وعلى surface.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#5B38F0"><span>فاتح <bdi dir="ltr">#5B38F0</bdi></span></div><div style="background:#9D82FF"><span>داكن <bdi dir="ltr">#9D82FF</bdi></span></div></div><div class="sw-body"><code>primary-hover</code><p>حالة المرور والضغط على primary.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#EFEAFF"><span>فاتح <bdi dir="ltr">#EFEAFF</bdi></span></div><div style="background:#2A2245"><span>داكن <bdi dir="ltr">#2A2245</bdi></span></div></div><div class="sw-body"><code>primary-soft</code><p>الرقائق المختارة، خلفيات الإبراز الخفيفة، العنصر النشط في الشريط الجانبي.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#4B2FC9"><span>فاتح <bdi dir="ltr">#4B2FC9</bdi></span></div><div style="background:#C9BCFF"><span>داكن <bdi dir="ltr">#C9BCFF</bdi></span></div></div><div class="sw-body"><code>primary-on-soft</code><p>النص والأيقونات فوق primary-soft (7.02:1 فاتح، 8.58:1 داكن).</p></div></div><div class="swatch"><div class="sw-fill" style="background:#FFFFFF"><span><bdi dir="ltr">#FFFFFF</bdi></span></div><div class="sw-body"><code>on-primary</code><p>النص فوق primary وفوق التدرّج. في الوضع الداكن 3.69:1 فقط على primary، راجع قسم سهولة الوصول.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#FFFFFF"><span>فاتح <bdi dir="ltr">#FFFFFF</bdi></span></div><div style="background:#0E0C14"><span>داكن <bdi dir="ltr">#0E0C14</bdi></span></div></div><div class="sw-body"><code>background</code><p>خلفية الصفحة والنوافذ والأوراق السفلية.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#F4F2FA"><span>فاتح <bdi dir="ltr">#F4F2FA</bdi></span></div><div style="background:#1A1724"><span>داكن <bdi dir="ltr">#1A1724</bdi></span></div></div><div class="sw-body"><code>surface</code><p>البطاقات والحقول وخلفية الصور المصغرة أثناء التحميل وبطاقة قواعد المحتوى.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#EEEDF3"><span>فاتح <bdi dir="ltr">#EEEDF3</bdi></span></div><div style="background:#2A2635"><span>داكن <bdi dir="ltr">#2A2635</bdi></span></div></div><div class="sw-body"><code>border</code><p>الفواصل وحدود البطاقات، بسماكة 1px دائمًا.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#14121C"><span>فاتح <bdi dir="ltr">#14121C</bdi></span></div><div style="background:#F5F4FA"><span>داكن <bdi dir="ltr">#F5F4FA</bdi></span></div></div><div class="sw-body"><code>text</code><p>النص الأساسي على background وsurface (18.53:1 فاتح، 17.76:1 داكن)، وأيقونة التنقل النشطة.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#8A8794"><span>فاتح <bdi dir="ltr">#8A8794</bdi></span></div><div style="background:#9A97A6"><span>داكن <bdi dir="ltr">#9A97A6</bdi></span></div></div><div class="sw-body"><code>text-muted</code><p>النص الثانوي والبيانات الوصفية والتعليقات. فاتح: 3.52:1 على background و3.17:1 على surface، أقل من 4.5:1 (اقتراح: #6E6B7A).</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#A6A3B3"><span>فاتح <bdi dir="ltr">#A6A3B3</bdi></span></div><div style="background:#6B6878"><span>داكن <bdi dir="ltr">#6B6878</bdi></span></div></div><div class="sw-body"><code>icon-inactive</code><p>أيقونات التبويبات والتنقل غير النشطة. فاتح: 2.47:1 أقل من 3:1 المطلوبة للأيقونات (اقتراح: #8A8794).</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#16A34A"><span>فاتح <bdi dir="ltr">#16A34A</bdi></span></div><div style="background:#22C55E"><span>داكن <bdi dir="ltr">#22C55E</bdi></span></div></div><div class="sw-body"><code>success</code><p>مقبول، مدفوع، مباشر. نص الشارة فوق success-soft: 2.95:1 فاتح (اقتراح: #166534)، 6.26:1 داكن.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#E7F6EC"><span>فاتح <bdi dir="ltr">#E7F6EC</bdi></span></div><div style="background:#14301F"><span>داكن <bdi dir="ltr">#14301F</bdi></span></div></div><div class="sw-body"><code>success-soft</code><p>خلفية شارات النجاح.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#E5484D"><span>فاتح <bdi dir="ltr">#E5484D</bdi></span></div><div style="background:#F2555A"><span>داكن <bdi dir="ltr">#F2555A</bdi></span></div></div><div class="sw-body"><code>error</code><p>مرفوض، فشل، إجراء حذف. فوق error-soft: 3.43:1 فاتح (اقتراح: #C42E33)، 4.63:1 داكن.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#FDECEC"><span>فاتح <bdi dir="ltr">#FDECEC</bdi></span></div><div style="background:#3A1A1C"><span>داكن <bdi dir="ltr">#3A1A1C</bdi></span></div></div><div class="sw-body"><code>error-soft</code><p>خلفية شارات الخطأ وحالة المرور لزر الحذف.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#F5A524"><span>فاتح <bdi dir="ltr">#F5A524</bdi></span></div><div style="background:#F7B547"><span>داكن <bdi dir="ltr">#F7B547</bdi></span></div></div><div class="sw-body"><code>warning</code><p>بانتظار المراجعة، مطلوب تعديلات. فوق warning-soft: 1.87:1 فاتح (اقتراح: #9A5B00)، 7.52:1 داكن.</p></div></div><div class="swatch"><div class="sw-fill split"><div style="background:#FEF4E2"><span>فاتح <bdi dir="ltr">#FEF4E2</bdi></span></div><div style="background:#3A2C12"><span>داكن <bdi dir="ltr">#3A2C12</bdi></span></div></div><div class="sw-body"><code>warning-soft</code><p>خلفية شارات التنبيه.</p></div></div><div class="swatch"><div class="sw-fill" style="background:#A78BFA"><span><bdi dir="ltr">#A78BFA</bdi></span></div><div class="sw-body"><code>gradient-start</code><p>بداية تدرّج الهوية (135°). نفس القيمة في الوضعين. لا نص صغير فوقه (الأبيض 2.72:1).</p></div></div><div class="swatch"><div class="sw-fill" style="background:#6D4AFF"><span><bdi dir="ltr">#6D4AFF</bdi></span></div><div class="sw-body"><code>gradient-end</code><p>نهاية تدرّج الهوية (135°). نفس القيمة في الوضعين.</p></div></div><div class="swatch"><div class="sw-fill" style="background:#00000066"><span><bdi dir="ltr">#00000066</bdi></span></div><div class="sw-body"><code>overlay</code><p>طبقة سوداء 40% خلف النوافذ المنبثقة والأوراق السفلية.</p></div></div><div class="swatch"><div class="sw-fill" style="background:#00000066"><span><bdi dir="ltr">#00000066</bdi></span></div><div class="sw-body"><code>scrim</code><p>إضافة: طبقة داكنة خفيفة تحت بيانات الفيديو (المشاهدات والمدة). المواصفات لم تحدد قيمة؛ هذه مقترحة.</p></div></div><div class="swatch"><div class="sw-fill" style="background:#FFFFFF"><span><bdi dir="ltr">#FFFFFF</bdi></span></div><div class="sw-body"><code>on-media</code><p>إضافة: النص الأبيض فوق scrim أو فوق الصور الداكنة.</p></div></div></div></section>
+<section id="s3"><h2>الخطوط</h2><div class="table"><table><thead><tr><th>اللغة</th><th>الخط</th><th>البديل</th></tr></thead><tbody><tr><td>العربية</td><td>Thmanyah Sans</td><td>system-ui</td></tr><tr><td>اللاتينية</td><td>Inter</td><td>system-ui</td></tr></tbody></table></div>
+<ul><li>الأوزان: عادي (400) ومتوسط (500) فقط.</li><li>بديل لاتيني ممكن: DM Sans (أكثر استدارة ودفئًا). أيًّا كان الخط، تأكد أن العربي واللاتيني بنفس الحجم والوزن البصري عند خلطهما في سطر واحد: أسماء العلامات، المعرّفات، الأرقام داخل النص العربي.</li><li>الخط العربي يبدو أصغر قليلًا من اللاتيني بنفس المقاس. أضف 1px لنص <code>body</code> العربي إذا بدا صغيرًا.</li><li>الأرقام: أرقام غربية (0–9) افتراضيًا في اللغتين. نعيد النظر إذا طلب المستخدمون الأرقام العربية (٠–٩).</li><li>في الإنجليزية: Sentence case لكل عناصر الواجهة.</li><li>رتّب الخطوط في CSS هكذا: <code>Inter, "Thmanyah Sans", system-ui</code> (العائلة <code>--font-sans</code>). Inter لا يحتوي حروفًا عربية، فيظهر العربي تلقائيًا بخط Thmanyah Sans واللاتيني والأرقام بخط Inter.</li></ul>
+<blockquote><strong>ملاحظة عن المعاينات:</strong> خط Thmanyah Sans غير متوفر على Google Fonts، لذلك تستخدم معاينات هذا المرجع <strong>IBM Plex Sans Arabic</strong> بديلًا مؤقتًا. استخدم ملفات Thmanyah Sans الأصلية في المنتج.</blockquote>
+<h3>سلّم الخطوط</h3>
+<div class="table"><table><thead><tr><th>الاسم</th><th>المقاس / ارتفاع السطر</th><th>الوزن</th><th>الاستخدام</th></tr></thead><tbody><tr><td><code>display</code></td><td>32 / 40</td><td>500</td><td>عناوين التعريف والحالات الفارغة</td></tr><tr><td><code>h1</code></td><td>24 / 32</td><td>500</td><td>عناوين الصفحات</td></tr><tr><td><code>h2</code></td><td>20 / 28</td><td>500</td><td>عناوين الأقسام</td></tr><tr><td><code>h3</code></td><td>16 / 24</td><td>500</td><td>عناوين البطاقات</td></tr><tr><td><code>body</code></td><td>15 / 24</td><td>400</td><td>النص الافتراضي</td></tr><tr><td><code>body-strong</code></td><td>15 / 24</td><td>500</td><td>التأكيد والتسميات</td></tr><tr><td><code>small</code></td><td>13 / 20</td><td>400</td><td>البيانات الوصفية والنص المساعد</td></tr><tr><td><code>caption</code></td><td>11 / 16</td><td>400</td><td>الأعداد والأوقات (أصغر مقاس)</td></tr></tbody></table></div>
+<h3>الاسم المكتوب (Wordmark)</h3>
+<ul><li>بأحرف صغيرة: <code>100clips</code></li><li>وزن متوسط (500)، وتباعد أحرف −0.4px</li><li>مملوء بتدرّج الهوية على الخلفيات الفاتحة، وأبيض فوق التدرّج أو فوق الصور الداكنة</li><li>لا يُعكس في RTL، ويُكتب دائمًا من اليسار لليمين</li></ul><div class="specimens"><div class="spec"><div class="spec-meta"><code>display</code><span dir="ltr">32 / 40 · 500</span></div><p style="font-size:32px;line-height:40px;font-weight:500">أطلق حملتك الأولى</p></div><div class="spec"><div class="spec-meta"><code>h1</code><span dir="ltr">24 / 32 · 500</span></div><p style="font-size:24px;line-height:32px;font-weight:500">حملاتك</p></div><div class="spec"><div class="spec-meta"><code>h2</code><span dir="ltr">20 / 28 · 500</span></div><p style="font-size:20px;line-height:28px;font-weight:500">مقاطع بانتظار المراجعة</p></div><div class="spec"><div class="spec-meta"><code>h3</code><span dir="ltr">16 / 24 · 500</span></div><p style="font-size:16px;line-height:24px;font-weight:500">حملة رمضان 2027</p></div><div class="spec"><div class="spec-meta"><code>body</code><span dir="ltr">15 / 24 · 400</span></div><p style="font-size:15px;line-height:24px;font-weight:400">صوّر مقطعًا قصيرًا يعرض المنتج في يومك العادي، بدون موسيقى.</p></div><div class="spec"><div class="spec-meta"><code>body-strong</code><span dir="ltr">15 / 24 · 500</span></div><p style="font-size:15px;line-height:24px;font-weight:500">الميزانية المتبقية: 4,500 ر.س</p></div><div class="spec"><div class="spec-meta"><code>small</code><span dir="ltr">13 / 20 · 400</span></div><p style="font-size:13px;line-height:20px;font-weight:400">نُشر قبل 3 ساعات · 12.4 ألف مشاهدة</p></div><div class="spec"><div class="spec-meta"><code>caption</code><span dir="ltr">11 / 16 · 400</span></div><p style="font-size:11px;line-height:16px;font-weight:400">0:28 · 1.2K</p></div></div></section>
+<section id="s4"><h2>التخطيط والمسافات</h2><ul><li>المسافات بأساس 4px، من <code>space-1</code> (4px) إلى <code>space-12</code> (48px). لا تستخدم قيمًا خارج السلّم.</li><li>الزوايا: <code>radius-sm</code> (8px) للحقول والأزرار الصغيرة والصور المصغرة في القوائم، <code>radius-md</code> (12px) للأزرار والبطاقات، <code>radius-lg</code> (16px) للبطاقات الكبيرة والنوافذ والأوراق السفلية، <code>radius-full</code> للرقائق والفلاتر والصور الشخصية.</li><li>الحدود دائمًا 1px بلون <code>border</code>.</li><li><strong>بدون ظلال.</strong> افصل الطبقات بالمسافات وخلفيات <code>surface</code> والحدود.</li><li>النوافذ المنبثقة والأوراق السفلية بخلفية <code>background</code>، وخلفها طبقة <code>overlay</code> (أسود 40%).</li></ul>
+<h3>الشبكة</h3>
+<ul><li><strong>الجوال:</strong> هوامش جانبية 16px، عمود واحد.</li><li><strong>لوحة الويب:</strong> شريط جانبي ثابت بعرض 240px ومنطقة محتوى بعرض أقصى 1200px، وفواصل 24px.</li><li>نقاط التوقف: 640 / 1024 / 1280px.</li></ul><div class="viz"><h4>المسافات</h4><div class="spacing"><div class="sp-row"><code>space-1</code><span class="sp-bar" style="width:4px"></span><span class="sp-val" dir="ltr">4px</span></div><div class="sp-row"><code>space-2</code><span class="sp-bar" style="width:8px"></span><span class="sp-val" dir="ltr">8px</span></div><div class="sp-row"><code>space-3</code><span class="sp-bar" style="width:12px"></span><span class="sp-val" dir="ltr">12px</span></div><div class="sp-row"><code>space-4</code><span class="sp-bar" style="width:16px"></span><span class="sp-val" dir="ltr">16px</span></div><div class="sp-row"><code>space-5</code><span class="sp-bar" style="width:20px"></span><span class="sp-val" dir="ltr">20px</span></div><div class="sp-row"><code>space-6</code><span class="sp-bar" style="width:24px"></span><span class="sp-val" dir="ltr">24px</span></div><div class="sp-row"><code>space-8</code><span class="sp-bar" style="width:32px"></span><span class="sp-val" dir="ltr">32px</span></div><div class="sp-row"><code>space-10</code><span class="sp-bar" style="width:40px"></span><span class="sp-val" dir="ltr">40px</span></div><div class="sp-row"><code>space-12</code><span class="sp-bar" style="width:48px"></span><span class="sp-val" dir="ltr">48px</span></div></div><h4>الزوايا</h4><div class="radii"><div class="rd"><div class="rd-box" style="border-radius:8px"></div><code>radius-sm</code><span dir="ltr">8px</span></div><div class="rd"><div class="rd-box" style="border-radius:12px"></div><code>radius-md</code><span dir="ltr">12px</span></div><div class="rd"><div class="rd-box" style="border-radius:16px"></div><code>radius-lg</code><span dir="ltr">16px</span></div><div class="rd"><div class="rd-box" style="border-radius:999px"></div><code>radius-full</code><span dir="ltr">999px</span></div></div></div></section>
+<section id="s5"><h2>الاتجاه واللغتان</h2><ul><li>ابنِ لـ RTL أولًا. استخدم الخصائص المنطقية (<code>margin-inline-start</code>، <code>padding-inline-end</code>، <code>inset-inline-start</code>) بدل left وright.</li><li><strong>اعكس:</strong> اتجاه التخطيط، ترتيب التنقل، أسهم الرجوع، الأسهم الصغيرة (chevrons)، اتجاه شريط التقدّم.</li><li><strong>لا تعكس:</strong> تدرّج الهوية، الشعار، مشغّل الفيديو، أزرار التحكم بالوسائط (تشغيل، إيقاف)، الأرقام، أرقام الهواتف، الساعات.</li><li>اعزل النص اللاتيني داخل الجمل العربية (المعرّفات مثل <code>@noura.creates</code>، أسماء العلامات) بعنصر <code>&lt;bdi&gt;</code> أو <code>dir="ltr"</code> حتى لا تنقلب علامات الترقيم.</li><li>كل نص موجود بالعربية والإنجليزية. لا نصوص مكتوبة مباشرة داخل المكوّنات.</li><li>زر تبديل اللغة متاح دائمًا: في الشريط العلوي بالويب، وفي الإعدادات بالجوال.</li><li>التواريخ ميلادية افتراضيًا، والهجري صيغة ثانوية اختيارية عند الحاجة، مثل حملات رمضان.</li></ul></section>
+<section id="s6"><h2>الأيقونات</h2><ul><li>المكتبة: <strong>Lucide</strong> (خطوط رفيعة).</li><li>سماكة الخط بين 1.5 و2px، وثابتة في كل مكان.</li><li>المقاسات: 16px داخل النص (<code>icon-inline</code>)، 20px افتراضي (<code>icon-default</code>)، 24px للتنقل (<code>icon-nav</code>).</li><li>أيقونة التنقل النشطة بلون <code>text</code>، وغير النشطة بلون <code>icon-inactive</code>.</li><li>لا تخلط الأيقونات المعبّأة والمحددة في نفس الشاشة.</li></ul></section>
+<section id="s7"><h2>المكوّنات</h2><p>كل مكوّن له معاينة حيّة وإرشادات أسفل هذا القسم. الأساسيات:</p>
+<ul><li><strong>الأزرار:</strong> خمسة أنواع: <code>Hero</code> (تدرّج، واحد في الشاشة كحد أقصى)، <code>Primary</code>، <code>Secondary</code>، <code>Ghost</code>، <code>Destructive</code>. الارتفاع 44px في الجوال و40px في الويب، والزوايا <code>radius-md</code>. النص يبدأ بفعل، من كلمة إلى ثلاث كلمات. تجنّب الأزرار المعطّلة: اتركها فعّالة واعرض ما ينقص عند الضغط.</li><li><strong>الرقائق والفلاتر:</strong> شكل كبسولة بارتفاع 32px. المختارة بخلفية <code>primary-soft</code> ونص <code>primary-on-soft</code>.</li><li><strong>البطاقات:</strong> <code>background</code> مع حد 1px، أو <code>surface</code> بدون حد. حشوة 16px.</li><li><strong>الحقول:</strong> ارتفاع 44px، خلفية <code>surface</code> بدون حد. التسمية فوق الحقل، والنص التوضيحي مثال حقيقي.</li><li><strong>شارات الحالة:</strong> كبسولة صغيرة بخلفية خفيفة ونص بنفس اللون.</li><li><strong>الصور الشخصية وحلقات القصص:</strong> 32 / 40 / 56 / 80px. الحلقة: 2px تدرّج، ثم 2px فراغ بلون الخلفية، ثم الصورة.</li><li><strong>بطاقات الفيديو:</strong> نسبة 9:16 للمقاطع. العنوان والمعرّف تحت البطاقة وليس فوق الفيديو.</li><li><strong>التنقل:</strong> في الجوال شريط سفلي من 5 عناصر، والأوسط زر النشر بالتدرّج. في الويب شريط جانبي (على اليمين في RTL).</li><li><strong>الحالات الفارغة:</strong> عنوان قصير يسمّي المكان، وسطر يشرحه، وإجراء رئيسي واحد. بدون رسومات حزينة أو اعتذارات.</li></ul><div class="comps"><article class="comp" id="c-Wordmark"><header class="comp-head"><h3 dir="ltr">Wordmark</h3><span>الاسم المكتوب بالتدرّج وبالأبيض</span></header><div class="comp-preview"><div class="hc-stage">
+  <p class="hc-wordmark" style="font-size:40px">100clips</p>
+  <p class="hc-wordmark" style="font-size:24px">100clips</p>
+  <div class="hc-brand-tile"><p class="hc-wordmark hc-wordmark--white" style="font-size:32px">100clips</p></div>
+</div></div><div class="comp-guide"><p>الاسم المكتوب <code>100clips</code> هو شعار المنصة، ويُكتب دائمًا بأحرف صغيرة.</p>
+<ul><li><strong>الصنف:</strong> <code>.hc-wordmark</code>، و<code>.hc-wordmark--white</code> فوق التدرّج أو الصور الداكنة.</li><li><strong>الخط:</strong> Inter بوزن 500، وتباعد أحرف −0.4px.</li><li><strong>اللون:</strong> تدرّج الهوية على الخلفيات الفاتحة والداكنة، وأبيض فوق التدرّج.</li><li><strong>الاتجاه:</strong> يُكتب من اليسار لليمين دائمًا ولا يُعكس في RTL.</li><li><strong>ما توفره:</strong> الاسم من الثابت <code>APP_NAME</code>، لا تكتبه مباشرة.</li></ul>
+<p>لا تفعل: لا تغيّر زاوية التدرّج أو ألوانه، لا تكتبه بأحرف كبيرة، لا تضعه بجانب زر Hero في نفس الشاشة (تدرّج واحد فقط).</p></div></article><article class="comp" id="c-Button"><header class="comp-head"><h3 dir="ltr">Button</h3><span>Hero و Primary و Secondary و Ghost و Destructive</span></header><div class="comp-preview"><div class="hc-stage">
+  <button class="hc-btn hc-btn--hero" type="button"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>أنشئ حملة</button>
+  <button class="hc-btn hc-btn--primary" type="button">اعتمد المقطع</button>
+  <button class="hc-btn hc-btn--secondary" type="button">راجع المقاطع</button>
+  <button class="hc-btn hc-btn--ghost" type="button">اشحن المحفظة</button>
+  <button class="hc-btn hc-btn--destructive" type="button"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>ارفض المقطع</button>
+  <p class="hc-note">ارتفاع 40px في الويب. أضف <span class="hc-ltr">hc-btn--mobile</span> لارتفاع 44px في الجوال.</p>
+</div></div><div class="comp-guide"><p>زر الإجراء بخمسة أنواع، وزر Hero واحد فقط في الشاشة.</p>
+<div class="table"><table><thead><tr><th>النوع</th><th>الصنف</th><th>الشكل</th><th>الاستخدام</th></tr></thead><tbody><tr><td>Hero</td><td><code>.hc-btn--hero</code></td><td>تدرّج الهوية، نص أبيض</td><td>الإجراء الأهم في الشاشة، واحد كحد أقصى</td></tr><tr><td>Primary</td><td><code>.hc-btn--primary</code></td><td>تعبئة <code>primary</code>، نص <code>on-primary</code></td><td>الإجراء الرئيسي</td></tr><tr><td>Secondary</td><td><code>.hc-btn--secondary</code></td><td>تعبئة <code>surface</code>، نص <code>text</code></td><td>الإجراءات المساندة</td></tr><tr><td>Ghost</td><td><code>.hc-btn--ghost</code></td><td>شفاف، نص <code>primary</code></td><td>الإجراءات الثانوية وداخل النص</td></tr><tr><td>Destructive</td><td><code>.hc-btn--destructive</code></td><td>نص <code>error</code>، وخلفية <code>error-soft</code> عند المرور</td><td>الحذف والرفض</td></tr></tbody></table></div>
+<ul><li><strong>الارتفاع:</strong> 44px في الجوال (<code>.hc-btn--mobile</code>)، 40px في الويب.</li><li><strong>الزوايا:</strong> <code>radius-md</code>.</li><li><strong>النص:</strong> يبدأ بفعل، من كلمة إلى ثلاث كلمات: «أنشئ حملة»، «اعتمد المقطع».</li><li><strong>الأيقونة:</strong> اختيارية، 20px، قبل النص (على اليمين في RTL).</li><li><strong>ما توفره:</strong> نص الزر من ملف الترجمة، و<code>aria-label</code> باللغتين إذا كان الزر بأيقونة فقط (<code>.hc-icon-btn</code>).</li></ul>
+<p>لا تفعل: لا تستخدم الأزرار المعطّلة. اترك الزر فعّالًا واعرض ما ينقص عند الضغط. لا تضع زري Hero في شاشة واحدة.</p></div></article><article class="comp" id="c-Chip"><header class="comp-head"><h3 dir="ltr">Chip</h3><span>فلاتر وخيارات</span></header><div class="comp-preview"><div class="hc-stage">
+  <button class="hc-chip" type="button" aria-pressed="true">الكل</button>
+  <button class="hc-chip" type="button" aria-pressed="false">جمال وعناية</button>
+  <button class="hc-chip" type="button" aria-pressed="false">مطاعم</button>
+  <button class="hc-chip" type="button" aria-pressed="true">الرياض</button>
+  <button class="hc-chip" type="button" aria-pressed="false">دبي</button>
+</div>
+</div><div class="comp-guide"><p>رقاقة لفلترة القوائم أو اختيار خيار، بشكل كبسولة.</p>
+<ul><li><strong>الصنف:</strong> <code>.hc-chip</code> على عنصر <code>button</code>، والحالة بـ <code>aria-pressed="true"</code>.</li><li><strong>المقاس:</strong> ارتفاع 32px (<code>chip-height</code>)، زوايا <code>radius-full</code>، نص <code>small</code>.</li><li><strong>الافتراضي:</strong> حد 1px بلون <code>border</code>، ونص <code>text-muted</code>.</li><li><strong>المختار:</strong> خلفية <code>primary-soft</code>، ونص <code>primary-on-soft</code>.</li><li><strong>ما توفره:</strong> النص من ملف الترجمة، والحالة المختارة.</li></ul>
+<p>لا تفعل: لا تستخدم الرقاقة كزر إجراء. للإجراءات استخدم <code>Button</code>.</p></div></article><article class="comp" id="c-Input"><header class="comp-head"><h3 dir="ltr">Input</h3><span>الحالة العادية وحالة الخطأ</span></header><div class="comp-preview"><div class="hc-stage hc-stage--top">
+  <label class="hc-field" for="campaign-name">
+    <span class="hc-field__label">اسم الحملة</span>
+    <input class="hc-input" id="campaign-name" placeholder="مثال: إطلاق قهوة رمضان">
+    <span class="hc-field__help">يظهر لصنّاع المحتوى في صفحة الحملة.</span>
+  </label>
+  <label class="hc-field" for="clip-file">
+    <span class="hc-field__label">ملف المقطع</span>
+    <input class="hc-input" id="clip-file" value="ramadan-coffee.mov" aria-invalid="true" aria-describedby="clip-file-error">
+    <span class="hc-field__help hc-field__help--error" id="clip-file-error"><svg class="hc-icon hc-icon--inline" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>حجم الملف أكبر من 100 ميجابايت. جرّب مقطعًا أقصر.</span>
+  </label>
+</div></div><div class="comp-guide"><p>حقل نص بتسمية فوقه ونص مساعد تحته.</p>
+<ul><li><strong>الأصناف:</strong> <code>.hc-field</code> للحاوية، <code>.hc-field__label</code> للتسمية، <code>.hc-input</code> للحقل، <code>.hc-field__help</code> للنص المساعد.</li><li><strong>المقاس:</strong> ارتفاع 44px (<code>input-height</code>)، زوايا <code>radius-sm</code>، خلفية <code>surface</code> بدون حد.</li><li><strong>التركيز:</strong> حلقة 2px بلون <code>primary</code>.</li><li><strong>الخطأ:</strong> <code>aria-invalid="true"</code> يضيف حدًا 1px بلون <code>error</code>، والنص المساعد بلون <code>error</code> مع أيقونة (لا تعتمد على اللون وحده).</li><li><strong>النص التوضيحي:</strong> مثال حقيقي يبدأ بـ «مثال:»، وليس تكرارًا للتسمية.</li><li><strong>ما توفره:</strong> التسمية والمثال ورسالة الخطأ من ملف الترجمة، وربط الرسالة بالحقل عبر <code>aria-describedby</code>.</li></ul>
+<p>رسالة الخطأ تقول ما حدث وما الخطوة التالية: «حجم الملف أكبر من 100 ميجابايت. جرّب مقطعًا أقصر.»</p></div></article><article class="comp" id="c-StatusBadge"><header class="comp-head"><h3 dir="ltr">StatusBadge</h3><span>سبع حالات للحملات والمقاطع</span></header><div class="comp-preview"><div class="hc-stage">
+  <span class="hc-badge hc-badge--draft">مسودة</span>
+  <span class="hc-badge hc-badge--success">مباشرة</span>
+  <span class="hc-badge hc-badge--warning">بانتظار المراجعة</span>
+  <span class="hc-badge hc-badge--warning">مطلوب تعديلات</span>
+  <span class="hc-badge hc-badge--success">مقبول</span>
+  <span class="hc-badge hc-badge--error">مرفوض</span>
+  <span class="hc-badge hc-badge--completed">مكتملة</span>
+</div></div><div class="comp-guide"><p>شارة صغيرة تعرض حالة الحملة أو المقطع، بخلفية خفيفة ونص بنفس اللون.</p>
+<div class="table"><table><thead><tr><th>الحالة</th><th>English</th><th>الصنف</th><th>الألوان</th></tr></thead><tbody><tr><td>مسودة</td><td>Draft</td><td><code>.hc-badge--draft</code></td><td><code>surface</code> / <code>text-muted</code></td></tr><tr><td>مباشرة</td><td>Live</td><td><code>.hc-badge--success</code></td><td><code>success-soft</code> / <code>success</code></td></tr><tr><td>بانتظار المراجعة</td><td>Pending review</td><td><code>.hc-badge--warning</code></td><td><code>warning-soft</code> / <code>warning</code></td></tr><tr><td>مطلوب تعديلات</td><td>Changes requested</td><td><code>.hc-badge--warning</code></td><td><code>warning-soft</code> / <code>warning</code></td></tr><tr><td>مقبول</td><td>Approved</td><td><code>.hc-badge--success</code></td><td><code>success-soft</code> / <code>success</code></td></tr><tr><td>مرفوض</td><td>Rejected</td><td><code>.hc-badge--error</code></td><td><code>error-soft</code> / <code>error</code></td></tr><tr><td>مكتملة</td><td>Completed</td><td><code>.hc-badge--completed</code></td><td><code>primary-soft</code> / <code>primary-on-soft</code></td></tr></tbody></table></div>
+<ul><li><strong>ما توفره:</strong> نص الحالة دائمًا. النص هو ما يميّز الحالات التي تشترك في نفس اللون.</li><li><strong>تنبيه تباين:</strong> في الوضع الفاتح، نص <code>success</code> و<code>warning</code> و<code>error</code> فوق خلفياتها أقل من 4.5:1. راجع قسم سهولة الوصول في الصفحة الرئيسية.</li></ul></div></article><article class="comp" id="c-Card"><header class="comp-head"><h3 dir="ltr">Card</h3><span>بحد، وعلى surface، وبطاقة كبيرة</span></header><div class="comp-preview"><div class="hc-stage hc-stage--top">
+  <article class="hc-card">
+    <div class="hc-card__row"><h3 class="hc-card__title">حملة رمضان 2027</h3><span class="hc-badge hc-badge--success">مباشرة</span></div>
+    <p class="hc-card__meta">24 مقطعًا · الميزانية المتبقية 4,500 ر.س</p>
+  </article>
+  <article class="hc-card hc-card--surface">
+    <h3 class="hc-card__title">مقاطع بانتظار المراجعة</h3>
+    <p class="hc-card__meta">8 مقاطع وصلت اليوم</p>
+  </article>
+  <article class="hc-card hc-card--feature">
+    <h3 class="hc-card__title">محفظتك</h3>
+    <p class="hc-card__meta">الرصيد الحالي 12,000 ر.س</p>
+    <div><button class="hc-btn hc-btn--secondary" type="button">اشحن المحفظة</button></div>
+  </article>
+</div></div><div class="comp-guide"><p>حاوية لمجموعة معلومات مترابطة، بدون ظلال.</p>
+<ul><li><strong><code>.hc-card</code>:</strong> خلفية <code>background</code> مع حد 1px بلون <code>border</code>.</li><li><strong><code>.hc-card--surface</code>:</strong> خلفية <code>surface</code> بدون حد.</li><li><strong><code>.hc-card--feature</code>:</strong> للبطاقات الكبيرة، بزوايا <code>radius-lg</code> بدل <code>radius-md</code>.</li><li><strong>الحشوة:</strong> 16px (<code>space-4</code>).</li><li><strong>المحتوى:</strong> العنوان بنمط <code>h3</code> (<code>.hc-card__title</code>)، والبيانات بنمط <code>small</code> بلون <code>text-muted</code> (<code>.hc-card__meta</code>).</li><li><strong>ما توفره:</strong> العنوان والبيانات، وشارة حالة أو إجراء واحد عند الحاجة.</li></ul>
+<p>لا تفعل: لا تضع بطاقة داخل بطاقة، ولا تضف ظلًا أو حدًا ملوّنًا.</p></div></article><article class="comp" id="c-Avatar"><header class="comp-head"><h3 dir="ltr">Avatar</h3><span>المقاسات وحلقة القصة</span></header><div class="comp-preview"><div class="hc-stage">
+  <span class="hc-avatar hc-avatar--sm" role="img" aria-label="نورة">ن</span>
+  <span class="hc-avatar" role="img" aria-label="سلطان">س</span>
+  <span class="hc-avatar hc-avatar--lg" role="img" aria-label="ريم">ر</span>
+  <span class="hc-avatar hc-avatar--xl" role="img" aria-label="خالد">خ</span>
+  <span class="hc-person"><span class="hc-ring"><span class="hc-ring__gap"><span class="hc-avatar hc-avatar--lg">ن</span></span></span>مقطع جديد</span>
+  <span class="hc-person"><span class="hc-ring hc-ring--seen"><span class="hc-ring__gap"><span class="hc-avatar hc-avatar--lg">ع</span></span></span>تمت المشاهدة</span>
+</div></div><div class="comp-guide"><p>صورة شخصية دائرية، مع حلقة قصة اختيارية.</p>
+<ul><li><strong>المقاسات:</strong> 32 (<code>.hc-avatar--sm</code>)، 40 (الافتراضي)، 56 (<code>.hc-avatar--lg</code>)، 80px (<code>.hc-avatar--xl</code>).</li><li><strong>الشكل:</strong> دائري (<code>radius-full</code>). بدون صورة: الحرف الأول على <code>primary-soft</code> بلون <code>primary-on-soft</code>.</li><li><strong>حلقة القصة:</strong> 2px بتدرّج الهوية، ثم 2px فراغ بلون <code>background</code>، ثم الصورة. تعني مقاطع جديدة أو حملة نشطة. البنية: <code>.hc-ring</code> ← <code>.hc-ring__gap</code> ← <code>.hc-avatar</code>.</li><li><strong>تمت المشاهدة أو غير نشط:</strong> <code>.hc-ring--seen</code>، حلقة 2px بلون <code>border</code>.</li><li><strong>ما توفره:</strong> الصورة أو الحرف الأول، واسم الشخص في <code>aria-label</code>.</li></ul>
+<p>لا تفعل: لا تستخدم حلقة التدرّج للزينة. تظهر فقط عند وجود محتوى جديد.</p></div></article><article class="comp" id="c-VideoCard"><header class="comp-head"><h3 dir="ltr">VideoCard</h3><span>9:16 للمقاطع، والعنوان تحت البطاقة</span></header><div class="comp-preview"><div class="hc-stage hc-stage--top">
+  <article class="hc-video">
+    <div class="hc-video__media"><svg class="hc-icon hc-icon--nav" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg><div class="hc-video__scrim"><span><svg class="hc-icon hc-icon--inline" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>12.4K</span><span>0:28</span></div></div>
+    <h3 class="hc-video__title">قهوة الصباح قبل الدوام</h3>
+    <p class="hc-video__handle"><bdi>@noura.creates</bdi></p>
+  </article>
+  <article class="hc-video">
+    <div class="hc-video__media"><svg class="hc-icon hc-icon--nav" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 3 20 12 6 21 6 3"/></svg><div class="hc-video__scrim"><span><svg class="hc-icon hc-icon--inline" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>3.1K</span><span>0:45</span></div></div>
+    <h3 class="hc-video__title">تجربة مطعم جديد في جدة</h3>
+    <p class="hc-video__handle"><bdi>@sultan.eats</bdi></p>
+  </article>
+  <article class="hc-video">
+    <div class="hc-video__media"></div>
+    <h3 class="hc-video__title">جارٍ التحميل</h3>
+    <p class="hc-video__handle">خلفية surface أثناء التحميل</p>
+  </article>
+</div></div><div class="comp-guide"><p>بطاقة مقطع فيديو بنسبة 9:16، مع البيانات فوق طبقة داكنة والعنوان تحتها.</p>
+<ul><li><strong>النسبة:</strong> 9:16 للمقاطع. لأصول العلامة التجارية يُسمح بـ 16:9 (<code>.hc-video__media--wide</code>) أو 1:1 (<code>.hc-video__media--square</code>).</li><li><strong>الإطار:</strong> زوايا <code>radius-md</code>، وخلفية <code>surface</code> أثناء التحميل.</li><li><strong>البيانات فوق الفيديو:</strong> المشاهدات والمدة فقط، بنص <code>caption</code> أبيض (<code>on-media</code>) فوق طبقة <code>scrim</code>.</li><li><strong>العنوان والمعرّف:</strong> تحت البطاقة، وليس فوق الفيديو. اعزل المعرّف اللاتيني بـ <code>&lt;bdi&gt;</code>.</li><li><strong>الاتجاه:</strong> منطقة الفيديو <code>direction: ltr</code>، فلا يُعكس المشغّل ولا أزرار التحكم.</li><li><strong>ما توفره:</strong> الصورة المصغرة، المشاهدات، المدة، العنوان، معرّف صانع المحتوى.</li></ul></div></article><article class="comp" id="c-TabBar"><header class="comp-head"><h3 dir="ltr">TabBar</h3><span>شريط الجوال السفلي بخمسة عناصر</span></header><div class="comp-preview"><div class="hc-stage" style="justify-content:center">
+  <nav class="hc-tabbar" aria-label="التنقل الرئيسي">
+    <a class="hc-tab" href="#" aria-current="page"><svg class="hc-icon hc-icon--nav" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>الرئيسية</a>
+    <a class="hc-tab" href="#"><svg class="hc-icon hc-icon--nav" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>استكشف</a>
+    <a class="hc-tab" href="#" aria-label="انشر مقطع"><span class="hc-tab__post"><svg class="hc-icon hc-icon--nav" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span></a>
+    <a class="hc-tab" href="#"><svg class="hc-icon hc-icon--nav" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>الحملات</a>
+    <a class="hc-tab" href="#"><svg class="hc-icon hc-icon--nav" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>حسابي</a>
+  </nav>
+</div></div><div class="comp-guide"><p>شريط التنقل السفلي في تطبيق صنّاع المحتوى، بخمسة عناصر.</p>
+<ul><li><strong>العناصر:</strong> الرئيسية، استكشف، انشر (في الوسط)، الحملات، حسابي. الترتيب يبدأ من اليمين في RTL.</li><li><strong>زر النشر:</strong> في الوسط بتدرّج الهوية (<code>.hc-tab__post</code>). هو عنصر التدرّج الوحيد في الشاشة، ويحتاج <code>aria-label</code> باللغتين.</li><li><strong>الأيقونات:</strong> 24px. النشطة بلون <code>text</code> (<code>aria-current="page"</code>)، وغير النشطة بلون <code>icon-inactive</code>.</li><li><strong>مساحة اللمس:</strong> 44px على الأقل لكل عنصر.</li><li><strong>ما توفره:</strong> الروابط، والصفحة الحالية، والنصوص من ملف الترجمة.</li></ul></div></article><article class="comp" id="c-Sidebar"><header class="comp-head"><h3 dir="ltr">Sidebar</h3><span>الشريط الجانبي في لوحة الويب</span></header><div class="comp-preview"><div class="hc-stage hc-stage--top">
+  <nav class="hc-sidebar" aria-label="القائمة الرئيسية">
+    <div class="hc-sidebar__brand"><span class="hc-wordmark" style="font-size:24px">100clips</span></div>
+    <a class="hc-nav-item" href="#"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>الرئيسية</a>
+    <a class="hc-nav-item" href="#" aria-current="page"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>الحملات</a>
+    <a class="hc-nav-item" href="#"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></svg>المقاطع</a>
+    <a class="hc-nav-item" href="#"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>صنّاع المحتوى</a>
+    <a class="hc-nav-item" href="#"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>المحفظة</a>
+    <a class="hc-nav-item" href="#"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>الإعدادات</a>
+  </nav>
+</div></div><div class="comp-guide"><p>الشريط الجانبي الثابت في لوحة العلامات التجارية، بعرض 240px.</p>
+<ul><li><strong>المكان:</strong> على اليمين في RTL، وعلى اليسار في الإنجليزية. استخدم <code>border-inline-start</code> للحد.</li><li><strong>العناصر:</strong> أيقونة 20px ونص لكل عنصر، بارتفاع 40px.</li><li><strong>العنصر النشط:</strong> خلفية <code>primary-soft</code>، ونص وأيقونة <code>primary-on-soft</code> (<code>aria-current="page"</code>).</li><li><strong>غير النشط:</strong> نص <code>text</code>، وأيقونة <code>icon-inactive</code>.</li><li><strong>الشعار:</strong> في الأعلى، وهو عنصر التدرّج الوحيد في هذه المنطقة.</li><li><strong>ما توفره:</strong> الروابط والصفحة الحالية والنصوص من ملف الترجمة.</li></ul></div></article><article class="comp" id="c-TopBar"><header class="comp-head"><h3 dir="ltr">TopBar</h3><span>العنوان، البحث، الإشعارات، اللغة، الحساب</span></header><div class="comp-preview"><div class="hc-stage" style="padding:0">
+  <header class="hc-topbar">
+    <h1 class="hc-topbar__title">الحملات</h1>
+    <div class="hc-topbar__search"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>ابحث في حملاتك</span></div>
+    <button class="hc-icon-btn" type="button" aria-label="الإشعارات"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    <button class="hc-topbar__lang" type="button" lang="en" aria-label="Switch to English">EN</button>
+    <span class="hc-avatar hc-avatar--sm" role="img" aria-label="حسابك">م</span>
+  </header>
+</div></div><div class="comp-guide"><p>الشريط العلوي في لوحة الويب.</p>
+<ul><li><strong>الترتيب في RTL:</strong> عنوان الصفحة على اليمين، ثم البحث، ثم الإشعارات، وزر تبديل اللغة، والحساب على اليسار.</li><li><strong>العنوان:</strong> بنمط <code>h1</code>.</li><li><strong>تبديل اللغة:</strong> متاح دائمًا هنا. يعرض اسم اللغة الأخرى («EN» أو «ع»).</li><li><strong>الأزرار بأيقونة فقط:</strong> <code>.hc-icon-btn</code> بمساحة 44×44px و<code>aria-label</code> باللغتين.</li><li><strong>الحد:</strong> 1px بلون <code>border</code> في الأسفل، بدون ظل.</li><li><strong>ما توفره:</strong> عنوان الصفحة، عدد الإشعارات، اللغة الحالية، صورة الحساب.</li></ul></div></article><article class="comp" id="c-EmptyState"><header class="comp-head"><h3 dir="ltr">EmptyState</h3><span>عنوان وسطر وإجراء واحد</span></header><div class="comp-preview"><section class="hc-empty">
+  <h2 class="hc-empty__title">أطلق حملتك الأولى</h2>
+  <p class="hc-empty__text">اختر منتجك وميزانيتك، وسيبدأ صنّاع المحتوى في الخليج بالتقديم.</p>
+  <button class="hc-btn hc-btn--primary" type="button"><svg class="hc-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg>أنشئ حملة</button>
+</section></div><div class="comp-guide"><p>ما يظهر عندما تكون القائمة فارغة.</p>
+<ul><li><strong>العنوان:</strong> قصير ويسمّي المكان، بنمط <code>display</code>: «أطلق حملتك الأولى».</li><li><strong>الشرح:</strong> سطر واحد بلون <code>text-muted</code>.</li><li><strong>الإجراء:</strong> زر رئيسي واحد.</li><li><strong>ما توفره:</strong> العنوان والسطر ونص الزر من ملف الترجمة.</li></ul>
+<p>لا تفعل: لا رسومات حزينة، ولا اعتذارات مثل «عذرًا، لا توجد بيانات».</p></div></article><article class="comp" id="c-ContentRules"><header class="comp-head"><h3 dir="ltr">ContentRules</h3><span>قائمة القواعد عند إنشاء الحملة ورفع المقطع</span></header><div class="comp-preview"><div class="hc-stage hc-stage--top">
+  <section class="hc-rules" aria-labelledby="rules-title">
+    <h3 class="hc-rules__title" id="rules-title">قواعد المحتوى في 100clips</h3>
+    <ul class="hc-rules__list">
+      <li><svg class="hc-icon hc-icon--inline" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>بدون موسيقى في المقاطع</li>
+      <li><svg class="hc-icon hc-icon--inline" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>لباس محتشم، وصانعات المحتوى يغطين الشعر</li>
+      <li><svg class="hc-icon hc-icon--inline" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>بدون فئات محظورة: القروض بفوائد، الكحول، القمار، والمنتجات غير الحلال</li>
+    </ul>
+    <label class="hc-check" for="accept-rules"><input type="checkbox" id="accept-rules">أوافق على قواعد المحتوى</label>
+  </section>
+  <div class="hc-card">
+    <div class="hc-card__row"><h3 class="hc-card__title">فحص المقطع</h3><span class="hc-badge hc-badge--warning">رصدنا موسيقى</span></div>
+    <p class="hc-card__meta">احذف الصوت الخلفي أو صوّر مرة ثانية بدون موسيقى.</p>
+  </div>
+</div></div><div class="comp-guide"><p>بطاقة قواعد المحتوى. تظهر عند إنشاء الحملة وقبل التصوير.</p>
+<ul><li><strong>الشكل:</strong> بطاقة <code>surface</code> محايدة مع أيقونة تحقق صغيرة بلون <code>primary</code>. لا لون أحمر ولا أسلوب تحذير: هذه قيم، وليست أخطاء.</li><li><strong>القواعد الثابتة:</strong> بدون موسيقى، لباس محتشم (صانعات المحتوى يغطين الشعر)، بدون فئات إعلانية محظورة.</li><li><strong>إنشاء الحملة:</strong> العلامة التجارية توافق على القائمة (<code>.hc-check</code>).</li><li><strong>رفع المقطع:</strong> نفس القائمة تظهر قبل التصوير. إذا رُصدت موسيقى تلقائيًا، اعرض شارة <code>warning</code> مع الخطوة التالية.</li><li><strong>الفئات المحظورة</strong> (القروض بفوائد، الكحول، القمار، المنتجات غير الحلال) لا تظهر كخيارات أصلًا عند التسجيل أو إنشاء الحملة.</li><li><strong>ما توفره:</strong> نصوص القواعد من ملف الترجمة، وحالة الموافقة.</li></ul></div></article></div></section>
+<section id="s8"><h2>الحركة</h2><div class="table"><table><thead><tr><th>المدة</th><th>القيمة</th><th>الاستخدام</th></tr></thead><tbody><tr><td><code>duration-fast</code></td><td>120ms</td><td>المرور، الضغط، المفاتيح</td></tr><tr><td><code>duration-base</code></td><td>200ms</td><td>الأوراق السفلية، القوائم المنسدلة، تغيير التبويب</td></tr><tr><td><code>duration-slow</code></td><td>320ms</td><td>الانتقال بين الصفحات، لحظات الاحتفال</td></tr></tbody></table></div>
+<ul><li>ease-out للعناصر الداخلة، وease-in للعناصر الخارجة.</li><li>الإعجاب والاعتماد: نبضة سريعة (1 ← 1.15 ← 1) بلون <code>primary</code>.</li><li>احترم إعداد «تقليل الحركة» في النظام (<code>prefers-reduced-motion</code>).</li></ul><div class="viz"><div class="motion"><div class="mo"><div class="mo-track"><span class="mo-dot" style="--d:120ms"></span></div><code>duration-fast</code><span dir="ltr">120ms</span></div><div class="mo"><div class="mo-track"><span class="mo-dot" style="--d:200ms"></span></div><code>duration-base</code><span dir="ltr">200ms</span></div><div class="mo"><div class="mo-track"><span class="mo-dot" style="--d:320ms"></span></div><code>duration-slow</code><span dir="ltr">320ms</span></div></div><button class="hc-btn hc-btn--secondary" type="button" id="motion-play">شغّل الحركة</button></div></section>
+<section id="s9"><h2>قواعد المحتوى في الواجهة</h2><p>هذه القواعد جزء من التصميم، وليست سياسة مخفية:</p>
+<ul><li><strong>إنشاء الحملة:</strong> قائمة ثابتة يجب أن توافق عليها العلامة التجارية: بدون موسيقى، لباس محتشم (صانعات المحتوى يغطين الشعر)، بدون فئات إعلانية محظورة.</li><li><strong>رفع المقطع:</strong> نفس القواعد تظهر لصانع المحتوى قبل التصوير، مع تنبيه تلقائي إذا رُصدت موسيقى.</li><li><strong>الفئات الإعلانية المحظورة</strong> (القروض بفوائد، الكحول، القمار، والمنتجات غير الحلال) غير قابلة للاختيار عند التسجيل أو إنشاء الحملة.</li><li>اعرض هذه القواعد في بطاقة <code>surface</code> محايدة مع أيقونة تحقق صغيرة، وليس بأسلوب تحذير أحمر. هي قيم، وليست أخطاء (مكوّن <code>ContentRules</code>).</li></ul></section>
+<section id="s10"><h2>الأسلوب والنصوص</h2><ul><li>ودود ومباشر وقصير، بعربية قريبة من أهل الخليج وإنجليزية بسيطة.</li><li>خاطب المستخدم مباشرة، وسمِّ ما يملكه بصيغة الملكية: «حملاتك»، «مقاطعك».</li><li>الأزرار تبدأ بفعل:</li></ul>
+<div class="table"><table><thead><tr><th>العربية</th><th>English</th></tr></thead><tbody><tr><td>أنشئ حملة</td><td>Create campaign</td></tr><tr><td>راجع المقاطع</td><td>Review clips</td></tr><tr><td>اعتمد المقطع</td><td>Approve clip</td></tr><tr><td>انشر مقطع</td><td>Post clip</td></tr><tr><td>اشحن المحفظة</td><td>Top up wallet</td></tr></tbody></table></div>
+<ul><li>رسائل الخطأ تقول ما حدث وما الخطوة التالية: «حجم الملف أكبر من 100 ميجابايت. جرّب مقطعًا أقصر.» / "That file is over 100 MB. Try a shorter clip."</li><li>لا «من فضلك»، ولا «بنجاح»، ولا علامات تعجب في رسائل النظام. ونفس الشيء بالإنجليزية: لا "please" ولا "successfully" ولا "!".</li></ul></section>
+<section id="s11"><h2>سهولة الوصول</h2><ul><li>التباين: 4.5:1 على الأقل للنص العادي، و3:1 للنص الكبير والأيقونات.</li><li>الأبيض على <code>primary</code> في الوضع الفاتح (<code>#6D4AFF</code>) يحقق 5.15:1، فيصلح لكل المقاسات.</li><li>مساحة اللمس 44×44px على الأقل (<code>touch-target</code>).</li><li>كل زر بأيقونة فقط له وصف للقارئ الآلي باللغتين (<code>aria-label</code>).</li><li>لا تعتمد على اللون وحده للحالة. أضف نصًا أو أيقونة.</li><li>حلقة التركيز: خط صلب 2px بلون <code>primary</code>، بمسافة 2px عن العنصر.</li><li>شجّع الترجمة النصية (captions) على المقاطع، فهي مفيدة أيضًا لأن الموسيقى غير مسموحة.</li></ul>
+<h3>أزواج ألوان لا تحقق الحد الأدنى</h3>
+<p>القيم في هذا المرجع مطابقة للمواصفات بدون تعديل. هذه الأزواج أقل من الحد المطلوب، والاقتراحات للمراجعة قبل الإطلاق:</p>
+<div class="table"><table><thead><tr><th>الزوج</th><th>الوضع</th><th>التباين</th><th>المطلوب</th><th>اقتراح</th></tr></thead><tbody><tr><td><code>text-muted</code> على <code>background</code></td><td>فاتح</td><td>3.52:1</td><td>4.5:1</td><td><code>#6E6B7A</code> (5.19:1)</td></tr><tr><td><code>text-muted</code> على <code>surface</code></td><td>فاتح</td><td>3.17:1</td><td>4.5:1</td><td><code>#6E6B7A</code> (4.68:1)</td></tr><tr><td><code>icon-inactive</code> على <code>background</code></td><td>فاتح</td><td>2.47:1</td><td>3:1</td><td><code>#8A8794</code> (3.52:1)</td></tr><tr><td><code>success</code> على <code>success-soft</code></td><td>فاتح</td><td>2.95:1</td><td>4.5:1</td><td>نص الشارة <code>#166534</code> (6.38:1)</td></tr><tr><td><code>error</code> على <code>error-soft</code></td><td>فاتح</td><td>3.43:1</td><td>4.5:1</td><td><code>#C42E33</code> (4.86:1)</td></tr><tr><td><code>error</code> على <code>background</code></td><td>فاتح</td><td>3.91:1</td><td>4.5:1</td><td><code>#C42E33</code> (5.55:1)</td></tr><tr><td><code>warning</code> على <code>warning-soft</code></td><td>فاتح</td><td>1.87:1</td><td>4.5:1</td><td>نص الشارة <code>#9A5B00</code> (4.97:1)</td></tr><tr><td><code>on-primary</code> على <code>primary</code></td><td>داكن</td><td>3.69:1</td><td>4.5:1</td><td>تعبئة الزر <code>#6D4AFF</code> في الداكن (5.15:1)</td></tr><tr><td><code>on-primary</code> على <code>primary-hover</code></td><td>داكن</td><td>2.97:1</td><td>4.5:1</td><td><code>#5B38F0</code> (6.42:1)</td></tr><tr><td><code>on-primary</code> على منتصف التدرّج</td><td>الاثنان</td><td>3.79:1</td><td>4.5:1</td><td>يكفي للنص الكبير فقط. لنص بحجم 15px فكّر في تدرّج أغمق قليلًا</td></tr></tbody></table></div></section>
+<section id="dev"><h2>للمطورين</h2><p>هذا القسم للمطورين: ملف الثيم الكامل، ومتغيرات CSS، وطريقة ربطها بـ Tailwind. كل القيم هنا مطابقة لأقسام الألوان والخطوط.</p><h3>ملف الثيم (<code>theme.ts</code>)</h3><p>المصدر الوحيد للقيم. اسم التطبيق في ثابت واحد حتى يكون تغيير الاسم تعديلًا واحدًا.</p>
+<div class="code"><button class="copy" type="button">نسخ</button><pre dir="ltr"><code>// theme.ts — المصدر الوحيد للقيم
+export const APP_NAME = "100clips";
+
+export const gradient = {
+  brand: ["#A78BFA", "#6D4AFF"],
+  angle: 135,
+};
+
+export const colors = {
+  light: {
+    primary: "#6D4AFF",
+    primaryHover: "#5B38F0",
+    primarySoft: "#EFEAFF",
+    primaryOnSoft: "#4B2FC9",
+    onPrimary: "#FFFFFF",
+    background: "#FFFFFF",
+    surface: "#F4F2FA",
+    border: "#EEEDF3",
+    text: "#14121C",
+    textMuted: "#8A8794",
+    iconInactive: "#A6A3B3",
+    success: "#16A34A",
+    successSoft: "#E7F6EC",
+    error: "#E5484D",
+    errorSoft: "#FDECEC",
+    warning: "#F5A524",
+    warningSoft: "#FEF4E2",
+  },
+  dark: {
+    primary: "#8B6CFF",
+    primaryHover: "#9D82FF",
+    primarySoft: "#2A2245",
+    primaryOnSoft: "#C9BCFF",
+    onPrimary: "#FFFFFF",
+    background: "#0E0C14",
+    surface: "#1A1724",
+    border: "#2A2635",
+    text: "#F5F4FA",
+    textMuted: "#9A97A6",
+    iconInactive: "#6B6878",
+    success: "#22C55E",
+    successSoft: "#14301F",
+    error: "#F2555A",
+    errorSoft: "#3A1A1C",
+    warning: "#F7B547",
+    warningSoft: "#3A2C12",
+  },
+};
+
+export const fonts = {
+  arabic: "Thmanyah Sans",
+  latin: "Inter",
+  weights: { regular: 400, medium: 500 },
+};
+
+export const radius = { sm: 8, md: 12, lg: 16, full: 999 };
+
+export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24, 8: 32, 10: 40, 12: 48 };
+
+export const motion = { fast: 120, base: 200, slow: 320 };</code></pre></div><h3>متغيرات CSS</h3><p>انسخ هذا إلى ملف الأنماط العام. الوضع الداكن يتبع إعداد النظام، ويمكن فرضه بـ <code>data-theme="dark"</code> على عنصر <code>html</code>.</p>
+<div class="code"><button class="copy" type="button">نسخ</button><pre dir="ltr"><code>:root {
+  --gradient-brand: linear-gradient(135deg, #A78BFA 0%, #6D4AFF 100%);
+  --primary: #6D4AFF;
+  --primary-hover: #5B38F0;
+  --primary-soft: #EFEAFF;
+  --primary-on-soft: #4B2FC9;
+  --on-primary: #FFFFFF;
+  --background: #FFFFFF;
+  --surface: #F4F2FA;
+  --border: #EEEDF3;
+  --text: #14121C;
+  --text-muted: #8A8794;
+  --icon-inactive: #A6A3B3;
+  --success: #16A34A;
+  --success-soft: #E7F6EC;
+  --error: #E5484D;
+  --error-soft: #FDECEC;
+  --warning: #F5A524;
+  --warning-soft: #FEF4E2;
+  --overlay: rgb(0 0 0 / 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #8B6CFF;
+    --primary-hover: #9D82FF;
+    --primary-soft: #2A2245;
+    --primary-on-soft: #C9BCFF;
+    --background: #0E0C14;
+    --surface: #1A1724;
+    --border: #2A2635;
+    --text: #F5F4FA;
+    --text-muted: #9A97A6;
+    --icon-inactive: #6B6878;
+    --success: #22C55E;
+    --success-soft: #14301F;
+    --error: #F2555A;
+    --error-soft: #3A1A1C;
+    --warning: #F7B547;
+    --warning-soft: #3A2C12;
+  }
+}
+/* كرّر نفس القيم الداكنة تحت :root[data-theme="dark"] */</code></pre></div><h3>الربط مع Tailwind v4</h3><p>أضف هذا بعد <code>@import "tailwindcss";</code> لتصبح الألوان متاحة كأصناف مثل <code>bg-surface</code> و<code>text-text-muted</code> و<code>rounded-md</code>.</p>
+<div class="code"><button class="copy" type="button">نسخ</button><pre dir="ltr"><code>@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-on-soft: var(--primary-on-soft);
+  --color-on-primary: var(--on-primary);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-icon-inactive: var(--icon-inactive);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-error: var(--error);
+  --color-error-soft: var(--error-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+
+  --font-sans: Inter, "Thmanyah Sans", system-ui, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --spacing: 4px; /* p-4 = 16px، gap-6 = 24px */
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 1024px;
+  --breakpoint-lg: 1280px;
+}</code></pre></div><h3>إعداد الصفحة</h3><div class="code"><button class="copy" type="button">نسخ</button><pre dir="ltr"><code>// app/layout.tsx
+&lt;html lang="ar" dir="rtl"&gt;</code></pre></div>
+<ul><li>بدّل <code>lang</code> و<code>dir</code> معًا عند تغيير اللغة (<code>en</code> و<code>ltr</code>).</li><li>في Tailwind استخدم الأصناف المنطقية: <code>ms-4</code> و<code>pe-2</code> و<code>start-0</code> بدل <code>ml-4</code> و<code>pr-2</code> و<code>left-0</code>.</li><li>اعكس الأسهم باتجاه الصفحة: <code>rtl:-scale-x-100</code> على أيقونة <code>ChevronRight</code>.</li><li>لا تعكس مشغّل الفيديو أو الشعار أو التدرّج.</li></ul></section>
+</main>
+</div>
+<script>
+(function () {
+  var root = document.documentElement, KEY = 'hc-theme';
+  function setTheme(v) {
+    if (v === 'light' || v === 'dark') root.setAttribute('data-theme', v); else root.removeAttribute('data-theme');
+    document.querySelectorAll('.theme button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.theme === v)); });
+    try { localStorage.setItem(KEY, v); } catch (e) {}
+  }
+  var saved = 'system';
+  try { saved = localStorage.getItem(KEY) || 'system'; } catch (e) {}
+  setTheme(saved);
+  document.querySelectorAll('.theme button').forEach(function (b) { b.addEventListener('click', function () { setTheme(b.dataset.theme); }); });
+
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var code = btn.parentNode.querySelector('code');
+      var done = function () { btn.textContent = 'تم النسخ'; setTimeout(function () { btn.textContent = 'نسخ'; }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(code.textContent).then(done, function () { selectText(code); });
+      else selectText(code);
+    });
+  });
+  function selectText(el) { var r = document.createRange(); r.selectNodeContents(el); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+
+  var play = document.getElementById('motion-play');
+  if (play) play.addEventListener('click', function () { document.querySelector('.motion').classList.toggle('go'); });
+
+  document.querySelectorAll('.hc-chip').forEach(function (b) { b.addEventListener('click', function () { b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); }); });
+  document.querySelectorAll('a[href="#"]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); }); });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) links.forEach(function (l) { l.classList.toggle('active', l.getAttribute('href') === '#' + en.target.id); });
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    document.querySelectorAll('main section').forEach(function (s) { io.observe(s); });
+  }
+})();
+</script>
+</body>
+</html>
