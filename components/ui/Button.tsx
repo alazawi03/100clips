@@ -8,7 +8,7 @@ const base =
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] font-medium transition-[background-color,transform] duration-[120ms] ease-out active:scale-[0.98] [&_svg]:size-5 [&_svg]:shrink-0";
 
 const variants: Record<ButtonVariant, string> = {
-  hero: "bg-brand-gradient text-on-primary",
+  hero: "bg-brand-gradient text-on-accent",
   primary: "bg-primary text-on-primary hover:bg-primary-hover",
   secondary: "bg-surface text-text hover:bg-border",
   ghost: "text-primary hover:bg-primary-soft",

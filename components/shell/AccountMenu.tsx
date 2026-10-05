@@ -1,31 +1,55 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Settings } from "lucide-react";
+import { ChevronsUpDown, LogOut, Settings } from "lucide-react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Dropdown, menuItemClass } from "@/components/ui/Dropdown";
+import type { ThemeChoice } from "@/lib/theme";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
-export function AccountMenu({ id, name, email }: { id: string; name: string; email: string }) {
+type Props = {
+  id: string;
+  name: string;
+  email: string;
+  theme: ThemeChoice;
+};
+
+/** Profile menu at the bottom of the desktop sidebar. Opens upwards, on hover or click. */
+export function AccountMenu({ id, name, email, theme }: Props) {
   const { t } = useI18n();
   return (
     <Dropdown
-      align="end"
+      openOnHover
+      placement="above"
+      panelClassName="w-72"
       triggerLabel={t("header.account")}
-      triggerClassName="grid size-11 place-items-center rounded-full hover:bg-surface"
-      trigger={<Avatar id={id} name={name} size="sm" />}
+      triggerClassName="flex w-full items-center gap-3 rounded-[var(--radius-md)] p-2 text-start hover:bg-surface"
+      trigger={
+        <>
+          <Avatar id={id} name={name} size="md" />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-small font-medium">{name}</span>
+            <bdi dir="ltr" className="block truncate text-caption text-text-muted">
+              {email}
+            </bdi>
+          </span>
+          <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-text-muted" />
+        </>
+      }
     >
       {(close) => (
         <div className="flex flex-col">
-          <div className="flex items-center gap-3 px-3 py-2">
+          <Link href="/settings" onClick={close} className={menuItemClass}>
             <Avatar id={id} name={name} size="md" />
             <span className="min-w-0">
               <span className="block truncate font-medium">{name}</span>
-              <bdi dir="ltr" className="block truncate text-small text-text-muted">
-                {email}
-              </bdi>
+              <span className="block truncate text-small text-primary">{t("header.profile")}</span>
             </span>
-          </div>
+          </Link>
+
+          <div className="my-1 border-t border-border" />
+          <ThemeSwitcher initial={theme} />
           <div className="my-1 border-t border-border" />
           <Link href="/settings" onClick={close} className={menuItemClass}>
             <Settings aria-hidden className="size-5 text-icon-inactive" strokeWidth={1.75} />

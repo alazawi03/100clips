@@ -15,7 +15,6 @@ export function brandToValues(b: Brand, locale: Locale): BrandValues {
     website: b.website,
     instagram: b.instagram,
     tiktok: b.tiktok,
-    cover: b.cover,
     crNumber: b.crNumber,
   };
 }
@@ -39,5 +38,6 @@ export function productToValues(p: Product, locale: Locale): ProductValues {
     venueKind: d.type === "venue" ? d.kind : undefined,
     location: d.type === "venue" ? d.location : undefined,
     hours: d.type === "venue" ? d.hours : undefined,
+    mapUrl: d.type === "venue" ? d.mapUrl : undefined,
   };
 }

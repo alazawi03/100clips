@@ -1,7 +1,10 @@
 /*
- * Chat between a brand and its creators. A conversation opens once the creator accepts an order.
+ * Chat between a brand and its creators. A conversation opens once the creator accepts an order,
+ * or when the brand messages a creator from their profile.
  * In-memory like the rest of the dummy data; swap for an API later.
  */
+
+import type { ReportReason } from "@/lib/reportReasons";
 
 export type ChatMessage = {
   id: string;
@@ -9,8 +12,6 @@ export type ChatMessage = {
   text: string;
   /** ISO date-time. */
   at: string;
-  /** Contact details were hidden from this message. */
-  masked?: boolean;
 };
 
 export type Conversation = {
@@ -92,17 +93,17 @@ export const conversations: Conversation[] = [
   },
 ];
 
-export function conversationsOf(brandId: string): Conversation[] {
+export function conversationsOf(): Conversation[] {
   const last = (c: Conversation) => c.messages.at(-1)?.at ?? "";
-  return conversations.filter((c) => c.brandId === brandId).sort((a, b) => last(b).localeCompare(last(a)));
+  return conversations.slice().sort((a, b) => last(b).localeCompare(last(a)));
 }
 
 export function getConversation(id: string): Conversation | undefined {
   return conversations.find((c) => c.id === id);
 }
 
-export function unreadCount(brandId: string): number {
-  return conversations.filter((c) => c.brandId === brandId && c.unread > 0).length;
+export function unreadCount(): number {
+  return conversations.filter((c) => c.unread > 0).length;
 }
 
 export function markRead(id: string) {
@@ -110,30 +111,27 @@ export function markRead(id: string) {
   if (c) c.unread = 0;
 }
 
-const CONTACT_PATTERNS = [
-  /[\w.+-]+@[\w-]+\.[\w.]+/g, // emails
-  /(https?:\/\/|www\.)\S+/gi, // links
-  /\b[\w-]+\.(com|net|org|me|io|co|bh|sa|ae|kw|qa|om)\b\S*/gi, // bare domains
-  /\+?\d[\d\s-]{6,}\d/g, // phone numbers
-];
-
-/** Keeps deals on 100clips: phone numbers, emails and links are replaced with •••. */
-export function maskContacts(text: string): { text: string; masked: boolean } {
-  let masked = false;
-  const out = CONTACT_PATTERNS.reduce(
-    (acc, re) =>
-      acc.replace(re, () => {
-        masked = true;
-        return "•••";
-      }),
-    text,
-  );
-  return { text: out, masked };
-}
-
 export function sendMessage(conversationId: string, text: string, at: string) {
   const c = getConversation(conversationId);
   if (!c) return;
-  const clean = maskContacts(text);
-  c.messages.push({ id: `msg-${seq++}`, from: "brand", text: clean.text, at, masked: clean.masked || undefined });
+  c.messages.push({ id: `msg-${seq++}`, from: "brand", text, at });
+}
+
+/** The conversation with a creator, started empty if there isn't one yet. */
+export function openConversation(brandId: string, creatorId: string): Conversation {
+  // One chat per brand and creator.
+  const existing = conversations.find((c) => c.creatorId === creatorId && c.brandId === brandId);
+  if (existing) return existing;
+  const created: Conversation = { id: `chat-${creatorId}-${brandId}`, brandId, creatorId, unread: 0, messages: [] };
+  conversations.push(created);
+  return created;
+}
+
+/** A report about a conversation, for the admin to review. */
+export type ChatReport = { id: string; conversationId: string; reason: ReportReason; details?: string; at: string };
+export const reports: ChatReport[] = [];
+
+export function addReport(conversationId: string, reason: ReportReason, details: string | undefined, at: string) {
+  if (!getConversation(conversationId)) return;
+  reports.push({ id: `rep-${seq++}`, conversationId, reason, details, at });
 }

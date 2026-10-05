@@ -29,7 +29,7 @@ export type MessageKey<T = typeof arJson, P extends string = ""> = {
       : MessageKey<T[K], Join<P, K>>;
 }[keyof T & string];
 
-/** Every key that points to a plural group, e.g. "brandHome.applicants". */
+/** Every key that points to a plural group, e.g. "cart.creators". */
 export type PluralKey<T = typeof arJson, P extends string = ""> = {
   [K in keyof T & string]: T[K] extends string
     ? never

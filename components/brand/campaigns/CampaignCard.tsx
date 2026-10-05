@@ -2,15 +2,22 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, campaignTone } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { hasManyBrands } from "@/lib/brandFilter";
+import { getBrand } from "@/lib/data/account";
 import { getCreator } from "@/lib/data/creators";
+import { orders } from "@/lib/data/orders";
+import { orderFlags } from "./campaignView";
 import type { Campaign } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 
 export function CampaignCard({ campaign, i18n }: { campaign: Campaign; i18n: I18n }) {
   const { t, tp, f } = i18n;
   const progress = Math.round((campaign.deliveredClips / campaign.clipsCount) * 100);
-  const waiting = campaign.applications.filter((a) => a.status === "pending");
-  const faces = campaign.applications.slice(0, 4).map((a) => getCreator(a.creatorId)!);
+  const brand = hasManyBrands() ? getBrand(campaign.brandId) : undefined;
+  const hired = orders.filter((o) => o.campaignId === campaign.id && o.status !== "cancelled");
+  const faces = [...new Set(hired.map((o) => o.creatorId))].slice(0, 4).map((id) => getCreator(id)!);
+  // Orders in this campaign waiting on the brand (review, ship, collect).
+  const needsYou = hired.filter((o) => orderFlags(o, campaign).action).length;
 
   return (
     <Link href={`/campaigns/${campaign.id}`} className="group block h-full rounded-[var(--radius-xl)]">
@@ -18,7 +25,10 @@ export function CampaignCard({ campaign, i18n }: { campaign: Campaign; i18n: I18
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="text-h3 font-medium">{f.pick(campaign.title)}</h3>
-            <p className="text-small text-text-muted">{t(`niches.${campaign.niche}`)}</p>
+            <p className="text-small text-text-muted">
+              {brand && f.pick(brand.name) + t("common.separator")}
+              {t(`niches.${campaign.niche}`)}
+            </p>
           </div>
           <Badge tone={campaignTone[campaign.status]}>{t(`status.campaign.${campaign.status}`)}</Badge>
         </div>
@@ -36,8 +46,8 @@ export function CampaignCard({ campaign, i18n }: { campaign: Campaign; i18n: I18
 
         <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-small">
           <span className="font-medium tabular-nums">{f.money(campaign.budget)}</span>
-          {waiting.length > 0 ? (
-            <Badge tone="brand">{tp("campaignsPage.newApplicants", waiting.length)}</Badge>
+          {needsYou > 0 ? (
+            <Badge tone="brand">{tp("flow.attention", needsYou)}</Badge>
           ) : (
             faces.length > 0 && (
               <span className="flex -space-x-2 rtl:space-x-reverse">

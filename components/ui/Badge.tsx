@@ -27,11 +27,11 @@ export const orderTone: Record<OrderStatus, BadgeTone> = {
   submitted: "neutral",
   delivered: "brand",
   approved: "success",
+  cancelled: "neutral",
 };
 
 export const campaignTone: Record<CampaignStatus, BadgeTone> = {
-  draft: "neutral",
-  open: "success",
   in_progress: "success",
   completed: "brand",
+  cancelled: "neutral",
 };

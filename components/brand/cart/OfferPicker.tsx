@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { CircleCheck, ShoppingBag } from "lucide-react";
+import { ChevronDown, CircleCheck, ShoppingBag } from "lucide-react";
 import { updateCart } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { FormatLogo } from "@/components/ui/PlatformLogo";
-import { QuantityStepper } from "@/components/ui/QuantityStepper";
+import { cn } from "@/lib/cn";
 import type { ContentFormat, FormatOffer } from "@/lib/data/types";
 import { createFormatters } from "@/lib/i18n/format";
 
@@ -16,36 +16,48 @@ type Props = {
   creatorId: string;
   creatorName: string;
   offers: FormatOffer[];
-  /** Quantities already in the cart, if this creator is in it. */
+  /** What's already in the cart for this creator (one format, one video). */
   inCart?: Partial<Record<ContentFormat, number>>;
+  /** "card": full list (desktop side column). "compact": a box that opens to show the choices (phones). */
+  variant?: "card" | "compact";
 };
 
-/** The creator's price list, shop style: pick quantities per platform and add them to the cart. */
-export function OfferPicker({ creatorId, creatorName, offers, inCart }: Props) {
+/** The creator's price list: choose one platform (one order = one video) and add it to the cart. */
+export function OfferPicker({ creatorId, creatorName, offers, inCart, variant = "card" }: Props) {
   const { t, locale } = useI18n();
   const f = createFormatters(locale);
-  const [qty, setQty] = useState<Record<string, number>>(() =>
-    Object.fromEntries(offers.map((o, i) => [o.format, inCart ? (inCart[o.format] ?? 0) : i === 0 ? 1 : 0])),
-  );
+  const [chosen, setChosen] = useState<ContentFormat | undefined>(() => offers.find((o) => (inCart?.[o.format] ?? 0) > 0)?.format);
   const [justAdded, setJustAdded] = useState(false);
+  const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
-  const total = offers.reduce((sum, o) => sum + o.price * qty[o.format], 0);
-  const count = offers.reduce((n, o) => n + qty[o.format], 0);
+  const total = offers.find((o) => o.format === chosen)?.price ?? 0;
+  const count = chosen ? 1 : 0;
 
   function add() {
     startTransition(async () => {
-      await updateCart(creatorId, offers.map((o) => ({ format: o.format, quantity: qty[o.format] })));
+      await updateCart(creatorId, chosen ? [{ format: chosen, quantity: 1 }] : []);
       setJustAdded(true);
     });
   }
 
-  return (
-    <Card>
-      <ul className="divide-y divide-border">
-        {offers.map((offer) => {
-          const label = t(`formats.${offer.format}`);
-          return (
-            <li key={offer.format} className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
+  /** One choice: tap a platform to pick it, tap it again to clear. */
+  const rows = (
+    <ul role="radiogroup" aria-label={t("profile.choosePlatforms")} className="divide-y divide-border">
+      {offers.map((offer) => {
+        const label = t(`formats.${offer.format}`);
+        const selected = chosen === offer.format;
+        return (
+          <li key={offer.format}>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => {
+                setChosen(selected ? undefined : offer.format);
+                setJustAdded(false);
+              }}
+              className={cn("flex w-full items-center justify-between gap-3 px-4 py-3 text-start transition-colors duration-[120ms] hover:bg-surface/60 sm:px-5", selected && "bg-primary-soft/50")}
+            >
               <span className="flex min-w-0 items-center gap-3">
                 <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface">
                   <FormatLogo format={offer.format} className="size-5" />
@@ -57,47 +69,84 @@ export function OfferPicker({ creatorId, creatorName, offers, inCart }: Props) {
                   </span>
                 </span>
               </span>
-              <QuantityStepper
-                value={qty[offer.format]}
-                onChange={(n) => {
-                  setQty((q) => ({ ...q, [offer.format]: n }));
-                  setJustAdded(false);
-                }}
-                label={label}
-                decreaseLabel={t("cart.decrease", { format: label })}
-                increaseLabel={t("cart.increase", { format: label })}
-              />
-            </li>
-          );
-        })}
-      </ul>
-      <div className="flex flex-col gap-3 border-t border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        {justAdded ? (
-          <p className="flex items-center gap-2 text-small font-medium" role="status">
-            <CircleCheck aria-hidden className="size-5 text-success" />
-            {t("cart.added", { name: creatorName })}
-            <Link href="/cart" className="text-primary hover:underline">
-              {t("cart.viewCart")}
-            </Link>
-          </p>
-        ) : (
-          <p className="text-small text-text-muted">
-            {count > 0 ? (
-              <>
-                <span className="font-medium text-text tabular-nums">{f.money(total)}</span>
-                {t("common.separator")}
-                {t("cart.pickHint")}
-              </>
-            ) : (
-              t("cart.pickHint")
-            )}
-          </p>
+              <span
+                aria-hidden
+                className={cn("grid size-6 shrink-0 place-items-center rounded-full border-2", selected ? "border-primary bg-primary text-on-primary" : "border-border")}
+              >
+                {selected && <span className="size-2.5 rounded-full bg-on-primary" />}
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+
+  const status = justAdded ? (
+    <p className="flex flex-wrap items-center gap-x-2 text-small font-medium" role="status">
+      <CircleCheck aria-hidden className="size-5 text-success" />
+      {t("cart.added", { name: creatorName })}
+      <Link href="/cart" className="text-primary hover:underline">
+        {t("cart.viewCart")}
+      </Link>
+    </p>
+  ) : (
+    <p className="text-small text-text-muted">
+      {count > 0 ? (
+        <>
+          <span className="font-medium text-text tabular-nums">{f.money(total)}</span>
+          {t("common.separator")}
+          {t("cart.pickHint")}
+        </>
+      ) : (
+        t("cart.pickHint")
+      )}
+    </p>
+  );
+
+  const addButton = (className?: string) => (
+    <Button variant="hero" onClick={add} aria-busy={pending} disabled={count === 0 && !inCart} className={cn("shrink-0 disabled:cursor-not-allowed disabled:opacity-50", className)}>
+      <ShoppingBag aria-hidden />
+      {inCart ? t("cart.updateCart") : t("cart.addToCart")}
+    </Button>
+  );
+
+  if (variant === "card") {
+    return (
+      <Card>
+        {rows}
+        <div className="flex flex-col gap-3 border-t border-border p-4">
+          {status}
+          {addButton("w-full")}
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <div className="rounded-[var(--radius-lg)] border border-border">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={`offers-${creatorId}`}
+          onClick={() => setOpen((v) => !v)}
+          className="flex min-h-12 w-full items-center justify-between gap-3 px-4 py-2 text-start"
+        >
+          <span className="min-w-0">
+            <span className="block text-small text-text-muted">{t("profile.choosePlatforms")}</span>
+            <span className="block truncate font-medium">{chosen ? t(`formats.${chosen}`) : t("profile.nothingChosen")}</span>
+          </span>
+          <ChevronDown aria-hidden className={cn("size-5 shrink-0 text-text-muted transition-transform", open && "rotate-180")} />
+        </button>
+        {open && (
+          <div id={`offers-${creatorId}`} className="border-t border-border">
+            {rows}
+          </div>
         )}
-        <Button variant="hero" onClick={add} aria-busy={pending} className="shrink-0">
-          <ShoppingBag aria-hidden />
-          {inCart ? t("cart.updateCart") : t("cart.addToCart")}
-        </Button>
       </div>
+      {status}
+      {addButton("w-full")}
     </Card>
   );
 }

@@ -9,7 +9,7 @@ import type { I18n } from "@/lib/i18n/server";
 
 export function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign[]; i18n: I18n }) {
   const { t, tp, f } = i18n;
-  const active = campaigns.filter((c) => c.status === "open" || c.status === "in_progress");
+  const active = campaigns.filter((c) => c.status === "in_progress");
 
   return (
     <section aria-labelledby="campaigns-title" className="min-w-0">
@@ -17,9 +17,9 @@ export function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign[]; i1
       <Card className="divide-y divide-border">
         {active.map((campaign) => {
           const progress = Math.round((campaign.deliveredClips / campaign.clipsCount) * 100);
-          const hired = orders.filter((o) => o.campaignId === campaign.id);
+          const hired = orders.filter((o) => o.campaignId === campaign.id && o.status !== "cancelled");
           const delivered = hired.filter((o) => o.status === "delivered" || o.status === "approved").length;
-          const faces = campaign.applications.slice(0, 4).map((a) => getCreator(a.creatorId)!);
+          const faces = [...new Set(hired.map((o) => o.creatorId))].slice(0, 4).map((id) => getCreator(id)!);
           return (
             <Link
               key={campaign.id}
@@ -50,7 +50,7 @@ export function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign[]; i1
                         ))}
                       </span>
                     )}
-                    {tp("brandHome.applicants", campaign.applications.length)}
+                    {tp("campaignDetail.creators", hired.length)}
                   </span>
                 </div>
               </div>

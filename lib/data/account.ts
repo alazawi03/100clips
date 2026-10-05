@@ -16,7 +16,6 @@ export const brands: Brand[] = [
     id: "muharraq-roastery",
     name: { ar: "محمصة المحرق", en: "Muharraq Roastery" },
     logo: "/placeholders/logo-roastery.svg",
-    cover: "/placeholders/cover-roastery.svg",
     industry: "food_beverage",
     city: { ar: "المحرق", en: "Muharraq" },
     about: {
@@ -31,7 +30,6 @@ export const brands: Brand[] = [
     id: "nouf-abayas",
     name: { ar: "عبايات نوف", en: "Nouf Abayas" },
     logo: "/placeholders/logo-nouf.svg",
-    cover: "/placeholders/cover-nouf.svg",
     industry: "fashion",
     city: { ar: "المنامة", en: "Manama" },
     about: {

@@ -10,7 +10,7 @@ import { useSubmissionKey } from "@/lib/useSubmissionKey";
 import type { MessageKey } from "@/lib/i18n/messages";
 import { AboutFields, BasicsFields, ExtrasFields, type BrandValues } from "./BrandFields";
 
-const STEP_FIELDS = [["nameAr", "logo", "industry"], ["about", "website", "instagram", "tiktok"], ["cover", "crNumber"]];
+const STEP_FIELDS = [["nameAr", "logo", "industry"], ["about", "website", "instagram", "tiktok"], ["crNumber"]];
 
 /**
  * Create a brand in three steps (basics, about, extras); adding the first product is the fourth.

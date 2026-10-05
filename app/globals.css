@@ -1,59 +1,117 @@
 @import "tailwindcss";
 
+/* dark: follows the theme choice (data-theme on <html>), falling back to the device setting. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
 /* 100clips design tokens. Values mirror theme.ts and DESIGN.ar.html. */
 
 :root {
-  --primary: #6d4aff;
-  --primary-hover: #5b38f0;
-  --primary-soft: #efeaff;
-  --primary-on-soft: #4b2fc9;
+  /* Black and white throughout; pink (accent) only for the logo, main actions, counts and the new-clips ring. */
+  --primary: #0a0a0a;
+  --primary-hover: #262626;
+  --primary-soft: #f2f2f2;
+  --primary-on-soft: #0a0a0a;
   --on-primary: #ffffff;
+  --accent: #ff2e7e;
+  --accent-soft: #ffe4ee;
+  --on-accent: #ffffff;
   --background: #ffffff;
-  --canvas: #faf9fd;
+  --canvas: #fafafa;
   --card: #ffffff;
-  --surface: #f4f2fa;
-  --border: #eeedf3;
-  --text: #14121c;
-  --text-muted: #8a8794;
-  --icon-inactive: #a6a3b3;
+  --surface: #f4f4f4;
+  --border: #ebebeb;
+  --text: #0a0a0a;
+  --text-muted: #737373;
+  --icon-inactive: #a3a3a3;
   --success: #16a34a;
   --success-soft: #e7f6ec;
   --error: #e5484d;
   --error-soft: #fdecec;
   --warning: #f5a524;
   --warning-soft: #fef4e2;
-  --gradient-start: #a78bfa;
-  --gradient-end: #6d4aff;
+  --gradient-start: #ff6fa8;
+  --gradient-end: #ff2e7e;
   --overlay: rgb(0 0 0 / 0.4);
   --scrim: rgb(0 0 0 / 0.4);
-  --shadow-soft: 0 1px 2px rgb(20 18 28 / 0.04), 0 4px 16px rgb(20 18 28 / 0.05);
-  --shadow-lift: 0 2px 4px rgb(20 18 28 / 0.05), 0 12px 32px rgb(20 18 28 / 0.08);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.05);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.05), 0 12px 32px rgb(0 0 0 / 0.08);
 }
 
+/* Dark tokens: on when the user picks Dark, or follows a dark device while not having picked Light.
+   The choice is a data-theme attribute on <html>, set from a cookie (see lib/theme.ts). */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --primary: #8b6cff;
-    --primary-hover: #9d82ff;
-    --primary-soft: #2a2245;
-    --primary-on-soft: #c9bcff;
-    --background: #0e0c14;
-    --canvas: #0e0c14;
-    --card: #15121e;
-    --surface: #1a1724;
-    --border: #2a2635;
-    --text: #f5f4fa;
-    --text-muted: #9a97a6;
-    --icon-inactive: #6b6878;
+  :root:not([data-theme="light"]) {
+    --primary: #fafafa;
+    --primary-hover: #e5e5e5;
+    --primary-soft: #333333;
+    --primary-on-soft: #fafafa;
+    --on-primary: #171717;
+    --accent: #ff4f95;
+    --accent-soft: #451a2e;
+    --on-accent: #ffffff;
+    --background: #171717;
+    --canvas: #171717;
+    --card: #212121;
+    --surface: #2a2a2a;
+    --border: #383838;
+    --text: #fafafa;
+    --text-muted: #a3a3a3;
+    --icon-inactive: #7a7a7a;
     --success: #22c55e;
     --success-soft: #14301f;
     --error: #f2555a;
     --error-soft: #3a1a1c;
     --warning: #f7b547;
     --warning-soft: #3a2c12;
+    --gradient-start: #ff7ab0;
+    --gradient-end: #ff3d88;
     --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
     --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.35);
     color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --primary: #fafafa;
+  --primary-hover: #e5e5e5;
+  --primary-soft: #333333;
+  --primary-on-soft: #fafafa;
+  --on-primary: #171717;
+  --accent: #ff4f95;
+  --accent-soft: #451a2e;
+  --on-accent: #ffffff;
+  --background: #171717;
+  --canvas: #171717;
+  --card: #212121;
+  --surface: #2a2a2a;
+  --border: #383838;
+  --text: #fafafa;
+  --text-muted: #a3a3a3;
+  --icon-inactive: #7a7a7a;
+  --success: #22c55e;
+  --success-soft: #14301f;
+  --error: #f2555a;
+  --error-soft: #3a1a1c;
+  --warning: #f7b547;
+  --warning-soft: #3a2c12;
+  --gradient-start: #ff7ab0;
+  --gradient-end: #ff3d88;
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.35);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 @theme inline {
@@ -62,6 +120,9 @@
   --color-primary-soft: var(--primary-soft);
   --color-primary-on-soft: var(--primary-on-soft);
   --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
   --color-background: var(--background);
   --color-canvas: var(--canvas);
   --color-card: var(--card);
@@ -147,4 +208,47 @@ body {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+}
+
+/* After payment (PaymentSuccess): the check draws itself, the title fades up, creators pop in.
+   Elements rest in their final state, so with reduced motion (motion-reduce:animate-none) they simply show. */
+@keyframes draw {
+  from {
+    stroke-dashoffset: var(--dash);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+/* The bar under the payment success screen, filling while it waits to move on. */
+@keyframes fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Number, link and code fields stay left-to-right so digits and URLs read correctly, but on Arabic pages
+   they line up on the right like every other field: the hint and the typed text start from the right. */
+[dir="rtl"] input[dir="ltr"],
+[dir="rtl"] textarea[dir="ltr"] {
+  text-align: right;
 }

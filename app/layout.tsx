@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import { I18nProvider } from "@/components/i18n/I18nProvider";
 import { getI18n } from "@/lib/i18n/server";
+import { getTheme } from "@/lib/theme";
 import { APP_NAME } from "@/theme";
 import "./globals.css";
 
@@ -32,8 +33,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const { locale, dir } = await getI18n();
+  const theme = await getTheme();
   return (
-    <html lang={locale} dir={dir} className={`${inter.variable} ${thmanyah.variable} antialiased`}>
+    <html lang={locale} dir={dir} data-theme={theme === "system" ? undefined : theme} className={`${inter.variable} ${thmanyah.variable} antialiased`}>
       <body>
         <I18nProvider locale={locale}>{children}</I18nProvider>
       </body>

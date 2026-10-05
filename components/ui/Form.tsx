@@ -2,13 +2,13 @@ import { CircleAlert } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-const control =
+export const controlClass =
   "w-full rounded-[var(--radius-sm)] border border-transparent bg-surface px-3 text-text placeholder:text-text-muted focus:outline-2 focus:outline-offset-0 focus:outline-primary aria-[invalid=true]:border-error";
 
-export function Field({ label, htmlFor, error, hint, children }: { label: string; htmlFor: string; error?: string; hint?: ReactNode; children: ReactNode }) {
+export function Field({ label, htmlFor, error, hint, children }: { label: ReactNode; htmlFor: string; error?: string; hint?: ReactNode; children: ReactNode }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      <label htmlFor={htmlFor} className="font-medium">
+      <label htmlFor={htmlFor} className="flex items-center gap-1.5 font-medium">
         {label}
       </label>
       {children}
@@ -27,15 +27,15 @@ export function FieldError({ id, children }: { id?: string; children: ReactNode 
 }
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
-  return <input className={cn(control, "h-11", className)} {...props} />;
+  return <input className={cn(controlClass, "h-11", className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: ComponentProps<"textarea">) {
-  return <textarea className={cn(control, "min-h-28 resize-y py-2.5 leading-6", className)} {...props} />;
+  return <textarea className={cn(controlClass, "min-h-28 resize-y py-2.5 leading-6", className)} {...props} />;
 }
 
 export function Select({ className, ...props }: ComponentProps<"select">) {
-  return <select className={cn(control, "h-11 appearance-none bg-[length:16px] bg-no-repeat pe-9", selectChevron, className)} {...props} />;
+  return <select className={cn(controlClass, "h-11 appearance-none bg-[length:16px] bg-no-repeat pe-9", selectChevron, className)} {...props} />;
 }
 
 /** Chevron drawn on the inline end, so it mirrors with the page direction. */

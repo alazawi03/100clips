@@ -1,17 +1,30 @@
 import { notFound } from "next/navigation";
-import { Star } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight, ExternalLink, MessageCircle, Star } from "lucide-react";
+import { messageCreator } from "@/app/actions/messages";
+import { InviteToCampaignMenu } from "@/components/brand/campaigns/InviteMenus";
+import { campaigns } from "@/lib/data/campaigns";
 import { Avatar } from "@/components/ui/Avatar";
 import { OfferPicker } from "@/components/brand/cart/OfferPicker";
+import { SaveToListButton } from "@/components/brand/creators/SaveToListButton";
+import { allLists } from "@/lib/data/lists";
 import { Card, SectionHeader } from "@/components/ui/Card";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { PlatformLogo } from "@/components/ui/PlatformLogo";
 import { PlayableClip } from "@/components/ui/PlayableClip";
 import { cn } from "@/lib/cn";
 import { clipsByCreator } from "@/lib/data/clips";
-import { getCurrentBrand } from "@/lib/currentBrand";
 import { getCreator } from "@/lib/data/creators";
+import { platformOf, type Platform } from "@/lib/data/types";
 import { cartOf } from "@/lib/data/store";
 import { reviewsOf } from "@/lib/data/reviews";
 import { getI18n } from "@/lib/i18n/server";
+
+/** Profile URL per platform. Dummy data has one handle per creator, used on every platform. */
+const profileUrl: Record<Platform, (handle: string) => string> = {
+  tiktok: (h) => `https://www.tiktok.com/@${h}`,
+  instagram: (h) => `https://www.instagram.com/${h}`,
+  youtube: (h) => `https://www.youtube.com/@${h}`,
+};
 
 function Stars({ rating, label }: { rating: number; label: string }) {
   return (
@@ -31,15 +44,63 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
   const name = f.pick(creator.name);
   const works = clipsByCreator(creator.id);
   const reviews = reviewsOf(creator.id);
-  const line = cartOf((await getCurrentBrand()).id).find((l) => l.creatorId === creator.id);
+  const line = cartOf().find((l) => l.creatorId === creator.id);
+  const socials = [...new Set(creator.formats.map((o) => platformOf[o.format]))];
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader title={name} back={{ href: "/explore", label: t("nav.explore") }} />
+      <Link href="/explore" className="inline-flex w-fit items-center gap-1 rounded-[var(--radius-sm)] text-small text-text-muted hover:text-text">
+        <ChevronRight aria-hidden className="size-4 rotate-180 rtl:rotate-0" />
+        {t("nav.explore")}
+      </Link>
 
-      <Card className="flex flex-col gap-5 p-5 md:flex-row md:items-start md:p-6">
-        <Avatar id={creator.id} name={name} size="xl" ring={creator.hasNewClips ? "new" : undefined} />
+      {/* Prices and quantities stay in view: a sticky side column on desktop, a bar above the tab bar on phones. */}
+      <div className="flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,1fr)_340px] md:items-start md:gap-8">
+      <div className="flex min-w-0 flex-col gap-8 md:order-1">
+      <Card className="flex flex-col gap-5 p-5 md:p-6 lg:flex-row lg:items-start">
+        <Avatar id={creator.id} name={name} size="xl" ring={creator.hasNewClips ? "new" : undefined} className="self-start" />
         <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="min-w-48 flex-1 text-h1 font-medium text-balance">{name}</h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <InviteToCampaignMenu
+                creatorId={creator.id}
+                campaigns={campaigns.filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: f.pick(c.title) }))}
+              />
+              <form action={messageCreator.bind(null, creator.id, undefined)}>
+                <button
+                  type="submit"
+                  aria-label={t("profile.messageName", { name })}
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-small font-medium transition-colors duration-[120ms] hover:bg-surface"
+                >
+                  <MessageCircle aria-hidden className="size-4" />
+                  <span className="hidden sm:inline">{t("profile.message")}</span>
+                </button>
+              </form>
+              <SaveToListButton
+                creatorId={creator.id}
+                name={name}
+                lists={allLists().map((l) => ({ id: l.id, name: l.name, favorites: l.favorites, count: l.creatorIds.length, has: l.creatorIds.includes(creator.id) }))}
+              />
+            </div>
+          </div>
+          <ul aria-label={t("profile.socials")} className="flex flex-wrap gap-2">
+            {socials.map((platform) => (
+              <li key={platform}>
+                <a
+                  href={profileUrl[platform](creator.handle)}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={t("profile.openSocial", { platform: t(`platforms.${platform}`), handle: creator.handle })}
+                  className="inline-flex h-9 items-center gap-2 rounded-full border border-border bg-card px-3 text-small font-medium hover:bg-surface"
+                >
+                  <PlatformLogo platform={platform} className="size-4" />
+                  {t(`platforms.${platform}`)}
+                  <ExternalLink aria-hidden className="size-3.5 text-text-muted" />
+                </a>
+              </li>
+            ))}
+          </ul>
           <p className="text-text-muted">
             <bdi dir="ltr">@{creator.handle}</bdi>
             {t("common.separator")}
@@ -68,9 +129,10 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
         </div>
       </Card>
 
-      <section aria-labelledby="offers-title">
-        <SectionHeader id="offers-title" title={t("profile.offers")} />
+      {/* Phones: the picker sits in the page right under the profile; desktop uses the sticky side column. */}
+      <section aria-label={t("profile.offers")} className="md:hidden">
         <OfferPicker
+          variant="compact"
           creatorId={creator.id}
           creatorName={name}
           offers={creator.formats}
@@ -123,6 +185,18 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
           <Card className="p-5 text-text-muted">{t("profile.noReviews", { name })}</Card>
         )}
       </section>
+      </div>
+      {/* The aside itself is sticky: a sticky child of a content-height aside would have no room to move. */}
+      <aside aria-labelledby="offers-title" className="hidden md:block md:sticky md:top-24 md:order-2 md:self-start">
+        <h2 id="offers-title" className="mb-3 hidden text-h3 font-medium md:block">{t("profile.offers")}</h2>
+        <OfferPicker
+          creatorId={creator.id}
+          creatorName={name}
+          offers={creator.formats}
+          inCart={line ? Object.fromEntries(line.items.map((i) => [i.format, i.quantity])) : undefined}
+        />
+      </aside>
+      </div>
     </div>
   );
 }

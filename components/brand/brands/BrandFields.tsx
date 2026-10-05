@@ -8,7 +8,7 @@ import { INDUSTRIES } from "@/lib/data/types";
 
 /** Starting values for every brand field, as plain strings. */
 export type BrandValues = Partial<
-  Record<"nameAr" | "nameEn" | "logo" | "industry" | "city" | "about" | "website" | "instagram" | "tiktok" | "cover" | "crNumber", string>
+  Record<"nameAr" | "nameEn" | "logo" | "industry" | "city" | "about" | "website" | "instagram" | "tiktok" | "crNumber", string>
 >;
 
 type SectionProps = { v: BrandValues; err: (name: string) => string | undefined };
@@ -77,11 +77,10 @@ export function AboutFields({ v, err }: SectionProps) {
   );
 }
 
-export function ExtrasFields({ v, err }: SectionProps) {
+export function ExtrasFields({ v }: SectionProps) {
   const { t } = useI18n();
   return (
     <div className="flex flex-col gap-5">
-      <ImageInput name="cover" label={`${t("brandForm.cover")} (${t("brandForm.optional")})`} hint={t("brandForm.coverHint")} defaultValue={v.cover} shape="wide" error={err("cover")} />
       <Field label={`${t("brandForm.crNumber")} (${t("brandForm.optional")})`} htmlFor="crNumber">
         <Input id="crNumber" name="crNumber" dir="ltr" inputMode="numeric" defaultValue={v.crNumber} placeholder={t("brandForm.crPlaceholder")} />
       </Field>

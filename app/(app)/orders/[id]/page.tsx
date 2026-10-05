@@ -12,15 +12,17 @@ import { cn } from "@/lib/cn";
 import { getCampaign } from "@/lib/data/campaigns";
 import { getClip } from "@/lib/data/clips";
 import { getCreator } from "@/lib/data/creators";
-import { getCurrentBrand } from "@/lib/currentBrand";
 import { getOrder } from "@/lib/data/orders";
-import { ORDER_STATUSES } from "@/lib/data/types";
+import { DEMO_TODAY, products } from "@/lib/data/account";
+import { currentStep, isLate, nextAction, stepsFor, waitingFor } from "@/lib/orderFlow";
+import { NextActionButton, Stars } from "@/components/brand/campaigns/OrderCard";
+import { LinkButton } from "@/components/ui/Button";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function OrderDetailPage({ params, searchParams }: PageProps<"/orders/[id]">) {
   const { id } = await params;
   const order = getOrder(id);
-  if (!order || order.brandId !== (await getCurrentBrand()).id) notFound();
+  if (!order) notFound();
   const { t, f } = await getI18n();
   const { done } = await searchParams;
 
@@ -29,7 +31,15 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const campaign = order.campaignId ? getCampaign(order.campaignId) : undefined;
   const clip = order.clipId ? getClip(order.clipId) : undefined;
   const brief = order.brief ?? campaign?.brief;
-  const step = ORDER_STATUSES.indexOf(order.status);
+  // Steps and next action follow the same rules as the campaign page.
+  const product = campaign ? products.find((p) => p.id === campaign.productIds?.[0]) : undefined;
+  const physical = product?.details.type === "physical";
+  const logistics = product && campaign ? campaign.logistics?.[product.id] : undefined;
+  const returns = logistics?.type === "physical" && logistics.after === "return";
+  const steps = stepsFor(physical);
+  const stepIndex = steps.indexOf(currentStep(order, physical));
+  const action = nextAction(order, { physical, returns });
+  const late = isLate(order, campaign?.deadline, DEMO_TODAY);
   const watchable = clip && (order.status === "delivered" || order.status === "approved");
 
   return (
@@ -39,6 +49,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
         subtitle={<bdi dir="ltr">#{order.id.replace("ord-", "")}</bdi>}
         back={{ href: "/orders", label: t("ordersPage.title") }}
       >
+        {late && <Badge tone="error">{t("flow.late")}</Badge>}
         {order.revisionRequested && <Badge tone="warning">{t("brandHome.revisionRequested")}</Badge>}
         <Badge tone={orderTone[order.status]}>{t(`status.order.${order.status}`)}</Badge>
       </PageHeader>
@@ -46,6 +57,12 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
       {done === "offerSent" && <Notice>{t("orderDetail.doneOfferSent", { name })}</Notice>}
       {done === "approved" && <Notice>{t("orderDetail.doneApproved", { amount: f.money(order.amount), name })}</Notice>}
       {done === "revisionSent" && <Notice>{t("orderDetail.doneRevisionSent", { name })}</Notice>}
+      {action && action !== "review" && product && (
+        <Card className="flex flex-wrap items-center justify-between gap-3 border-accent/40 p-4 sm:p-5">
+          <p className="font-medium">{t(`flow.action.${action}`, { name, product: f.pick(product.name) })}</p>
+          <NextActionButton orderId={order.id} action={action} />
+        </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_320px] md:items-start">
         <div className="flex min-w-0 flex-col gap-6">
@@ -89,7 +106,8 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
                 )}
                 <p className="max-w-sm text-text-muted">
                   {order.status === "pending" && t("orderDetail.waitingPending", { name })}
-                  {order.status === "in_progress" && t("orderDetail.waitingProgress", { name })}
+                  {order.status === "in_progress" &&
+                    (waitingFor(order, physical) === "receive" ? t("flow.waiting.receive", { name }) : t("orderDetail.waitingProgress", { name }))}
                   {order.status === "submitted" && t("orderDetail.waitingSubmitted")}
                 </p>
               </div>
@@ -102,13 +120,42 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
               {order.items.map((item) => (
                 <li key={item.format} className="flex justify-between gap-3">
                   <span>
-                    {t(`formats.${item.format}`)} × {f.number(item.quantity)}
+                    {t(`formats.${item.format}`)}
                   </span>
                   <span className="tabular-nums">{f.money(item.price * item.quantity)}</span>
                 </li>
               ))}
             </ul>
           </Card>
+
+          {physical && order.status !== "cancelled" && (
+            <Card className="flex flex-col gap-2 p-5">
+              <h2 className="font-medium">{t("campaignDetail.shipping")}</h2>
+              <ul className="flex flex-col gap-1 text-small">
+                <li className={order.shipping?.sentAt ? "" : "text-text-muted"}>
+                  {order.shipping?.sentAt ? t("campaignDetail.sentOn", { date: f.date(order.shipping.sentAt.slice(0, 10)) }) : t("campaignDetail.notSent")}
+                  {order.shipping?.note && <span className="text-text-muted"> · {order.shipping.note}</span>}
+                </li>
+                {order.shipping?.sentAt && (
+                  <li className={order.shipping.receivedAt ? "" : "text-text-muted"}>
+                    {order.shipping.receivedAt ? t("campaignDetail.receivedOn", { date: f.date(order.shipping.receivedAt.slice(0, 10)) }) : t("campaignDetail.notReceived")}
+                  </li>
+                )}
+                {order.shipping?.returnedAt && <li>{t("campaignDetail.returnedOn", { date: f.date(order.shipping.returnedAt.slice(0, 10)) })}</li>}
+              </ul>
+              <p className="text-small text-text-muted">{returns ? t("campaignDetail.returnInfo") : t("campaignDetail.keepInfo")}</p>
+            </Card>
+          )}
+
+          {order.status === "approved" && (
+            <Card className="flex flex-col gap-3 p-5">
+              <h2 className="font-medium">{order.rating ? t("campaignDetail.rated", { name }) : t("campaignDetail.rate", { name })}</h2>
+              <Stars orderId={order.id} value={order.rating} label={t("campaignDetail.rate", { name })} />
+              <LinkButton href={`/creators/${creator.id}`} variant="secondary" className="w-fit">
+                {t("campaignDetail.hireAgain")}
+              </LinkButton>
+            </Card>
+          )}
 
           {order.note && (
             <Card className="flex flex-col gap-2 p-5">
@@ -175,12 +222,12 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
           <Card className="p-5">
             <h2 className="mb-3 font-medium">{t("orderDetail.progress")}</h2>
             <ol className="flex flex-col">
-              {ORDER_STATUSES.map((status, index) => {
-                const complete = index < step || order.status === "approved";
-                const current = index === step && order.status !== "approved";
+              {steps.map((s, index) => {
+                const complete = index < stepIndex || order.status === "approved";
+                const current = index === stepIndex && order.status !== "approved" && order.status !== "cancelled";
                 return (
-                  <li key={status} className="relative flex gap-3 pb-4 last:pb-0">
-                    {index < ORDER_STATUSES.length - 1 && (
+                  <li key={s} className="relative flex gap-3 pb-4 last:pb-0">
+                    {index < steps.length - 1 && (
                       <span aria-hidden className={cn("absolute start-[11px] top-6 h-[calc(100%-24px)] w-0.5", complete ? "bg-primary" : "bg-border")} />
                     )}
                     <span
@@ -195,7 +242,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
                       {current && <span className="size-2 rounded-full bg-primary" />}
                     </span>
                     <span className={cn("text-small", current ? "font-medium" : complete ? "text-text" : "text-text-muted")} aria-current={current ? "step" : undefined}>
-                      {t(`status.order.${status}`)}
+                      {t(`flow.steps.${s}`)}
                     </span>
                   </li>
                 );
