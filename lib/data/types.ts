@@ -107,15 +107,14 @@ export type Campaign = {
 /**
  * pending      offer sent, waiting for the creator to accept
  * in_progress  creator is filming
- * submitted    clip uploaded, 100clips is checking it against the content rules
- * delivered    clip passed the check and is ready for the brand to review
+ * delivered    clip uploaded and ready for the brand to review (no 100clips check in the MVP)
  * approved     brand approved the clip and the payment is released
  */
 /** "cancelled": the offer was withdrawn before the creator accepted (money back to the balance). */
-export type OrderStatus = "pending" | "in_progress" | "submitted" | "delivered" | "approved" | "cancelled";
+export type OrderStatus = "pending" | "in_progress" | "delivered" | "approved" | "cancelled";
 /** The working pipeline, in order. Cancelled orders sit outside it. */
 export type PipelineStatus = Exclude<OrderStatus, "cancelled">;
-export const ORDER_STATUSES: PipelineStatus[] = ["pending", "in_progress", "submitted", "delivered", "approved"];
+export const ORDER_STATUSES: PipelineStatus[] = ["pending", "in_progress", "delivered", "approved"];
 
 /** Something that happened on an order, for the activity timeline. `at` is an ISO date or date-time. */
 export type OrderEventType = "offered" | "accepted" | "sent" | "received" | "uploaded" | "revisionRequested" | "approved" | "released" | "cancelled" | "returned";
@@ -152,8 +151,10 @@ export type Order = {
   shipping?: OrderShipping;
   /** Activity history; demo orders without one get it derived from their status (lib/orderFlow.ts). */
   events?: OrderEvent[];
-  /** 1–5 stars, given by the brand after approving. */
+  /** 1–5 stars, given by the brand when approving (or later). */
   rating?: number;
+  /** The brand's comment when approving. */
+  review?: string;
 };
 
 export type OrderItem = { format: ContentFormat; quantity: number; /** In BHD, per clip. */ price: number };
@@ -195,9 +196,17 @@ export type Brand = {
   website?: string;
   instagram?: string;
   tiktok?: string;
+  /** Countries the brand works in. */
+  countries?: Country[];
   /** Commercial registration number. */
   crNumber?: string;
+  /** File name of the uploaded VAT certificate (the file itself waits for a file store). */
+  vatCertificate?: string;
 };
+
+/** GCC countries a brand can work in. */
+export type Country = "bh" | "sa" | "ae" | "kw" | "qa" | "om";
+export const COUNTRIES: Country[] = ["bh", "sa", "ae", "kw", "qa", "om"];
 
 export type AppPlatform = "ios" | "android" | "web";
 export const APP_PLATFORMS: AppPlatform[] = ["ios", "android", "web"];

@@ -11,6 +11,7 @@ import { allLists } from "@/lib/data/lists";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
 import { PlayableClip } from "@/components/ui/PlayableClip";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { cn } from "@/lib/cn";
 import { clipsByCreator } from "@/lib/data/clips";
 import { getCreator } from "@/lib/data/creators";
@@ -60,28 +61,39 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
       <Card className="flex flex-col gap-5 p-5 md:p-6 lg:flex-row lg:items-start">
         <Avatar id={creator.id} name={name} size="xl" ring={creator.hasNewClips ? "new" : undefined} className="self-start" />
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="min-w-48 flex-1 text-h1 font-medium text-balance">{name}</h1>
-            <div className="flex flex-wrap items-center gap-2">
-              <InviteToCampaignMenu
-                creatorId={creator.id}
-                campaigns={campaigns.filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: f.pick(c.title) }))}
-              />
-              <form action={messageCreator.bind(null, creator.id, undefined)}>
-                <button
-                  type="submit"
-                  aria-label={t("profile.messageName", { name })}
-                  className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-small font-medium transition-colors duration-[120ms] hover:bg-surface"
-                >
-                  <MessageCircle aria-hidden className="size-4" />
-                  <span className="hidden sm:inline">{t("profile.message")}</span>
-                </button>
-              </form>
-              <SaveToListButton
-                creatorId={creator.id}
-                name={name}
-                lists={allLists().map((l) => ({ id: l.id, name: l.name, favorites: l.favorites, count: l.creatorIds.length, has: l.creatorIds.includes(creator.id) }))}
-              />
+          {/* Name, with icon-only actions at the far end of the same line; each says what it does on hover. */}
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="min-w-0 flex-1 text-h1 font-medium text-balance">{name}</h1>
+            <div className="flex shrink-0 items-center gap-2">
+              {campaigns.some((c) => c.status === "in_progress") && (
+                <Tooltip label={t("invite.toCampaign")}>
+                  <InviteToCampaignMenu
+                    variant="icon"
+                    label={t("invite.toCampaign")}
+                    creatorIds={[creator.id]}
+                    campaigns={campaigns.filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: f.pick(c.title) }))}
+                  />
+                </Tooltip>
+              )}
+              <Tooltip label={t("profile.message")}>
+                <form action={messageCreator.bind(null, creator.id, undefined)}>
+                  <button
+                    type="submit"
+                    aria-label={t("profile.messageName", { name })}
+                    className="grid size-9 place-items-center rounded-full border border-border bg-card transition-colors duration-[120ms] hover:bg-surface"
+                  >
+                    <MessageCircle aria-hidden className="size-4" />
+                  </button>
+                </form>
+              </Tooltip>
+              <Tooltip label={t("lists.save")}>
+                <SaveToListButton
+                  compact
+                  creatorId={creator.id}
+                  name={name}
+                  lists={allLists().map((l) => ({ id: l.id, name: l.name, favorites: l.favorites, count: l.creatorIds.length, has: l.creatorIds.includes(creator.id) }))}
+                />
+              </Tooltip>
             </div>
           </div>
           <ul aria-label={t("profile.socials")} className="flex flex-wrap gap-2">

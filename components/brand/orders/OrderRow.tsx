@@ -7,6 +7,7 @@ import { getBrand } from "@/lib/data/account";
 import { getCampaign } from "@/lib/data/campaigns";
 import { getCreator } from "@/lib/data/creators";
 import { orderFlags } from "@/components/brand/campaigns/campaignView";
+import { cn } from "@/lib/cn";
 import type { Order } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 
@@ -48,6 +49,18 @@ export function OrderRow({ order, i18n, lead = "order" }: { order: Order; i18n: 
             </>
           )}
         </div>
+        {order.status !== "cancelled" && (
+          <div className="order-last flex w-full flex-col gap-1 ps-14 sm:order-none sm:w-44 sm:shrink-0 sm:ps-0">
+            <span aria-hidden className="flex gap-0.5">
+              {flags.steps.map((s, i) => (
+                <span key={s} className={cn("h-1 flex-1 rounded-full", i <= flags.stepIndex ? "bg-primary" : "bg-border")} />
+              ))}
+            </span>
+            <span className="truncate text-caption text-text-muted">
+              {t("flow.stepLabel", { n: flags.stepIndex + 1, total: flags.steps.length, step: t(`flow.steps.${flags.steps[flags.stepIndex]}`) })}
+            </span>
+          </div>
+        )}
         {brand && (
           <div className="hidden w-40 shrink-0 items-center gap-2 md:flex">
             <BrandLogo id={brand.id} name={brandName!} src={brand.logo} size="sm" />
@@ -58,7 +71,8 @@ export function OrderRow({ order, i18n, lead = "order" }: { order: Order; i18n: 
           {flags.late && <Badge tone="error">{t("flow.lateShort")}</Badge>}
           {flags.action && <Badge tone="warning">{tp("flow.waitingDays", flags.actionDays ?? 0)}</Badge>}
           {order.revisionRequested && <Badge tone="warning">{t("brandHome.revisionRequested")}</Badge>}
-          <Badge tone={orderTone[order.status]}>{t(`status.order.${order.status}`)}</Badge>
+          {/* The step line says where the order is; cancelled orders have no steps, so they keep the badge. */}
+          {order.status === "cancelled" && <Badge tone={orderTone[order.status]}>{t(`status.order.${order.status}`)}</Badge>}
           <span className="ms-auto min-w-20 text-end font-medium tabular-nums sm:ms-0">{f.money(order.amount)}</span>
         </div>
       </Link>

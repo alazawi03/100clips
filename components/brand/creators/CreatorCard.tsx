@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { SaveToListButton } from "./SaveToListButton";
+import { InviteToCampaignMenu } from "@/components/brand/campaigns/InviteMenus";
+import { campaigns } from "@/lib/data/campaigns";
+import { cn } from "@/lib/cn";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import { buttonClass } from "@/components/ui/Button";
@@ -28,6 +31,7 @@ export function CreatorCard({
 }) {
   const { t, f } = i18n;
   const works = clipsByCreator(creator.id).slice(0, 3);
+  const active = campaigns.filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: i18n.f.pick(c.title) }));
   const name = f.pick(creator.name);
   const platforms = [
     ...new Set(creator.formats.map((o) => platformOf[o.format])),
@@ -67,8 +71,8 @@ export function CreatorCard({
                 {t("explore.newCreator")}
               </span>
             )}
-            {/* Room for the save button, which is placed over this spot. */}
-            <span aria-hidden className="size-9 shrink-0" />
+            {/* Room for the save and invite buttons, which are placed over this spot. */}
+            <span aria-hidden className={cn("h-9 shrink-0", active.length > 0 ? "w-[76px]" : "w-9")} />
           </div>
 
           {works.length > 0 && (
@@ -113,7 +117,8 @@ export function CreatorCard({
           </div>
         </Card>
       </Link>
-      <div className="absolute end-4 top-[26px] z-10">
+      <div className="absolute end-4 top-[26px] z-10 flex gap-1">
+        <InviteToCampaignMenu variant="icon" creatorIds={[creator.id]} campaigns={active} label={t("invite.creatorToCampaign", { name })} />
         <SaveToListButton
           compact
           creatorId={creator.id}

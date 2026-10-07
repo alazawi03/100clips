@@ -48,22 +48,48 @@ export function AddCreatorMenu({ campaignId }: { campaignId: string }) {
   );
 }
 
-/** "Invite to campaign" on a creator profile: pick one of your active campaigns, then the package and payment. */
-export function InviteToCampaignMenu({ creatorId, campaigns }: { creatorId: string; campaigns: Array<{ id: string; title: string }> }) {
+/**
+ * "Invite to campaign": pick one of your active campaigns, then the invite page opens with these creators
+ * ticked (`creatorIds`) or a whole list ticked (`listId`), for packages and payment.
+ * "icon" sits on creator cards, "button" on list headers, "pill" on a creator profile.
+ */
+export function InviteToCampaignMenu({
+  campaigns,
+  creatorIds,
+  listId,
+  variant = "pill",
+  label,
+}: {
+  campaigns: Array<{ id: string; title: string }>;
+  creatorIds?: string[];
+  listId?: string;
+  variant?: "icon" | "button" | "pill";
+  /** Accessible name, e.g. "Invite Noura to a campaign". */
+  label?: string;
+}) {
   const { t } = useI18n();
   if (campaigns.length === 0) return null;
+  const query = listId ? `list=${listId}` : `creators=${(creatorIds ?? []).join(",")}`;
+  const text = listId ? t("invite.listToCampaign") : t("invite.toCampaign");
   return (
     <Dropdown
       align="end"
       panelClassName="w-72"
-      triggerClassName="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-small font-medium transition-colors hover:bg-surface"
+      triggerLabel={label ?? text}
+      triggerClassName={
+        variant === "icon"
+          ? "grid size-9 place-items-center rounded-full border border-border bg-card text-text transition-colors hover:bg-surface"
+          : variant === "button"
+            ? buttonClass("secondary", "h-9 md:h-9")
+            : "inline-flex h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-small font-medium transition-colors hover:bg-surface"
+      }
       trigger={
         <>
           <Megaphone aria-hidden className="size-4" />
-          <span className="hidden sm:inline">{t("invite.toCampaign")}</span>
+          {variant === "button" && text}
+          {variant === "pill" && <span className="hidden sm:inline">{text}</span>}
         </>
       }
-      triggerLabel={t("invite.toCampaign")}
     >
       {(close) => (
         <div className="flex flex-col">
@@ -71,7 +97,7 @@ export function InviteToCampaignMenu({ creatorId, campaigns }: { creatorId: stri
           <ul>
             {campaigns.map((c) => (
               <li key={c.id}>
-                <Link href={`/campaigns/${c.id}/invite?creator=${creatorId}`} onClick={close} className={menuItemClass}>
+                <Link href={`/campaigns/${c.id}/invite?${query}`} onClick={close} className={menuItemClass}>
                   <Megaphone aria-hidden className="size-4 shrink-0 text-text-muted" />
                   <span className="truncate">{c.title}</span>
                 </Link>

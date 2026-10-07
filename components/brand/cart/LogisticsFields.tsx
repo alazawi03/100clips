@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { AppWindow, Handshake, ImageOff, MapPin, Package } from "lucide-react";
+import { AppWindow, Gift, Handshake, ImageOff, MapPin, Package } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { DateInput } from "@/components/ui/DateInput";
@@ -77,7 +77,10 @@ export function LogisticsFields({ products, v, err }: Props) {
                         />
                         <span>
                           <span className="block text-small font-medium">{t(`checkout.logistics.${option}`)}</span>
-                          <span className="block text-caption text-text-muted">{t(`checkout.logistics.${option}Hint`)}</span>
+                          <span className="flex items-center gap-1 text-caption text-text-muted">
+                            {option === "keep" && <Gift aria-hidden className="size-3.5 shrink-0" />}
+                            {t(`checkout.logistics.${option}Hint`)}
+                          </span>
                         </span>
                       </label>
                     ))}

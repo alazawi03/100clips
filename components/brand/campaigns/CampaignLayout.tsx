@@ -8,10 +8,10 @@ const TABS = ["overview", "orders", "brief", "clips", "activity"] as const;
 type Tab = (typeof TABS)[number];
 
 /**
- * Desktop: two columns, the work (next action, orders, clips) beside the reference (summary, brief, activity).
+ * Desktop: two columns, the work (next action, orders, clips) beside the reference (brief, activity).
  * Phones: one section at a time under tabs. Every section is rendered once; tabs only hide the others.
  */
-export function CampaignLayout(props: Record<"banner" | "summary" | "orders" | "brief" | "clips" | "activity", ReactNode>) {
+export function CampaignLayout(props: Record<"banner" | "orders" | "brief" | "clips" | "activity", ReactNode>) {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("overview");
   const show = (...tabs: Tab[]) => cn(!tabs.includes(tab) && "max-lg:hidden");
@@ -40,7 +40,6 @@ export function CampaignLayout(props: Record<"banner" | "summary" | "orders" | "
           <div className={show("clips")}>{props.clips}</div>
         </div>
         <div className="flex min-w-0 flex-col gap-6">
-          <div className={show("overview")}>{props.summary}</div>
           <div className={show("brief")}>{props.brief}</div>
           <div className={show("activity")}>{props.activity}</div>
         </div>

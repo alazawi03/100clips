@@ -12,7 +12,7 @@ import { getI18n } from "@/lib/i18n/server";
 
 /**
  * Invite creators to an existing campaign, paid up front. Reached from the campaign's "Add creator"
- * (?list= picks one of the brand's lists) or a creator profile's "Invite to campaign" (?creator=).
+ * (pick a list there), a list's "Invite to campaign" (?list=, all ticked), or a creator card or profile (?creators=).
  */
 export default async function InvitePage({ params, searchParams }: PageProps<"/campaigns/[id]/invite">) {
   const { id } = await params;
@@ -31,8 +31,10 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/c
   });
 
   const lists = allLists().map((l) => ({ id: l.id, name: l.favorites ? t("lists.favorites") : l.name, creators: creatorsIn(l).map(view) }));
-  const single = typeof query.creator === "string" ? allCreators.find((c) => c.id === query.creator) : undefined;
-  const listId = typeof query.list === "string" ? query.list : undefined;
+  // ?creators=a,b from creator cards or a profile; ?list= from a list's "Invite to campaign".
+  const presetIds = typeof query.creators === "string" ? query.creators.split(",") : [];
+  const preset = allCreators.filter((c) => presetIds.includes(c.id));
+  const listId = typeof query.list === "string" && lists.some((l) => l.id === query.list) ? query.list : undefined;
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
@@ -47,8 +49,9 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/c
       <InviteForm
         campaignId={id}
         lists={lists}
-        single={single && view(single)}
+        preset={preset.length > 0 ? preset.map(view) : undefined}
         initialListId={listId ?? lists.find((l) => l.creators.length > 0)?.id}
+        tickList={!!listId}
         balance={account.balance}
       />
     </div>

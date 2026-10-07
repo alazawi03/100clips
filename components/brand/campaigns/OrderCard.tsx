@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Check, ChevronDown, CircleAlert, Clapperboard, Clock, MessageCircle, Star } from "lucide-react";
+import { Check, ChevronDown, CircleAlert, Clapperboard, Clock, MessageCircle, ScanSearch, Star } from "lucide-react";
 import { markOrderReturned, markOrderSent, rateOrder } from "@/app/actions/brand";
 import { messageCreator } from "@/app/actions/messages";
 import { useI18n } from "@/components/i18n/I18nProvider";
@@ -39,9 +39,12 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
             <span className="block truncate font-medium">{order.name}</span>
             <span className="block truncate text-small text-text-muted">{order.itemsLabel}</span>
           </span>
-          <Badge tone={orderTone[order.status]} className="shrink-0">
-            {t(`status.order.${order.status}`)}
-          </Badge>
+          {/* The step line below says where the order is; a badge only for cancelled ones, which have no steps. */}
+          {cancelled && (
+            <Badge tone={orderTone[order.status]} className="shrink-0">
+              {t(`status.order.${order.status}`)}
+            </Badge>
+          )}
           {/* Room for the messages button, which sits on top of the header (a button can't hold a form). */}
           <span aria-hidden className="size-10 shrink-0" />
           <ChevronDown aria-hidden className={cn("size-5 shrink-0 text-text-muted transition-transform", open && "rotate-180")} />
@@ -123,21 +126,32 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
             </Section>
           )}
           <Section title={t("campaignDetail.clip")}>
-            {order.clip && (order.status === "delivered" || order.status === "approved" || order.status === "submitted" || order.revisionRequested) ? (
+            {order.clip && (order.status === "delivered" || order.status === "approved") ? (
               <div className="flex flex-col gap-3">
-                <div className="flex items-end gap-3">
-                  <Link href={`/orders/${order.id}`} className="block w-28 shrink-0" aria-label={t("campaignDetail.openOrder")}>
-                    <ClipPoster clip={order.clip} views={f.compact(order.clip.views)} duration={f.duration(order.clip.durationSec)} compact />
-                  </Link>
-                  <div className="flex min-w-0 flex-col gap-1.5 text-small">
-                    <span className="font-medium">{t("campaignDetail.version", { n: order.revisionRequested && order.status !== "in_progress" ? 2 : 1 })}</span>
-                    {order.revisionRequested && order.status === "in_progress" && <Badge tone="warning">{t("brandHome.revisionRequested")}</Badge>}
-                    <Link href={`/orders/${order.id}`} className={buttonClass("secondary", "h-9 w-fit md:h-9")}>
-                      {t("campaignDetail.openOrder")}
-                    </Link>
-                  </div>
+                {/* The real clip, playable here, in its 9:16 frame. */}
+                <video
+                  dir="ltr"
+                  src={order.clip.videoSrc}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  aria-label={t("profile.play", { title: order.name })}
+                  className="aspect-[9/16] w-full max-w-[220px] rounded-[var(--radius-lg)] bg-black object-cover"
+                />
+                <span className="text-small text-text-muted">{t("campaignDetail.version", { n: order.revisionRequested ? 2 : 1 })}</span>
+                {order.status === "delivered" && <ReviewActions orderId={order.id} creatorName={order.name} amount={f.money(order.amount)} revisionsLeft={order.revisionRequested ? 0 : 1} />}
+              </div>
+            ) : order.clip && order.revisionRequested ? (
+              <div className="flex flex-col gap-2">
+                <div className="relative w-full max-w-[220px]">
+                  <ClipPoster clip={order.clip} views={f.compact(order.clip.views)} duration={f.duration(order.clip.durationSec)} compact className="opacity-50" />
+                  <span className="absolute inset-0 grid place-items-center">
+                    <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-small font-medium shadow-soft">
+                      <ScanSearch aria-hidden className="size-4" />
+                      {t("brandHome.revisionRequested")}
+                    </span>
+                  </span>
                 </div>
-                {order.status === "delivered" && <ReviewActions orderId={order.id} />}
               </div>
             ) : (
               <p className="flex items-center gap-2 text-small text-text-muted">
@@ -145,6 +159,9 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
                 {t("campaignDetail.noClip")}
               </p>
             )}
+            <Link href={`/orders/${order.id}`} className="w-fit text-small font-medium text-text-muted hover:text-text hover:underline">
+              {t("campaignDetail.openOrder")}
+            </Link>
           </Section>
 
           {order.status === "approved" && (

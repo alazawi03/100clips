@@ -6,12 +6,14 @@ import { getBrand } from "@/lib/data/account";
 import * as store from "@/lib/data/brandsStore";
 import {
   APP_PLATFORMS,
+  COUNTRIES,
   INDUSTRIES,
   PRODUCT_TYPES,
   SERVICE_DELIVERIES,
   VENUE_KINDS,
   type AppPlatform,
   type Brand,
+  type Country,
   type Industry,
   type Product,
   type ProductDetails,
@@ -20,6 +22,7 @@ import {
   type VenueKind,
 } from "@/lib/data/types";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { DOCUMENT_TYPES, MAX_DOCUMENT_BYTES } from "@/lib/images";
 
 /** errors: field → translation key. values: what was sent, so the form can show it again. */
 export type BrandFormState = { errors: Partial<Record<string, MessageKey>>; values: Record<string, string | string[]>; createdId?: string } | null;
@@ -35,9 +38,10 @@ function all(form: FormData, name: string) {
 function submitted(form: FormData): Record<string, string | string[]> {
   const values: Record<string, string | string[]> = {};
   for (const key of new Set(form.keys())) {
-    if (key.startsWith("$")) continue;
+    // Files aren't sent back to the form; a browser can't prefill a file field.
+    if (key.startsWith("$") || form.get(key) instanceof File) continue;
     const list = all(form, key);
-    values[key] = list.length > 1 || ["benefit", "concernQ", "concernA", "photo", "platforms", "delivery"].includes(key) ? list : list[0];
+    values[key] = list.length > 1 || ["benefit", "concernQ", "concernA", "photo", "platforms", "delivery", "countries"].includes(key) ? list : list[0];
   }
   return values;
 }
@@ -97,7 +101,12 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
   const website = withScheme(text(form, "website"));
   const instagram = handle(text(form, "instagram"));
   const tiktok = handle(text(form, "tiktok"));
+  const countries = all(form, "countries").filter((c): c is Country => (COUNTRIES as string[]).includes(c));
   const crNumber = text(form, "crNumber");
+  // A newly picked file, or the one already saved (vatCertificateKeep).
+  const vatFile = form.get("vatCertificate");
+  const vatPicked = vatFile instanceof File && vatFile.size > 0 ? vatFile : undefined;
+  const vatCertificate = vatPicked ? vatPicked.name : text(form, "vatCertificateKeep");
 
   if (!nameAr && !nameEn) errors.nameAr = "forms.errors.brandNameRequired";
   if (logo && !isImage(logo)) errors.logo = "forms.errors.imageType";
@@ -106,6 +115,8 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
   if (website && !isUrl(website)) errors.website = "forms.errors.urlInvalid";
   if (instagram === null) errors.instagram = "forms.errors.handleInvalid";
   if (tiktok === null) errors.tiktok = "forms.errors.handleInvalid";
+  if (vatPicked && !DOCUMENT_TYPES.includes(vatPicked.type)) errors.vatCertificate = "forms.errors.fileType";
+  else if (vatPicked && vatPicked.size > MAX_DOCUMENT_BYTES) errors.vatCertificate = "forms.errors.fileTooBig";
   if (Object.keys(errors).length > 0) return { errors };
 
   return {
@@ -119,7 +130,9 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
       website: website || undefined,
       instagram: instagram || undefined,
       tiktok: tiktok || undefined,
+      countries: countries.length > 0 ? countries : undefined,
       crNumber: crNumber || undefined,
+      vatCertificate: vatCertificate || undefined,
     },
   };
 }

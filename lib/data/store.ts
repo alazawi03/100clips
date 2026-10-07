@@ -52,15 +52,8 @@ export function cartOf(): CartLine[] {
   return cart;
 }
 
-/**
- * What checkout starts with: the brand and product, set by "Find creators for this product",
- * plus the brief when duplicating a campaign.
- */
-export type CheckoutDefault = {
-  brandId: string;
-  productId: string;
-  copy?: Pick<Campaign, "title" | "brief" | "videoStyle" | "keyMessage" | "references" | "mustInclude" | "avoid">;
-};
+/** What checkout starts with: the brand and product, set by "Find creators for this product". */
+export type CheckoutDefault = { brandId: string; productId: string };
 let checkoutDefault: CheckoutDefault | undefined;
 
 export function getCheckoutDefault() {
@@ -181,12 +174,15 @@ export function inviteToCampaign(campaignId: string, picks: Array<{ creatorId: s
   return { campaign, lines, ...charge(total, useBalance) };
 }
 
-export function approveOrder(orderId: string) {
+/** Approving releases the payment; a rating and comment can come with it. */
+export function approveOrder(orderId: string, rating?: number, review?: string) {
   const order = getOrder(orderId);
   if (!order || order.status !== "delivered") return;
   keepHistory(order);
   order.status = "approved";
   order.revisionRequested = false;
+  if (rating && Number.isInteger(rating) && rating >= 1 && rating <= 5) order.rating = rating;
+  if (review) order.review = review;
   log(order, "approved");
   log(order, "released");
 }
@@ -251,13 +247,3 @@ export function campaignRate(campaign: Campaign): number {
   return Math.round((campaign.budget / campaign.clipsCount) * 1000) / 1000;
 }
 
-/** "Duplicate": checkout will start with this campaign's brand, product and brief. */
-export function duplicateCampaign(campaignId: string) {
-  const c = getCampaign(campaignId);
-  if (!c?.productIds?.[0]) return;
-  checkoutDefault = {
-    brandId: c.brandId,
-    productId: c.productIds[0],
-    copy: { title: c.title, brief: c.brief, videoStyle: c.videoStyle, keyMessage: c.keyMessage, references: c.references, mustInclude: c.mustInclude, avoid: c.avoid },
-  };
-}

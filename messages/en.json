@@ -54,7 +54,6 @@
     "order": {
       "pending": "Pending",
       "in_progress": "In progress",
-      "submitted": "Submitted",
       "delivered": "Delivered",
       "approved": "Approved",
       "cancelled": "Cancelled"
@@ -120,7 +119,9 @@
       "deadlineFuture": "Choose a date after today.",
       "dateInvalid": "Enter the date as DD/MM/YYYY.",
       "dateTooEarly": "Choose {date} or later.",
-      "pickCreators": "Choose at least one creator."
+      "pickCreators": "Choose at least one creator.",
+      "fileType": "The file must be a PDF, PNG or JPG.",
+      "fileTooBig": "That file is over 5 MB. Choose a smaller one."
     },
     "datePlaceholder": "DD/MM/YYYY",
     "openCalendar": "Open calendar"
@@ -148,8 +149,7 @@
     "platform": "Platform",
     "newCreator": "New",
     "clearOne": "Clear selection",
-    "viewProfile": "View profile",
-    "doneDuplicated": "We copied the campaign. Pick creators, and checkout will start with the same product and brief."
+    "viewProfile": "View profile"
   },
   "profile": {
     "rating": "Rating",
@@ -215,24 +215,6 @@
     "cancelConfirm": "Cancel this campaign? Offers nobody has accepted are withdrawn and the money goes back to your balance.",
     "cancelBlocked": "A creator has already accepted, so it can't be cancelled.",
     "cancelledNote": "This campaign was cancelled. The money went back to your balance.",
-    "summaryCreators": "Creators",
-    "summaryCreatorsLine": "{accepted} accepted · {waiting} waiting",
-    "summaryClips": "Clips",
-    "summaryClipsLine": "{ordered} ordered · {delivered} delivered · {approved} approved",
-    "summaryMoney": "Money",
-    "paid": "Paid",
-    "released": "Released",
-    "returned": "Back to balance",
-    "daysLeft": {
-      "zero": "Due today",
-      "one": "1 day left",
-      "other": "{count} days left"
-    },
-    "daysLate": {
-      "zero": "",
-      "one": "1 day late",
-      "other": "{count} days late"
-    },
     "messages": "Messages",
     "shipping": "Shipping",
     "notSent": "Not sent yet",
@@ -270,8 +252,7 @@
       "clips": "Clips",
       "activity": "Activity"
     },
-    "deliveredOf": "{done} of {total} delivered",
-    "duplicate": "Duplicate campaign"
+    "deliveredOf": "{done} of {total} delivered"
   },
   "ordersPage": {
     "title": "Orders",
@@ -282,7 +263,6 @@
     "clip": "Clip",
     "waitingPending": "Waiting for {name} to accept the offer.",
     "waitingProgress": "{name} is filming the clip.",
-    "waitingSubmitted": "The clip is in. We're checking it against the content rules before it reaches you.",
     "reviewHint": "Watch the clip, then approve it or request a revision. The creator is paid once you approve.",
     "approve": "Approve clip",
     "requestRevision": "Request revision",
@@ -302,7 +282,18 @@
     "doneApproved": "Clip approved. We paid {amount} to {name}.",
     "doneRevisionSent": "Revision request sent to {name}.",
     "items": "What you ordered",
-    "yourNote": "Your note to the creator"
+    "yourNote": "Your note to the creator",
+    "approveTitle": "Approve {name}’s clip?",
+    "approveHint": "This releases {amount} to {name}. Approving can’t be undone.",
+    "rateLabel": "Rate {name}",
+    "reviewLabel": "Comment (optional)",
+    "reviewPlaceholder": "Write what you liked about the clip",
+    "approveConfirm": "Approve and release payment",
+    "revisionsLeft": {
+      "zero": "No revisions left",
+      "one": "1 revision left",
+      "other": "{count} revisions left"
+    }
   },
   "walletPage": {
     "available": "Available balance",
@@ -475,7 +466,7 @@
   "brandForm": {
     "stepBasics": "Basics",
     "stepAbout": "About",
-    "stepExtras": "Extras",
+    "stepExtras": "Business details",
     "stepProduct": "First product",
     "stepper": "Brand setup steps",
     "stepOf": "Step {n} of {total}",
@@ -509,8 +500,13 @@
     "next": "Next",
     "back": "Back",
     "create": "Create brand",
+    "skipProduct": "Skip, add a product later",
     "save": "Save changes",
-    "doneSaved": "Changes saved."
+    "doneSaved": "Changes saved.",
+    "countries": "Where does your brand work?",
+    "countriesHint": "Pick one or more countries.",
+    "vatCertificate": "VAT certificate",
+    "vatHint": "PDF or image, up to 5 MB."
   },
   "images": {
     "upload": "Upload image",
@@ -718,7 +714,6 @@
       "accepted": "Accepted",
       "received": "Product received",
       "filming": "Filming",
-      "review": "Under review",
       "ready": "Ready for you",
       "approved": "Approved"
     },
@@ -737,7 +732,6 @@
       "receive": "Waiting for {name} to receive the product",
       "filming": "{name} is filming",
       "revision": "{name} is working on your revision",
-      "checking": "100clips is checking {name}'s clip",
       "done": "All done with {name}",
       "cancelled": "The offer to {name} was cancelled"
     },
@@ -791,6 +785,21 @@
     "toCampaign": "Invite to campaign",
     "chooseCampaign": "Choose a campaign",
     "inCampaign": "Already in this campaign",
-    "invitees": "Who you’re inviting"
+    "invitees": "Who you’re inviting",
+    "listToCampaign": "Invite list to campaign",
+    "creatorToCampaign": "Invite {name} to a campaign"
+  },
+  "countries": {
+    "bh": "Bahrain",
+    "sa": "Saudi Arabia",
+    "ae": "UAE",
+    "kw": "Kuwait",
+    "qa": "Qatar",
+    "om": "Oman"
+  },
+  "files": {
+    "upload": "Upload file",
+    "replace": "Replace file",
+    "remove": "Remove"
   }
 }

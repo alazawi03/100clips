@@ -80,8 +80,12 @@ function BrandCard({ brand, expanded, onToggle, onOpenProduct }: { brand: BrandR
                 {t("common.separator")}
               </span>
               {brand.industry}
-              {t("common.separator")}
-              {brand.city}
+              {brand.city && (
+                <>
+                  {t("common.separator")}
+                  {brand.city}
+                </>
+              )}
             </span>
           </span>
           <span className="hidden sm:block">

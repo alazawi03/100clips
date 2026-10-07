@@ -8,12 +8,14 @@ import { Card } from "@/components/ui/Card";
 import { Stepper } from "@/components/ui/Stepper";
 import { useSubmissionKey } from "@/lib/useSubmissionKey";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { ProductFields, type ProductValues } from "@/components/brand/products/ProductForm";
 import { AboutFields, BasicsFields, ExtrasFields, type BrandValues } from "./BrandFields";
 
-const STEP_FIELDS = [["nameAr", "logo", "industry"], ["about", "website", "instagram", "tiktok"], ["crNumber"]];
+const STEP_FIELDS = [["nameAr", "logo", "industry"], ["about", "website", "instagram", "tiktok"], ["countries", "crNumber", "vatCertificate"]];
+const PRODUCT_STEP = STEP_FIELDS.length;
 
 /**
- * Create a brand in three steps (basics, about, extras); adding the first product is the fourth.
+ * Create a brand in three steps (basics, about and links, business details), then its first product, which can be skipped.
  * Every step lives in one form so a single submit sends it all. Required: name and industry (step 1).
  */
 export function BrandWizard({ mode }: { mode: "onboarding" | "add" }) {
@@ -27,8 +29,12 @@ export function BrandWizard({ mode }: { mode: "onboarding" | "add" }) {
   const [seen, setSeen] = useState(state);
   if (state !== seen) {
     setSeen(state);
-    const first = state ? STEP_FIELDS.findIndex((fields) => fields.some((f) => state.errors[f])) : -1;
-    if (first >= 0) setStep(first);
+    const keys = Object.keys(state?.errors ?? {});
+    if (keys.length > 0) {
+      const first = STEP_FIELDS.findIndex((fields) => fields.some((f) => keys.includes(f)));
+      // Anything that isn't a brand field belongs to the product.
+      setStep(first >= 0 ? first : PRODUCT_STEP);
+    }
   }
 
   const fieldsKey = useSubmissionKey(state);
@@ -51,15 +57,15 @@ export function BrandWizard({ mode }: { mode: "onboarding" | "add" }) {
     window.scrollTo({ top: 0 });
   }
 
-  const titles = [t("brandForm.stepBasics"), t("brandForm.stepAbout"), t("brandForm.stepExtras")];
+  const titles = [t("brandForm.stepBasics"), t("brandForm.stepAbout"), t("brandForm.stepExtras"), t("brandForm.stepProduct")];
 
   return (
     <div className="flex flex-col gap-6">
-      <Stepper label={t("brandForm.stepper")} current={step} steps={[...titles, t("brandForm.stepProduct")]} />
+      <Stepper label={t("brandForm.stepper")} current={step} steps={titles} />
       <form ref={form} action={action} noValidate>
         <Card className="flex flex-col gap-6 p-5 md:p-6">
           <div>
-            <p className="text-small text-text-muted">{t("brandForm.stepOf", { n: step + 1, total: 4 })}</p>
+            <p className="text-small text-text-muted">{t("brandForm.stepOf", { n: step + 1, total: titles.length })}</p>
             <h2 className="text-h2 font-medium">{titles[step]}</h2>
           </div>
           <div key={fieldsKey} className="contents">
@@ -72,6 +78,9 @@ export function BrandWizard({ mode }: { mode: "onboarding" | "add" }) {
             <div hidden={step !== 2}>
               <ExtrasFields v={v} err={err} />
             </div>
+            <div hidden={step !== PRODUCT_STEP}>
+              <ProductFields optional v={(state?.values ?? {}) as ProductValues} err={err} />
+            </div>
           </div>
           <div className="flex flex-col-reverse gap-2 border-t border-border pt-5 sm:flex-row sm:justify-between">
             {step > 0 ? (
@@ -81,14 +90,19 @@ export function BrandWizard({ mode }: { mode: "onboarding" | "add" }) {
             ) : (
               <span />
             )}
-            {step < 2 ? (
+            {step < titles.length - 1 ? (
               <Button variant="primary" onClick={next}>
                 {t("brandForm.next")}
               </Button>
             ) : (
-              <Button type="submit" variant="primary" aria-busy={pending}>
-                {t("brandForm.create")}
-              </Button>
+              <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                <Button type="submit" name="intent" value="skipProduct" variant="ghost">
+                  {t("brandForm.skipProduct")}
+                </Button>
+                <Button type="submit" variant="primary" aria-busy={pending}>
+                  {t("brandForm.create")}
+                </Button>
+              </div>
             )}
           </div>
         </Card>

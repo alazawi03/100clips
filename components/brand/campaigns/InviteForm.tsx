@@ -27,9 +27,11 @@ export type InviteCreator = {
 type Props = {
   campaignId: string;
   lists: Array<{ id: string; name: string; creators: InviteCreator[] }>;
-  /** Coming from a creator profile: just this creator. */
-  single?: InviteCreator;
+  /** Coming from creator cards or a profile (?creators=): just these creators, already ticked. */
+  preset?: InviteCreator[];
   initialListId?: string;
+  /** Coming from a list's "Invite to campaign" (?list=): its members start ticked. */
+  tickList?: boolean;
   balance: number;
 };
 
@@ -39,18 +41,21 @@ const REDIRECT_MS = 3000;
  * Pick who to invite (from a list, all or some, or the one creator from their profile), choose each
  * creator's package (one video in one format), and pay up front. Then the success screen, then the campaign.
  */
-export function InviteForm({ campaignId, lists, single, initialListId, balance }: Props) {
+export function InviteForm({ campaignId, lists, preset, initialListId, tickList, balance }: Props) {
   const { t, tp, locale } = useI18n();
   const f = createFormatters(locale);
   const [state, action, pending] = useActionState<CheckoutState, FormData>(inviteToCampaign.bind(null, campaignId), null);
   const [listId, setListId] = useState(initialListId);
   // creatorId → chosen package. Everyone starts on their first package; ticking adds them.
-  const [picked, setPicked] = useState<Map<string, ContentFormat>>(() => new Map(single ? [[single.id, single.packages[0].format]] : []));
+  const [picked, setPicked] = useState<Map<string, ContentFormat>>(() => {
+    const start = preset ?? (tickList ? (lists.find((l) => l.id === initialListId)?.creators ?? []) : []);
+    return new Map(start.map((c) => [c.id, c.packages[0].format]));
+  });
   const [packages, setPackages] = useState<Map<string, ContentFormat>>(() => new Map());
   const [useBalance, setUseBalance] = useState(balance > 0);
 
-  const shown = single ? [single] : (lists.find((l) => l.id === listId)?.creators ?? []);
-  const everyone = new Map([...lists.flatMap((l) => l.creators), ...(single ? [single] : [])].map((c) => [c.id, c]));
+  const shown = preset ?? lists.find((l) => l.id === listId)?.creators ?? [];
+  const everyone = new Map([...lists.flatMap((l) => l.creators), ...(preset ?? [])].map((c) => [c.id, c]));
   const chosen = [...picked.entries()].map(([id, format]) => ({ creator: everyone.get(id)!, format })).filter((p) => p.creator);
   const total = chosen.reduce((sum, p) => sum + (p.creator.packages.find((o) => o.format === p.format)?.price ?? 0), 0);
   const fromBalance = useBalance ? Math.min(balance, total) : 0;
@@ -103,7 +108,7 @@ export function InviteForm({ campaignId, lists, single, initialListId, balance }
       ))}
 
       <div className="flex min-w-0 flex-col gap-6">
-        {!single && (
+        {!preset && (
           <Card className="flex flex-col gap-4 p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="flex items-center gap-2 font-medium">
@@ -139,7 +144,7 @@ export function InviteForm({ campaignId, lists, single, initialListId, balance }
         <Card className="flex flex-col">
           <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
             <h2 className="font-medium">{t("invite.invitees")}</h2>
-            {!single && shown.length > 1 && (
+            {shown.length > 1 && (
               <label className="flex cursor-pointer items-center gap-2 text-small font-medium">
                 <input
                   type="checkbox"

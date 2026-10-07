@@ -164,8 +164,8 @@ export async function checkout(_prev: CheckoutState, form: FormData): Promise<Ch
   return { errors: {}, values: {}, paid: { campaignId: result.campaign.id, creators: lines.map((l) => ({ id: l.creator.id, name: l.creator.name })) } };
 }
 
-export async function approveOrder(orderId: string) {
-  store.approveOrder(orderId);
+export async function approveOrder(orderId: string, form: FormData) {
+  store.approveOrder(orderId, Number(text(form, "rating")) || undefined, text(form, "review").slice(0, 500) || undefined);
   revalidatePath("/", "layout");
   redirect(`/orders/${orderId}?done=approved`);
 }
@@ -225,8 +225,3 @@ export async function inviteToCampaign(campaignId: string, _prev: CheckoutState,
   return { errors: {}, values: {}, paid: { campaignId, creators: result.lines.map((l) => ({ id: l.creator.id, name: l.creator.name })) } };
 }
 
-/** Copies the campaign's brief into checkout, then lets the brand pick creators. */
-export async function duplicateCampaign(campaignId: string) {
-  store.duplicateCampaign(campaignId);
-  redirect("/explore?done=duplicated");
-}

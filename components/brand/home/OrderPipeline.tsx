@@ -1,4 +1,4 @@
-import { BadgeCheck, ChevronRight, Clapperboard, Hourglass, Inbox, ScanSearch } from "lucide-react";
+import { BadgeCheck, ChevronRight, Clapperboard, Hourglass, Inbox } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/cn";
@@ -9,7 +9,6 @@ import type { I18n } from "@/lib/i18n/server";
 const statusIcon: Record<PipelineStatus, LucideIcon> = {
   pending: Hourglass,
   in_progress: Clapperboard,
-  submitted: ScanSearch,
   delivered: Inbox,
   approved: BadgeCheck,
 };

@@ -24,7 +24,7 @@ export default async function CheckoutPage() {
     summary: l.items.map((i) => t(`formats.${i.format}`)).join(t("common.separator")),
   }));
 
-  // Set by "Find creators for this product" or "Duplicate campaign".
+  // Set by "Find creators for this product".
   const start = getCheckoutDefault();
   return (
     <div className="flex flex-col gap-6">
@@ -38,21 +38,6 @@ export default async function CheckoutPage() {
           products: productsOf(b.id).map((p) => ({ id: p.id, name: f.pick(p.name), typeLabel: t(`productForm.types.${p.details.type}`), photo: p.photos[0], type: p.details.type, downloadLink: p.details.type === "app" ? p.details.downloadLink : undefined, mapUrl: p.details.type === "venue" ? p.details.mapUrl : undefined, price: p.price !== undefined ? f.money(p.price) : undefined })),
         }))}
         initial={start}
-        prefill={
-          start?.copy && {
-            values: Object.fromEntries(
-              Object.entries({
-                title: f.pick(start.copy.title),
-                brief: f.pick(start.copy.brief),
-                videoStyle: start.copy.videoStyle,
-                keyMessage: start.copy.keyMessage,
-                mustInclude: start.copy.mustInclude,
-                avoid: start.copy.avoid,
-              }).filter((e): e is [string, string] => !!e[1]),
-            ),
-            references: start.copy.references ?? [],
-          }
-        }
         minDeadline={nextDay(DEMO_TODAY)}
         total={total}
         balance={account.balance}

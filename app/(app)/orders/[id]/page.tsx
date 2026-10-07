@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, Clapperboard, Hourglass, ScanSearch } from "lucide-react";
+import { Check, Clapperboard, Gift, Hourglass, Megaphone } from "lucide-react";
 import { ReviewActions } from "@/components/brand/orders/ReviewActions";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, orderTone } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { ClipPoster } from "@/components/ui/ClipPoster";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/cn";
@@ -52,6 +51,12 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
         {late && <Badge tone="error">{t("flow.late")}</Badge>}
         {order.revisionRequested && <Badge tone="warning">{t("brandHome.revisionRequested")}</Badge>}
         <Badge tone={orderTone[order.status]}>{t(`status.order.${order.status}`)}</Badge>
+        {campaign && (
+          <LinkButton href={`/campaigns/${campaign.id}`} variant="secondary" className="h-9 md:h-9">
+            <Megaphone aria-hidden />
+            {t("checkout.viewCampaign")}
+          </LinkButton>
+        )}
       </PageHeader>
 
       {done === "offerSent" && <Notice>{t("orderDetail.doneOfferSent", { name })}</Notice>}
@@ -84,31 +89,19 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
                 {order.status === "delivered" && (
                   <>
                     <p className="text-small text-text-muted">{t("orderDetail.reviewHint")}</p>
-                    <ReviewActions orderId={order.id} />
+                    <ReviewActions orderId={order.id} creatorName={name} amount={f.money(order.amount)} revisionsLeft={order.revisionRequested ? 0 : 1} />
                   </>
                 )}
               </>
             ) : (
               <div className="flex flex-col items-center gap-4 py-6 text-center">
-                {clip && order.status === "submitted" ? (
-                  <div className="relative w-36">
-                    <ClipPoster clip={clip} views={f.compact(clip.views)} duration={f.duration(clip.durationSec)} compact className="opacity-60" />
-                    <span className="absolute inset-0 grid place-items-center">
-                      <span className="grid size-12 place-items-center rounded-full bg-card text-primary shadow-soft">
-                        <ScanSearch aria-hidden className="size-6" />
-                      </span>
-                    </span>
-                  </div>
-                ) : (
-                  <span className="grid size-14 place-items-center rounded-full bg-surface text-text-muted">
-                    {order.status === "pending" ? <Hourglass aria-hidden className="size-6" /> : <Clapperboard aria-hidden className="size-6" />}
-                  </span>
-                )}
+                <span className="grid size-14 place-items-center rounded-full bg-surface text-text-muted">
+                  {order.status === "pending" ? <Hourglass aria-hidden className="size-6" /> : <Clapperboard aria-hidden className="size-6" />}
+                </span>
                 <p className="max-w-sm text-text-muted">
                   {order.status === "pending" && t("orderDetail.waitingPending", { name })}
                   {order.status === "in_progress" &&
                     (waitingFor(order, physical) === "receive" ? t("flow.waiting.receive", { name }) : t("orderDetail.waitingProgress", { name }))}
-                  {order.status === "submitted" && t("orderDetail.waitingSubmitted")}
                 </p>
               </div>
             )}
@@ -143,7 +136,10 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
                 )}
                 {order.shipping?.returnedAt && <li>{t("campaignDetail.returnedOn", { date: f.date(order.shipping.returnedAt.slice(0, 10)) })}</li>}
               </ul>
-              <p className="text-small text-text-muted">{returns ? t("campaignDetail.returnInfo") : t("campaignDetail.keepInfo")}</p>
+              <p className="flex items-center gap-1.5 text-small text-text-muted">
+                {!returns && <Gift aria-hidden className="size-4 shrink-0" />}
+                {returns ? t("campaignDetail.returnInfo") : t("campaignDetail.keepInfo")}
+              </p>
             </Card>
           )}
 
@@ -220,7 +216,12 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
           </Card>
 
           <Card className="p-5">
-            <h2 className="mb-3 font-medium">{t("orderDetail.progress")}</h2>
+            <h2 className="font-medium">{t("orderDetail.progress")}</h2>
+            {order.status !== "cancelled" && (
+              <p className="mb-3 text-small text-text-muted">
+                {t("flow.stepLabel", { n: stepIndex + 1, total: steps.length, step: t(`flow.steps.${steps[stepIndex]}`) })}
+              </p>
+            )}
             <ol className="flex flex-col">
               {steps.map((s, index) => {
                 const complete = index < stepIndex || order.status === "approved";
@@ -232,14 +233,13 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
                     )}
                     <span
                       className={cn(
-                        "relative grid size-6 shrink-0 place-items-center rounded-full border-2",
+                        "relative grid size-6 shrink-0 place-items-center rounded-full border-2 text-caption font-medium tabular-nums",
                         complete && "border-primary bg-primary text-on-primary",
                         current && "border-primary bg-card",
                         !complete && !current && "border-border bg-card",
                       )}
                     >
-                      {complete && <Check aria-hidden className="size-3.5" strokeWidth={3} />}
-                      {current && <span className="size-2 rounded-full bg-primary" />}
+                      {complete ? <Check aria-hidden className="size-3.5" strokeWidth={3} /> : <span className={current ? "text-primary" : "text-text-muted"}>{index + 1}</span>}
                     </span>
                     <span className={cn("text-small", current ? "font-medium" : complete ? "text-text" : "text-text-muted")} aria-current={current ? "step" : undefined}>
                       {t(`flow.steps.${s}`)}

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "hero" | "primary" | "secondary" | "ghost" | "destructive";
+export type ButtonVariant = "hero" | "primary" | "secondary" | "ghost" | "destructive" | "success";
 
 const base =
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] font-medium transition-[background-color,transform] duration-[120ms] ease-out active:scale-[0.98] [&_svg]:size-5 [&_svg]:shrink-0";
@@ -13,6 +13,7 @@ const variants: Record<ButtonVariant, string> = {
   secondary: "bg-surface text-text hover:bg-border",
   ghost: "text-primary hover:bg-primary-soft",
   destructive: "text-error hover:bg-error-soft",
+  success: "bg-success text-white hover:brightness-110",
 };
 
 /** 44px on mobile, 40px from the md breakpoint up (DESIGN.ar.html: Button). */

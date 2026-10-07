@@ -49,8 +49,6 @@ type Props = {
   }>;
   /** Brand and product to start with, e.g. after "Find creators for this product". */
   initial?: { brandId: string; productId: string };
-  /** Brief copied from another campaign ("Duplicate"), shown until the form is first submitted. */
-  prefill?: { values: Record<string, string>; references: string[] };
   /** Earliest delivery date allowed (tomorrow), yyyy-mm-dd. */
   minDeadline: string;
   total: number;
@@ -83,7 +81,7 @@ function isUrl(value: string) {
  * Every step lives in one form so a single submit sends it all; Next checks the current step
  * with the same rules as the server, and the server's answer is the final word.
  */
-export function CheckoutForm({ creators, brands, initial, prefill, minDeadline, total, balance }: Props) {
+export function CheckoutForm({ creators, brands, initial, minDeadline, total, balance }: Props) {
   const { t, tp, locale } = useI18n();
   const f = createFormatters(locale);
   const form = useRef<HTMLFormElement>(null);
@@ -138,12 +136,12 @@ export function CheckoutForm({ creators, brands, initial, prefill, minDeadline, 
     return key ? t(key) : undefined;
   };
   const described = (name: string) => (err(name) ? `${name}-error` : undefined);
-  const v = (name: string) => (state ? state.values[name] : prefill?.values[name]);
+  const v = (name: string) => state?.values[name];
   const hasNotes = creators.some((c) => v(`note-${c.id}`));
   // FormState keeps one value per name, so the submitted references are re-read from the errors' fields.
   const sentRefs: string[] = [];
   for (let i = 0; state?.values[`reference-${i}`] !== undefined; i++) sentRefs.push(String(state!.values[`reference-${i}`]));
-  const refs = state ? sentRefs : (prefill?.references ?? []);
+  const refs = sentRefs;
   // One reference field to start; "Add another" adds more, no limit. Comes back with as many as were sent.
   const [refList, setRefList] = useState<string[]>(() => (refs.length ? refs : [""]));
   const hasMore = ["keyMessage", "mustInclude", "avoid"].some((k) => v(k)) || refs.some(Boolean) || Object.keys(state?.errors ?? {}).some((k) => k.startsWith("reference-"));

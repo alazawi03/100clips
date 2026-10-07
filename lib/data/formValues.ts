@@ -15,7 +15,9 @@ export function brandToValues(b: Brand, locale: Locale): BrandValues {
     website: b.website,
     instagram: b.instagram,
     tiktok: b.tiktok,
+    countries: b.countries,
     crNumber: b.crNumber,
+    vatCertificate: b.vatCertificate,
   };
 }
 

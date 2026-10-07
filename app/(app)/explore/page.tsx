@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { CreatorCard } from "@/components/brand/creators/CreatorCard";
 import { CreatorFiltersBar } from "@/components/brand/creators/CreatorFiltersBar";
-import { Notice } from "@/components/ui/Notice";
 import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { filterCreators, parseFilters } from "@/lib/data/creatorFilters";
 import { creators } from "@/lib/data/creators";
@@ -19,7 +18,6 @@ export default async function CreatorsPage({ searchParams }: PageProps<"/explore
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("explore.title")} />
-      {query.done === "duplicated" && <Notice>{t("explore.doneDuplicated")}</Notice>}
       <Suspense>
         <CreatorFiltersBar resultsLabel={tp("explore.results", results.length)} />
       </Suspense>

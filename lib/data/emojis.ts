@@ -1,4 +1,7 @@
-import type { Industry } from "./types";
+import type { Country, Industry } from "./types";
+
+/** Flags shown next to country names. */
+export const countryFlag: Record<Country, string> = { bh: "🇧🇭", sa: "🇸🇦", ae: "🇦🇪", kw: "🇰🇼", qa: "🇶🇦", om: "🇴🇲" };
 
 /** Shown before industry names in pickers. Emojis read the same in every language. */
 export const industryEmoji: Record<Industry, string> = {

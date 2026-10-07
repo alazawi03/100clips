@@ -3,13 +3,13 @@ import type { Order, OrderEvent, OrderEventType } from "@/lib/data/types";
 /*
  * How an order moves, shared by the campaign page, the order page and the orders list.
  * Steps a brand sees: offer sent → accepted → product received (physical only) → filming →
- * under review (100clips checks the clip) → ready for you → approved.
+ * ready for you → approved. (No 100clips check in the MVP: an upload goes straight to the brand.)
  */
 
-export type OrderStep = "offered" | "accepted" | "received" | "filming" | "review" | "ready" | "approved";
+export type OrderStep = "offered" | "accepted" | "received" | "filming" | "ready" | "approved";
 
 export function stepsFor(physical: boolean): OrderStep[] {
-  return physical ? ["offered", "accepted", "received", "filming", "review", "ready", "approved"] : ["offered", "accepted", "filming", "review", "ready", "approved"];
+  return physical ? ["offered", "accepted", "received", "filming", "ready", "approved"] : ["offered", "accepted", "filming", "ready", "approved"];
 }
 
 /** Where the order is now. A physical product has to be received before filming starts. */
@@ -20,8 +20,6 @@ export function currentStep(order: Order, physical: boolean): OrderStep {
       return "offered";
     case "in_progress":
       return physical && !order.shipping?.receivedAt ? "accepted" : "filming";
-    case "submitted":
-      return "review";
     case "delivered":
       return "ready";
     case "approved":
@@ -52,7 +50,7 @@ export function actionWaitingDays(order: Order, action: NextAction, today: strin
 }
 
 /** What the order is waiting on when the brand has nothing to do. */
-export type Waiting = "accept" | "receive" | "filming" | "revision" | "checking" | "done" | "cancelled";
+export type Waiting = "accept" | "receive" | "filming" | "revision" | "done" | "cancelled";
 
 export function waitingFor(order: Order, physical: boolean): Waiting {
   if (order.status === "cancelled") return "cancelled";
@@ -61,7 +59,6 @@ export function waitingFor(order: Order, physical: boolean): Waiting {
     if (physical && order.shipping?.sentAt && !order.shipping.receivedAt) return "receive";
     return order.revisionRequested ? "revision" : "filming";
   }
-  if (order.status === "submitted") return "checking";
   return "done";
 }
 
@@ -94,7 +91,7 @@ export function eventsOf(order: Order): OrderEvent[] {
     order.status !== "pending" && order.status !== "cancelled" && ["accepted", addDays(at, 1)],
     !!order.shipping?.sentAt && ["sent", order.shipping.sentAt],
     !!order.shipping?.receivedAt && ["received", order.shipping.receivedAt],
-    (order.status === "submitted" || order.status === "delivered" || order.status === "approved" || order.revisionRequested === true) && ["uploaded", addDays(at, 5)],
+    (order.status === "delivered" || order.status === "approved" || order.revisionRequested === true) && ["uploaded", addDays(at, 5)],
     order.revisionRequested === true && ["revisionRequested", addDays(at, 6)],
     order.status === "approved" && ["approved", addDays(at, 8)],
     order.status === "approved" && ["released", addDays(at, 8)],

@@ -24,7 +24,6 @@ export function Badge({ tone = "neutral", children, className }: { tone?: BadgeT
 export const orderTone: Record<OrderStatus, BadgeTone> = {
   pending: "warning",
   in_progress: "neutral",
-  submitted: "neutral",
   delivered: "brand",
   approved: "success",
   cancelled: "neutral",

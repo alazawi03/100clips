@@ -2,6 +2,10 @@
 export const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 export const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 
+/** Documents such as a VAT certificate: a PDF or a photo of it. */
+export const DOCUMENT_TYPES = ["application/pdf", "image/png", "image/jpeg"];
+export const MAX_DOCUMENT_BYTES = 5 * 1024 * 1024;
+
 /**
  * Shrinks an image in the browser and returns it as a data URL, so uploads stay small
  * until there is a real file store. PNGs stay PNG to keep logo transparency.

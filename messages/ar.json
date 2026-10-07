@@ -54,7 +54,6 @@
     "order": {
       "pending": "بانتظار القبول",
       "in_progress": "قيد التنفيذ",
-      "submitted": "قيد الفحص",
       "delivered": "جاهز لمراجعتك",
       "approved": "معتمد",
       "cancelled": "ملغي"
@@ -120,7 +119,9 @@
       "deadlineFuture": "اختر تاريخ بعد اليوم.",
       "dateInvalid": "اكتب التاريخ بصيغة يوم/شهر/سنة.",
       "dateTooEarly": "اختر {date} أو بعده.",
-      "pickCreators": "اختر صانع محتوى واحد على الأقل."
+      "pickCreators": "اختر صانع محتوى واحد على الأقل.",
+      "fileType": "الملف لازم يكون PDF أو صورة PNG أو JPG.",
+      "fileTooBig": "الملف أكبر من 5 ميجابايت. اختر ملف أصغر."
     },
     "datePlaceholder": "يوم/شهر/سنة",
     "openCalendar": "افتح التقويم"
@@ -151,8 +152,7 @@
     "platform": "المنصة",
     "newCreator": "جديد",
     "clearOne": "امسح الاختيار",
-    "viewProfile": "اعرض الملف",
-    "doneDuplicated": "نسخنا الحملة. اختر صنّاع المحتوى، وإتمام الطلب بيبدأ بنفس المنتج والوصف."
+    "viewProfile": "اعرض الملف"
   },
   "profile": {
     "rating": "التقييم",
@@ -224,30 +224,6 @@
     "cancelConfirm": "تلغي الحملة؟ نسحب العروض اللي ما انقبلت ونرجّع المبلغ لرصيدك.",
     "cancelBlocked": "ما تقدر تلغيها لأن فيه صانع محتوى قبِل العرض.",
     "cancelledNote": "انلغت الحملة ورجع المبلغ لرصيدك.",
-    "summaryCreators": "صنّاع المحتوى",
-    "summaryCreatorsLine": "{accepted} قبلوا · {waiting} بالانتظار",
-    "summaryClips": "المقاطع",
-    "summaryClipsLine": "{ordered} مطلوبة · {delivered} وصلت · {approved} معتمدة",
-    "summaryMoney": "المبالغ",
-    "paid": "مدفوع",
-    "released": "محوّل",
-    "returned": "رجع لرصيدك",
-    "daysLeft": {
-      "zero": "اليوم آخر موعد",
-      "one": "باقي يوم",
-      "two": "باقي يومين",
-      "few": "باقي {count} أيام",
-      "many": "باقي {count} يوم",
-      "other": "باقي {count} يوم"
-    },
-    "daysLate": {
-      "zero": "",
-      "one": "متأخر يوم",
-      "two": "متأخر يومين",
-      "few": "متأخر {count} أيام",
-      "many": "متأخر {count} يوم",
-      "other": "متأخر {count} يوم"
-    },
     "messages": "الرسائل",
     "shipping": "الشحن",
     "notSent": "ما انرسل بعد",
@@ -285,8 +261,7 @@
       "clips": "المقاطع",
       "activity": "النشاط"
     },
-    "deliveredOf": "{done} من {total} وصلت",
-    "duplicate": "كرّر الحملة"
+    "deliveredOf": "{done} من {total} وصلت"
   },
   "ordersPage": {
     "title": "الطلبات",
@@ -297,7 +272,6 @@
     "clip": "المقطع",
     "waitingPending": "ننتظر {name} يقبل العرض.",
     "waitingProgress": "{name} يصوّر المقطع الحين.",
-    "waitingSubmitted": "وصل المقطع، ونفحصه مع قواعد المحتوى قبل ما يوصلك.",
     "reviewHint": "شاهد المقطع، ثم اعتمده أو اطلب تعديل. يتحوّل المبلغ لصانع المحتوى بعد الاعتماد.",
     "approve": "اعتمد المقطع",
     "requestRevision": "اطلب تعديل",
@@ -317,7 +291,21 @@
     "doneApproved": "اعتمدت المقطع، وحوّلنا {amount} إلى {name}.",
     "doneRevisionSent": "أرسلنا طلب التعديل إلى {name}.",
     "items": "المطلوب من صانع المحتوى",
-    "yourNote": "ملاحظتك لصانع المحتوى"
+    "yourNote": "ملاحظتك لصانع المحتوى",
+    "approveTitle": "تعتمد مقطع {name}؟",
+    "approveHint": "بنحوّل {amount} لـ {name}. ما تقدر تتراجع بعد الاعتماد.",
+    "rateLabel": "قيّم {name}",
+    "reviewLabel": "تعليق (اختياري)",
+    "reviewPlaceholder": "اكتب اللي عجبك في المقطع",
+    "approveConfirm": "اعتمد وحوّل المبلغ",
+    "revisionsLeft": {
+      "zero": "ما فيه تعديلات متبقية",
+      "one": "باقي تعديل واحد",
+      "two": "باقي تعديلين",
+      "few": "باقي {count} تعديلات",
+      "many": "باقي {count} تعديل",
+      "other": "باقي {count} تعديل"
+    }
   },
   "walletPage": {
     "available": "الرصيد المتاح",
@@ -496,7 +484,7 @@
   "brandForm": {
     "stepBasics": "الأساسيات",
     "stepAbout": "عن العلامة",
-    "stepExtras": "إضافات",
+    "stepExtras": "معلومات تجارية",
     "stepProduct": "أول منتج",
     "stepper": "خطوات إنشاء العلامة",
     "stepOf": "الخطوة {n} من {total}",
@@ -530,8 +518,13 @@
     "next": "التالي",
     "back": "رجوع",
     "create": "أنشئ العلامة",
+    "skipProduct": "تخطَّ وأضيف المنتج بعدين",
     "save": "احفظ التغييرات",
-    "doneSaved": "حفظنا التغييرات."
+    "doneSaved": "حفظنا التغييرات.",
+    "countries": "وين تشتغل علامتك؟",
+    "countriesHint": "اختر دولة أو أكثر.",
+    "vatCertificate": "شهادة ضريبة القيمة المضافة",
+    "vatHint": "PDF أو صورة، بحد أقصى 5 ميجابايت."
   },
   "images": {
     "upload": "ارفع صورة",
@@ -757,7 +750,6 @@
       "accepted": "القبول",
       "received": "استلام المنتج",
       "filming": "التصوير",
-      "review": "قيد الفحص",
       "ready": "جاهز لك",
       "approved": "معتمد"
     },
@@ -776,7 +768,6 @@
       "receive": "بانتظار استلام {name} للمنتج",
       "filming": "{name} في مرحلة التصوير",
       "revision": "التعديل عند {name}",
-      "checking": "100clips يفحص مقطع {name}",
       "done": "اكتمل الطلب مع {name}",
       "cancelled": "انلغى العرض لـ {name}"
     },
@@ -839,6 +830,21 @@
     "toCampaign": "ادعُ لحملة",
     "chooseCampaign": "اختر الحملة",
     "inCampaign": "موجود في هذي الحملة",
-    "invitees": "اللي بتدعوهم"
+    "invitees": "اللي بتدعوهم",
+    "listToCampaign": "ادعُ القائمة لحملة",
+    "creatorToCampaign": "ادعُ {name} لحملة"
+  },
+  "countries": {
+    "bh": "البحرين",
+    "sa": "السعودية",
+    "ae": "الإمارات",
+    "kw": "الكويت",
+    "qa": "قطر",
+    "om": "عُمان"
+  },
+  "files": {
+    "upload": "ارفع ملف",
+    "replace": "بدّل الملف",
+    "remove": "احذف"
   }
 }

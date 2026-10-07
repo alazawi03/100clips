@@ -10,7 +10,8 @@ export type CreatorList = { id: string; name: string; creatorIds: string[]; favo
 
 export const FAVORITES_ID = "favorites";
 
-const lists: CreatorList[] = [{ id: FAVORITES_ID, name: "", creatorIds: [], favorites: true }];
+// Demo: a few creators already saved, so Lists and "invite from a list" have something to show.
+const lists: CreatorList[] = [{ id: FAVORITES_ID, name: "", creatorIds: ["khalid-almutairi", "fahad-alqahtani", "hessa-alajmi"], favorites: true }];
 let seq = 1;
 
 export function allLists(): CreatorList[] {

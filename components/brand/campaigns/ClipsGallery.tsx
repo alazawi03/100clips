@@ -13,7 +13,7 @@ import type { Clip, OrderStatus } from "@/lib/data/types";
 import { createFormatters } from "@/lib/i18n/format";
 
 type Item = { orderId: string; creatorId: string; name: string; status: OrderStatus; clip: Clip };
-const FILTERS = ["all", "delivered", "submitted", "approved"] as const;
+const FILTERS = ["all", "delivered", "approved"] as const;
 
 /** Every clip in the campaign in one grid, filtered by creator and status. */
 export function ClipsGallery({ items }: { items: Item[] }) {

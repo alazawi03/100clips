@@ -50,7 +50,14 @@ export function productOf(campaign: Campaign) {
 export function orderFlags(order: Order, campaign: Campaign | undefined) {
   const { physical, returns } = campaign ? productOf(campaign) : { physical: false, returns: false };
   const action = nextAction(order, { physical, returns });
-  return { action, actionDays: action && actionWaitingDays(order, action, DEMO_TODAY), late: isLate(order, campaign?.deadline, DEMO_TODAY) };
+  const steps = stepsFor(physical);
+  return {
+    action,
+    actionDays: action && actionWaitingDays(order, action, DEMO_TODAY),
+    late: isLate(order, campaign?.deadline, DEMO_TODAY),
+    steps,
+    stepIndex: steps.indexOf(currentStep(order, physical)),
+  };
 }
 
 export function orderCardView(order: Order, campaign: Campaign, i18n: I18n): OrderCardView {
