@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, ExternalLink, MessageCircle, Star } from "lucide-react";
+import { ChevronRight, Clapperboard, ExternalLink, MessageCircle, Star } from "lucide-react";
 import { messageCreator } from "@/app/actions/messages";
 import { InviteToCampaignMenu } from "@/components/brand/campaigns/InviteMenus";
 import { campaigns } from "@/lib/data/campaigns";
@@ -10,10 +10,8 @@ import { SaveToListButton } from "@/components/brand/creators/SaveToListButton";
 import { allLists } from "@/lib/data/lists";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
-import { PlayableClip } from "@/components/ui/PlayableClip";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { cn } from "@/lib/cn";
-import { clipsByCreator } from "@/lib/data/clips";
 import { getCreator } from "@/lib/data/creators";
 import { isActiveMarket } from "@/lib/data/markets";
 import { platformOf, type Platform } from "@/lib/data/types";
@@ -44,7 +42,7 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
   if (!creator || !isActiveMarket(creator.country)) notFound();
   const { t, f } = await getI18n();
   const name = f.pick(creator.name);
-  const works = clipsByCreator(creator.id);
+  const portfolio = creator.portfolio ?? [];
   const reviews = reviewsOf(creator.id);
   const line = cartOf().find((l) => l.creatorId === creator.id);
   // The accounts the creator added in the app; older profiles fall back to one handle on each platform they sell.
@@ -158,27 +156,36 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
         />
       </section>
 
-      {works.length > 0 && (
-        <section aria-labelledby="work-title">
-          <SectionHeader id="work-title" title={t("profile.latestWork")} />
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {works.map((clip) => (
+      {/* The samples the creator chose in the app (up to 3), or a note that there are none yet. */}
+      <section aria-labelledby="work-title">
+        <SectionHeader id="work-title" title={t("profile.portfolio")} />
+        {portfolio.length > 0 ? (
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {portfolio.map((clip) => (
               <li key={clip.id} className="flex flex-col gap-2">
-                <PlayableClip
-                  clip={clip}
-                  views={f.compact(clip.views)}
-                  duration={f.duration(clip.durationSec)}
-                  label={t("profile.play", { title: f.pick(clip.title) })}
+                <video
+                  dir="ltr"
+                  src={clip.videoSrc}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  aria-label={t("profile.play", { title: f.pick(clip.title) })}
+                  className="aspect-[9/16] w-full rounded-[var(--radius-lg)] bg-black object-cover"
                 />
-                <div>
-                  <p className="line-clamp-2 font-medium">{f.pick(clip.title)}</p>
-                  <p className="text-small text-text-muted">{t("profile.forBrand", { brand: f.pick(clip.brand) })}</p>
-                </div>
+                <p className="flex items-baseline justify-between gap-2">
+                  <span className="line-clamp-2 font-medium">{f.pick(clip.title)}</span>
+                  <span className="shrink-0 text-small text-text-muted tabular-nums">{f.duration(clip.durationSec)}</span>
+                </p>
               </li>
             ))}
           </ul>
-        </section>
-      )}
+        ) : (
+          <Card className="flex items-center gap-3 p-5 text-text-muted">
+            <Clapperboard aria-hidden className="size-5 shrink-0" />
+            {t("profile.noVideos")}
+          </Card>
+        )}
+      </section>
 
       <section aria-labelledby="reviews-title">
         <SectionHeader id="reviews-title" title={t("profile.reviews")} />
@@ -200,7 +207,10 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
             </ul>
           </Card>
         ) : (
-          <Card className="p-5 text-text-muted">{t("profile.noReviews", { name })}</Card>
+          <Card className="flex items-center gap-3 p-5 text-text-muted">
+            <Star aria-hidden className="size-5 shrink-0" />
+            {t("profile.noReviews")}
+          </Card>
         )}
       </section>
       </div>

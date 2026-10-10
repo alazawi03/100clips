@@ -76,7 +76,7 @@ export function OfferWaiting({
               {t("offer.withdrawDialog.keep")}
             </Button>
             <Button
-              variant="destructive"
+              variant="danger"
               aria-busy={pending}
               disabled={pending}
               onClick={() =>
@@ -85,7 +85,7 @@ export function OfferWaiting({
                   dialog.current?.close();
                 })
               }
-              className="bg-error text-white hover:bg-error hover:brightness-110 disabled:opacity-70"
+              className="disabled:opacity-70"
             >
               <Undo2 aria-hidden />
               {t("offer.withdrawDialog.confirm")}

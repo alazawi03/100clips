@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "hero" | "primary" | "secondary" | "ghost" | "destructive" | "success";
+export type ButtonVariant = "hero" | "primary" | "secondary" | "ghost" | "destructive" | "danger" | "success";
 
 const base =
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] font-medium transition-[background-color,transform] duration-[120ms] ease-out active:scale-[0.98] [&_svg]:size-5 [&_svg]:shrink-0";
@@ -13,6 +13,8 @@ const variants: Record<ButtonVariant, string> = {
   secondary: "bg-button-secondary text-text hover:bg-button-secondary-hover",
   ghost: "text-primary hover:bg-primary-soft",
   destructive: "text-error hover:bg-error-soft",
+  /** Solid red, for confirming something that can't be undone. */
+  danger: "bg-error text-white hover:brightness-110",
   success: "bg-success text-white hover:brightness-110",
 };
 

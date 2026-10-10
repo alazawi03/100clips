@@ -178,10 +178,9 @@
     "rating": "Rating",
     "completed": "Completed orders",
     "offers": "Platforms and prices",
-    "latestWork": "Latest work",
     "forBrand": "For {brand}",
     "reviews": "Reviews from brands",
-    "noReviews": "No reviews yet. {name} is new to 100clips.",
+    "noReviews": "No reviews yet.",
     "play": "Play {title}",
     "perClip": "per clip",
     "hire": "Hire",
@@ -190,7 +189,9 @@
     "choosePlatforms": "Platform",
     "nothingChosen": "Choose a platform",
     "message": "Message",
-    "messageName": "Message {name}"
+    "messageName": "Message {name}",
+    "portfolio": "Portfolio",
+    "noVideos": "No videos uploaded yet."
   },
   "campaignsPage": {
     "title": "Campaigns",

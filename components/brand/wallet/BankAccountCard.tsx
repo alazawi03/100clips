@@ -52,14 +52,14 @@ export function BankAccountCard({ bank, withdrawalWaiting }: Props) {
               {t("settings.bank.change")}
             </Button>
             <Button
-              variant="ghost"
+              variant="destructive"
               aria-busy={removing}
               disabled={removing}
               onClick={() => {
                 if (!window.confirm(t(withdrawalWaiting ? "settings.bank.removeConfirmWaiting" : "settings.bank.removeConfirm"))) return;
                 startRemoving(() => removeBankAccount());
               }}
-              className="h-9 text-error md:h-9"
+              className="h-9 md:h-9"
             >
               <Trash2 aria-hidden />
               {t("settings.bank.remove")}

@@ -190,10 +190,9 @@
     "rating": "التقييم",
     "completed": "طلبات مكتملة",
     "offers": "المنصات والأسعار",
-    "latestWork": "أحدث الأعمال",
     "forBrand": "لـ {brand}",
     "reviews": "تقييمات العلامات التجارية",
-    "noReviews": "ما فيه تقييمات بعد. {name} جديد على 100clips.",
+    "noReviews": "ما فيه تقييمات بعد.",
     "play": "شغّل {title}",
     "perClip": "للمقطع",
     "hire": "وظّف",
@@ -202,7 +201,9 @@
     "choosePlatforms": "المنصة",
     "nothingChosen": "اختر المنصة",
     "message": "أرسل رسالة",
-    "messageName": "أرسل رسالة لـ {name}"
+    "messageName": "أرسل رسالة لـ {name}",
+    "portfolio": "معرض الأعمال",
+    "noVideos": "ما فيه فيديوهات مرفوعة بعد."
   },
   "campaignsPage": {
     "title": "الحملات",
