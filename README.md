@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 100clips
 
-## Getting Started
+A UGC marketplace that connects brands with local content creators in the Gulf, starting in Bahrain. Brands hire creators to film short clips for TikTok, Instagram and YouTube, either directly from a creator's price list or through a campaign creators apply to.
 
-First, run the development server:
+This repo is the **brand dashboard** (web). The creator app (mobile) is separate.
+
+## Status
+
+Front-end prototype. Every screen runs on sample data from `lib/data/`, and `lib/data/store.ts` keeps changes in memory until the dev server restarts. Login, sign-up, notifications and settings are placeholders. There is no backend, payment or file storage yet.
+
+## Run it
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. The home page redirects to `/dashboard`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Where things are
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/(app)/` — dashboard screens (explore, campaigns, orders, brands, balance, messages)
+- `app/actions/` — server actions behind the forms
+- `lib/data/` — types, sample data and the in-memory store
+- `lib/i18n/` — Arabic and English text (Arabic and RTL first)
+- `DESIGN.ar.md` — the design system (Arabic)
