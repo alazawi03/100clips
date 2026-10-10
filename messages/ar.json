@@ -16,13 +16,11 @@
     "switchLanguage": "Switch to English",
     "languageShort": "EN",
     "home": "الصفحة الرئيسية",
-    "switchBrand": "اختر العلامة التجارية",
-    "currentBrand": "العلامة الحالية: {name}",
-    "addBrand": "أضف علامة تجارية",
     "signOut": "تسجيل الخروج",
     "balanceShort": "رصيدك {amount}",
     "cart": "السلة ({count})",
-    "messages": "الرسائل ({count} غير مقروءة)"
+    "messages": "الرسائل ({count} غير مقروءة)",
+    "profile": "عرض الملف الشخصي"
   },
   "nav": {
     "label": "التنقل الرئيسي",
@@ -37,77 +35,91 @@
     "notifications": "الإشعارات",
     "settings": "الإعدادات",
     "hireCreator": "وظّف صانع محتوى",
-    "createCampaign": "أنشئ حملة",
     "moreLabel": "صفحات أخرى",
     "close": "إغلاق",
-    "messages": "الرسائل"
+    "messages": "الرسائل",
+    "lists": "القوائم"
   },
   "brandHome": {
-    "pipelineTitle": "طلباتك حسب الحالة",
     "readyTitle": "جاهزة لمراجعتك",
     "readyHint": "اعتمد المقطع أو اطلب تعديل.",
     "campaignsTitle": "حملاتك الحالية",
-    "clipsProgress": "{done} من {total} مقاطع وصلت",
-    "applicants": {
-      "zero": "ما فيه متقدمين بعد",
-      "one": "متقدم واحد",
-      "two": "متقدمان",
-      "few": "{count} متقدمين",
-      "many": "{count} متقدمًا",
-      "other": "{count} متقدم"
-    },
-    "recentOrdersTitle": "آخر الطلبات",
     "revisionRequested": "طلبت تعديل",
-    "creatorsDelivered": "{done} من {total} صنّاع محتوى سلّموا"
-  },
-  "status": {
-    "order": {
-      "pending": "بانتظار القبول",
-      "in_progress": "قيد التنفيذ",
-      "submitted": "قيد الفحص",
-      "delivered": "جاهز لمراجعتك",
-      "approved": "معتمد"
+    "creatorsDelivered": "{done} من {total} صنّاع محتوى سلّموا",
+    "welcomeTitle": "ابدأ أول حملة لك",
+    "welcomeBody": "اختر صنّاع محتوى من البحرين، قول لهم وش تبي، وتوصلك مقاطع جاهزة للنشر والإعلان.",
+    "welcomeCta": "ابدأ أول حملة",
+    "step1Title": "اختر صنّاع المحتوى",
+    "step1Body": "تصفّح حسب المجال والمدينة والسعر.",
+    "step2Title": "اكتب الوصف وادفع",
+    "step2Body": "تدفع مرة وحدة، وإذا اعتذر صانع محتوى يرجع لك مبلغه.",
+    "step3Title": "اعتمد المقاطع",
+    "step3Body": "شاهد كل مقطع، واعتمده أو اطلب تعديل واحد.",
+    "setupTitle": "قبل ما تبدأ",
+    "setupLogo": "أضف شعار {brand}",
+    "setupProduct": "أضف أول منتج لـ {brand}",
+    "inspirationTitle": "مقاطع صوّرها صنّاع المحتوى على 100clips",
+    "inspirationHint": "افتح أي مقطع عشان تشوف مين صوّره.",
+    "needsTitle": "يحتاجك",
+    "needsDeclined": {
+      "one": "اعتذار من {name} عن «{campaign}»",
+      "two": "اعتذاران عن «{campaign}»",
+      "few": "{count} اعتذارات عن «{campaign}»",
+      "many": "{count} اعتذار عن «{campaign}»",
+      "other": "{count} اعتذار عن «{campaign}»"
     },
-    "campaign": {
-      "draft": "مسودة",
-      "open": "مفتوحة للتقديم",
-      "in_progress": "قيد التنفيذ",
-      "completed": "مكتملة"
-    }
+    "declinedHint": "ادعُ صانع محتوى ثاني بداله.",
+    "inviteCreator": "ادعُ صانع محتوى",
+    "statApproved": "مقاطع معتمدة",
+    "statSpent": "المصروف على المقاطع",
+    "seeApproved": "شوف المقاطع المعتمدة",
+    "heldForOnTheWay": "{amount} محجوزة لمقاطع بالطريق",
+    "kpiTitle": "نتائجك",
+    "statOnTheWay": "مقاطع بالطريق",
+    "waitingReview": {
+      "zero": "ولا واحد ينتظر مراجعتك",
+      "one": "واحد ينتظر مراجعتك",
+      "two": "اثنين ينتظرون مراجعتك",
+      "few": "{count} تنتظر مراجعتك",
+      "many": "{count} تنتظر مراجعتك",
+      "other": "{count} تنتظر مراجعتك"
+    },
+    "fromCreators": {
+      "zero": "ما فيه صنّاع محتوى للحين",
+      "one": "من صانع محتوى واحد",
+      "two": "من صانعي محتوى",
+      "few": "من {count} صنّاع محتوى",
+      "many": "من {count} صانع محتوى",
+      "other": "من {count} صانع محتوى"
+    },
+    "setupBrand": "أنشئ علامتك التجارية",
+    "statThisMonth": "المصروف هالشهر",
+    "lastMonth": "{amount} الشهر اللي فات"
   },
   "orderSource": {
     "offer": "عرض مباشر",
     "campaign": "حملة"
   },
   "niches": {
+    "general": "عام",
     "beauty": "جمال وعناية",
     "food": "أكل وقهوة",
     "fashion": "أزياء",
     "tech": "تقنية",
     "travel": "سفر",
     "fitness": "رياضة",
-    "family": "عائلة",
+    "family": "عائلي",
     "gaming": "ألعاب"
-  },
-  "languages": {
-    "ar": "العربية",
-    "en": "الإنجليزية"
   },
   "genders": {
     "female": "أنثى",
     "male": "ذكر"
   },
   "forms": {
-    "rulesTitle": "قواعد المحتوى في 100clips",
-    "ruleNoMusic": "بدون موسيقى في المقاطع",
-    "ruleModest": "لباس محتشم، وصانعات المحتوى يغطين الشعر",
-    "ruleNoProhibited": "بدون فئات محظورة: القروض بفوائد، الكحول، القمار، والمنتجات غير الحلال",
-    "acceptRules": "أوافق على قواعد المحتوى",
     "errors": {
       "titleRequired": "اكتب عنوان قصير.",
       "briefTooShort": "اكتب وصف أوضح، 20 حرف على الأقل.",
       "clipsCountRange": "اختر من 1 إلى 50 مقطع.",
-      "acceptRules": "وافق على قواعد المحتوى عشان تكمل.",
       "unknownCreator": "ما لقينا صانع المحتوى هذا.",
       "pickNiche": "اختر مجال الحملة.",
       "budgetPositive": "اكتب الميزانية بالدينار.",
@@ -128,15 +140,29 @@
       "productNameRequired": "اكتب اسم المنتج.",
       "productTypeRequired": "اختر نوع المنتج.",
       "priceInvalid": "اكتب السعر بالدينار، مثل 4.500",
-      "aboutTooLong": "خلّه مختصر، 300 حرف كحد أقصى."
-    }
+      "aboutTooLong": "خلّه مختصر، 300 حرف كحد أقصى.",
+      "pickBrand": "اختر العلامة اللي الحملة لها.",
+      "visitOrder": "آخر يوم للزيارة ما يصير قبل أول يوم.",
+      "mapUrlInvalid": "الصق رابط من خرائط Google، مثل https://maps.app.goo.gl/…",
+      "pickVideoStyle": "اختر أسلوب الفيديو.",
+      "deadlineFuture": "اختر تاريخ بعد اليوم.",
+      "dateInvalid": "اكتب التاريخ بصيغة يوم/شهر/سنة.",
+      "dateTooEarly": "اختر {date} أو بعده.",
+      "pickCreators": "اختر صانع محتوى واحد على الأقل.",
+      "fileType": "الملف لازم يكون PDF أو صورة PNG أو JPG.",
+      "fileTooBig": "الملف أكبر من 5 ميجابايت. اختر ملف أصغر.",
+      "editLocked": "فيه صانع محتوى قبِل العرض، فما تقدر تغيّر التفاصيل الحين.",
+      "deadlineLater": "اختر تاريخ بعد موعد التسليم الحالي.",
+      "brandSuspended": "هذي العلامة موقوفة من 100clips وما تقدر تدفع لشغل جديد. تواصل مع الدعم."
+    },
+    "datePlaceholder": "يوم/شهر/سنة",
+    "openCalendar": "افتح التقويم"
   },
   "explore": {
     "title": "صنّاع المحتوى",
     "search": "ابحث بالاسم أو المعرّف",
     "niche": "المجال",
     "gender": "الجنس",
-    "language": "اللغة",
     "sort": "الترتيب",
     "sortRating": "الأعلى تقييمًا",
     "sortPriceLow": "الأقل سعرًا",
@@ -157,70 +183,42 @@
     "platform": "المنصة",
     "newCreator": "جديد",
     "clearOne": "امسح الاختيار",
-    "viewProfile": "اعرض الملف"
+    "viewProfile": "اعرض الملف",
+    "face": "الوجه"
   },
   "profile": {
     "rating": "التقييم",
     "completed": "طلبات مكتملة",
     "offers": "المنصات والأسعار",
-    "latestWork": "أحدث الأعمال",
     "forBrand": "لـ {brand}",
     "reviews": "تقييمات العلامات التجارية",
-    "noReviews": "ما فيه تقييمات بعد. {name} جديد على 100clips.",
+    "noReviews": "ما فيه تقييمات بعد.",
     "play": "شغّل {title}",
     "perClip": "للمقطع",
-    "hire": "وظّف"
+    "hire": "وظّف",
+    "socials": "حسابات التواصل",
+    "openSocial": "افتح @{handle} على {platform}",
+    "choosePlatforms": "المنصة",
+    "nothingChosen": "اختر المنصة",
+    "message": "أرسل رسالة",
+    "messageName": "أرسل رسالة لـ {name}",
+    "portfolio": "معرض الأعمال",
+    "noVideos": "ما فيه فيديوهات مرفوعة بعد."
   },
   "campaignsPage": {
     "title": "الحملات",
-    "newApplicants": {
-      "zero": "",
-      "one": "طلب جديد",
-      "two": "طلبان جديدان",
-      "few": "{count} طلبات جديدة",
-      "many": "{count} طلبًا جديدًا",
-      "other": "{count} طلب جديد"
-    },
     "emptyTitle": "أطلق حملتك الأولى",
-    "emptyHint": "اكتب اللي تبيه، وصنّاع المحتوى يقدّمون عليها.",
+    "emptyHint": "اختر صنّاع المحتوى، اكتب وصف واحد، وادفع مرة وحدة.",
     "emptyFiltered": "ما فيه حملات بهذي الحالة.",
     "filterLabel": "فلترة الحملات حسب الحالة"
-  },
-  "newCampaign": {
-    "title": "أنشئ حملة",
-    "subtitle": "اكتب اللي تبيه، وصنّاع المحتوى يقدّمون عليها. تختار منهم اللي يناسبك.",
-    "titleLabel": "اسم الحملة",
-    "titlePlaceholder": "مثال: إطلاق خلطة رمضان",
-    "briefLabel": "وصف الحملة",
-    "briefPlaceholder": "مثال: صوّروا خلطة رمضان في جلسة الغبقة، والقهوة في يد الضيف.",
-    "nicheLabel": "المجال",
-    "nichePlaceholder": "اختر المجال",
-    "clipsLabel": "عدد المقاطع",
-    "budgetLabel": "الميزانية الكاملة (د.ب)",
-    "budgetPlaceholder": "مثال: 300",
-    "perClipHint": "يعني {price} للمقطع",
-    "publish": "انشر الحملة",
-    "saveDraft": "احفظ كمسودة"
   },
   "campaignDetail": {
     "brief": "وصف الحملة",
     "budget": "الميزانية",
-    "slotsFull": "اكتملت المقاعد. ارفض الباقين أو زِد عدد المقاطع.",
-    "applicantsTitle": "المتقدمون",
-    "tabPending": "بانتظار قرارك",
-    "tabAccepted": "مقبولون",
-    "tabRejected": "مرفوضون",
     "accept": "اقبل",
     "reject": "ارفض",
     "appliedOn": "قدّم {date}",
     "viewOrder": "اعرض الطلب",
-    "noPending": "ما فيه طلبات بانتظار قرارك.",
-    "noAccepted": "ما قبلت أحد بعد.",
-    "noRejected": "ما رفضت أحد.",
-    "draftNote": "الحملة مسودة. انشرها عشان يقدر صنّاع المحتوى يقدّمون عليها.",
-    "publish": "انشر الحملة",
-    "donePublished": "الحملة منشورة الحين. نبلغك أول ما يقدّم أحد.",
-    "doneDraftSaved": "حفظنا الحملة كمسودة.",
     "creatorsTitle": "صنّاع المحتوى في الحملة",
     "product": "المنتج",
     "creators": {
@@ -231,7 +229,90 @@
       "many": "{count} صانع محتوى",
       "other": "{count} صانع محتوى"
     },
-    "donePaid": "تم الدفع وأرسلنا الطلب لكل صنّاع المحتوى. نبلغك أول ما يقبلون."
+    "promoting": "الترويج لـ",
+    "logistics": "الترتيبات",
+    "logistics_keeps": "يحتفظ فيه صانع المحتوى",
+    "logistics_returns": "يرجعه صانع المحتوى",
+    "logistics_promo": "كود الخصم: {code}",
+    "logistics_testAccount": "تمت مشاركة حساب تجريبي",
+    "logistics_visit": "الزيارة {from} – {to}",
+    "logistics_visitFrom": "الزيارة من {date}",
+    "logistics_visitTo": "الزيارة إلى {date}",
+    "paidTitle": "تم الدفع",
+    "paidSentTo": {
+      "zero": "أرسلنا طلبك.",
+      "one": "أرسلنا طلبك لصانع محتوى واحد.",
+      "two": "أرسلنا طلبك لصانعي محتوى.",
+      "few": "أرسلنا طلبك لـ {count} صنّاع محتوى.",
+      "many": "أرسلنا طلبك لـ {count} صانع محتوى.",
+      "other": "أرسلنا طلبك لـ {count} صانع محتوى."
+    },
+    "paidNext": "نبلغك أول ما يقبلون.",
+    "briefHint": "اللي يشوفه صنّاع المحتوى مع طلبك.",
+    "created": "أُنشئت {date}",
+    "noDeadline": "بدون موعد تسليم",
+    "addCreator": "أضف صانع محتوى",
+    "more": "إجراءات أكثر",
+    "cancelledNote": "انلغت الحملة ورجع المبلغ لرصيدك.",
+    "messages": "الرسائل",
+    "shipping": "الشحن",
+    "notSent": "ما انرسل بعد",
+    "sentOn": "انرسل {date}",
+    "receivedOn": "انستلم {date}",
+    "notReceived": "ما انستلم بعد",
+    "sendNote": "ملاحظة (اختياري)",
+    "sendNotePlaceholder": "اكتب طريقة التوصيل",
+    "returnInfo": "المنتج يرجع لك بعد التصوير. استرجعه بعد ما تعتمد المقطع.",
+    "keepInfo": "هدية لصانع المحتوى، ما يحتاج يرجعه.",
+    "returnedOn": "استرجعته {date}",
+    "clip": "المقطع",
+    "noClip": "ما وصل مقطع بعد",
+    "openOrder": "افتح الطلب",
+    "rate": "قيّم {name}",
+    "rated": "قيّمت {name}",
+    "hireAgain": "وظّف مرة ثانية",
+    "stage1": "الأساسيات",
+    "stage1Hint": "ثابتة بعد الدفع",
+    "stage2": "تفاصيل إضافية",
+    "notesTitle": "ملاحظاتك لصنّاع المحتوى",
+    "clipsTitle": "المقاطع",
+    "allCreators": "كل صنّاع المحتوى",
+    "allStatuses": "الكل",
+    "downloadApproved": "نزّل المعتمدة ({count})",
+    "noClips": "ما وصلت مقاطع بعد",
+    "activity": "النشاط",
+    "campaignCreated": "انشأت الحملة ودفعت",
+    "showAll": "اعرض الكل",
+    "tabs": {
+      "overview": "نظرة عامة",
+      "orders": "الطلبات",
+      "brief": "الوصف",
+      "clips": "المقاطع",
+      "activity": "النشاط"
+    },
+    "runAgain": "شغّلها مرة ثانية",
+    "editDetails": "عدّل التفاصيل",
+    "editDetailsHint": "صنّاع المحتوى يشوفون التفاصيل الجديدة مع عرضك. تقدر تعدّل لين أحد يقبل.",
+    "editBlocked": "ما تقدر تعدّل التفاصيل لأن فيه صانع محتوى قبِل العرض.",
+    "editSave": "احفظ التفاصيل",
+    "edited": "تعدّلت {date}",
+    "extendDeadline": "مدّد موعد التسليم",
+    "extendHint": "أعطِ صنّاع المحتوى وقت أكثر. تقدر تأخّره بس، ما تقدّمه.",
+    "extendCurrent": "الموعد الحالي: {date}",
+    "extendNew": "الموعد الجديد",
+    "extendSave": "مدّد الموعد",
+    "extendNoDeadline": "هالحملة ما لها موعد تسليم.",
+    "extendDone": "بس وصنّاع المحتوى للحين يشتغلون.",
+    "detailsEditedEvent": "عدّلت التفاصيل الإضافية",
+    "deadlineMovedEvent": "انتقل موعد التسليم إلى {date}",
+    "doneDeadlineExtended": "مدّدت موعد التسليم إلى {date}، ويشوف صنّاع المحتوى الموعد الجديد في طلبهم.",
+    "doneDetailsEdited": "حفظنا التعديلات، ويشوفها صنّاع المحتوى في العرض.",
+    "deadlineExtendedTag": "تم التمديد",
+    "seeDetails": "شوف التفاصيل",
+    "detailsEditedFields": "عدّلت {fields}",
+    "deadlineMovedFrom": "انتقل موعد التسليم من {from} إلى {to}",
+    "emptyValue": "(فاضي)",
+    "doneDetailsEditedFields": "حفظنا التعديلات: تغيّر {fields}، ويشوفها صنّاع المحتوى في العرض."
   },
   "ordersPage": {
     "title": "الطلبات",
@@ -242,27 +323,81 @@
     "clip": "المقطع",
     "waitingPending": "ننتظر {name} يقبل العرض.",
     "waitingProgress": "{name} يصوّر المقطع الحين.",
-    "waitingSubmitted": "وصل المقطع، ونفحصه مع قواعد المحتوى قبل ما يوصلك.",
     "reviewHint": "شاهد المقطع، ثم اعتمده أو اطلب تعديل. يتحوّل المبلغ لصانع المحتوى بعد الاعتماد.",
     "approve": "اعتمد المقطع",
     "requestRevision": "اطلب تعديل",
     "revisionLabel": "وش تبي يتعدل؟",
-    "revisionPlaceholder": "مثال: الكوب ما يبان في أول 3 ثواني.",
+    "revisionPlaceholder": "اكتب وش تبي يتعدّل",
     "sendRevision": "أرسل طلب التعديل",
     "yourRevision": "طلب التعديل اللي أرسلته",
     "brief": "المطلوب",
     "details": "تفاصيل الطلب",
     "amount": "المبلغ",
+    "totalPaid": "دفعت",
     "clips": "عدد المقاطع",
     "created": "تاريخ الطلب",
     "source": "المصدر",
     "progress": "مراحل الطلب",
     "creator": "صانع المحتوى",
     "doneOfferSent": "أرسلنا عرضك إلى {name}. نبلغك أول ما يقبل.",
-    "doneApproved": "اعتمدت المقطع، وحوّلنا {amount} إلى {name}.",
+    "approvedTitle": "اعتمدت المقطع",
+    "approvedPaid": "تم تحويل المبلغ لـ{name}.",
+    "campaignCompleteTitle": "اكتملت الحملة",
+    "campaignCompleteBody": {
+      "one": "مقطعك معتمد.",
+      "two": "المقطعين معتمدين.",
+      "few": "كل المقاطع الـ {count} معتمدة.",
+      "many": "كل المقاطع الـ {count} معتمدة.",
+      "other": "كل المقاطع الـ {count} معتمدة."
+    },
+    "rateCreator": "كيف كان التعامل مع {name}؟",
+    "downloadClip": "حمّل المقطع",
+    "hireAgain": "وظّف {name} مرة ثانية",
     "doneRevisionSent": "أرسلنا طلب التعديل إلى {name}.",
     "items": "المطلوب من صانع المحتوى",
-    "yourNote": "ملاحظتك لصانع المحتوى"
+    "yourNote": "ملاحظتك لصانع المحتوى",
+    "approveTitle": "تعتمد مقطع {name}؟",
+    "approveHint": "الاعتماد يحوّل المبلغ لـ{name}، وما تقدر تتراجع عنه.",
+    "rateLabel": "قيّم {name}",
+    "reviewLabel": "تعليق (اختياري)",
+    "reviewPlaceholder": "اكتب اللي عجبك في المقطع",
+    "approveConfirm": "اعتمد وحوّل المبلغ",
+    "revisionsLeft": {
+      "zero": "ما فيه تعديلات متبقية",
+      "one": "باقي تعديل واحد",
+      "two": "باقي تعديلين",
+      "few": "باقي {count} تعديلات",
+      "many": "باقي {count} تعديل",
+      "other": "باقي {count} تعديل"
+    },
+    "problem": {
+      "cardTitle": "تحتاج مساعدة؟",
+      "hint": "فيه مشكلة في هالطلب؟ فريق دعم 100clips بيتابعها معك.",
+      "button": "الإبلاغ عن مشكلة",
+      "title": "الإبلاغ عن مشكلة",
+      "intro": "قول لفريق دعم 100clips وش صار. البلاغ يوصل لفريقنا، مو لصانع المحتوى.",
+      "reasonLabel": "وش المشكلة؟",
+      "reasons": {
+        "notDelivered": "المقطع ما وصل",
+        "notAsAgreed": "المقطع مو مثل المتفق عليه",
+        "productIssue": "مشكلة في المنتج (الإرسال أو الإرجاع)",
+        "creatorConduct": "تصرف صانع المحتوى",
+        "payment": "الدفع أو الاسترجاع",
+        "other": "شي ثاني"
+      },
+      "detailsLabel": "وش صار؟",
+      "detailsPlaceholder": "التواريخ، الرسائل، أي شي يساعدنا نفهم",
+      "send": "إرسال لدعم 100clips",
+      "sent": "وصل بلاغك لدعم 100clips",
+      "sentHint": "بنتابع الموضوع ونرد عليك هنا في الطلب.",
+      "open": "بلّغت في {date} · فريق الدعم يتابعه",
+      "resolved": "بلّغت في {date} · تم الحل",
+      "errors": {
+        "reason": "اختر نوع المشكلة.",
+        "details": "اكتب لنا وش صار.",
+        "alreadyOpen": "فيه بلاغ مفتوح على هالطلب."
+      }
+    }
   },
   "walletPage": {
     "available": "الرصيد المتاح",
@@ -277,10 +412,46 @@
     "reservedHint": "مبلغ مدفوع لطلبات لم تكتمل بعد. يُحرَّر بعد إنجاز الطلب أو يُستردّ إن أُلغي.",
     "netCharged": "صافي الشحن",
     "netSpent": "صافي المصروف",
-    "transactions": "المعاملات"
+    "transactions": "المعاملات",
+    "typeRefund": "استرجاع",
+    "refundLabel": "استرجاع · {title}",
+    "refundWhy": {
+      "cancelled": "تم سحب العرض",
+      "expired": "انتهى العرض بدون رد",
+      "declined": "اعتذار من {name}"
+    },
+    "withdrawal": {
+      "label": "سحب لحسابك البنكي",
+      "requested": "قيد التحويل",
+      "sent": "تم التحويل",
+      "rejected": "رجع للرصيد",
+      "requestedDetail": "يوصل بين {from} و{to}",
+      "sentDetail": "إلى {iban} في {date}",
+      "rejectedDetail": "ما تم التحويل: {note}",
+      "pending": "{amount} في الطريق لحسابك البنكي، يوصل بين {from} و{to}."
+    },
+    "withdraw": {
+      "button": "سحب للبنك",
+      "empty": "ما فيه رصيد للسحب.",
+      "title": "سحب الرصيد للبنك",
+      "noBankTitle": "أضف حساب بنكي أول",
+      "noBankHint": "السحوبات تروح للحساب البنكي في الإعدادات. أضفه مرة وحدة وتقدر تسحب أي وقت.",
+      "addBank": "إضافة حساب بنكي",
+      "amount": "المبلغ (د.ب)",
+      "available": "المتاح: {amount}",
+      "to": "إلى",
+      "timing": "ينخصم من رصيدك الحين ويوصل حسابك البنكي خلال {from}–{to} أيام عمل.",
+      "submit": "طلب السحب",
+      "sentTitle": "تم طلب السحب",
+      "sentHint": "يوصل حسابك البنكي خلال {from}–{to} أيام عمل، وتشوفه تحت العمليات.",
+      "errors": {
+        "noBank": "أضف حساب بنكي في الإعدادات أول.",
+        "tooSmall": "أقل مبلغ 1 د.ب.",
+        "tooMuch": "المبلغ أكثر من رصيدك المتاح."
+      }
+    }
   },
   "industries": {
-    "beauty": "تجميل",
     "food_beverage": "أكل ومشروبات",
     "fashion": "أزياء",
     "tech": "تقنية",
@@ -300,14 +471,11 @@
   "formats": {
     "tiktok_video": "فيديو تيك توك",
     "instagram_reel": "ريلز إنستغرام",
-    "instagram_story": "ستوري إنستغرام",
-    "youtube_video": "فيديو يوتيوب",
-    "youtube_short": "يوتيوب شورتس"
+    "instagram_story": "ستوري إنستغرام"
   },
   "platforms": {
     "tiktok": "تيك توك",
-    "instagram": "إنستغرام",
-    "youtube": "يوتيوب"
+    "instagram": "إنستغرام"
   },
   "cart": {
     "title": "السلة",
@@ -316,12 +484,11 @@
     "inCart": "في السلة",
     "viewCart": "اعرض السلة",
     "added": "أضفنا {name} للسلة.",
-    "pickHint": "اختر عدد المقاطع لكل منصة، ثم أضفها للسلة.",
+    "pickHint": "اختر منصة وحدة، ثم أضفها للسلة.",
     "remove": "احذف من السلة",
     "removeName": "احذف {name} من السلة",
-    "decrease": "أنقص مقطع من {format}",
-    "increase": "زد مقطع في {format}",
     "subtotal": "المجموع الفرعي",
+    "serviceFee": "رسوم الخدمة ({rate})",
     "total": "المجموع",
     "creators": {
       "zero": "ما فيه صنّاع محتوى",
@@ -344,20 +511,20 @@
     "emptyHint": "تصفّح صنّاع المحتوى وأضف اللي يناسبونك. تقدر تجمع أكثر من صانع محتوى في حملة وحدة.",
     "explore": "تصفّح صنّاع المحتوى",
     "addMore": "أضف صنّاع محتوى",
-    "notOffered": "غير متوفر"
+    "notOffered": "غير متوفر",
+    "alsoOffers": "بدّل إلى",
+    "switchTo": "بدّل إلى {format}"
   },
   "checkout": {
     "title": "إتمام الطلب",
     "subtitle": "حملة وحدة لكل صنّاع المحتوى في السلة. كل واحد يستلم نفس الوصف وملاحظتك له.",
-    "campaign": "تفاصيل الحملة",
     "titleLabel": "اسم الحملة",
-    "titlePlaceholder": "مثال: إطلاق خلطة رمضان",
+    "titlePlaceholder": "اكتب اسم الحملة",
     "productLabel": "المنتج",
-    "productPlaceholder": "اختر المنتج",
     "briefLabel": "وصف المقطع",
-    "briefPlaceholder": "مثال: صوّروا قهوة الصباح في جلسة البيت، وركّزوا على صوت الصب. بدون موسيقى.",
+    "briefPlaceholder": "اكتب وصف المقطع",
     "notes": "ملاحظة لكل صانع محتوى (اختياري)",
-    "notePlaceholder": "مثال: نحب أسلوبك في مقطع البرجر.",
+    "notePlaceholder": "اكتب ملاحظتك لصانع المحتوى",
     "payment": "الدفع",
     "useBalance": "استخدم رصيدي ({amount})",
     "fromBalance": "من الرصيد",
@@ -365,19 +532,87 @@
     "cardName": "الاسم على البطاقة",
     "cardNumber": "رقم البطاقة",
     "cardExpiry": "تاريخ الانتهاء",
-    "cardExpiryPlaceholder": "MM/YY",
+    "cardExpiryPlaceholder": "شهر/سنة",
     "cardCvc": "رمز الأمان",
     "demoCard": "هذا نموذج تجريبي، ما نخصم أي مبلغ.",
-    "heldNote": "يحجز 100clips المبلغ، ولا يتحوّل لصانع المحتوى إلا بعد ما تعتمد المقاطع.",
     "pay": "ادفع {amount}",
     "payBalance": "ادفع من الرصيد",
     "summary": "ملخص الطلب",
-    "back": "السلة"
+    "brandLabel": "العلامة التجارية",
+    "addProduct": "أضف منتج",
+    "addProductTitle": "أضف منتج لـ {brand}",
+    "noProducts": "ما عند {brand} منتجات بعد. أضف منتج عشان تكمل.",
+    "logistics": {
+      "title": "التوصيل والترتيبات",
+      "hint": "كيف يوصل كل منتج لصنّاع المحتوى.",
+      "physicalShip": "ترسله أنت لكل صانع محتوى. نشاركك عنوانه بعد ما يقبل.",
+      "afterFilming": "بعد التصوير",
+      "keep": "يحتفظ فيه صانع المحتوى",
+      "keepHint": "هدية لصانع المحتوى، ما يحتاج يرجعه.",
+      "return": "يرجعه صانع المحتوى",
+      "returnHint": "ترسل مندوب ياخذه منه بعد ما تعتمد المقطع.",
+      "appLink": "رابط التطبيق",
+      "promoCode": "كود الخصم",
+      "testAccount": "حساب تجريبي",
+      "testAccountHint": "نشاركه فقط مع اللي يقبلون. استخدم حساب تجريبي، مو حساب حقيقي.",
+      "testAccountPlaceholder": "اكتب بيانات الحساب التجريبي",
+      "visitFrom": "الزيارة من",
+      "visitTo": "الزيارة إلى",
+      "included": "وش يشمل",
+      "includedPlaceholder": "اكتب وش تشمل الزيارة",
+      "serviceNote": "ما يحتاج ترتيبات هنا. اشرح طريقة الخدمة في الوصف.",
+      "promoPlaceholder": "اكتب الكود"
+    },
+    "revisionNote": "يشمل تعديل واحد لكل مقطع.",
+    "stepWhat": "وش تروّج له",
+    "stepBrief": "الوصف",
+    "stepper": "خطوات إتمام الطلب",
+    "videoStyle": "أسلوب الفيديو",
+    "videoStyles": {
+      "ad": "إعلاني",
+      "review": "مراجعة",
+      "routine": "روتين يومي",
+      "unboxing": "فتح صندوق",
+      "howto": "طريقة استخدام",
+      "other": "أخرى"
+    },
+    "deadline": "موعد التسليم",
+    "deadlineHint": "آخر موعد يسلّم فيه صنّاع المحتوى المقاطع.",
+    "videoStyleGuideLabel": "عن أساليب الفيديو",
+    "videoStyleGuideTitle": "أي أسلوب يناسبك؟",
+    "videoStyleHints": {
+      "ad": "مقطع ترويجي قصير يبيع المنتج مباشرة، وينتهي بدعوة واضحة.",
+      "review": "بعد ما يستخدم المنتج فترة، يعطي رأيه بصراحة في الجودة والأداء.",
+      "routine": "المنتج يُستخدم بشكل طبيعي في يوم صانع المحتوى، مثل روتين الصباح أو يوم في حياتي.",
+      "unboxing": "أول انطباع: فتح العلبة قدّام الكاميرا وعرض التغليف واللي داخلها، قبل الاستخدام.",
+      "howto": "خطوة بخطوة: طريقة استخدام المنتج.",
+      "other": "أسلوب ثاني، وضّحه في وصف المقطع."
+    },
+    "refundNote": "إذا اعتذر صانع المحتوى أو ما رد خلال 96 ساعة، أو ما انطلقت الحملة، نرجّع لك المبلغ اللي دفعته.",
+    "editCart": "تعديل السلة",
+    "paying": "جاري الدفع…",
+    "redirecting": "ننقلك لحملتك…",
+    "viewCampaign": "عرض الحملة",
+    "moreDetails": "تفاصيل إضافية (اختياري)",
+    "moreDetailsHint": "تظهر مع طلبك، وتساعد صنّاع المحتوى يطلعونه صح.",
+    "keyMessage": "الرسالة الأساسية",
+    "keyMessageHint": "أهم شي تبي المشاهد يتذكّره.",
+    "keyMessagePlaceholder": "اكتب الرسالة الأساسية",
+    "references": "مراجع",
+    "mustInclude": "لازم يتضمّن",
+    "mustIncludePlaceholder": "اكتب اللي لازم يتضمّنه المقطع",
+    "avoid": "تجنّب",
+    "avoidPlaceholder": "اكتب اللي لازم يتجنّبه المقطع",
+    "addReference": "أضف مرجع ثاني",
+    "removeReference": "احذف المرجع",
+    "referencePlaceholder": "الصق رابط الفيديو",
+    "backToCart": "السلة",
+    "usageNote": "المقاطع تنشر في حساب صانع المحتوى وتظل منشورة. حذفها يحتاج موافقة 100clips."
   },
   "brandForm": {
     "stepBasics": "الأساسيات",
     "stepAbout": "عن العلامة",
-    "stepExtras": "إضافات",
+    "stepExtras": "معلومات تجارية",
     "stepProduct": "أول منتج",
     "stepper": "خطوات إنشاء العلامة",
     "stepOf": "الخطوة {n} من {total}",
@@ -386,18 +621,16 @@
     "addTitle": "أضف علامة تجارية",
     "editTitle": "عدّل {name}",
     "nameAr": "اسم العلامة بالعربي",
-    "nameArPlaceholder": "مثال: محمصة المحرق",
+    "nameArPlaceholder": "اكتب اسم العلامة بالعربي",
     "nameEn": "اسم العلامة بالإنجليزي",
-    "nameEnPlaceholder": "e.g. Muharraq Roastery",
+    "nameEnPlaceholder": "اكتب اسم العلامة بالإنجليزي",
     "nameHint": "اكتب الاسم باللغتين إذا عندك، أو بلغة وحدة.",
     "logo": "الشعار",
     "logoHint": "صورة مربعة بصيغة PNG أو JPG.",
     "industry": "المجال",
     "industryPlaceholder": "اختر المجال",
-    "city": "المدينة",
-    "cityPlaceholder": "مثال: المنامة",
     "about": "عن العلامة",
-    "aboutPlaceholder": "مثال: محمصة قهوة مختصة في المحرق، نحمّص كل أسبوع ونقدّم القهوة العربية.",
+    "aboutPlaceholder": "اكتب نبذة عن علامتك",
     "aboutHint": "سطرين أو ثلاثة. يقرأها صنّاع المحتوى قبل ما يقبلون طلبك.",
     "links": "الروابط",
     "website": "الموقع الإلكتروني",
@@ -405,16 +638,22 @@
     "instagram": "إنستغرام",
     "tiktok": "تيك توك",
     "handlePlaceholder": "@اسم_الحساب",
-    "cover": "صورة الغلاف",
-    "coverHint": "صورة عريضة تظهر أعلى صفحة علامتك.",
     "crNumber": "رقم السجل التجاري",
-    "crPlaceholder": "مثال: 123456-1",
+    "crPlaceholder": "اكتب رقم السجل التجاري",
     "optional": "اختياري",
     "next": "التالي",
     "back": "رجوع",
     "create": "أنشئ العلامة",
+    "skipProduct": "تخطَّ وأضيف المنتج بعدين",
     "save": "احفظ التغييرات",
-    "doneSaved": "حفظنا التغييرات."
+    "doneSaved": "حفظنا التغييرات.",
+    "countries": "وين تشتغل علامتك؟",
+    "countriesHint": "اختر دولة أو أكثر.",
+    "vatCertificate": "شهادة ضريبة القيمة المضافة",
+    "vatHint": "PDF أو صورة، بحد أقصى 5 ميجابايت.",
+    "registrationIn": "السجل والضريبة في {country}",
+    "registrationsHint": "اختر الدول اللي تشتغل فيها، ونطلب لكل دولة رقم السجل التجاري وشهادة ضريبة القيمة المضافة.",
+    "onlyCountryHint": "100clips حالياً في {country}، فنطلب تسجيلك هناك بس. دول الخليج الثانية جاية."
   },
   "images": {
     "upload": "ارفع صورة",
@@ -444,22 +683,22 @@
       "venue": "كافيه، مطعم، صالون، نادي، عيادة"
     },
     "name": "اسم المنتج",
-    "namePlaceholder": "مثال: خلطة رمضان",
+    "namePlaceholder": "اكتب اسم المنتج",
     "photos": "الصور",
     "photosHint": "حتى 6 صور. الصورة الأولى هي الغلاف.",
     "description": "الوصف",
-    "descriptionPlaceholder": "مثال: قهوة عربية بالهيل والزعفران، كيس 250 غرام.",
+    "descriptionPlaceholder": "اكتب وصف المنتج",
     "price": "السعر (د.ب)",
-    "pricePlaceholder": "مثال: 4.500",
+    "pricePlaceholder": "اكتب السعر",
     "benefits": "أهم المميزات",
-    "benefitsHint": "من 3 إلى 5 نقاط قصيرة.",
-    "benefitPlaceholder": "مثال: محمّصة طازجة كل أسبوع",
+    "benefitsHint": "ابدأ بميزة واحدة وأضف حتى 5 نقاط قصيرة.",
+    "benefitPlaceholder": "اكتب ميزة",
     "benefitLabel": "الميزة {n}",
-    "addBenefit": "أضف ميزة",
+    "addBenefit": "أضف ميزة ثانية",
     "removeBenefit": "احذف الميزة {n}",
     "concerns": "مخاوف العملاء",
     "concernsHint": "وش يقلق العملاء أو يسألون عنه قبل الشراء؟ الجواب اختياري.",
-    "concernPlaceholder": "مثال: هل الطعم قوي؟",
+    "concernPlaceholder": "اكتب سؤال",
     "concernLabel": "السؤال {n}",
     "answerPlaceholder": "الجواب (اختياري)",
     "answerLabel": "جواب السؤال {n}",
@@ -469,7 +708,7 @@
     "value": "قيمة القطعة (د.ب)",
     "valueHint": "قيمة اللي نرسله لصانع المحتوى.",
     "size": "الحجم أو الوزن",
-    "sizePlaceholder": "مثال: 250 غرام",
+    "sizePlaceholder": "اكتب الحجم",
     "downloadLink": "رابط التحميل",
     "downloadPlaceholder": "https://",
     "platforms": "المنصات",
@@ -494,13 +733,15 @@
       "other": "غيره"
     },
     "location": "الموقع",
-    "locationPlaceholder": "مثال: السيف، المنامة",
+    "locationPlaceholder": "اكتب الموقع",
     "hours": "ساعات العمل",
-    "hoursPlaceholder": "مثال: 7 صباحًا – 12 منتصف الليل",
+    "hoursPlaceholder": "اكتب ساعات العمل",
     "add": "أضف المنتج",
     "save": "احفظ المنتج",
     "skip": "تخطَّ الحين",
-    "pickTypeFirst": "اختر نوع المنتج عشان تكمل."
+    "pickTypeFirst": "اختر نوع المنتج عشان تكمل.",
+    "mapUrl": "الموقع على خرائط Google",
+    "mapUrlHint": "في خرائط Google اضغط مشاركة وانسخ الرابط. يستخدمه صنّاع المحتوى عشان يوصلونك."
   },
   "brandsPage": {
     "title": "العلامات والمنتجات",
@@ -508,9 +749,6 @@
     "addBrand": "أضف علامة تجارية",
     "edit": "عدّل",
     "editBrand": "عدّل {name}",
-    "current": "الحالية",
-    "select": "اختر",
-    "selectBrand": "اختر {name}",
     "productsOf": "منتجات {brand}",
     "addProduct": "أضف منتج",
     "editProduct": "عدّل {name}",
@@ -524,20 +762,43 @@
       "many": "{count} منتجًا",
       "other": "{count} منتج"
     },
-    "doneBrandCreated": "أنشأنا {name} واخترناها كعلامتك الحالية.",
+    "doneBrandCreated": "أنشأنا علامتك التجارية.",
     "doneProductAdded": "أضفنا {name}.",
     "doneProductSaved": "حفظنا {name}.",
-    "doneBrandSaved": "حفظنا تغييرات {name}."
+    "doneBrandSaved": "حفظنا تغييرات {name}.",
+    "doneProductDuplicated": "أنشأنا {name}.",
+    "doneProductDeleted": "حذفنا المنتج.",
+    "expand": "اعرض منتجات {name}",
+    "collapse": "أخفِ منتجات {name}",
+    "addFirstProduct": "أضف أول منتج",
+    "openProduct": "افتح {name}",
+    "moreActions": "المزيد من الإجراءات لـ {name}",
+    "duplicate": "نسخ",
+    "delete": "احذف",
+    "deleteConfirm": "تحذف {name}؟ ما تقدر ترجع عن الحذف.",
+    "statCampaigns": {
+      "zero": "0 حملات",
+      "one": "حملة",
+      "two": "حملتان",
+      "few": "{count} حملات",
+      "many": "{count} حملة",
+      "other": "{count} حملة"
+    },
+    "statClips": {
+      "zero": "0 مقاطع",
+      "one": "مقطع",
+      "two": "مقطعان",
+      "few": "{count} مقاطع",
+      "many": "{count} مقطعًا",
+      "other": "{count} مقطع"
+    }
   },
   "chat": {
     "title": "الرسائل",
     "empty": "ما فيه محادثات بعد. تبدأ المحادثة أول ما يقبل صانع المحتوى طلبك.",
     "pick": "اختر محادثة",
-    "viewOrder": "اعرض الطلب",
     "placeholder": "اكتب رسالتك",
     "send": "أرسل",
-    "guard": "لحمايتك، نخفي أرقام الهواتف والإيميلات والروابط. خلّوا التواصل هنا.",
-    "maskedNote": "أخفينا معلومات تواصل من هذي الرسالة",
     "you": "أنت",
     "unread": {
       "zero": "",
@@ -547,6 +808,1014 @@
       "many": "{count} رسالة جديدة",
       "other": "{count} رسالة جديدة"
     },
-    "back": "الرسائل"
+    "back": "الرسائل",
+    "report": "أبلغ عن هذي المحادثة",
+    "reportTitle": "وش المشكلة؟",
+    "reportReasons": {
+      "offPlatform": "يدفع للاتفاق خارج المنصة",
+      "abuse": "رسائل مسيئة أو غير لائقة",
+      "spam": "إزعاج أو احتيال",
+      "other": "شي ثاني"
+    },
+    "reportDetails": "أضف تفاصيل (اختياري)",
+    "reportSend": "أرسل البلاغ",
+    "reportSent": "وصل البلاغ",
+    "reportSentHint": "فريقنا بيراجع المحادثة.",
+    "reportClose": "تم",
+    "activeOrders": {
+      "one": "طلب جاري",
+      "two": "طلبين جاريين",
+      "few": "{count} طلبات جارية",
+      "many": "{count} طلب جاري",
+      "other": "{count} طلب جاري"
+    }
+  },
+  "productDrawer": {
+    "showPhoto": "اعرض الصورة {n}",
+    "benefits": "أهم المميزات",
+    "concerns": "مخاوف العملاء",
+    "noAnswer": "ما فيه إجابة بعد",
+    "campaigns": "الحملات اللي تستخدم هذا المنتج",
+    "noCampaigns": "ما فيه حملات تستخدم هذا المنتج بعد.",
+    "findCreators": "ابحث عن صنّاع محتوى لهذا المنتج",
+    "openMap": "افتح في خرائط Google"
+  },
+  "brandFilter": {
+    "label": "العلامة",
+    "all": "كل العلامات"
+  },
+  "lists": {
+    "title": "القوائم",
+    "subtitle": "صنّاع المحتوى اللي حفظتهم، مرتّبين في قوائم.",
+    "save": "احفظ",
+    "saved": "محفوظ",
+    "saveLabel": "احفظ {name} في قائمة",
+    "menuTitle": "احفظ في قائمة",
+    "nameLabel": "اسم القائمة",
+    "namePlaceholder": "اكتب اسم القائمة",
+    "create": "أنشئ القائمة",
+    "newList": "قائمة جديدة",
+    "creators": {
+      "zero": "ما فيه صنّاع محتوى",
+      "one": "صانع محتوى واحد",
+      "two": "صانعا محتوى",
+      "few": "{count} صنّاع محتوى",
+      "many": "{count} صانع محتوى",
+      "other": "{count} صانع محتوى"
+    },
+    "emptyList": "ما فيه أحد في هذي القائمة بعد.",
+    "favorites": "المفضلة",
+    "emptyFavorites": "اضغط احفظ في صفحة صانع المحتوى واختر المفضلة."
+  },
+  "theme": {
+    "label": "المظهر",
+    "system": "تلقائي",
+    "light": "فاتح",
+    "dark": "داكن"
+  },
+  "flow": {
+    "steps": {
+      "offered": "إرسال العرض",
+      "accepted": "القبول",
+      "received": "استلام المنتج",
+      "filming": "التصوير",
+      "ready": "جاهز لك",
+      "approved": "معتمد"
+    },
+    "action": {
+      "review": "مقطع {name} جاهز",
+      "ship": "أرسل {product} لـ {name}",
+      "collect": "استرجع {product} من {name}"
+    },
+    "button": {
+      "review": "راجعه الحين",
+      "ship": "تم الإرسال",
+      "collect": "تم الاسترجاع"
+    },
+    "waiting": {
+      "accept": "بانتظار قبول {name}",
+      "receive": "بانتظار استلام {name} للمنتج",
+      "filming": "{name} في مرحلة التصوير",
+      "revision": "التعديل عند {name}",
+      "done": "اكتمل الطلب مع {name}",
+      "cancelled": "انلغى العرض لـ {name}"
+    },
+    "calm": "ما فيه شي يحتاجك الحين",
+    "due": "التسليم {date}",
+    "events": {
+      "offered": "أرسلت العرض لـ {name}",
+      "accepted": "قبول العرض من {name}",
+      "sent": "أرسلت المنتج لـ {name}",
+      "received": "تأكيد الاستلام من {name}",
+      "uploaded": "مقطع جديد من {name}",
+      "revisionRequested": "طلبت تعديل من {name}",
+      "approved": "اعتمدت مقطع {name}",
+      "released": "تحوّل المبلغ لـ {name}",
+      "cancelled": "انلغى العرض لـ {name}",
+      "returned": "استرجعت المنتج من {name}",
+      "declined": "رفض {name} العرض",
+      "expired": "انتهى العرض لـ{name} بدون رد"
+    },
+    "next": "التالي: {step}",
+    "stepsTitle": "خطوات الطلب",
+    "waitingDays": {
+      "zero": "بانتظارك من اليوم",
+      "one": "بانتظارك من يوم",
+      "two": "بانتظارك من يومين",
+      "few": "بانتظارك من {count} أيام",
+      "many": "بانتظارك من {count} يوم",
+      "other": "بانتظارك من {count} يوم"
+    },
+    "stepCount": "الخطوة {n} من {total}",
+    "group": {
+      "review": {
+        "zero": "",
+        "one": "مقطع واحد بانتظار مراجعتك",
+        "two": "مقطعين بانتظار مراجعتك",
+        "few": "{count} مقاطع بانتظار مراجعتك",
+        "many": "{count} مقطع بانتظار مراجعتك",
+        "other": "{count} مقطع بانتظار مراجعتك"
+      },
+      "ship": {
+        "zero": "",
+        "one": "منتج واحد لازم ترسله",
+        "two": "منتجين لازم ترسلهم",
+        "few": "{count} منتجات لازم ترسلها",
+        "many": "{count} منتج لازم ترسله",
+        "other": "{count} منتج لازم ترسله"
+      },
+      "collect": {
+        "zero": "",
+        "one": "منتج واحد لازم تسترجعه",
+        "two": "منتجين لازم تسترجعهم",
+        "few": "{count} منتجات لازم تسترجعها",
+        "many": "{count} منتج لازم تسترجعه",
+        "other": "{count} منتج لازم تسترجعه"
+      }
+    },
+    "groupButton": {
+      "review": "راجع الحين",
+      "ship": "أرسل الحين",
+      "collect": "استرجع الحين"
+    },
+    "shipDialog": {
+      "title": "تأكيد إرسال المنتج لـ {name}",
+      "hint": "بنبلّغ {name} إن {product} في الطريق، ويأكد الاستلام لما يوصله.",
+      "note": "طريقة التوصيل (اختياري)",
+      "confirm": "أكّد الإرسال"
+    }
+  },
+  "invite": {
+    "title": "ادعُ إلى «{campaign}»",
+    "fromList": "صنّاع المحتوى",
+    "chooseList": "اختر قائمة",
+    "noLists": "ما عندك قوائم بعد. احفظ صنّاع محتوى في قائمة أول، أو تصفّح صنّاع المحتوى.",
+    "emptyList": "هذي القائمة فاضية.",
+    "package": "الباقة",
+    "selected": {
+      "zero": "ما اخترت أحد",
+      "one": "اخترت صانع محتوى واحد",
+      "two": "اخترت صانعي محتوى",
+      "few": "اخترت {count} صنّاع محتوى",
+      "many": "اخترت {count} صانع محتوى",
+      "other": "اخترت {count} صانع محتوى"
+    },
+    "sameBrief": "يوصلهم نفس وصف الحملة، وعندهم 96 ساعة يقبلون.",
+    "toCampaign": "ادعُ لحملة",
+    "chooseCampaign": "اختر الحملة",
+    "inCampaign": "موجود في هذي الحملة",
+    "invitees": "اللي بتدعوهم",
+    "listToCampaign": "ادعُ القائمة لحملة",
+    "creatorToCampaign": "ادعُ {name} لحملة",
+    "platforms": "المنصات",
+    "pickPlatform": "اختر منصة وحدة.",
+    "noneChosen": "ما فيه أحد للحين. أضف صنّاع محتوى من قائمة فوق.",
+    "add": "أضف",
+    "added": "تمت الإضافة",
+    "addAll": "أضف الكل ({count})",
+    "remove": "شيل {name}",
+    "explore": "استكشف",
+    "pages": "الصفحات",
+    "previousPage": "الصفحة السابقة",
+    "nextPage": "الصفحة التالية",
+    "pageRange": "{from}–{to} من {total}",
+    "allNiches": "الكل"
+  },
+  "countries": {
+    "bh": "البحرين",
+    "sa": "السعودية",
+    "ae": "الإمارات",
+    "kw": "الكويت",
+    "qa": "قطر",
+    "om": "عُمان"
+  },
+  "files": {
+    "upload": "ارفع ملف",
+    "replace": "بدّل الملف",
+    "remove": "احذف"
+  },
+  "campaignStatus": {
+    "toReview": {
+      "zero": "",
+      "one": "{count} للمراجعة",
+      "two": "{count} للمراجعة",
+      "few": "{count} للمراجعة",
+      "many": "{count} للمراجعة",
+      "other": "{count} للمراجعة"
+    },
+    "approvedOf": "{done} من {total} مقاطع معتمدة"
+  },
+  "adCode": {
+    "title": {
+      "tiktok": "كود Spark Ads",
+      "instagram": "كود Partnership Ads"
+    },
+    "copy": "انسخ",
+    "copied": "تم النسخ",
+    "validUntil": "صالح لين {date}",
+    "expired": "انتهت صلاحيته في {date}",
+    "none": "ما أضاف صانع المحتوى كود إعلان لهالمقطع.",
+    "request": "اطلب كود إعلان",
+    "requestNew": "اطلب كود جديد",
+    "requestMessage": "هلا {name}، عجبني المقطع حق «{title}» ونبي نسوّيه إعلان من حسابك. ممكن ترسل لي كود الإعلان (Spark / Partnership Ads)؟"
+  },
+  "again": {
+    "title": "شغّل «{campaign}» مرة ثانية",
+    "subtitle": "نفس الوصف افتراضيًا. اختر صنّاع المحتوى، راجع التفاصيل، وادفع.",
+    "sameCreators": "صنّاع محتوى الحملة",
+    "details": "تفاصيل الحملة",
+    "sameAsBefore": "نفس المرة اللي فاتت",
+    "edit": "عدّل",
+    "doneEditing": "تم",
+    "lockedHint": "المنتج ({product}) وأسلوب الفيديو ({style}) يبقون نفسهم."
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "seeAll": "عرض الكل",
+    "empty": "ما فيه شي للحين. لما يرد صنّاع المحتوى على عروضك أو يسلّمون مقاطع، بيظهر هنا.",
+    "unread": "غير مقروء",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "thisWeek": "هالأسبوع",
+    "earlier": "قبل",
+    "titles": {
+      "accepted": {
+        "male": "{name} قبل عرضك",
+        "female": "{name} قبلت عرضك"
+      },
+      "declined": {
+        "male": "{name} اعتذر عن عرضك",
+        "female": "{name} اعتذرت عن عرضك"
+      },
+      "received": {
+        "male": "{name} استلم المنتج",
+        "female": "{name} استلمت المنتج"
+      },
+      "clipReady": {
+        "male": "مقطع {name} جاهز لمراجعتك",
+        "female": "مقطع {name} جاهز لمراجعتك"
+      },
+      "newVersion": {
+        "male": "{name} أرسل نسخة جديدة",
+        "female": "{name} أرسلت نسخة جديدة"
+      },
+      "adCode": {
+        "male": "{name} أضاف كود إعلان",
+        "female": "{name} أضافت كود إعلان"
+      },
+      "late": {
+        "male": "ما وصل مقطع {name} للحين",
+        "female": "ما وصل مقطع {name} للحين"
+      },
+      "expired": {
+        "male": "ما رد {name} وانتهى العرض",
+        "female": "ما ردت {name} وانتهى العرض"
+      }
+    },
+    "details": {
+      "declined": "{campaign} · رجع {amount} لرصيدك",
+      "newVersion": "{campaign} · بعد طلب التعديل",
+      "late": "{campaign} · كان موعده {date}",
+      "expired": "{campaign} · رجع {amount} لرصيدك"
+    }
+  },
+  "debug": {
+    "account": "للتجربة · الحساب",
+    "demoData": "بيانات تجريبية",
+    "newAccount": "حساب جديد"
+  },
+  "newCampaign": {
+    "button": "حملة جديدة",
+    "title": "حملة جديدة",
+    "subtitle": "اختر صنّاع المحتوى، جهّز الحملة، وادفع. تنحفظ كمسودة وانت تشتغل، وتقدر تكملها بعدين.",
+    "noCreatorsYet": "ما اخترت صنّاع محتوى للحين.",
+    "savedOn": "حُفظت {date}",
+    "untitled": "حملة بدون اسم",
+    "continueDraft": "كمّل",
+    "deleteDraft": "احذف المسودة",
+    "deleteDraftConfirm": "تحذف هالمسودة؟ ما تقدر تتراجع.",
+    "creatorsCount": {
+      "zero": "ما فيه صنّاع محتوى للحين",
+      "one": "صانع محتوى واحد",
+      "two": "صانعا محتوى",
+      "few": "{count} صنّاع محتوى",
+      "many": "{count} صانع محتوى",
+      "other": "{count} صانع محتوى"
+    },
+    "draftDeleted": "حذفنا المسودة.",
+    "needBrand": {
+      "title": "أنشئ علامتك التجارية أول",
+      "body": "كل حملة تكون لعلامة من علاماتك وللمنتج اللي تبين تظهره المقاطع. ياخذ دقيقتين، وبعدها ترجع هنا على طول تبدأ أول حملة.",
+      "step1": "أنشئ علامتك: الاسم، الشعار، وش تبيع.",
+      "step2": "أضف المنتج اللي بتسوي عنه المقاطع (تقدر تضيفه مع العلامة).",
+      "step3": "اختر صنّاع المحتوى، اكتب الوصف، وأطلق حملتك.",
+      "create": "أنشئ علامتك",
+      "later": "مو الحين",
+      "bodyOrder": "طلبك يصير حملة لعلامة من علاماتك وللمنتج اللي تبين تظهره المقاطع. ياخذ دقيقتين، وبعدها ترجع على طول تكمل طلبك.",
+      "step3Order": "ارجع كمّل طلبك: الوصف والدفع."
+    }
+  },
+  "admin": {
+    "title": "لوحة الإدارة",
+    "badge": "الإدارة",
+    "asOf": "حتى {date}",
+    "nav": {
+      "label": "الإدارة",
+      "overview": "نظرة عامة",
+      "money": "الأموال",
+      "payouts": "التحويلات",
+      "brandApp": "فتح تطبيق العلامات",
+      "approvals": "الاعتماد",
+      "orders": "الطلبات",
+      "users": "المستخدمون",
+      "reports": "البلاغات"
+    },
+    "ranges": {
+      "30d": "آخر 30 يوم",
+      "90d": "آخر 90 يوم",
+      "year": "هذه السنة",
+      "all": "كل الفترات"
+    },
+    "breakdowns": {
+      "time": "حسب الوقت",
+      "brand": "العلامة",
+      "creator": "المبدع",
+      "platform": "المنصة",
+      "niche": "المجال"
+    },
+    "stats": {
+      "owed": "مستحق للمبدعين",
+      "owedHint": {
+        "zero": "ما فيه أحد ينتظر",
+        "one": "مبدع واحد ينتظر تحويل",
+        "two": "مبدعَين ينتظرون تحويل",
+        "few": "{count} مبدعين ينتظرون تحويل",
+        "many": "{count} مبدع ينتظرون تحويل",
+        "other": "{count} مبدع ينتظرون تحويل"
+      },
+      "held": "محجوز لطلبات جارية",
+      "heldHint": {
+        "zero": "ما فيه طلبات جارية",
+        "one": "طلب واحد · منها {fees} رسوم",
+        "two": "طلبين · منها {fees} رسوم",
+        "few": "{count} طلبات · منها {fees} رسوم",
+        "many": "{count} طلب · منها {fees} رسوم",
+        "other": "{count} طلب · منها {fees} رسوم"
+      },
+      "revenue": "الإيرادات",
+      "revenue30": "الإيرادات، آخر 30 يوم",
+      "revenueHint": {
+        "zero": "ما فيه مقاطع معتمدة",
+        "one": "من مقطع معتمد واحد",
+        "two": "من مقطعين معتمدين",
+        "few": "من {count} مقاطع معتمدة",
+        "many": "من {count} مقطع معتمد",
+        "other": "من {count} مقطع معتمد"
+      },
+      "paid": "مدفوعات العلامات",
+      "paid30": "مدفوعات العلامات، آخر 30 يوم",
+      "paidHint": "بعد استرداد {refunded}"
+    },
+    "overview": {
+      "title": "نظرة عامة",
+      "attention": "يحتاج انتباهك",
+      "toTransfer": {
+        "one": "مبدع واحد مستحق له {amount}",
+        "two": "مبدعَين مستحق لهم {amount}",
+        "few": "{count} مبدعين مستحق لهم {amount}",
+        "many": "{count} مبدع مستحق لهم {amount}",
+        "other": "{count} مبدع مستحق لهم {amount}"
+      },
+      "oldestWait": {
+        "zero": "اعتُمد اليوم",
+        "one": "أطول انتظار يوم واحد",
+        "two": "أطول انتظار يومين",
+        "few": "أطول انتظار {count} أيام",
+        "many": "أطول انتظار {count} يوم",
+        "other": "أطول انتظار {count} يوم"
+      },
+      "noBank": {
+        "one": "مبدع واحد له مستحقات وما أضاف حساب بنكي",
+        "two": "مبدعَين لهم مستحقات وما أضافوا حساب بنكي",
+        "few": "{count} مبدعين لهم مستحقات وما أضافوا حساب بنكي",
+        "many": "{count} مبدع لهم مستحقات وما أضافوا حساب بنكي",
+        "other": "{count} مبدع لهم مستحقات وما أضافوا حساب بنكي"
+      },
+      "reports": {
+        "one": "بلاغ محادثة واحد للمراجعة",
+        "two": "بلاغين محادثة للمراجعة",
+        "few": "{count} بلاغات محادثة للمراجعة",
+        "many": "{count} بلاغ محادثة للمراجعة",
+        "other": "{count} بلاغ محادثة للمراجعة"
+      },
+      "reportsSoon": "صفحة البلاغات قادمة.",
+      "openPayouts": "فتح التحويلات",
+      "openMoney": "عرض الأموال",
+      "view": "عرض",
+      "calm": "ما فيه شي يحتاجك الحين.",
+      "approvals": {
+        "one": "مبدع واحد بانتظار الاعتماد",
+        "two": "مبدعَين بانتظار الاعتماد",
+        "few": "{count} مبدعين بانتظار الاعتماد",
+        "many": "{count} مبدع بانتظار الاعتماد",
+        "other": "{count} مبدع بانتظار الاعتماد"
+      },
+      "openApprovals": "مراجعة الطلبات",
+      "openOrders": "فتح الطلبات",
+      "problems": {
+        "one": "بلاغ واحد يحتاج متابعة",
+        "two": "بلاغين يحتاجون متابعة",
+        "few": "{count} بلاغات تحتاج متابعة",
+        "many": "{count} بلاغ يحتاج متابعة",
+        "other": "{count} بلاغ يحتاج متابعة"
+      },
+      "openReports": "فتح البلاغات",
+      "brandWithdrawals": {
+        "one": "سحب علامة واحد بانتظار الإرسال: {amount}",
+        "two": "سحبين للعلامات بانتظار الإرسال: {amount} إجمالًا",
+        "few": "{count} سحوبات للعلامات بانتظار الإرسال: {amount} إجمالًا",
+        "many": "{count} سحب للعلامات بانتظار الإرسال: {amount} إجمالًا",
+        "other": "{count} سحب للعلامات بانتظار الإرسال: {amount} إجمالًا"
+      },
+      "oldestRequested": "أقدمها طُلب {date}"
+    },
+    "stuck": {
+      "title": {
+        "one": "طلب واحد متوقف",
+        "two": "طلبين متوقفين",
+        "few": "{count} طلبات متوقفة",
+        "many": "{count} طلب متوقف",
+        "other": "{count} طلب متوقف"
+      },
+      "hint": "طلبات ما تحركت من 3 أيام أو أكثر.",
+      "reasons": {
+        "offerExpired": {
+          "one": "بدون رد من يوم: يلزم الاسترداد",
+          "two": "بدون رد من يومين: يلزم الاسترداد",
+          "few": "بدون رد من {count} أيام: يلزم الاسترداد",
+          "many": "بدون رد من {count} يوم: يلزم الاسترداد",
+          "other": "بدون رد من {count} يوم: يلزم الاسترداد"
+        },
+        "reviewWaiting": {
+          "one": "المقطع ينتظر العلامة من يوم",
+          "two": "المقطع ينتظر العلامة من يومين",
+          "few": "المقطع ينتظر العلامة من {count} أيام",
+          "many": "المقطع ينتظر العلامة من {count} يوم",
+          "other": "المقطع ينتظر العلامة من {count} يوم"
+        },
+        "notReceived": {
+          "one": "أُرسل قبل يوم وما وصل",
+          "two": "أُرسل قبل يومين وما وصل",
+          "few": "أُرسل قبل {count} أيام وما وصل",
+          "many": "أُرسل قبل {count} يوم وما وصل",
+          "other": "أُرسل قبل {count} يوم وما وصل"
+        },
+        "late": {
+          "one": "متأخر يوم عن الموعد",
+          "two": "متأخر يومين عن الموعد",
+          "few": "متأخر {count} أيام عن الموعد",
+          "many": "متأخر {count} يوم عن الموعد",
+          "other": "متأخر {count} يوم عن الموعد"
+        }
+      }
+    },
+    "money": {
+      "title": "الأموال",
+      "subtitle": "من {from} إلى {to}",
+      "rangeLabel": "الفترة",
+      "byLabel": "تقسيم الإيرادات حسب",
+      "revenueTitle": "الإيرادات",
+      "revenueHint": "رسوم الخدمة 10% على المقاطع المعتمدة في هذه الفترة.",
+      "chartLabel": "الإيرادات لكل فترة",
+      "weekOf": "أسبوع {date}",
+      "colWeek": "الأسبوع",
+      "colMonth": "الشهر",
+      "colClips": "مقاطع معتمدة",
+      "colBrandPaid": "دفعت العلامات",
+      "colCreatorPay": "كسب المبدعون",
+      "colRevenue": "الإيرادات",
+      "colShare": "النسبة",
+      "noRevenue": "ما فيه مقاطع معتمدة في هذه الفترة",
+      "ledgerTitle": "العمليات",
+      "ledgerHint": "مدفوعات العلامات، والمبالغ المستردة لها، والتحويلات للمبدعين.",
+      "ledgerEmpty": "ما فيه عمليات في هذه الفترة",
+      "export": "تصدير CSV"
+    },
+    "ledger": {
+      "payment": "دفعة من {brand}",
+      "refund": "استرداد إلى {brand}",
+      "payout": "تحويل إلى {name}",
+      "payoutDetail": "المرجع {ref} · عدد الطلبات: {count}",
+      "types": {
+        "payment": "دفعة",
+        "refund": "استرداد",
+        "payout": "تحويل"
+      }
+    },
+    "payouts": {
+      "title": "تحويلات المبدعين",
+      "subtitle": "المقاطع المعتمدة، تُدفع للمبدعين بتحويل بنكي.",
+      "paidSoFar": "المحوَّل حتى الآن",
+      "transfers": {
+        "zero": "ما فيه تحويلات بعد",
+        "one": "تحويل واحد",
+        "two": "تحويلين",
+        "few": "{count} تحويلات",
+        "many": "{count} تحويل",
+        "other": "{count} تحويل"
+      },
+      "toTransfer": "بانتظار التحويل",
+      "toTransferHint": "الأطول انتظارًا أولًا. أرسل التحويل من البنك، وبعدها سجّله مدفوع مع رقم المرجع.",
+      "allPaid": "الكل استلم",
+      "allPaidHint": "يظهر المبدع هنا لما تعتمد العلامة مقطعه.",
+      "noBank": "ما أضاف حساب بنكي بعد",
+      "waitingForBank": "بانتظار بيانات البنك",
+      "orders": {
+        "one": "مقطع معتمد واحد",
+        "two": "مقطعين معتمدين",
+        "few": "{count} مقاطع معتمدة",
+        "many": "{count} مقطع معتمد",
+        "other": "{count} مقطع معتمد"
+      },
+      "waiting": {
+        "zero": "اعتُمد اليوم",
+        "one": "ينتظر من يوم",
+        "two": "ينتظر من يومين",
+        "few": "ينتظر من {count} أيام",
+        "many": "ينتظر من {count} يوم",
+        "other": "ينتظر من {count} يوم"
+      },
+      "markPaid": "تسجيل كمدفوع",
+      "drawerTitle": "تحويل إلى {name}",
+      "sendTo": "التحويل إلى",
+      "covers": "يشمل",
+      "approvedOn": "اعتُمد {date}",
+      "bankRef": "مرجع التحويل",
+      "bankRefHint": "من إيصال التحويل في البنك.",
+      "confirm": "تسجيل {amount} كمدفوع",
+      "doneTitle": "تم تسجيل {amount} لـ{name} كمدفوع (المرجع {ref})",
+      "doneHint": "صار في السجل. لما يشتغل النظام الخلفي، يوصل المبدع إشعار «تم إرسال السحب».",
+      "history": "سجل تحويلات المبدعين",
+      "noHistory": "ما فيه تحويلات بعد",
+      "colDate": "التاريخ",
+      "colCreator": "المبدع",
+      "colIban": "الآيبان",
+      "colRef": "المرجع",
+      "colOrders": "المقاطع",
+      "colAmount": "المبلغ",
+      "errors": {
+        "refRequired": "اكتب مرجع التحويل.",
+        "nothingOwed": "ما فيه مستحقات لهذا المبدع الحين.",
+        "noBank": "هذا المبدع ما أضاف حساب بنكي بعد.",
+        "changed": "تغيّر شي من فتحت هذي الصفحة. سكّرها وحاول مرة ثانية."
+      },
+      "bankChanged": "تغيّرت بيانات البنك قبل {days} أيام. تأكد من المبدع قبل التحويل.",
+      "bankChangedShort": "تغيّرت بيانات البنك قبل {days} أيام"
+    },
+    "forms": {
+      "close": "إغلاق"
+    },
+    "who": {
+      "creator": "المبدع",
+      "brand": "العلامة",
+      "admin": "100clips"
+    },
+    "waiting": {
+      "accept": "قبول العرض",
+      "receive": "تأكيد وصول المنتج",
+      "film": "التصوير والرفع",
+      "revise": "رفع النسخة الجديدة",
+      "ship": "إرسال المنتج",
+      "review": "مراجعة المقطع",
+      "collect": "استرجاع المنتج",
+      "refundExpired": "انتهى العرض، يلزم استرداد المبلغ للعلامة",
+      "transfer": "تحويل أجر المبدع",
+      "done": "مكتمل",
+      "closed": "مغلق، والمبلغ رجع للعلامة"
+    },
+    "events": {
+      "offered": "{brand} أرسلت العرض",
+      "accepted": "{creator} قبل العرض",
+      "declined": "{creator} اعتذر عن العرض",
+      "sent": "{brand} أرسلت المنتج",
+      "received": "{creator} استلم المنتج",
+      "uploaded": "{creator} رفع المقطع",
+      "revisionRequested": "{brand} طلبت تعديل",
+      "approved": "{brand} اعتمدت المقطع",
+      "released": "تحرير الدفعة لـ{creator}",
+      "cancelled": "إلغاء الطلب",
+      "returned": "{brand} استرجعت المنتج",
+      "expired": "انتهى العرض بدون رد، ورجع المبلغ لـ{brand}"
+    },
+    "activity": {
+      "title": "نشاط الإدارة",
+      "hint": "كل إجراء من 100clips هنا، مع الملاحظة اللي انكتبت وقتها.",
+      "empty": "ما فيه إجراءات من الإدارة بعد.",
+      "payoutSent": "تسجيل تحويل {amount} كمدفوع (المرجع {ref})",
+      "deadlineExtended": "تمديد الموعد إلى {date}",
+      "orderCancelled": "إلغاء واسترداد {amount} لرصيد العلامة",
+      "creatorApproved": "اعتماد الطلب: الملف صار ظاهر",
+      "changesRequested": "طلب تعديلات على الطلب",
+      "creatorRejected": "رفض الطلب",
+      "suspended": "إيقاف الحساب",
+      "unsuspended": "رفع الإيقاف",
+      "loginReset": "إعادة تعيين الدخول",
+      "withdrawalSent": "إرسال سحب علامة بقيمة {amount} (المرجع {ref})",
+      "withdrawalRejected": "رفض سحب علامة بقيمة {amount}، والمبلغ رجع للرصيد",
+      "problemResolved": "حل بلاغ مشكلة"
+    },
+    "approvals": {
+      "title": "اعتماد المبدعين",
+      "subtitle": "المبدع الجديد ما يظهر للعلامات إلا بعد ما تراجع ملفه ومقاطعه حسب قواعد المحتوى.",
+      "tabsLabel": "حالة الطلب",
+      "status": {
+        "pending": "بانتظار المراجعة",
+        "changes_requested": "مطلوب تعديلات",
+        "rejected": "مرفوض",
+        "approved": "معتمد"
+      },
+      "empty": {
+        "pending": "ما فيه طلبات بانتظار المراجعة",
+        "changes_requested": "ما فيه أحد يعدّل طلبه",
+        "rejected": "ما فيه طلبات مرفوضة",
+        "approved": "ما فيه طلبات معتمدة بعد"
+      },
+      "samples": {
+        "one": "مقطع واحد",
+        "two": "مقطعين",
+        "few": "{count} مقاطع",
+        "many": "{count} مقطع",
+        "other": "{count} مقطع"
+      },
+      "followers": "{count} متابع",
+      "appliedOn": "قدّم {date}",
+      "samplesTitle": "المقاطع النموذجية",
+      "samplesHint": "شاهد كل مقطع وقارنه بقواعد المحتوى قبل القرار.",
+      "niches": "المجالات",
+      "prices": "الباقات والأسعار",
+      "reviewTitle": "مراجعتك",
+      "rulesTitle": "المقاطع ملتزمة بقواعد المحتوى",
+      "rules": {
+        "noMusic": "بدون موسيقى",
+        "appropriateClothes": "لبس مناسب"
+      },
+      "decision": "القرار",
+      "decisions": {
+        "approve": "اعتماد",
+        "changes": "طلب تعديلات",
+        "reject": "رفض"
+      },
+      "note": "ملاحظة للمبدع",
+      "noteOptional": "ملاحظة للمبدع (اختياري)",
+      "notePlaceholder": "وش يعدّل، أو السبب",
+      "noteHint": "يشوفها المبدع في التطبيق.",
+      "submit": {
+        "none": "اختر القرار",
+        "approve": "اعتماد وإظهار الملف",
+        "changes": "إرجاع للتعديل",
+        "reject": "رفض الطلب"
+      },
+      "errors": {
+        "pickDecision": "اختر القرار.",
+        "checkRules": "أكّد قاعدتي المحتوى للاعتماد، أو اطلب تعديلات.",
+        "noteRequired": "اكتب للمبدع وش يعدّل أو السبب.",
+        "alreadyDecided": "هذا الطلب انحسم قبل."
+      },
+      "decided": {
+        "approved": "تم اعتماد {name} وصار ملفه ظاهر. العلامات تقدر تلقاه وتدعوه الحين.",
+        "changes_requested": "رجع الطلب لـ{name} مع ملاحظتك.",
+        "rejected": "تم رفض طلب {name}."
+      },
+      "lastDecision": "القرار",
+      "after": {
+        "approved": "الملف ظاهر للعلامات.",
+        "changes_requested": "بانتظار المبدع يحدّث ملفه أو مقاطعه. يرجع هنا لما يعيد الإرسال.",
+        "rejected": "يقدر المبدع يقدّم مرة ثانية بمقاطع جديدة."
+      },
+      "openProfile": "فتح الملف"
+    },
+    "orders": {
+      "title": "الطلبات والحملات",
+      "subtitle": "كل الطلبات في 100clips، ومين ينتظر مين.",
+      "search": "ابحث برقم الطلب أو العلامة أو المبدع أو الحملة",
+      "filtersLabel": "عرض",
+      "filters": {
+        "all": "الكل",
+        "late": "متأخرة",
+        "brandReview": "بانتظار مراجعة العلامة",
+        "stuck": "متوقفة",
+        "running": "جارية",
+        "done": "معتمدة",
+        "closed": "مرفوضة أو ملغية"
+      },
+      "empty": "ما فيه طلبات هنا",
+      "emptySearch": "ما فيه نتائج لـ«{q}».",
+      "campaign": "حملة",
+      "due": "الموعد {date}",
+      "noDeadline": "بدون موعد",
+      "late": "متأخر",
+      "lateBy": {
+        "one": "متأخر يوم",
+        "two": "متأخر يومين",
+        "few": "متأخر {count} أيام",
+        "many": "متأخر {count} يوم",
+        "other": "متأخر {count} يوم"
+      },
+      "details": "التفاصيل",
+      "format": "الصيغة",
+      "created": "تاريخ الطلب",
+      "deadline": "الموعد",
+      "extendedFrom": "مدّدته 100clips من {date}",
+      "source": "المصدر",
+      "fromCampaign": "حملة: {title}",
+      "directOffer": "عرض مباشر",
+      "revisionNote": "ملاحظة التعديل",
+      "shipping": "المنتج",
+      "sentOn": "أُرسل {date}، ما وصل بعد",
+      "received": "وصل {date}",
+      "timeline": "السجل",
+      "money": "المبالغ",
+      "creatorPay": "أجر المبدع",
+      "brandPaid": "دفعت العلامة",
+      "moneyHeld": "محجوز لين تعتمد العلامة المقطع.",
+      "moneyRefunded": "رجع {amount} لرصيد العلامة.",
+      "moneyPaid": "تم التحويل للمبدع يوم {date} (المرجع {ref}).",
+      "moneyOwed": {
+        "zero": "اعتُمد اليوم. بانتظار التحويل للمبدع.",
+        "one": "اعتُمد قبل يوم. بانتظار التحويل للمبدع.",
+        "two": "اعتُمد قبل يومين. بانتظار التحويل للمبدع.",
+        "few": "اعتُمد قبل {count} أيام. بانتظار التحويل للمبدع.",
+        "many": "اعتُمد قبل {count} يوم. بانتظار التحويل للمبدع.",
+        "other": "اعتُمد قبل {count} يوم. بانتظار التحويل للمبدع."
+      },
+      "extend": "تمديد الموعد",
+      "extendTitle": "تمديد موعد {id}",
+      "extendWhat": "يتغير موعد هذا الطلب بس، وما يصير إلا لتاريخ أبعد.",
+      "newDeadline": "الموعد الجديد",
+      "noteOptional": "ملاحظة (اختياري)",
+      "extendConfirm": "حفظ الموعد الجديد",
+      "extendDone": "تم تمديد الموعد.",
+      "cancel": "إلغاء واسترداد",
+      "cancelTitle": "إلغاء {id}",
+      "cancelWhat": "يتوقف الطلب ويرجع {amount} (مع رسوم الخدمة) لرصيد العلامة، وما ينصرف للمبدع شي. ما تقدر تتراجع بعدها.",
+      "reason": "السبب",
+      "reasonHint": "ينحفظ في سجل النشاط.",
+      "cancelConfirm": "إلغاء واسترداد {amount}",
+      "cancelDone": "تم الإلغاء. رجع {amount} لرصيد العلامة.",
+      "errors": {
+        "noteRequired": "اكتب سبب الإلغاء.",
+        "cantChange": "هذا الطلب ما يتعدّل الحين.",
+        "deadlineLater": "اختر تاريخ بعد اليوم وبعد الموعد الحالي."
+      }
+    },
+    "users": {
+      "title": "المستخدمون",
+      "subtitle": "العلامات والمبدعون في 100clips.",
+      "search": "ابحث بالاسم أو المعرّف أو الإيميل أو الرقم",
+      "tabsLabel": "نوع المستخدم",
+      "creators": "المبدعون",
+      "brands": "العلامات",
+      "empty": "ما فيه نتائج",
+      "live": "ظاهر",
+      "active": "نشط",
+      "suspendedBadge": "موقوف",
+      "earned": "كسب {amount}",
+      "spent": "صرف {amount}",
+      "ordersCount": {
+        "zero": "ما فيه طلبات",
+        "one": "طلب واحد",
+        "two": "طلبين",
+        "few": "{count} طلبات",
+        "many": "{count} طلب",
+        "other": "{count} طلب"
+      },
+      "suspend": "إيقاف",
+      "unsuspend": "رفع الإيقاف",
+      "suspendTitle": "إيقاف {name}",
+      "unsuspendTitle": "رفع الإيقاف عن {name}",
+      "suspendWhat": {
+        "creator": "ما تقدر العلامات تلقاه أو تدعوه وهو موقوف. الطلبات الجارية تكمل.",
+        "brand": "ما تقدر تدفع لحملات أو دعوات جديدة وهي موقوفة. الطلبات الجارية تكمل."
+      },
+      "unsuspendWhat": {
+        "creator": "يرجع يظهر للعلامات.",
+        "brand": "ترجع تقدر تدفع لشغل جديد."
+      },
+      "reason": "السبب",
+      "reasonOptional": "ملاحظة (اختياري)",
+      "suspendConfirm": "إيقاف",
+      "unsuspendConfirm": "رفع الإيقاف",
+      "suspendedDone": "تم الإيقاف.",
+      "unsuspendedDone": "تم رفع الإيقاف.",
+      "suspendedSince": "موقوف من {date}",
+      "errors": {
+        "reasonRequired": "اكتب السبب لسجل النشاط."
+      },
+      "reset": "إعادة تعيين الدخول",
+      "resetTitle": "إعادة تعيين الدخول",
+      "resetWhat": {
+        "brand": "نرسل لصاحب الحساب رابط لتعيين كلمة مرور جديدة، ونسجّل خروجه من كل الأجهزة.",
+        "creator": "نسجّل خروجه من كل الأجوال، ويدخل مرة ثانية برمز يوصل لرقمه."
+      },
+      "resetConfirm": "إعادة تعيين",
+      "resetDone": {
+        "brand": "انرسل إيميل إعادة تعيين كلمة المرور.",
+        "creator": "تم تسجيل الخروج من كل الأجهزة."
+      },
+      "rating": "التقييم",
+      "noRating": "ما فيه تقييمات بعد",
+      "earnedTotal": "إجمالي الأرباح",
+      "bankTitle": "بيانات البنك",
+      "bankHint": "كل تغيير ينحفظ، الأحدث أولًا.",
+      "bankCurrent": "الحالي",
+      "bankOld": "قديم",
+      "bankByCreator": "أضافه المبدع · {date}",
+      "bankByAdmin": "صحّحته 100clips · {date}",
+      "orderHistory": "سجل الطلبات",
+      "noOrders": "ما فيه طلبات بعد.",
+      "transfers": "التحويلات",
+      "owner": "صاحب الحساب",
+      "balance": "الرصيد",
+      "spentTotal": "المصروف على مقاطع معتمدة",
+      "website": "الموقع",
+      "registration": "التسجيل التجاري",
+      "noRegistration": "ما أضافوا دول بعد.",
+      "cr": "سجل تجاري {number}",
+      "noCr": "بدون سجل تجاري",
+      "vat": "شهادة الضريبة",
+      "noVat": "بدون شهادة ضريبة"
+    },
+    "support": {
+      "contact": "تواصل",
+      "title": "محادثة مع {name}",
+      "writingAs": "تكتب باسم الحساب الرسمي. يشوفه المبدع مع علامة التوثيق.",
+      "placeholder": "رسالة باسم 100Clips Support",
+      "send": "إرسال",
+      "empty": "ما فيه رسائل مع {name} بعد. رسالتك تظهر في رسائله، مثبّتة فوق."
+    },
+    "withdrawals": {
+      "title": "سحوبات العلامات",
+      "hint": "مبالغ طلبت العلامات سحبها من رصيدها. انخصمت من الرصيد، ولازم تنرسل خلال 5–7 أيام عمل.",
+      "empty": "ما فيه سحوبات بعد",
+      "requested": "طُلب {date}",
+      "arrives": "الموعد من {from} إلى {to}",
+      "sentOn": "أُرسل {date}",
+      "noBank": "ما فيه حساب بنكي في الحساب الحين. ما يقدر ينرسل لين يضيفون واحد.",
+      "status": {
+        "requested": "بانتظار الإرسال",
+        "sent": "مُرسل",
+        "rejected": "مرفوض"
+      },
+      "markSent": "تسجيل كمُرسل",
+      "sendTitle": "إرسال {amount} للعلامة",
+      "sendConfirm": "تسجيل {amount} كمُرسل",
+      "sentDone": "تم تسجيل {amount} كمُرسل.",
+      "reject": "رفض",
+      "rejectTitle": "رفض سحب {amount}",
+      "rejectWhat": "يرجع {amount} لرصيد العلامة، ويشوفون ملاحظتك.",
+      "noteToBrand": "ملاحظة للعلامة",
+      "rejectConfirm": "رفض وإرجاع للرصيد",
+      "rejectedDone": "تم الرفض. رجع {amount} لرصيد العلامة.",
+      "errors": {
+        "noBank": "ما فيه حساب بنكي في الحساب الحين. اطلب منهم يضيفون واحد أول.",
+        "noteRequired": "اكتب للعلامة السبب."
+      }
+    },
+    "reports": {
+      "title": "البلاغات",
+      "subtitle": "مشاكل بلّغت عنها العلامات على الطلبات، ومحادثات تم الإبلاغ عنها.",
+      "problemsTitle": "مشاكل على الطلبات",
+      "problemsHint": "تابع المشكلة، وبعدها احسمها برد. العلامة تشوفه على الطلب.",
+      "tabsLabel": "حالة البلاغ",
+      "status": {
+        "open": "مفتوح",
+        "resolved": "محلول"
+      },
+      "empty": {
+        "open": "ما فيه بلاغات مفتوحة",
+        "resolved": "ما فيه بلاغات محلولة بعد"
+      },
+      "reasons": {
+        "notDelivered": "المقطع ما تسلّم",
+        "notAsAgreed": "المقطع مو حسب الاتفاق",
+        "productIssue": "مشكلة في المنتج",
+        "creatorConduct": "تصرف المبدع",
+        "payment": "مشكلة في الدفع",
+        "other": "شي ثاني"
+      },
+      "openOrder": "فتح الطلب: {title} ({id})",
+      "repliedOn": "الرد {date}:",
+      "onOrder": "بلاغ من العلامة: {reason}",
+      "resolve": "حل البلاغ",
+      "resolveTitle": "حل البلاغ",
+      "reply": "الرد على العلامة",
+      "replyHint": "وش لقيت ووش بيصير الحين. العلامة تشوفه على الطلب.",
+      "resolveConfirm": "حل وإرسال الرد",
+      "resolvedDone": "تم الحل. العلامة تشوف ردك على الطلب.",
+      "errors": {
+        "replyRequired": "اكتب رد للعلامة.",
+        "alreadyResolved": "هذا البلاغ محلول قبل."
+      },
+      "chatTitle": "محادثات مُبلّغ عنها",
+      "chatHint": "علامات بلّغت عن محادثات مع مبدعين. الرسائل تبقى ظاهرة للطرفين.",
+      "chatEmpty": "ما فيه محادثات مُبلّغ عنها."
+    },
+    "waitlist": {
+      "title": "دول بانتظار الإطلاق",
+      "hint": "صناع محتوى من خارج البحرين طلبوا نعلمهم لما نطلق عندهم. كل طلب صوت لدولته.",
+      "latest": "آخر طلب {date}",
+      "requests": {
+        "one": "طلب واحد",
+        "two": "طلبين",
+        "few": "{count} طلبات",
+        "many": "{count} طلب",
+        "other": "{count} طلب"
+      }
+    }
+  },
+  "offer": {
+    "waiting": "بانتظار قبول {name}",
+    "hoursLeft": {
+      "zero": "العرض ينتهي الحين",
+      "one": "باقي ساعة على انتهاء العرض",
+      "two": "باقي ساعتين على انتهاء العرض",
+      "few": "باقي {count} ساعات على انتهاء العرض",
+      "many": "باقي {count} ساعة على انتهاء العرض",
+      "other": "باقي {count} ساعة على انتهاء العرض"
+    },
+    "withdraw": "سحب العرض",
+    "closed": {
+      "cancelled": "تم سحب هالعرض",
+      "expired": "ما وصل رد من {name} خلال {hours} ساعة",
+      "declined": "اعتذار من {name} عن العرض"
+    },
+    "reason": "السبب: {reason}",
+    "reasons": {
+      "busy": "مشغول هالفترة",
+      "notMyNiche": "ما يناسب محتواه",
+      "other": "سبب ثاني"
+    },
+    "refunded": "رجع {amount} لرصيدك.",
+    "withdrawDialog": {
+      "title": "تسحب عرضك لـ{name}؟",
+      "body": "بعدها ما يقدر {name} يقبل العرض. ما تقدر تتراجع عن السحب، بس تقدر ترسل عرض جديد في أي وقت.",
+      "refund": "يرجع لرصيدك",
+      "keep": "خلّ العرض",
+      "confirm": "سحب العرض"
+    }
+  },
+  "versions": {
+    "label": "نسخ المقطع",
+    "tab": "النسخة {n}",
+    "latest": "النسخة {n}، الأحدث، بعد طلب التعديل.",
+    "only": "النسخة 1",
+    "older": "النسخة {n}، قبل طلب التعديل. الأحدث هي النسخة {latest}."
+  },
+  "settings": {
+    "bank": {
+      "title": "الحساب البنكي للسحب",
+      "hint": "الفلوس اللي تسحبها من رصيدك (المبالغ المسترجعة أو الشحن غير المستخدم) تروح لهالحساب. تقدر تغيّره أو تحذفه أي وقت، ونتأكد منه مرة ثانية قبل كل تحويل.",
+      "change": "تغيير",
+      "remove": "حذف",
+      "removeConfirm": "تحذف هالحساب البنكي؟ بتحتاج تضيف حساب قبل السحب الجاي.",
+      "removeConfirmWaiting": "عندك سحب في الطريق. تحذف الحساب البنكي؟ ما نقدر نحوّل لين تضيف حساب من جديد.",
+      "holder": "اسم صاحب الحساب",
+      "holderHint": "مثل ما هو مسجّل في البنك بالضبط.",
+      "iban": "رقم الآيبان (IBAN)",
+      "ibanHint": "حساب بنكي في البحرين (الآيبان يبدأ بـ BH).",
+      "save": "حفظ الحساب البنكي",
+      "errors": {
+        "holderRequired": "اكتب اسم صاحب الحساب.",
+        "ibanRequired": "اكتب رقم الآيبان.",
+        "ibanCharacters": "الآيبان فيه حروف وأرقام بس.",
+        "ibanCountry": "استخدم آيبان بحريني (يبدأ بـ BH). دول الخليج الثانية جاية.",
+        "ibanLength": "طول الآيبان مو صحيح لهالدولة.",
+        "ibanChecksum": "الآيبان مو صحيح. تأكد من الأرقام."
+      }
+    }
+  },
+  "faces": {
+    "shows": "يظهر الوجه",
+    "faceless": "بدون وجه"
   }
 }

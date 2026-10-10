@@ -2,6 +2,8 @@ import type { Account, Brand, Product } from "./types";
 
 /** Fixed "today" so dummy dates and relative times stay stable on server and client. */
 export const DEMO_TODAY = "2026-10-03";
+/** The demo's "now": midday in Bahrain on DEMO_TODAY, for things counted in hours (offers expiring). */
+export const DEMO_NOW = `${DEMO_TODAY}T12:00:00+03:00`;
 
 export const account: Account = {
   id: "acc-mona",
@@ -9,6 +11,7 @@ export const account: Account = {
   email: "mona@example.com",
   phone: "+973 3300 0000",
   balance: 40,
+  bankAccount: { holder: "MONA AL KAABI", iban: "BH67BMAG00001299123456" },
 };
 
 export const brands: Brand[] = [
@@ -16,24 +19,21 @@ export const brands: Brand[] = [
     id: "muharraq-roastery",
     name: { ar: "محمصة المحرق", en: "Muharraq Roastery" },
     logo: "/placeholders/logo-roastery.svg",
-    cover: "/placeholders/cover-roastery.svg",
     industry: "food_beverage",
-    city: { ar: "المحرق", en: "Muharraq" },
     about: {
       ar: "محمصة قهوة مختصة في المحرق، نحمّص كل أسبوع ونقدّم القهوة العربية والمختصة.",
       en: "A specialty coffee roastery in Muharraq. We roast weekly and serve Arabic and specialty coffee.",
     },
     website: "https://example.com/roastery",
     instagram: "muharraq.roastery",
-    crNumber: "123456-1",
+    countries: ["bh"],
+    registrations: { bh: { crNumber: "123456-1" } },
   },
   {
     id: "nouf-abayas",
     name: { ar: "عبايات نوف", en: "Nouf Abayas" },
     logo: "/placeholders/logo-nouf.svg",
-    cover: "/placeholders/cover-nouf.svg",
     industry: "fashion",
-    city: { ar: "المنامة", en: "Manama" },
     about: {
       ar: "متجر عبايات أونلاين بتصاميم محتشمة وأقمشة خفيفة، مع توصيل لكل دول الخليج.",
       en: "An online abaya store with modest designs and light fabrics, delivering across the Gulf.",

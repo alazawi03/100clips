@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 type DropdownProps = {
@@ -13,16 +13,34 @@ type DropdownProps = {
   /** Open below the trigger (default) or above it, e.g. at the bottom of the sidebar. */
   placement?: "below" | "above";
   panelClassName?: string;
+  /** Also open while a mouse hovers the trigger or panel. Click and keyboard still work. */
+  openOnHover?: boolean;
   children: (close: () => void) => ReactNode;
 };
 
 /** Button that opens a panel below it. Closes on outside click, Escape, or when a child calls close(). */
-export function Dropdown({ trigger, triggerLabel, triggerClassName, align = "start", placement = "below", panelClassName, children }: DropdownProps) {
+export function Dropdown({ trigger, triggerLabel, triggerClassName, align = "start", placement = "below", panelClassName, openOnHover, children }: DropdownProps) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const panelId = useId();
+  const leaveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // Mouse only: touch has no hover, and opening on tap is handled by click.
+  const hover = openOnHover
+    ? {
+        onPointerEnter: (e: ReactPointerEvent) => {
+          if (e.pointerType !== "mouse") return;
+          clearTimeout(leaveTimer.current);
+          setOpen(true);
+        },
+        onPointerLeave: (e: ReactPointerEvent) => {
+          if (e.pointerType !== "mouse") return;
+          // A short delay so moving from the trigger to the panel doesn't close it.
+          leaveTimer.current = setTimeout(() => setOpen(false), 150);
+        },
+      }
+    : {};
 
   // Slide the panel back inside the screen if it would run off either edge.
   useLayoutEffect(() => {
@@ -54,14 +72,15 @@ export function Dropdown({ trigger, triggerLabel, triggerClassName, align = "sta
   }, [open]);
 
   return (
-    <div ref={root} className="relative min-w-0">
+    <div ref={root} className="relative min-w-0" {...hover}>
       <button
         ref={button}
         type="button"
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={triggerLabel}
-        onClick={() => setOpen((v) => !v)}
+        // With hover, a mouse click keeps the panel open instead of toggling it shut.
+        onClick={(e) => setOpen((v) => (openOnHover && (e.nativeEvent as PointerEvent).pointerType === "mouse" ? true : !v))}
         className={triggerClassName}
       >
         {trigger}

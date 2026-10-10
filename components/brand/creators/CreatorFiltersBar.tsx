@@ -1,15 +1,15 @@
 "use client";
 
-import { Languages, LayoutGrid, Mars, MonitorPlay, Search, Users, Venus, X } from "lucide-react";
+import { LayoutGrid, MonitorPlay, ScanFace, Search, Users, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { useI18n } from "@/components/i18n/I18nProvider";
-import { nicheIcon } from "@/components/ui/nicheIcons";
+import { faceEmoji, genderEmoji, nicheEmoji } from "@/lib/data/emojis";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
 import { FilterMenu, type FilterOption } from "./FilterMenu";
 import { SortMenu } from "./SortMenu";
 import { cn } from "@/lib/cn";
-import { CONTENT_LANGUAGES, GENDERS, NICHES, PLATFORMS, SORTS } from "@/lib/data/creatorFilters";
+import { FACES, GENDERS, NICHES, PLATFORMS, SORTS } from "@/lib/data/creatorFilters";
 
 export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
   const { t } = useI18n();
@@ -38,7 +38,7 @@ export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
-  const active = ["platform", "niche", "gender", "lang"].some((k) => params.get(k)) || !!params.get("q");
+  const active = ["platform", "niche", "gender", "face"].some((k) => params.get(k)) || !!params.get("q");
 
   const icon = "size-4 shrink-0";
   const filters: Array<{ key: string; label: string; icon: ReactNode; options: FilterOption[] }> = [
@@ -52,25 +52,19 @@ export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
       key: "niche",
       label: t("explore.niche"),
       icon: <LayoutGrid aria-hidden className={icon} />,
-      options: NICHES.map((n) => {
-        const Icon = nicheIcon[n];
-        return { value: n, label: t(`niches.${n}`), icon: <Icon aria-hidden className="size-5 text-text-muted" strokeWidth={1.75} /> };
-      }),
+      options: NICHES.map((n) => ({ value: n, label: t(`niches.${n}`), icon: <span aria-hidden className="text-base leading-none">{nicheEmoji[n]}</span> })),
     },
     {
       key: "gender",
       label: t("explore.gender"),
       icon: <Users aria-hidden className={icon} />,
-      options: GENDERS.map((g) => {
-        const Icon = g === "female" ? Venus : Mars;
-        return { value: g, label: t(`genders.${g}`), icon: <Icon aria-hidden className="size-5 text-text-muted" strokeWidth={1.75} /> };
-      }),
+      options: GENDERS.map((g) => ({ value: g, label: t(`genders.${g}`), icon: <span aria-hidden className="text-base leading-none">{genderEmoji[g]}</span> })),
     },
     {
-      key: "lang",
-      label: t("explore.language"),
-      icon: <Languages aria-hidden className={icon} />,
-      options: CONTENT_LANGUAGES.map((l) => ({ value: l, label: t(`languages.${l}`) })),
+      key: "face",
+      label: t("explore.face"),
+      icon: <ScanFace aria-hidden className={icon} />,
+      options: FACES.map((v) => ({ value: v, label: t(`faces.${v}`), icon: <span aria-hidden className="text-base leading-none">{faceEmoji[v]}</span> })),
     },
   ];
 

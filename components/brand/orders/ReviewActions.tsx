@@ -1,18 +1,31 @@
 "use client";
 
-import { Check, PencilLine } from "lucide-react";
-import { useActionState, useState } from "react";
+import { Check, PencilLine, Star } from "lucide-react";
+import { useActionState, useRef, useState } from "react";
 import { approveOrder, requestRevision, type FormState } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
 import { Field, Textarea } from "@/components/ui/Form";
+import { cn } from "@/lib/cn";
 
-/** Approve the delivered clip, or open a short form to ask for a revision. */
-export function ReviewActions({ orderId }: { orderId: string }) {
-  const { t } = useI18n();
+type Props = {
+  orderId: string;
+  creatorName: string;
+  /** Revisions still available on this clip (one is included). */
+  revisionsLeft: number;
+};
+
+/**
+ * Approve the delivered clip (green, then a confirmation with stars and an optional comment),
+ * or ask for a revision while one is still left.
+ */
+export function ReviewActions({ orderId, creatorName, revisionsLeft }: Props) {
+  const { t, tp } = useI18n();
   const [revising, setRevising] = useState(false);
   const [state, sendRevision, pending] = useActionState<FormState, FormData>(requestRevision.bind(null, orderId), null);
   const error = state?.errors.note ? t(state.errors.note) : undefined;
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [rating, setRating] = useState(0);
 
   if (revising) {
     return (
@@ -33,17 +46,69 @@ export function ReviewActions({ orderId }: { orderId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-2 sm:flex-row">
-      <form action={approveOrder.bind(null, orderId)} className="flex-1">
-        <Button type="submit" variant="primary" className="w-full">
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Button variant="success" className="flex-1" onClick={() => dialog.current?.showModal()}>
           <Check aria-hidden />
           {t("orderDetail.approve")}
         </Button>
-      </form>
-      <Button variant="secondary" className="flex-1" onClick={() => setRevising(true)}>
-        <PencilLine aria-hidden />
-        {t("orderDetail.requestRevision")}
-      </Button>
+        <Button variant="secondary" className="flex-1 disabled:cursor-not-allowed disabled:opacity-50" disabled={revisionsLeft === 0} onClick={() => setRevising(true)}>
+          <PencilLine aria-hidden />
+          {t("orderDetail.requestRevision")}
+        </Button>
+      </div>
+      <p className="text-caption text-text-muted">{tp("orderDetail.revisionsLeft", revisionsLeft)}</p>
+
+      {/* Confirm approval: rate the creator and leave a comment (both optional), then release the payment. */}
+      <dialog
+        ref={dialog}
+        aria-labelledby={`approve-${orderId}`}
+        onClick={(e) => e.target === dialog.current && dialog.current?.close()}
+        className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-[var(--radius-xl)] border border-border bg-card p-0 text-text shadow-lift backdrop:bg-[var(--overlay)]"
+      >
+        <form action={approveOrder.bind(null, orderId)} className="flex flex-col gap-5 p-5 sm:p-6">
+          <div className="flex flex-col gap-1">
+            <h2 id={`approve-${orderId}`} className="text-h3 font-medium">
+              {t("orderDetail.approveTitle", { name: creatorName })}
+            </h2>
+            <p className="text-small text-text-muted">{t("orderDetail.approveHint", { name: creatorName })}</p>
+          </div>
+
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 font-medium">{t("orderDetail.rateLabel", { name: creatorName })}</legend>
+            <input type="hidden" name="rating" value={rating || ""} />
+            <div role="radiogroup" aria-label={t("orderDetail.rateLabel", { name: creatorName })} className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  role="radio"
+                  aria-checked={rating === n}
+                  aria-label={String(n)}
+                  onClick={() => setRating(n)}
+                  className="grid size-10 place-items-center rounded-full hover:bg-surface"
+                >
+                  <Star aria-hidden className={cn("size-7", n <= rating ? "fill-warning text-warning" : "text-border")} />
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <Field label={t("orderDetail.reviewLabel")} htmlFor={`review-${orderId}`}>
+            <Textarea id={`review-${orderId}`} name="review" maxLength={500} className="min-h-24" placeholder={t("orderDetail.reviewPlaceholder")} />
+          </Field>
+
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="ghost" onClick={() => dialog.current?.close()}>
+              {t("common.cancel")}
+            </Button>
+            <Button type="submit" variant="success">
+              <Check aria-hidden />
+              {t("orderDetail.approveConfirm")}
+            </Button>
+          </div>
+        </form>
+      </dialog>
     </div>
   );
 }

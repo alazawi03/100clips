@@ -10,13 +10,18 @@ export function brandToValues(b: Brand, locale: Locale): BrandValues {
     nameEn: b.name.en,
     logo: b.logo,
     industry: b.industry,
-    city: b.city[locale],
     about: b.about?.[locale],
     website: b.website,
     instagram: b.instagram,
     tiktok: b.tiktok,
-    cover: b.cover,
-    crNumber: b.crNumber,
+    countries: b.countries,
+    // Per country: cr_bh, vat_bh, … (the form's field names).
+    ...Object.fromEntries(
+      Object.entries(b.registrations ?? {}).flatMap(([country, r]) => [
+        [`cr_${country}`, r?.crNumber],
+        [`vat_${country}`, r?.vatCertificate],
+      ]),
+    ),
   };
 }
 
@@ -39,5 +44,6 @@ export function productToValues(p: Product, locale: Locale): ProductValues {
     venueKind: d.type === "venue" ? d.kind : undefined,
     location: d.type === "venue" ? d.location : undefined,
     hours: d.type === "venue" ? d.hours : undefined,
+    mapUrl: d.type === "venue" ? d.mapUrl : undefined,
   };
 }

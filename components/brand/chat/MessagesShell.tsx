@@ -16,7 +16,7 @@ export function MessagesShell({ conversations, children }: { conversations: Conv
   const active = useSelectedLayoutSegment();
 
   return (
-    <div className="grid gap-4 md:grid-cols-[320px_minmax(0,1fr)] md:items-start">
+    <div data-hug className="grid gap-4 md:grid-cols-[320px_minmax(0,1fr)] md:items-start">
       <Card className={cn("overflow-hidden", active && "hidden md:block")}>
         <h1 className="border-b border-border px-5 py-4 text-h2 font-medium">{t("chat.title")}</h1>
         {conversations.length === 0 ? (

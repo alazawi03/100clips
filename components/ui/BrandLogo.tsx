@@ -2,6 +2,7 @@ import Image from "next/image";
 import { cn, hueFrom } from "@/lib/cn";
 
 const sizes = {
+  xs: "size-6 text-[11px]",
   sm: "size-8 text-[13px]",
   md: "size-10 text-[15px]",
   lg: "size-14 text-[20px]",

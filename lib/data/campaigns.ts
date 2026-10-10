@@ -1,23 +1,9 @@
-import type { Application, ApplicationStatus, Campaign, Localized } from "./types";
-
-const pitches: Localized[] = [
-  { ar: "أقدر أصور التجربة هالأسبوع، وأغلب متابعيني من البحرين.", en: "I can film this week, and most of my followers are in Bahrain." },
-  { ar: "صورت لكافيهات قبل، وأحب أبين أجواء المكان من الداخل.", en: "I've filmed cafés before and love showing the space inside." },
-  { ar: "أقترح أصور مع أهلي وقت الغبقة عشان يطلع المقطع طبيعي.", en: "I'd film with my family at a ghabga so it feels natural." },
-  { ar: "عندي فكرة: من الباب إلى أول رشفة، بدون موسيقى، بس أصوات المكان.", en: "My idea: door to first sip, no music, just the sounds of the place." },
-  { ar: "متابعيني يحبون مراجعات الأكل الصادقة، وبكون واضح ومختصر.", en: "My followers like honest food reviews. I'll keep it clear and short." },
-  { ar: "أقدر أسلم المقطع خلال 5 أيام مع ترجمة نصية.", en: "I can deliver within 5 days, with captions." },
-  { ar: "أحب أعرض المنتج كهدية للأهل، بأسلوب هادي ومرتب.", en: "I'd show it as a gift for family, in a calm, tidy style." },
-];
-
-function app(creatorId: string, status: ApplicationStatus, pitch: number, appliedAt: string): Application {
-  return { creatorId, status, pitch: pitches[pitch % pitches.length], appliedAt };
-}
+import type { Campaign } from "./types";
 
 export const campaigns: Campaign[] = [
   {
     id: "seef-branch",
-    productId: "seef-branch",
+    productIds: ["seef-branch"],
     brandId: "muharraq-roastery",
     title: { ar: "افتتاح فرع السيف", en: "Seef branch opening" },
     brief: {
@@ -27,60 +13,19 @@ export const campaigns: Campaign[] = [
     niche: "food",
     clipsCount: 6,
     budget: 270,
+    videoStyle: "routine",
+    deadline: "2026-10-25",
+    createdAt: "2026-09-12",
+    keyMessage: "فرعنا الجديد في السيف مفتوح من الصبح لين آخر الليل.",
+    references: ["https://www.tiktok.com/@muharraq.roastery/video/7400000000000000001", "https://www.instagram.com/reel/C9AbCdEfGhI/"],
+    mustInclude: "#فرع_السيف، @muharraq.roastery، لقطة للّوحة عند الباب",
+    avoid: "لا تصوّرون الزبائن بدون إذنهم.",
     status: "in_progress",
-    applications: [
-      app("sultan-alotaibi", "accepted", 4, "2026-09-12"),
-      app("reem-alhashimi", "accepted", 2, "2026-09-12"),
-      app("latifa-alshamsi", "accepted", 1, "2026-09-13"),
-      app("yousef-alhammadi", "accepted", 5, "2026-09-14"),
-      app("ahmed-bujeiri", "pending", 0, "2026-09-29"),
-      app("hessa-alajmi", "pending", 6, "2026-10-01"),
-    ],
     deliveredClips: 2,
   },
   {
-    id: "ramadan-blend",
-    productId: "ramadan-blend",
-    brandId: "muharraq-roastery",
-    title: { ar: "إطلاق خلطة رمضان", en: "Ramadan blend launch" },
-    brief: {
-      ar: "قدموا خلطة رمضان في جلسة الفطور أو الغبقة. نبي أجواء عائلية دافية، والقهوة في يد الضيف.",
-      en: "Feature the Ramadan blend at iftar or a ghabga gathering. Warm family moments, with the coffee in a guest's hand.",
-    },
-    niche: "family",
-    clipsCount: 10,
-    budget: 450,
-    status: "open",
-    applications: [
-      app("reem-alhashimi", "pending", 2, "2026-09-26"),
-      app("hessa-alajmi", "pending", 6, "2026-09-27"),
-      app("latifa-alshamsi", "pending", 1, "2026-09-28"),
-      app("noura-alkaabi", "pending", 5, "2026-09-30"),
-      app("maryam-alkuwari", "pending", 6, "2026-10-01"),
-      app("fatima-aldosari", "pending", 0, "2026-10-02"),
-      app("abdullah-albalushi", "pending", 3, "2026-10-02"),
-    ],
-    deliveredClips: 0,
-  },
-  {
-    id: "national-day",
-    productId: "ramadan-blend",
-    brandId: "muharraq-roastery",
-    title: { ar: "هدايا العيد الوطني", en: "National Day gift boxes" },
-    brief: {
-      ar: "افتحوا صندوق هدايا العيد الوطني البحريني وورونا وش فيه، ولمن بتهدونه.",
-      en: "Unbox the Bahrain National Day gift box, show what is inside, and who you would give it to.",
-    },
-    niche: "family",
-    clipsCount: 5,
-    budget: 225,
-    status: "open",
-    applications: [app("ahmed-bujeiri", "pending", 0, "2026-10-01"), app("reem-alhashimi", "pending", 6, "2026-10-02")],
-    deliveredClips: 0,
-  },
-  {
     id: "iced-summer",
-    productId: "ramadan-blend",
+    productIds: ["ramadan-blend"],
     brandId: "muharraq-roastery",
     title: { ar: "قهوة الصيف الباردة", en: "Iced summer coffee" },
     brief: {
@@ -90,34 +35,13 @@ export const campaigns: Campaign[] = [
     niche: "food",
     clipsCount: 8,
     budget: 320,
+    createdAt: "2026-07-18",
     status: "completed",
-    applications: [
-      app("sultan-alotaibi", "accepted", 4, "2026-07-10"),
-      app("yousef-alhammadi", "accepted", 5, "2026-07-10"),
-      app("fahad-alqahtani", "accepted", 0, "2026-07-11"),
-      app("latifa-alshamsi", "accepted", 1, "2026-07-12"),
-    ],
     deliveredClips: 8,
   },
   {
-    id: "winter-offers",
-    productId: "roastery-app",
-    brandId: "muharraq-roastery",
-    title: { ar: "عروض الشتاء", en: "Winter offers" },
-    brief: {
-      ar: "مشروبات الشتاء الحارة في جلسة برا مع الأهل أو الربع.",
-      en: "Hot winter drinks at an outdoor gathering with family or friends.",
-    },
-    niche: "food",
-    clipsCount: 4,
-    budget: 160,
-    status: "draft",
-    applications: [],
-    deliveredClips: 0,
-  },
-  {
     id: "winter-collection",
-    productId: "evening-abaya",
+    productIds: ["evening-abaya"],
     brandId: "nouf-abayas",
     title: { ar: "تشكيلة الشتاء", en: "Winter collection" },
     brief: {
@@ -127,13 +51,51 @@ export const campaigns: Campaign[] = [
     niche: "fashion",
     clipsCount: 3,
     budget: 195,
+    videoStyle: "routine",
+    deadline: "2026-10-02",
+    createdAt: "2026-09-20",
+    logistics: { "evening-abaya": { type: "physical", after: "return" } },
     status: "in_progress",
-    applications: [
-      app("maryam-alkuwari", "accepted", 6, "2026-09-20"),
-      app("noura-alkaabi", "accepted", 5, "2026-09-21"),
-      app("fatima-aldosari", "pending", 0, "2026-10-01"),
-    ],
     deliveredClips: 1,
+  },
+  // Every active order still waiting for the creator to accept (one creator declined): "Pending".
+  {
+    id: "app-launch",
+    productIds: ["roastery-app"],
+    brandId: "muharraq-roastery",
+    title: { ar: "إطلاق تطبيق المحمصة", en: "Roastery app launch" },
+    brief: {
+      ar: "حمّلوا تطبيقنا، اطلبوا مشروبكم المفضل، وصوروا الطلب من الجوال لين الاستلام من الفرع.",
+      en: "Download our app, order your favourite drink, and film it from the phone to the pickup at the branch.",
+    },
+    niche: "food",
+    clipsCount: 3,
+    budget: 135,
+    videoStyle: "howto",
+    deadline: "2026-10-30",
+    createdAt: "2026-10-03",
+    logistics: { "roastery-app": { type: "app", promoCode: "CLIPS100" } },
+    status: "in_progress",
+    deliveredClips: 0,
+  },
+  // Cancelled by the brand before anyone accepted (one creator had already declined).
+  {
+    id: "eid-linen",
+    productIds: ["linen-abaya"],
+    brandId: "nouf-abayas",
+    title: { ar: "عباية الكتان للعيد", en: "Linen abaya for Eid" },
+    brief: {
+      ar: "إطلالة العيد بعباية الكتان، من تجهيز الصبح لين زيارة الأهل.",
+      en: "An Eid look in the linen abaya, from getting ready in the morning to visiting family.",
+    },
+    niche: "fashion",
+    clipsCount: 2,
+    budget: 135,
+    videoStyle: "ad",
+    createdAt: "2026-09-05",
+    logistics: { "linen-abaya": { type: "physical", after: "keep" } },
+    status: "cancelled",
+    deliveredClips: 0,
   },
 ];
 

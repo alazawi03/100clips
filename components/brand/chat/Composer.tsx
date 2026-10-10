@@ -6,15 +6,17 @@ import { sendChatMessage } from "@/app/actions/messages";
 import { useI18n } from "@/components/i18n/I18nProvider";
 
 /** Enter sends, Shift+Enter adds a line. React clears the box after the action. */
-export function Composer({ conversationId }: { conversationId: string }) {
+export function Composer({ conversationId, defaultText }: { conversationId: string; defaultText?: string }) {
   const { t } = useI18n();
   const form = useRef<HTMLFormElement>(null);
   return (
     <form ref={form} action={sendChatMessage.bind(null, conversationId)} className="flex items-end gap-2 border-t border-border p-3">
       <textarea
         name="text"
-        rows={1}
+        rows={defaultText ? 3 : 1}
         required
+        defaultValue={defaultText}
+        autoFocus={!!defaultText}
         aria-label={t("chat.placeholder")}
         placeholder={t("chat.placeholder")}
         onKeyDown={(e) => {

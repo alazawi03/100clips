@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { AppWindow, MapPin, Package, Plus, Sparkles, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { createProduct, updateProduct, type BrandFormState } from "@/app/actions/brands";
@@ -33,6 +33,7 @@ export type ProductValues = {
   venueKind?: string;
   location?: string;
   hours?: string;
+  mapUrl?: string;
 };
 
 function asList(v: unknown): string[] {
@@ -44,18 +45,32 @@ type FieldsProps = {
   err: (name: string) => string | undefined;
   /** Product type is optional here (the brand wizard lets you skip the product). */
   optional?: boolean;
+  /** Already inside a card: no cards of its own. */
+  flat?: boolean;
 };
+
+type GroupProps = { className: string; first?: boolean; children: React.ReactNode };
+
+function PaddedCard({ className, children }: GroupProps) {
+  return <Card className={cn(className, "p-5 md:p-6")}>{children}</Card>;
+}
+
+function FlatGroup({ className, first, children }: GroupProps) {
+  return <div className={cn(className, !first && "mt-5 border-t border-border pt-5")}>{children}</div>;
+}
 
 /**
  * Every product field, without a form around it, so the same fields serve the standalone product form
  * and the last step of the brand wizard. Remount it (key) after a server response to restart from `v`.
  */
-export function ProductFields({ v, err, optional }: FieldsProps) {
+export function ProductFields({ v, err, optional, flat }: FieldsProps) {
   const { t } = useI18n();
+  // Inside another card (the brand wizard) the groups are divided by lines instead of being cards themselves.
+  const Box = flat ? FlatGroup : PaddedCard;
   const [type, setType] = useState<ProductType | undefined>(v.type);
   const [benefits, setBenefits] = useState<string[]>(() => {
     const list = asList(v.benefit);
-    return list.length >= 3 ? list : [...list, ...Array(3 - list.length).fill("")];
+    return list.length >= 1 ? list : [""];
   });
   const [concerns, setConcerns] = useState<Array<{ q: string; a: string }>>(() => {
     const qs = asList(v.concernQ);
@@ -69,7 +84,7 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
     <>
       {/* The submitted type lives in a hidden field: React's post-action form reset would uncheck the radios. */}
       <input type="hidden" name="type" value={type ?? ""} />
-      <Card className="flex flex-col gap-3 p-5 md:p-6">
+      <Box first className="flex flex-col gap-3">
         <fieldset>
           <legend className="mb-3 text-h3 font-medium">{t("productForm.typeLabel")}</legend>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -99,11 +114,11 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
         </fieldset>
         {err("type") && <FieldError>{err("type")}</FieldError>}
         {!type && !err("type") && !optional && <p className="text-small text-text-muted">{t("productForm.pickTypeFirst")}</p>}
-      </Card>
+      </Box>
 
       {type && (
         <>
-          <Card className="flex flex-col gap-5 p-5 md:p-6">
+          <Box className="flex flex-col gap-5">
             <Field label={t("productForm.name")} htmlFor="name" error={err("name")}>
               <Input id="name" name="name" defaultValue={v.name} placeholder={t("productForm.namePlaceholder")} aria-invalid={!!err("name")} aria-describedby={described("name")} />
             </Field>
@@ -116,40 +131,43 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
                 <Input id="price" name="price" type="number" inputMode="decimal" min={0} step="0.001" dir="ltr" defaultValue={v.price} placeholder={t("productForm.pricePlaceholder")} aria-invalid={!!err("price")} aria-describedby={described("price")} className="sm:max-w-60" />
               </Field>
             )}
-          </Card>
+          </Box>
 
-          <Card className="flex flex-col gap-4 p-5 md:p-6">
-            <div>
-              <h2 className="font-medium">{t("productForm.benefits")}</h2>
-              <p className="text-small text-text-muted">{t("productForm.benefitsHint")}</p>
+          <Box className="flex flex-col gap-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-medium">{t("productForm.benefits")}</h2>
+                <p className="text-small text-text-muted">{t("productForm.benefitsHint")}</p>
+              </div>
+              {benefits.length < 5 && (
+                <button type="button" onClick={() => setBenefits((list) => [...list, ""])} className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full border border-border px-3 text-small font-medium transition-colors hover:bg-surface">
+                  <Plus aria-hidden className="size-4" />
+                  {t("productForm.addBenefit")}
+                </button>
+              )}
             </div>
             <ul className="flex flex-col gap-2">
               {benefits.map((b, i) => (
-                <li key={i} className="flex items-center gap-2">
+                <li key={i} className="group relative">
                   <Input
                     name="benefit"
                     value={b}
                     onChange={(e) => setBenefits((list) => list.map((x, j) => (j === i ? e.target.value : x)))}
                     placeholder={i === 0 ? t("productForm.benefitPlaceholder") : undefined}
                     aria-label={t("productForm.benefitLabel", { n: i + 1 })}
+                    className={benefits.length > 1 ? "pe-12" : undefined}
                   />
-                  {benefits.length > 3 && (
-                    <button type="button" onClick={() => setBenefits((list) => list.filter((_, j) => j !== i))} aria-label={t("productForm.removeBenefit", { n: i + 1 })} className="grid size-11 shrink-0 place-items-center rounded-full text-text-muted hover:bg-surface">
+                  {benefits.length > 1 && (
+                    <button type="button" onClick={() => setBenefits((list) => list.filter((_, j) => j !== i))} aria-label={t("productForm.removeBenefit", { n: i + 1 })} className="absolute end-1 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full text-text-muted transition-opacity hover:bg-surface focus-visible:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100">
                       <X aria-hidden className="size-4" />
                     </button>
                   )}
                 </li>
               ))}
             </ul>
-            {benefits.length < 5 && (
-              <button type="button" onClick={() => setBenefits((list) => [...list, ""])} className={buttonClass("ghost", "self-start")}>
-                <Plus aria-hidden />
-                {t("productForm.addBenefit")}
-              </button>
-            )}
-          </Card>
+          </Box>
 
-          <Card className="flex flex-col gap-4 p-5 md:p-6">
+          <Box className="flex flex-col gap-4">
             <div>
               <h2 className="font-medium">
                 {t("productForm.concerns")} <span className="font-normal text-text-muted">({t("brandForm.optional")})</span>
@@ -190,9 +208,9 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
               <Plus aria-hidden />
               {t("productForm.addConcern")}
             </button>
-          </Card>
+          </Box>
 
-          <Card className="flex flex-col gap-5 p-5 md:p-6">
+          <Box className="flex flex-col gap-5">
             <h2 className="font-medium">{t("productForm.detailsTitle")}</h2>
             {type === "physical" && (
               <div className="grid gap-5 sm:grid-cols-2">
@@ -234,9 +252,12 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
                     <Input id="hours" name="hours" defaultValue={v.hours} placeholder={t("productForm.hoursPlaceholder")} />
                   </Field>
                 </div>
+                <Field label={`${t("productForm.mapUrl")} (${t("brandForm.optional")})`} htmlFor="mapUrl" error={err("mapUrl")} hint={t("productForm.mapUrlHint")}>
+                  <Input id="mapUrl" name="mapUrl" type="url" inputMode="url" dir="ltr" defaultValue={v.mapUrl} placeholder="https://maps.app.goo.gl/…" aria-invalid={!!err("mapUrl")} aria-describedby={described("mapUrl")} />
+                </Field>
               </>
             )}
-          </Card>
+          </Box>
 
         </>
       )}
@@ -245,20 +266,26 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
 }
 
 type Props =
-  | { mode: "create"; initial?: undefined; productId?: undefined }
+  | { mode: "create"; brandId: string; /** When set, the form stays in place after saving and reports the new product. */ onCreated?: (productId: string) => void; initial?: undefined; productId?: undefined }
   | { mode: "edit"; productId: string; initial: ProductValues };
 
 /** Add a product to the selected brand, or edit one. The type comes first because it decides which details we ask for. */
 export function ProductForm(props: Props) {
   const { t } = useI18n();
-  const bound = props.mode === "edit" ? updateProduct.bind(null, props.productId) : createProduct;
+  const bound = props.mode === "edit" ? updateProduct.bind(null, props.productId) : createProduct.bind(null, props.brandId);
   const [state, action, pending] = useActionState<BrandFormState, FormData>(bound, null);
   const fieldsKey = useSubmissionKey(state);
+  const onCreated = props.mode === "create" ? props.onCreated : undefined;
+  const createdId = state?.createdId;
+  useEffect(() => {
+    if (createdId) onCreated?.(createdId);
+  }, [createdId, onCreated]);
   const v: ProductValues = { ...props.initial, ...(state?.values as ProductValues | undefined) };
   const err = (name: string) => (state?.errors[name] ? t(state.errors[name]!) : undefined);
 
   return (
     <form action={action} noValidate className="flex flex-col gap-6">
+      {props.mode === "create" && props.onCreated && <input type="hidden" name="inline" value="1" />}
       <ProductFields key={fieldsKey} v={v} err={err} />
       <div className="flex justify-end">
         <Button type="submit" variant="primary" aria-busy={pending}>

@@ -1,17 +1,20 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getBrand } from "@/lib/data/account";
 import * as store from "@/lib/data/brandsStore";
+import { isActiveMarket } from "@/lib/data/markets";
 import {
   APP_PLATFORMS,
+  COUNTRIES,
   INDUSTRIES,
   PRODUCT_TYPES,
   SERVICE_DELIVERIES,
   VENUE_KINDS,
   type AppPlatform,
   type Brand,
+  type Country,
   type Industry,
   type Product,
   type ProductDetails,
@@ -19,11 +22,11 @@ import {
   type ServiceDelivery,
   type VenueKind,
 } from "@/lib/data/types";
-import { BRAND_COOKIE, getCurrentBrand } from "@/lib/currentBrand";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { DOCUMENT_TYPES, MAX_DOCUMENT_BYTES } from "@/lib/images";
 
 /** errors: field → translation key. values: what was sent, so the form can show it again. */
-export type BrandFormState = { errors: Partial<Record<string, MessageKey>>; values: Record<string, string | string[]> } | null;
+export type BrandFormState = { errors: Partial<Record<string, MessageKey>>; values: Record<string, string | string[]>; createdId?: string } | null;
 
 function text(form: FormData, name: string) {
   return String(form.get(name) ?? "").trim();
@@ -36,9 +39,10 @@ function all(form: FormData, name: string) {
 function submitted(form: FormData): Record<string, string | string[]> {
   const values: Record<string, string | string[]> = {};
   for (const key of new Set(form.keys())) {
-    if (key.startsWith("$")) continue;
+    // Files aren't sent back to the form; a browser can't prefill a file field.
+    if (key.startsWith("$") || form.get(key) instanceof File) continue;
     const list = all(form, key);
-    values[key] = list.length > 1 || ["benefit", "concernQ", "concernA", "photo", "platforms", "delivery"].includes(key) ? list : list[0];
+    values[key] = list.length > 1 || ["benefit", "concernQ", "concernA", "photo", "platforms", "delivery", "countries"].includes(key) ? list : list[0];
   }
   return values;
 }
@@ -62,6 +66,14 @@ function isUrl(value: string) {
 }
 
 /** "example.com" → "https://example.com"; anything with a scheme is left as typed. */
+/** google.com/maps, maps.google.*, maps.app.goo.gl or goo.gl/maps links. */
+function isGoogleMapsUrl(value: string) {
+  if (!isUrl(value)) return false;
+  const { hostname, pathname } = new URL(value);
+  const host = hostname.replace(/^www\./, "");
+  return (/^google\.[a-z.]+$/.test(host) && pathname.startsWith("/maps")) || /^maps\.google\.[a-z.]+$/.test(host) || host === "maps.app.goo.gl" || (host === "goo.gl" && pathname.startsWith("/maps"));
+}
+
 function withScheme(value: string) {
   return value && !/^[a-z]+:\/\//i.test(value) && /^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(value) ? `https://${value}` : value;
 }
@@ -84,14 +96,25 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
   const nameAr = text(form, "nameAr");
   const nameEn = text(form, "nameEn");
   const logo = text(form, "logo");
-  const cover = text(form, "cover");
   const industry = oneOf<Industry>(text(form, "industry"), INDUSTRIES);
-  const city = text(form, "city");
   const about = text(form, "about");
   const website = withScheme(text(form, "website"));
   const instagram = handle(text(form, "instagram"));
   const tiktok = handle(text(form, "tiktok"));
-  const crNumber = text(form, "crNumber");
+  // Only active markets (Bahrain for the MVP) can be picked.
+  const countries = all(form, "countries").filter((c): c is Country => (COUNTRIES as string[]).includes(c) && isActiveMarket(c));
+  // For each chosen country: its CR number (cr_bh) and VAT certificate (vat_bh), a newly picked
+  // file or the one already saved (vat_bhKeep). Both optional.
+  const registrations: NonNullable<Brand["registrations"]> = {};
+  for (const country of countries) {
+    const crNumber = text(form, `cr_${country}`);
+    const file = form.get(`vat_${country}`);
+    const picked = file instanceof File && file.size > 0 ? file : undefined;
+    if (picked && !DOCUMENT_TYPES.includes(picked.type)) errors[`vat_${country}`] = "forms.errors.fileType";
+    else if (picked && picked.size > MAX_DOCUMENT_BYTES) errors[`vat_${country}`] = "forms.errors.fileTooBig";
+    const vatCertificate = picked ? picked.name : text(form, `vat_${country}Keep`);
+    if (crNumber || vatCertificate) registrations[country] = { crNumber: crNumber || undefined, vatCertificate: vatCertificate || undefined };
+  }
 
   if (!nameAr && !nameEn) errors.nameAr = "forms.errors.brandNameRequired";
   if (logo && !isImage(logo)) errors.logo = "forms.errors.imageType";
@@ -100,7 +123,6 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
   if (website && !isUrl(website)) errors.website = "forms.errors.urlInvalid";
   if (instagram === null) errors.instagram = "forms.errors.handleInvalid";
   if (tiktok === null) errors.tiktok = "forms.errors.handleInvalid";
-  if (cover && !isImage(cover)) errors.cover = "forms.errors.imageType";
   if (Object.keys(errors).length > 0) return { errors };
 
   return {
@@ -108,20 +130,15 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
     brand: {
       name: { ar: nameAr || nameEn, en: nameEn || nameAr },
       logo: logo || undefined,
-      cover: cover || undefined,
       industry: industry!,
-      city: same(city),
       about: about ? same(about) : undefined,
       website: website || undefined,
       instagram: instagram || undefined,
       tiktok: tiktok || undefined,
-      crNumber: crNumber || undefined,
+      countries: countries.length > 0 ? countries : undefined,
+      registrations: Object.keys(registrations).length > 0 ? registrations : undefined,
     },
   };
-}
-
-async function select(brandId: string) {
-  (await cookies()).set(BRAND_COOKIE, brandId, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
 }
 
 /**
@@ -137,8 +154,10 @@ export async function createBrand(mode: "onboarding" | "add", _prev: BrandFormSt
 
   const created = store.createBrand(brandResult.brand);
   if (productResult?.product) store.createProduct({ brandId: created.id, ...productResult.product });
-  await select(created.id);
   revalidatePath("/", "layout");
+  // Started from "New campaign" or the cart without a brand: carry on there.
+  if (form.get("then") === "campaign") redirect("/campaigns/new");
+  if (form.get("then") === "checkout") redirect("/checkout");
   redirect(mode === "onboarding" ? "/dashboard" : "/brands?done=brandCreated");
 }
 
@@ -181,7 +200,9 @@ function parseProduct(form: FormData): { product?: Omit<Product, "id" | "brandId
   } else if (type === "service") {
     details = { type, delivery: all(form, "delivery").filter((d): d is ServiceDelivery => !!oneOf(d, SERVICE_DELIVERIES)) };
   } else if (type === "venue") {
-    details = { type, kind: oneOf<VenueKind>(text(form, "venueKind"), VENUE_KINDS) ?? "other", location: text(form, "location") || undefined, hours: text(form, "hours") || undefined };
+    const mapUrl = withScheme(text(form, "mapUrl"));
+    if (mapUrl && !isGoogleMapsUrl(mapUrl)) errors.mapUrl = "forms.errors.mapUrlInvalid";
+    details = { type, kind: oneOf<VenueKind>(text(form, "venueKind"), VENUE_KINDS) ?? "other", location: text(form, "location") || undefined, hours: text(form, "hours") || undefined, mapUrl: mapUrl || undefined };
   }
   if (Object.keys(errors).length > 0 || !details) return { errors };
 
@@ -199,21 +220,37 @@ function parseProduct(form: FormData): { product?: Omit<Product, "id" | "brandId
   };
 }
 
-/** Adds a product to the selected brand. */
-export async function createProduct(_prev: BrandFormState, form: FormData): Promise<BrandFormState> {
+/** Adds a product to a brand. Coming from checkout, it returns there so the cart is still in front of the user. */
+export async function createProduct(brandId: string, _prev: BrandFormState, form: FormData): Promise<BrandFormState> {
   const { product, errors } = parseProduct(form);
   if (!product) return { errors, values: submitted(form) };
-  const brand = await getCurrentBrand();
-  const created = store.createProduct({ brandId: brand.id, ...product });
+  if (!getBrand(brandId)) redirect("/brands");
+  const created = store.createProduct({ brandId, ...product });
   revalidatePath("/", "layout");
+  // Inline mode (the checkout drawer): stay on the page and hand the new product back to the form.
+  if (form.get("inline") === "1") return { errors: {}, values: {}, createdId: created.id };
   redirect(`/brands?done=productAdded&product=${created.id}`);
+}
+
+export async function duplicateProduct(productId: string) {
+  const copy = store.duplicateProduct(productId);
+  revalidatePath("/", "layout");
+  if (copy) redirect(`/brands?done=productDuplicated&product=${copy.id}`);
+}
+
+export async function deleteProduct(productId: string) {
+  const product = store.getProduct(productId);
+  if (!product) return;
+  store.deleteProduct(productId);
+  revalidatePath("/", "layout");
+  redirect(`/brands?done=productDeleted&brand=${product.brandId}`);
 }
 
 export async function updateProduct(productId: string, _prev: BrandFormState, form: FormData): Promise<BrandFormState> {
   const { product, errors } = parseProduct(form);
   if (!product) return { errors, values: submitted(form) };
   const existing = store.getProduct(productId);
-  if (!existing || existing.brandId !== (await getCurrentBrand()).id) redirect("/brands");
+  if (!existing) redirect("/brands");
   store.updateProduct(productId, product);
   revalidatePath("/", "layout");
   redirect(`/brands?done=productSaved&product=${productId}`);

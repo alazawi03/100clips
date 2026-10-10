@@ -1,169 +1,712 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { Lock } from "lucide-react";
-import { checkout, type FormState } from "@/app/actions/brand";
+import Image from "next/image";
+import Link from "next/link";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { ChevronDown, CircleAlert, CircleCheck, CircleX, Ellipsis, ImageOff, ListChecks, ListPlus, LoaderCircle, Megaphone, MessageSquare, PackageOpen, Pencil, Plus, Star, Sun, X, type LucideIcon } from "lucide-react";
+import { autosaveCampaignDraft, checkout, type CheckoutState } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
+import { PaymentSuccess } from "@/components/brand/campaigns/PaymentSuccess";
+import { useCreatorPicker, type PickerOptions } from "@/components/brand/campaigns/CreatorPicker";
+import { ProductForm } from "@/components/brand/products/ProductForm";
+import { Button, buttonClass } from "@/components/ui/Button";
+import { StepHeader } from "@/components/ui/StepHeader";
+import { BrandLogo } from "@/components/ui/BrandLogo";
+import { Drawer } from "@/components/ui/Drawer";
+import { Dropdown } from "@/components/ui/Dropdown";
 import { Card } from "@/components/ui/Card";
-import { ContentRules } from "@/components/ui/ContentRules";
-import { Field, Input, Select, Textarea } from "@/components/ui/Form";
+import { DateInput } from "@/components/ui/DateInput";
+import { Field, FieldError, Input, Textarea } from "@/components/ui/Form";
+import { Stepper } from "@/components/ui/Stepper";
+import { cn } from "@/lib/cn";
+import { VIDEO_STYLES, type ProductType, type VideoStyle } from "@/lib/data/types";
+import type { MessageKey } from "@/lib/i18n/messages";
+import { useSubmissionKey } from "@/lib/useSubmissionKey";
+import { LogisticsFields } from "./LogisticsFields";
+import { FeeTotal } from "./FeeTotal";
+import { PaymentTerms } from "./PaymentTerms";
+import { PaymentFields } from "./PaymentFields";
 import { createFormatters } from "@/lib/i18n/format";
+import { withFee } from "@/lib/fees";
+import { priceForBrand } from "@/lib/fees";
 
 type Props = {
-  creators: Array<{ id: string; name: string; subtotal: number; summary: string }>;
-  products: Array<{ id: string; name: string }>;
+  creators: Array<{
+    id: string;
+    name: string;
+    subtotal: number;
+    summary: string;
+  }>;
+  brands: Array<{
+    id: string;
+    name: string;
+    logo?: string;
+    products: Array<{
+      id: string;
+      name: string;
+      typeLabel: string;
+      photo?: string;
+      price?: string;
+      type: ProductType;
+      downloadLink?: string;
+      mapUrl?: string;
+    }>;
+  }>;
+  /** Brand and product to start with ("Find creators for this product"), and every field when running a campaign again. */
+  initial?: { brandId: string; productId?: string; values?: Record<string, string> };
+  /** Earliest delivery date allowed (tomorrow), yyyy-mm-dd. */
+  minDeadline: string;
+  /**
+   * "New campaign": creators are picked on the page (first step, the shared picker) instead of coming
+   * from the cart, and the whole form can be saved as a draft. `draftId` when continuing one.
+   */
+  picker?: PickerOptions & { draftId?: string };
   total: number;
   balance: number;
 };
 
-export function CheckoutForm({ creators, products, total, balance }: Props) {
-  const { t, locale } = useI18n();
+/** Steps after the creators step: what to promote, brief, payment. */
+const BASE_LAST = 2;
+/** How long the payment success screen stays before opening the campaign. */
+const REDIRECT_MS = 3000;
+
+const styleIcon: Record<VideoStyle, LucideIcon> = { ad: Megaphone, review: Star, routine: Sun, unboxing: PackageOpen, howto: ListChecks, other: Ellipsis };
+
+/** Which step holds a field, so a server error can send you back to it. */
+const baseStepOf = (name: string) =>
+  name.startsWith("card") ? 2 : name.startsWith("reference-") || ["title", "brief", "videoStyle", "deadline", "keyMessage", "mustInclude", "avoid"].includes(name) ? 1 : 0;
+
+/** What DateInput sends for a full, real date. */
+const isIsoDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+
+function isUrl(value: string) {
+  try {
+    return ["https:", "http:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Checkout in three steps: what to promote, the brief, then payment.
+ * Every step lives in one form so a single submit sends it all; Next checks the current step
+ * with the same rules as the server, and the server's answer is the final word.
+ */
+export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadline, total: cartTotal, balance, picker }: Props) {
+  const { t, tp, locale } = useI18n();
   const f = createFormatters(locale);
-  const [state, action, pending] = useActionState<FormState, FormData>(checkout, null);
+  const form = useRef<HTMLFormElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const [state, action, pending] = useActionState<CheckoutState, FormData>(checkout, null);
+  // New campaign: a creators step comes first, and the chosen creators replace the cart's.
+  const fromPicker = !!picker;
+  const offset = fromPicker ? 1 : 0;
+  const LAST = BASE_LAST + offset;
+  const stepOf = (name: string) => (name === "pick" ? 0 : baseStepOf(name) + offset);
+  const pk = useCreatorPicker(picker ?? { lists: [] });
+  const [showMissing, setShowMissing] = useState(false);
+  const creators = fromPicker ? pk.chosen.map((p) => ({ id: p.creator.id, name: p.creator.name, subtotal: p.price, summary: p.label })) : cartCreators;
+  const total = fromPicker ? pk.total : cartTotal;
+
+  /* ---------- New campaign: saves itself as a draft ---------- */
+  // The draft being filled in (none until the first real change), and what the save line says.
+  const [draftId, setDraftId] = useState(picker?.draftId);
+  const draftRef = useRef(picker?.draftId);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const busy = useRef<Promise<void> | null>(null);
+  const again = useRef(false);
+
+  /** Saves now: only once something real is filled in, never card details. One save at a time. */
+  async function saveDraft() {
+    if (!fromPicker || !form.current) return;
+    if (busy.current) {
+      again.current = true;
+      return;
+    }
+    const data = new FormData(form.current);
+    for (const key of [...data.keys()]) if (key.startsWith("card")) data.delete(key);
+    const meaningful = pk.invitees > 0 || ["title", "brief", "productId"].some((k) => String(data.get(k) ?? "").trim());
+    if (!meaningful && !draftRef.current) return;
+    data.set("draftId", draftRef.current ?? "");
+    busy.current = (async () => {
+      try {
+        const { id } = await autosaveCampaignDraft(data);
+        if (id !== draftRef.current) {
+          draftRef.current = id;
+          setDraftId(id);
+          // Reloading or coming back continues this draft instead of starting another.
+          window.history.replaceState(null, "", `/campaigns/new?draft=${id}`);
+        }
+      } catch {
+        // Not saved this time; the next change tries again.
+      }
+    })();
+    await busy.current;
+    busy.current = null;
+    if (again.current) {
+      again.current = false;
+      void saveDraft();
+    }
+  }
+  /** Saves a second after the last change. */
+  function scheduleSave() {
+    if (!fromPicker) return;
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => void saveDraft(), 1000);
+  }
+  // Picking or dropping a creator, or changing a platform, counts as a change too.
+  const pickKey = pk.picked.map((c) => c.id).join() + "|" + pk.chosen.map((c) => `${c.creator.id}:${c.format}`).join();
+  const lastPickKey = useRef(pickKey);
+  useEffect(() => {
+    if (pickKey === lastPickKey.current) return;
+    lastPickKey.current = pickKey;
+    scheduleSave();
+  });
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const paid = state?.paid;
+  // After paying: wait on the success screen, then open the campaign. replace() keeps checkout out of history,
+  // and the full load refreshes the cart, balance and counts in the header.
+  useEffect(() => {
+    if (!paid) return;
+    window.scrollTo({ top: 0 });
+    const timer = setTimeout(() => window.location.replace(`/campaigns/${paid.campaignId}`), REDIRECT_MS);
+    return () => clearTimeout(timer);
+  }, [paid]);
+  const [step, setStep] = useState(0);
+  const [clientErrors, setClientErrors] = useState<Partial<Record<string, MessageKey>>>({});
+  const [cleared, setCleared] = useState<string[]>([]);
+
+  // A server error sends you back to the earliest step with a problem (adjusted during render, once per result).
+  const [seen, setSeen] = useState(state);
+  if (state !== seen) {
+    setSeen(state);
+    setClientErrors({});
+    setCleared([]);
+    const steps = Object.keys(state?.errors ?? {}).map(stepOf);
+    if (steps.length) setStep(Math.min(...steps));
+  }
+  const fieldsKey = useSubmissionKey(state);
+
+  // With a single brand there is nothing to choose: it is always that brand, and the picker is hidden.
+  const [brandId, setBrandId] = useState(brands.length === 1 ? brands[0].id : (state?.values.brandId ?? initial?.brandId ?? ""));
+  // One product per campaign.
+  const [productId, setProductId] = useState(initial?.productId ?? "");
+  const pickProduct = (id: string) => {
+    setProductId(id);
+    clear("productId");
+    scheduleSave();
+  };
+  const [adding, setAdding] = useState(false);
+  const brand = brands.find((b) => b.id === brandId);
+  const selected = brand?.products.filter((p) => p.id === productId) ?? [];
+  // Unboxing needs a box: only offered for physical products.
+  const styles = VIDEO_STYLES.filter((s) => s !== "unboxing" || selected[0]?.type === "physical");
   const [useBalance, setUseBalance] = useState(balance > 0 && (state ? state.values.useBalance === "on" : true));
-  const fromBalance = useBalance ? Math.min(balance, total) : 0;
-  const byCard = total - fromBalance;
+  // Creators' prices plus the service fee.
+  const toPay = withFee(total);
+  const fromBalance = useBalance ? Math.min(balance, toPay) : 0;
+  const byCard = toPay - fromBalance;
+
+  /** Hide a field's error once it has been changed; Next or the server checks it again. */
+  const clear = (name: string) => setCleared((names) => (names.includes(name) ? names : [...names, name]));
+  const errors = Object.fromEntries(Object.entries({ ...state?.errors, ...clientErrors }).filter(([name]) => !cleared.includes(name)));
   const err = (name: string) => {
-    const key = state?.errors[name];
+    const key = errors[name];
     return key ? t(key) : undefined;
   };
   const described = (name: string) => (err(name) ? `${name}-error` : undefined);
-  const v = (name: string) => state?.values[name];
+  // Before the first submit, fields start from `initial` (a campaign being run again).
+  const v = (name: string) => (state ? state.values[name] : initial?.values?.[name]);
+  const hasNotes = creators.some((c) => v(`note-${c.id}`));
+  // FormState keeps one value per name, so the submitted references are re-read from the errors' fields.
+  const sentRefs: string[] = [];
+  for (let i = 0; v(`reference-${i}`) !== undefined; i++) sentRefs.push(String(v(`reference-${i}`)));
+  const refs = sentRefs;
+  // One reference field to start; "Add another" adds more, no limit. Comes back with as many as were sent.
+  const [refList, setRefList] = useState<string[]>(() => (refs.length ? refs : [""]));
+  const hasMore = ["keyMessage", "mustInclude", "avoid"].some((k) => v(k)) || refs.some(Boolean) || Object.keys(state?.errors ?? {}).some((k) => k.startsWith("reference-"));
+
+  /** The server's rules for one step, run before moving on. */
+  function check(current: number) {
+    const data = new FormData(form.current!);
+    const get = (name: string) => String(data.get(name) ?? "").trim();
+    const found: Partial<Record<string, MessageKey>> = {};
+    if (fromPicker && current === 0) {
+      // Someone chosen, each with a platform.
+      if (pk.invitees === 0) found.pick = "forms.errors.pickCreators";
+      else if (pk.missing.length > 0) {
+        setShowMissing(true);
+        document.getElementById(`invitee-${pk.missing[0]}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return false;
+      }
+      setClientErrors(found);
+      setCleared([]);
+      return Object.keys(found).length === 0;
+    }
+    current -= offset;
+    if (current === 0) {
+      if (!brand) found.brandId = "forms.errors.pickBrand";
+      else if (selected.length === 0) found.productId = "forms.errors.pickProduct";
+      for (const p of selected) {
+        const name = (key: string) => `log-${p.id}-${key}`;
+        if (p.type === "app" && get(name("link")) && !isUrl(get(name("link")))) found[name("link")] = "forms.errors.urlInvalid";
+        if (p.type === "venue") {
+          for (const key of ["from", "to"]) if (get(name(key)) && !isIsoDate(get(name(key)))) found[name(key)] = "forms.errors.dateInvalid";
+          if (isIsoDate(get(name("from"))) && isIsoDate(get(name("to"))) && get(name("to")) < get(name("from"))) found[name("to")] = "forms.errors.visitOrder";
+        }
+      }
+    } else if (current === 1) {
+      if (!get("title")) found.title = "forms.errors.titleRequired";
+      if (get("brief").length < 20) found.brief = "forms.errors.briefTooShort";
+      if (!get("videoStyle")) found.videoStyle = "forms.errors.pickVideoStyle";
+      if (get("deadline") && !isIsoDate(get("deadline"))) found.deadline = "forms.errors.dateInvalid";
+      else if (get("deadline") && get("deadline") < minDeadline) found.deadline = "forms.errors.deadlineFuture";
+      data.getAll("reference").forEach((r, i) => {
+        if (String(r).trim() && !isUrl(String(r).trim())) found[`reference-${i}`] = "forms.errors.urlInvalid";
+      });
+    }
+    setClientErrors(found);
+    setCleared([]);
+    return Object.keys(found).length === 0;
+  }
+
+  function go(to: number) {
+    if (fromPicker) {
+      clearTimeout(timer.current);
+      void saveDraft();
+    }
+    setStep(to);
+    window.scrollTo({ top: 0 });
+    requestAnimationFrame(() => heading.current?.focus({ preventScroll: true }));
+  }
+
+  const titles = [...(fromPicker ? [t("invite.fromList")] : []), t("checkout.stepWhat"), t("checkout.stepBrief"), t("checkout.payment")];
+
+  // Paid: the success screen replaces the form, then the campaign opens after a few seconds.
+  if (paid) {
+    const href = `/campaigns/${paid.campaignId}`;
+    return (
+      <PaymentSuccess t={t} tp={tp} creators={paid.creators.map((c) => ({ id: c.id, name: f.pick(c.name) }))}>
+        <p className="text-small text-text-muted">{t("checkout.redirecting")}</p>
+        <span aria-hidden className="block h-1 w-40 overflow-hidden rounded-full bg-surface">
+          <span className="block h-full origin-left bg-primary motion-safe:animate-[fill_3s_linear_both] rtl:origin-right" />
+        </span>
+        <Link href={href} replace className={buttonClass("secondary")}>
+          {t("checkout.viewCampaign")}
+        </Link>
+      </PaymentSuccess>
+    );
+  }
 
   return (
-    <form action={action} noValidate className="grid gap-6 md:grid-cols-[minmax(0,1fr)_320px] md:items-start">
-      <div className="flex min-w-0 flex-col gap-6">
-        <Card className="flex flex-col gap-5 p-5 md:p-6">
-          <h2 className="text-h3 font-medium">{t("checkout.campaign")}</h2>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label={t("checkout.titleLabel")} htmlFor="title" error={err("title")}>
-              <Input id="title" name="title" defaultValue={v("title")} placeholder={t("checkout.titlePlaceholder")} aria-invalid={!!err("title")} aria-describedby={described("title")} />
-            </Field>
-            <Field label={t("checkout.productLabel")} htmlFor="productId" error={err("productId")}>
-              <Select id="productId" name="productId" defaultValue={v("productId") ?? ""} aria-invalid={!!err("productId")} aria-describedby={described("productId")}>
-                <option value="" disabled>
-                  {t("checkout.productPlaceholder")}
-                </option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </Select>
-            </Field>
+    <>
+      <form
+        ref={form}
+        action={action}
+        noValidate
+        onChange={(e) => {
+          const input = e.target as unknown as HTMLInputElement;
+          const name = input.dataset.field || input.name;
+          if (name) clear(name);
+          if (!name.startsWith("card")) scheduleSave();
+        }}
+        // Enter in a field moves to the next step instead of submitting early.
+        onSubmit={(e) => {
+          if (step < LAST) {
+            e.preventDefault();
+            if (check(step)) go(step + 1);
+          }
+        }}
+        className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start"
+      >
+        <div className="flex min-w-0 flex-col gap-6">
+          <Stepper label={t("checkout.stepper")} current={step} steps={titles} onStep={go} />
+
+          {/* Locked while paying, so nothing changes under the request. */}
+          <Card inert={pending} className="flex flex-col gap-6 p-5 md:p-6">
+            <StepHeader
+              count={t("brandForm.stepOf", { n: step + 1, total: LAST + 1 })}
+              title={titles[step]}
+              headingRef={heading}
+              back={
+                step > 0
+                  ? { label: t("brandForm.back"), onClick: () => go(step - 1) }
+                  : fromPicker
+                    ? { label: t("campaignsPage.title"), href: "/campaigns" }
+                    : { label: t("checkout.backToCart"), href: "/cart" }
+              }
+            />
+
+            <input type="hidden" name="brandId" value={brandId} />
+            {fromPicker && <input type="hidden" name="mode" value="new" />}
+            {draftId && <input type="hidden" name="draftId" value={draftId} />}
+            {productId && <input type="hidden" name="productId" value={productId} />}
+
+            <div key={fieldsKey} className="contents">
+              {/* New campaign, step 1: who makes the clips (the shared picker). Always mounted so its picks submit. */}
+              {/* "Content creators" and "You'll invite": two boxes, with room between them. */}
+              {fromPicker && (
+                <div hidden={step !== 0}>
+                  <div className="flex flex-col gap-5">{pk.render({ bare: true, showMissing, error: err("pick") })}</div>
+                </div>
+              )}
+
+              {/* Step 1: what the campaign promotes */}
+              <div hidden={step !== offset}>
+                <div className="flex flex-col gap-6">
+                  {brands.length > 1 && (
+                    <fieldset className="flex flex-col gap-2" aria-describedby={described("brandId")}>
+                      <legend className="mb-2 font-medium">{t("checkout.brandLabel")}</legend>
+                      <div className="flex flex-wrap gap-2">
+                        {brands.map((b) => (
+                          <label
+                            key={b.id}
+                            className="flex h-12 cursor-pointer items-center gap-2 rounded-full border border-border ps-1.5 pe-4 transition-colors hover:bg-surface/60 has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:checked]:text-primary-on-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
+                          >
+                            <input
+                              type="radio"
+                              name="brandPick"
+                              value={b.id}
+                              checked={b.id === brandId}
+                              onChange={() => {
+                                setBrandId(b.id);
+                                setProductId("");
+                                clear("brandId");
+                              }}
+                              className="sr-only"
+                            />
+                            <BrandLogo id={b.id} name={b.name} src={b.logo} size="sm" />
+                            {b.name}
+                          </label>
+                        ))}
+                      </div>
+                      {err("brandId") && <FieldError id="brandId-error">{err("brandId")}</FieldError>}
+                    </fieldset>
+                  )}
+
+                  {brand && (
+                    <fieldset role="radiogroup" className="flex flex-col gap-2" aria-describedby={described("productId")}>
+                      <legend className="mb-2 font-medium">{t("checkout.productLabel")}</legend>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {brand.products.map((p) => {
+                          const on = p.id === productId;
+                          return (
+                            <label
+                              key={p.id}
+                              className={cn(
+                                "flex cursor-pointer items-center gap-3 rounded-[var(--radius-lg)] border p-3 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary",
+                                on ? "border-primary bg-primary-soft/40" : "border-border hover:bg-surface/60",
+                              )}
+                            >
+                              <input type="radio" name="productPick" value={p.id} checked={on} onChange={() => pickProduct(p.id)} className="sr-only" />
+                              <span className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-[var(--radius-md)] border border-border bg-surface">
+                                {p.photo ? <Image src={p.photo} alt="" fill unoptimized className="object-cover" /> : <ImageOff aria-hidden className="size-4 text-icon-inactive" strokeWidth={1.5} />}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate font-medium">{p.name}</span>
+                                <span className="block truncate text-small text-text-muted">
+                                  {p.typeLabel}
+                                  {p.price && (
+                                    <>
+                                      {t("common.separator")}
+                                      <span className="tabular-nums">{p.price}</span>
+                                    </>
+                                  )}
+                                </span>
+                              </span>
+                              <span aria-hidden className={cn("grid size-6 shrink-0 place-items-center rounded-full border-2 transition-colors", on ? "border-primary" : "border-border")}>
+                                {on && <span className="size-3 rounded-full bg-primary" />}
+                              </span>
+                            </label>
+                          );
+                        })}
+                        <button
+                          type="button"
+                          onClick={() => setAdding(true)}
+                          className="flex min-h-[74px] items-center gap-3 rounded-[var(--radius-lg)] border border-dashed border-primary/40 p-3 font-medium text-primary transition-colors hover:bg-primary-soft/60"
+                        >
+                          <span className="grid size-12 shrink-0 place-items-center rounded-[var(--radius-md)] bg-primary-soft">
+                            <Plus aria-hidden className="size-5" />
+                          </span>
+                          {t("checkout.addProduct")}
+                        </button>
+                      </div>
+                      {brand.products.length === 0 && <p className="text-small text-text-muted">{t("checkout.noProducts", { brand: brand.name })}</p>}
+                      {err("productId") && <FieldError id="productId-error">{err("productId")}</FieldError>}
+                    </fieldset>
+                  )}
+
+                  {brand && (
+                    <LogisticsFields
+                      products={selected}
+                      v={(name) => {
+                        const value = v(name);
+                        return typeof value === "string" ? value : undefined;
+                      }}
+                      err={err}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Step 2: the brief every creator gets */}
+              <div hidden={step !== offset + 1}>
+                <div className="flex flex-col gap-5">
+                  <fieldset className="flex flex-col gap-2" aria-describedby={described("videoStyle")}>
+                    <legend className="mb-2 flex items-center gap-1.5 font-medium">
+                      {t("checkout.videoStyle")}
+                      <Dropdown
+                        openOnHover
+                        panelClassName="w-80"
+                        triggerLabel={t("checkout.videoStyleGuideLabel")}
+                        triggerClassName="grid size-6 place-items-center rounded-full text-text-muted transition-colors hover:text-text"
+                        trigger={<CircleAlert aria-hidden className="size-[18px]" strokeWidth={1.75} />}
+                      >
+                        {() => (
+                          <div className="flex flex-col gap-3 p-2 font-normal">
+                            <p className="font-medium">{t("checkout.videoStyleGuideTitle")}</p>
+                            <dl className="flex flex-col gap-2.5 text-small">
+                              {styles.map((style) => {
+                                const Icon = styleIcon[style];
+                                return (
+                                  <div key={style} className="flex gap-2.5">
+                                    <Icon aria-hidden className="mt-0.5 size-4 shrink-0 text-text-muted" strokeWidth={1.75} />
+                                    <div>
+                                      <dt className="font-medium">{t(`checkout.videoStyles.${style}`)}</dt>
+                                      <dd className="text-text-muted">{t(`checkout.videoStyleHints.${style}`)}</dd>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </dl>
+                          </div>
+                        )}
+                      </Dropdown>
+                    </legend>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {styles.map((style) => {
+                        const Icon = styleIcon[style];
+                        return (
+                          <label
+                            key={style}
+                            className="flex cursor-pointer flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-border px-3 py-4 text-center text-small font-medium transition-colors hover:bg-surface/60 has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
+                          >
+                            <input type="radio" name="videoStyle" value={style} defaultChecked={v("videoStyle") === style} className="sr-only" />
+                            <Icon aria-hidden className="size-6" strokeWidth={1.75} />
+                            {t(`checkout.videoStyles.${style}`)}
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {err("videoStyle") && <FieldError id="videoStyle-error">{err("videoStyle")}</FieldError>}
+                  </fieldset>
+                  <Field label={t("checkout.titleLabel")} htmlFor="title" error={err("title")}>
+                    <Input id="title" name="title" defaultValue={v("title")} placeholder={t("checkout.titlePlaceholder")} aria-invalid={!!err("title")} aria-describedby={described("title")} />
+                  </Field>
+                  <Field label={t("checkout.briefLabel")} htmlFor="brief" error={err("brief")}>
+                    <Textarea id="brief" name="brief" defaultValue={v("brief")} placeholder={t("checkout.briefPlaceholder")} aria-invalid={!!err("brief")} aria-describedby={described("brief")} />
+                  </Field>
+                  <Field label={`${t("checkout.deadline")} (${t("brandForm.optional")})`} htmlFor="deadline" error={err("deadline")} hint={t("checkout.deadlineHint")}>
+                    <DateInput id="deadline" name="deadline" min={minDeadline} defaultValue={v("deadline")} aria-invalid={!!err("deadline")} aria-describedby={described("deadline")} className="sm:max-w-72" />
+                  </Field>
+                  {/* What creators see with the request; optional, so folded away. Closed fields still submit. */}
+                  <details open={hasMore || undefined} className="group/more rounded-[var(--radius-lg)] border border-border">
+                    <summary className="flex cursor-pointer list-none items-center gap-2 rounded-[var(--radius-lg)] p-4 [&::-webkit-details-marker]:hidden">
+                      <ListPlus aria-hidden className="size-5 text-text-muted" />
+                      <span className="flex-1">
+                        <span className="block font-medium">{t("checkout.moreDetails")}</span>
+                        <span className="block text-small text-text-muted">{t("checkout.moreDetailsHint")}</span>
+                      </span>
+                      <ChevronDown aria-hidden className="size-5 shrink-0 text-text-muted transition-transform group-open/more:rotate-180" />
+                    </summary>
+                    <div className="flex flex-col gap-5 px-4 pb-4">
+                      <Field label={t("checkout.keyMessage")} htmlFor="keyMessage" hint={t("checkout.keyMessageHint")}>
+                        <Input id="keyMessage" name="keyMessage" maxLength={200} defaultValue={v("keyMessage")} placeholder={t("checkout.keyMessagePlaceholder")} />
+                      </Field>
+                      <fieldset className="flex flex-col gap-2">
+                        {/* Title on one side, "+ Add another" on the other. */}
+                        <legend className="mb-2 flex w-full items-center justify-between gap-3 font-medium">
+                          {t("checkout.references")}
+                          {refList.length < 5 && (
+                            <button
+                              type="button"
+                              onClick={() => setRefList((list) => [...list, ""])}
+                              className="inline-flex h-8 items-center gap-1 rounded-full border border-border px-3 text-small font-medium transition-colors hover:bg-surface"
+                            >
+                              <Plus aria-hidden className="size-4" />
+                              {t("checkout.addReference")}
+                            </button>
+                          )}
+                        </legend>
+                        {refList.map((ref, i) => (
+                          <div key={i} className="flex flex-col gap-2">
+                            <div className="group relative">
+                              <Input
+                                id={`reference-${i}`}
+                                name="reference"
+                                data-field={`reference-${i}`}
+                                type="url"
+                                inputMode="url"
+                                dir="ltr"
+                                aria-label={`${t("checkout.references")} ${i + 1}`}
+                                value={ref}
+                                onChange={(e) => setRefList((list) => list.map((x, j) => (j === i ? e.target.value : x)))}
+                                placeholder={t("checkout.referencePlaceholder")}
+                                aria-invalid={!!err(`reference-${i}`)}
+                                aria-describedby={described(`reference-${i}`)}
+                                className={refList.length > 1 ? "pe-12" : undefined}
+                              />
+                              {refList.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setRefList((list) => list.filter((_, j) => j !== i))}
+                                  aria-label={`${t("checkout.removeReference")} ${i + 1}`}
+                                  className="absolute end-1 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full text-text-muted transition-opacity hover:bg-surface focus-visible:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100"
+                                >
+                                  <X aria-hidden className="size-4" />
+                                </button>
+                              )}
+                            </div>
+                            {err(`reference-${i}`) && <FieldError id={`reference-${i}-error`}>{err(`reference-${i}`)}</FieldError>}
+                          </div>
+                        ))}
+                      </fieldset>
+                      <Field
+                        label={
+                          <>
+                            <CircleCheck aria-hidden className="size-4 text-success" />
+                            {t("checkout.mustInclude")}
+                          </>
+                        }
+                        htmlFor="mustInclude"
+                      >
+                        <Textarea id="mustInclude" name="mustInclude" maxLength={500} className="min-h-16" defaultValue={v("mustInclude")} placeholder={t("checkout.mustIncludePlaceholder")} />
+                      </Field>
+                      <Field
+                        label={
+                          <>
+                            <CircleX aria-hidden className="size-4 text-error" />
+                            {t("checkout.avoid")}
+                          </>
+                        }
+                        htmlFor="avoid"
+                      >
+                        <Textarea id="avoid" name="avoid" maxLength={500} className="min-h-16" defaultValue={v("avoid")} placeholder={t("checkout.avoidPlaceholder")} />
+                      </Field>
+                    </div>
+                  </details>
+                  {/* Optional, so folded away. Closed fields still submit with the form. */}
+                  <details open={hasNotes || undefined} className="group rounded-[var(--radius-lg)] border border-border">
+                    <summary className="flex cursor-pointer list-none items-center gap-2 rounded-[var(--radius-lg)] p-4 font-medium [&::-webkit-details-marker]:hidden">
+                      <MessageSquare aria-hidden className="size-5 text-text-muted" />
+                      {t("checkout.notes")}
+                      <ChevronDown aria-hidden className="ms-auto size-5 text-text-muted transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="flex flex-col gap-3 px-4 pb-4">
+                      {creators.map((c) => (
+                        <div key={c.id} className="flex items-start gap-3">
+                          <Avatar id={c.id} name={c.name} size="sm" className="mt-1.5" />
+                          <Textarea
+                            name={`note-${c.id}`}
+                            aria-label={`${t("checkout.notes")}: ${c.name}`}
+                            defaultValue={v(`note-${c.id}`)}
+                            placeholder={t("checkout.notePlaceholder")}
+                            className="min-h-16"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                </div>
+              </div>
+
+              {/* Step 3: payment */}
+              <div hidden={step !== offset + 2}>
+                <div className="flex flex-col gap-5">
+                  <PaymentFields balance={balance} useBalance={useBalance} onUseBalance={setUseBalance} byCard={byCard} err={err} v={v} />
+                </div>
+              </div>
+            </div>
+
+            {/* Only the way forward down here; back is at the top of the step. New campaign saves a draft quietly as you go (drafts are deleted from their card on Campaigns). */}
+            <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-end">
+              {step < LAST ? (
+                <Button type="submit" variant="primary" className="w-full sm:w-auto">
+                  {t("brandForm.next")}
+                </Button>
+              ) : (
+                <Button type="submit" variant="hero" aria-busy={pending} disabled={pending} className="w-full disabled:opacity-80 sm:w-auto">
+                  {pending ? (
+                    <>
+                      <LoaderCircle aria-hidden className="animate-spin" />
+                      {t("checkout.paying")}
+                    </>
+                  ) : byCard > 0 ? (
+                    t("checkout.pay", { amount: f.money(byCard) })
+                  ) : (
+                    t("checkout.payBalance")
+                  )}
+                </Button>
+              )}
+            </div>
+          </Card>
+        </div>
+
+        <Card className="flex flex-col gap-4 p-5 lg:sticky lg:top-24">
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-medium">{t("checkout.summary")}</p>
+            {/* The way back to the cart: here rather than at the top, so it doesn't compete with the steps. */}
+            {!fromPicker && (
+              <Link href="/cart" className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] px-1.5 py-0.5 text-small font-medium text-text-muted hover:text-text">
+                <Pencil aria-hidden className="size-3.5" />
+                {t("checkout.editCart")}
+              </Link>
+            )}
           </div>
-          <Field label={t("checkout.briefLabel")} htmlFor="brief" error={err("brief")}>
-            <Textarea id="brief" name="brief" defaultValue={v("brief")} placeholder={t("checkout.briefPlaceholder")} aria-invalid={!!err("brief")} aria-describedby={described("brief")} />
-          </Field>
-          <fieldset className="flex flex-col gap-3">
-            <legend className="mb-1 font-medium">{t("checkout.notes")}</legend>
+          {creators.length === 0 && <p className="text-small text-text-muted">{t("newCampaign.noCreatorsYet")}</p>}
+          <ul className="flex flex-col gap-3">
             {creators.map((c) => (
-              <div key={c.id} className="flex items-start gap-3">
-                <Avatar id={c.id} name={c.name} size="sm" className="mt-1.5" />
-                <Textarea
-                  name={`note-${c.id}`}
-                  aria-label={`${t("checkout.notes")}: ${c.name}`}
-                  defaultValue={v(`note-${c.id}`)}
-                  placeholder={t("checkout.notePlaceholder")}
-                  className="min-h-16"
-                />
-              </div>
+              <li key={c.id} className="flex items-center gap-3 text-small">
+                <Avatar id={c.id} name={c.name} size="sm" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium">{c.name}</span>
+                  <span className="block truncate text-text-muted">{c.summary}</span>
+                </span>
+                <span className="tabular-nums">{f.money(priceForBrand(c.subtotal))}</span>
+              </li>
             ))}
-          </fieldset>
-          <ContentRules t={t} error={err("rules")} defaultChecked={v("rules") === "on"} />
-        </Card>
-
-        <Card className="flex flex-col gap-5 p-5 md:p-6">
-          <h2 className="text-h3 font-medium">{t("checkout.payment")}</h2>
-          {balance > 0 && (
-            <label className="flex items-center justify-between gap-3 rounded-[var(--radius-lg)] bg-surface px-4 py-3">
-              <span className="font-medium">{t("checkout.useBalance", { amount: f.money(balance) })}</span>
-              <input type="checkbox" name="useBalance" checked={useBalance} onChange={(e) => setUseBalance(e.target.checked)} className="size-5 accent-[var(--primary)]" />
-            </label>
-          )}
-          {byCard > 0 && (
-            <div className="flex flex-col gap-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={t("checkout.cardName")} htmlFor="cardName" error={err("cardName")}>
-                  <Input id="cardName" name="cardName" autoComplete="cc-name" defaultValue={v("cardName")} aria-invalid={!!err("cardName")} aria-describedby={described("cardName")} />
-                </Field>
-                <Field label={t("checkout.cardNumber")} htmlFor="cardNumber" error={err("cardNumber")}>
-                  <Input
-                    id="cardNumber"
-                    name="cardNumber"
-                    dir="ltr"
-                    inputMode="numeric"
-                    autoComplete="cc-number"
-                    placeholder="4242 4242 4242 4242"
-                    defaultValue={v("cardNumber")}
-                    aria-invalid={!!err("cardNumber")}
-                    aria-describedby={described("cardNumber")}
-                  />
-                </Field>
-                <Field label={t("checkout.cardExpiry")} htmlFor="cardExpiry" error={err("cardExpiry")}>
-                  <Input
-                    id="cardExpiry"
-                    name="cardExpiry"
-                    dir="ltr"
-                    inputMode="numeric"
-                    autoComplete="cc-exp"
-                    placeholder={t("checkout.cardExpiryPlaceholder")}
-                    defaultValue={v("cardExpiry")}
-                    aria-invalid={!!err("cardExpiry")}
-                    aria-describedby={described("cardExpiry")}
-                  />
-                </Field>
-                <Field label={t("checkout.cardCvc")} htmlFor="cardCvc" error={err("cardCvc")}>
-                  <Input id="cardCvc" name="cardCvc" dir="ltr" inputMode="numeric" autoComplete="cc-csc" placeholder="123" defaultValue={v("cardCvc")} aria-invalid={!!err("cardCvc")} aria-describedby={described("cardCvc")} />
-                </Field>
+          </ul>
+          <dl className="flex flex-col gap-2 border-t border-border pt-3 text-small">
+            <FeeTotal creatorsTotal={total} />
+            {fromBalance > 0 && (
+              <div className="flex justify-between gap-2">
+                <dt className="text-text-muted">{t("checkout.fromBalance")}</dt>
+                <dd className="tabular-nums">{f.signedMoney(-fromBalance)}</dd>
               </div>
-              <p className="text-small text-text-muted">{t("checkout.demoCard")}</p>
-            </div>
-          )}
+            )}
+            {fromBalance > 0 && byCard > 0 && (
+              <div className="flex justify-between gap-2">
+                <dt className="text-text-muted">{t("checkout.byCard")}</dt>
+                <dd className="tabular-nums">{f.money(byCard)}</dd>
+              </div>
+            )}
+          </dl>
+          <PaymentTerms />
         </Card>
-      </div>
-
-      <Card className="flex flex-col gap-4 p-5 md:sticky md:top-24">
-        <p className="font-medium">{t("checkout.summary")}</p>
-        <ul className="flex flex-col gap-3">
-          {creators.map((c) => (
-            <li key={c.id} className="flex items-start justify-between gap-3 text-small">
-              <span className="min-w-0">
-                <span className="block truncate font-medium">{c.name}</span>
-                <span className="block text-text-muted">{c.summary}</span>
-              </span>
-              <span className="tabular-nums">{f.money(c.subtotal)}</span>
-            </li>
-          ))}
-        </ul>
-        <dl className="flex flex-col gap-2 border-t border-border pt-3 text-small">
-          <div className="flex justify-between gap-2 text-body">
-            <dt className="font-medium">{t("cart.total")}</dt>
-            <dd className="font-medium tabular-nums">{f.money(total)}</dd>
-          </div>
-          {fromBalance > 0 && (
-            <div className="flex justify-between gap-2">
-              <dt className="text-text-muted">{t("checkout.fromBalance")}</dt>
-              <dd className="tabular-nums">{f.signedMoney(-fromBalance)}</dd>
-            </div>
-          )}
-          {fromBalance > 0 && byCard > 0 && (
-            <div className="flex justify-between gap-2">
-              <dt className="text-text-muted">{t("checkout.byCard")}</dt>
-              <dd className="tabular-nums">{f.money(byCard)}</dd>
-            </div>
-          )}
-        </dl>
-        <p className="flex gap-2 text-small text-text-muted">
-          <Lock aria-hidden className="mt-0.5 size-4 shrink-0" />
-          {t("checkout.heldNote")}
-        </p>
-        <Button type="submit" variant="hero" className="w-full" aria-busy={pending}>
-          {byCard > 0 ? t("checkout.pay", { amount: f.money(byCard) }) : t("checkout.payBalance")}
-        </Button>
-      </Card>
-    </form>
+      </form>
+      {brand && (
+        <Drawer open={adding} onClose={() => setAdding(false)} title={t("checkout.addProductTitle", { brand: brand.name })}>
+          <ProductForm
+            mode="create"
+            brandId={brand.id}
+            onCreated={(id) => {
+              setProductId(id);
+              setAdding(false);
+            }}
+          />
+        </Drawer>
+      )}
+    </>
   );
 }

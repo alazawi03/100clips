@@ -1,4 +1,4 @@
-import { Bell, LayoutDashboard, Megaphone, Package, Settings, Store, Users, Wallet } from "lucide-react";
+import { Bell, Bookmark, LayoutDashboard, Megaphone, Package, Settings, Store, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { MessageKey } from "@/lib/i18n/messages";
 
@@ -13,14 +13,15 @@ const orders: NavItem = { href: "/orders", label: "nav.orders", icon: Package };
 const brands: NavItem = { href: "/brands", label: "nav.brands", icon: Store };
 const balance: NavItem = { href: "/balance", label: "nav.balance", icon: Wallet };
 const notifications: NavItem = { href: "/notifications", label: "nav.notifications", icon: Bell };
+const lists: NavItem = { href: "/lists", label: "nav.lists", icon: Bookmark };
 const settings: NavItem = { href: "/settings", label: "nav.settings", icon: Settings };
 
 /** Desktop sidebar. */
-export const sidebarItems: NavItem[] = [dashboard, explore, campaigns, orders, brands, balance];
+export const sidebarItems: NavItem[] = [dashboard, explore, lists, campaigns, orders, brands, balance];
 
 /** Mobile tab bar, followed by a "More" tab that opens moreItems. */
 export const tabItems: NavItem[] = [{ ...dashboard, label: "nav.home" }, explore, campaigns, orders];
-export const moreItems: NavItem[] = [brands, balance, notifications, settings];
+export const moreItems: NavItem[] = [brands, balance, lists, notifications, settings];
 
 /** Creator profiles belong to Explore. */
 const aliases: Record<string, string> = { "/creators": "/explore" };

@@ -21,7 +21,7 @@ export function updateBrand(id: string, input: Omit<Brand, "id">): Brand | undef
   if (!brand) return undefined;
   Object.assign(brand, input);
   // Clear optional fields the brand removed.
-  for (const key of ["logo", "about", "website", "instagram", "tiktok", "cover", "crNumber"] as const) {
+  for (const key of ["logo", "about", "website", "instagram", "tiktok", "countries", "registrations"] as const) {
     if (input[key] === undefined) delete brand[key];
   }
   return brand;
@@ -35,6 +35,19 @@ export function createProduct(input: Omit<Product, "id">): Product {
   const product: Product = { id: slug("product"), ...input };
   products.push(product);
   return product;
+}
+
+export function duplicateProduct(id: string): Product | undefined {
+  const source = getProduct(id);
+  if (!source) return undefined;
+  const copy: Product = { ...structuredClone(source), id: slug("product"), name: { ar: `${source.name.ar} (نسخة)`, en: `${source.name.en} (copy)` } };
+  products.splice(products.indexOf(source) + 1, 0, copy);
+  return copy;
+}
+
+export function deleteProduct(id: string) {
+  const index = products.findIndex((p) => p.id === id);
+  if (index >= 0) products.splice(index, 1);
 }
 
 export function updateProduct(id: string, input: Omit<Product, "id" | "brandId">): Product | undefined {
