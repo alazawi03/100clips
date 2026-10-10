@@ -1,4 +1,4 @@
-import { creators } from "./creators";
+import { bookableCreators, creators } from "./creators";
 import type { Creator } from "./types";
 
 /*
@@ -22,7 +22,7 @@ export function allLists(): CreatorList[] {
 export function creatorsIn(list: CreatorList): Creator[] {
   return [...list.creatorIds]
     .reverse()
-    .map((id) => creators.find((c) => c.id === id))
+    .map((id) => bookableCreators().find((c) => c.id === id))
     .filter((c): c is Creator => !!c);
 }
 

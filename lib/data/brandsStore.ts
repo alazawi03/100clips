@@ -21,7 +21,7 @@ export function updateBrand(id: string, input: Omit<Brand, "id">): Brand | undef
   if (!brand) return undefined;
   Object.assign(brand, input);
   // Clear optional fields the brand removed.
-  for (const key of ["logo", "about", "website", "instagram", "tiktok", "countries", "crNumber", "vatCertificate"] as const) {
+  for (const key of ["logo", "about", "website", "instagram", "tiktok", "countries", "registrations"] as const) {
     if (input[key] === undefined) delete brand[key];
   }
   return brand;

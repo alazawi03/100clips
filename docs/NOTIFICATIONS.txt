@@ -1,0 +1,79 @@
+100clips - Notifications
+========================
+Updated: 9 October 2026
+
+Status key:
+  [BUILT]    working in the app today (demo data)
+  [PLANNED]  agreed, not built yet (phone push needs the backend)
+
+Messages (chats) are NOT notifications: they have their own tab / page with an unread count,
+so they are never shown twice.
+
+
+------------------------------------------------------------
+1. CREATOR APP - the bell on Home  [BUILT]
+------------------------------------------------------------
+Where: bell icon at the top of Home, with the number of new ones.
+Layout: grouped under Today / Yesterday / This week / Earlier, newest first.
+Each row: an icon for the kind, the brand's logo, what happened, which ad, the time.
+New ones have a pink dot. Tapping opens that ad.
+
+  #  When                         Arabic                                   English                              Details shown
+  1  Brand sends an offer         عرض جديد من {brand}                      New offer from {brand}               ad · format · price
+  2  Brand ships the product      {brand} أرسلت لك المنتج                  {brand} sent you the product         ad · how it's delivered
+  3  Brand asks for a revision    {brand} طلبت تعديل على مقطعك             {brand} asked for a revision         the brand's note
+  4  Brand approves the clip      {brand} اعتمدت مقطعك                     {brand} approved your clip           money received · stars
+  5  Brand cancels the offer      {brand} ألغت العرض                       {brand} cancelled the offer          ad
+
+Also on approval [BUILT]: the full-screen celebration opens by itself, once per approval,
+when the app opens or comes back to the front, and only while Home is on screen.
+
+
+------------------------------------------------------------
+2. BRAND WEB APP - notifications page  [BUILT]
+------------------------------------------------------------
+Where: bell in the top bar, and the Notifications page. "Mark all as read".
+The wording follows the creator's gender (قبل / قبلت).
+
+  #  When                              Arabic (female form)                                  English
+  1  Creator accepts the offer         {name} قبلت عرض «{campaign}»                          {name} accepted the offer for "{campaign}"
+  2  Creator declines                  {name} اعتذرت عن «{campaign}»، ورجع المبلغ لرصيدك.     {name} declined "{campaign}"; the money is back in your balance
+  3  Creator receives the product      {name} استلمت منتج «{campaign}»                       {name} received the product for "{campaign}"
+  4  Clip ready for review             مقطع {name} لـ«{campaign}» جاهز لمراجعتك               {name}'s clip for "{campaign}" is ready for review
+  5  New version after a revision      {name} أرسلت نسخة جديدة لـ«{campaign}»                {name} sent a new version for "{campaign}"
+  6  Creator adds an ad code           {name} أضافت كود إعلان لـ«{campaign}»                  {name} added an ad code for "{campaign}"
+  7  Deadline passed, no clip yet      عدّى موعد «{campaign}» وما وصل مقطع {name}             The deadline for "{campaign}" passed without {name}'s clip
+
+  Note: #7 is a "late" notice. We removed the "late" labels from the campaign and order pages
+  earlier; decide whether this notification stays.
+
+
+------------------------------------------------------------
+3. CREATOR APP - phone push notifications (lock screen)  [PLANNED]
+------------------------------------------------------------
+Grouping: stacked per brand (all of محمصة المحرق's in one stack). Summary line:
+"3 تحديثات من محمصة المحرق". Money and milestones that aren't about one brand go in a
+"100clips" stack.
+
+  #  When                         Title                                       Text                                       Opens            Buttons
+  1  New offer                    عرض جديد من {brand}                          {format} · {price} · باقي 72 ساعة           the offer        اقبل / شوف العرض
+  2  Offer has 12 hours left      باقي 12 ساعة على عرض {brand}                  رد قبل لا ينتهي                            the offer        (time-sensitive)
+  3  Product shipped              منتجك في الطريق 📦                            {brand} أرسلت {product} ({how})             the ad           استلمته
+  4  Deadline in 2 days / today   التسليم بعد يومين / التسليم اليوم              {ad} · {brand}                             upload
+  5  Revision requested           طلبوا تعديل على مقطعك                         "{note}"                                   upload v2
+  6  Clip approved                اعتمدوا مقطعك! 🎉                              تحوّل لك {amount} · ⭐ {stars}               celebration
+  7  Send the product back        رجّع المنتج لـ{brand}                          بعد الاعتماد، أرسله لهم                     the ad
+  8  Brand wants the ad code      {brand} تبي كود الإعلان                        Spark Ads / Partnership Ads للمقطع          the ad
+  9  New message                  {brand}                                     the message text                           the chat         رد
+ 10  Withdrawal sent              أرسلنا {amount} لحسابك                         توصلك خلال 1-3 أيام                        earnings
+ 11  Offer cancelled              ألغت {brand} العرض                            {ad}                                       the ad
+
+Settings (planned): switch each group on/off: offers, deadlines, money, messages.
+Several messages from one brand collapse into "3 رسائل من {brand}".
+
+
+------------------------------------------------------------
+4. BRAND WEB APP - email / push  [NOT DECIDED]
+------------------------------------------------------------
+Nothing beyond the in-app page yet. Candidates: clip ready for review, offer declined,
+deadline passed.

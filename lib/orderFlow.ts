@@ -1,4 +1,4 @@
-import type { Order, OrderEvent, OrderEventType } from "@/lib/data/types";
+import type { Clip, ClipVersion, Order, OrderEvent, OrderEventType } from "@/lib/data/types";
 
 /*
  * How an order moves, shared by the campaign page, the order page and the orders list.
@@ -16,6 +16,7 @@ export function stepsFor(physical: boolean): OrderStep[] {
 export function currentStep(order: Order, physical: boolean): OrderStep {
   switch (order.status) {
     case "pending":
+    case "declined":
     case "cancelled":
       return "offered";
     case "in_progress":
@@ -53,7 +54,7 @@ export function actionWaitingDays(order: Order, action: NextAction, today: strin
 export type Waiting = "accept" | "receive" | "filming" | "revision" | "done" | "cancelled";
 
 export function waitingFor(order: Order, physical: boolean): Waiting {
-  if (order.status === "cancelled") return "cancelled";
+  if (order.status === "cancelled" || order.status === "declined") return "cancelled";
   if (order.status === "pending") return "accept";
   if (order.status === "in_progress") {
     if (physical && order.shipping?.sentAt && !order.shipping.receivedAt) return "receive";
@@ -65,6 +66,52 @@ export function waitingFor(order: Order, physical: boolean): Waiting {
 /** Past the deadline while the creator still owes the clip. */
 export function isLate(order: Order, deadline: string | undefined, today: string): boolean {
   return !!deadline && today > deadline && (order.status === "pending" || order.status === "in_progress");
+}
+
+/* ---------- Offers run out ---------- */
+
+/** Creators have this long to accept an offer (the creator app uses the same window). After it, the money comes back. */
+export const OFFER_HOURS = 96;
+const HOUR = 3_600_000;
+
+/** When the offer runs out, in ms. Demo orders carry only a date: they count from midday Bahrain time. */
+export function offerExpiresAt(order: Pick<Order, "createdAt">): number {
+  const sent = order.createdAt.length > 10 ? order.createdAt : `${order.createdAt}T12:00:00+03:00`;
+  return Date.parse(sent) + OFFER_HOURS * HOUR;
+}
+
+/** Whole hours left to accept (rounded up, 0 once it has run out). */
+export const offerHoursLeft = (order: Pick<Order, "createdAt">, now: string) => Math.max(0, Math.ceil((offerExpiresAt(order) - Date.parse(now)) / HOUR));
+
+/** Still waiting for the creator, and past the window. */
+export const isOfferExpired = (order: Pick<Order, "status" | "createdAt">, now: string) => order.status === "pending" && Date.parse(now) >= offerExpiresAt(order);
+
+/** Show the countdown as urgent from this many hours left. */
+export const OFFER_URGENT_HOURS = 24;
+
+/* ---------- Clip versions ---------- */
+
+/** Every version of the clip, oldest first: the stored ones, or just the current clip. */
+export function clipVersions(order: Order, clip: Clip | undefined): ClipVersion[] {
+  if (order.versions?.length) return order.versions;
+  if (!clip) return [];
+  const uploaded = eventsOf(order).find((e) => e.type === "uploaded")?.at ?? order.createdAt;
+  return [{ videoSrc: clip.videoSrc, uploadedAt: uploaded }];
+}
+
+/** One revision is included; it's used once asked for (or once a second version exists). */
+export const revisionUsed = (order: Order) => !!order.revisionRequested || (order.versions?.length ?? 0) > 1 || eventsOf(order).some((e) => e.type === "revisionRequested");
+
+/* ---------- Dates ---------- */
+
+/** `days` working days after `iso` (a date or date-time), skipping the Gulf weekend (Friday and Saturday). yyyy-mm-dd. */
+export function addBusinessDays(iso: string, days: number): string {
+  const d = new Date(`${iso.slice(0, 10)}T12:00:00Z`);
+  for (let left = days; left > 0; ) {
+    d.setUTCDate(d.getUTCDate() + 1);
+    if (d.getUTCDay() !== 5 && d.getUTCDay() !== 6) left--;
+  }
+  return d.toISOString().slice(0, 10);
 }
 
 /** Whole days from `today` to `date` (negative when it has passed). */
@@ -88,7 +135,9 @@ export function eventsOf(order: Order): OrderEvent[] {
   const derived: Array<[OrderEventType, string] | false> = [
     ["offered", at],
     order.status === "cancelled" && ["cancelled", addDays(at, 1)],
-    order.status !== "pending" && order.status !== "cancelled" && ["accepted", addDays(at, 1)],
+    order.status === "declined" && order.declineReason === "expired" && ["expired", new Date(offerExpiresAt(order)).toISOString()],
+    order.status === "declined" && order.declineReason !== "expired" && ["declined", addDays(at, 1)],
+    order.status !== "pending" && order.status !== "cancelled" && order.status !== "declined" && ["accepted", addDays(at, 1)],
     !!order.shipping?.sentAt && ["sent", order.shipping.sentAt],
     !!order.shipping?.receivedAt && ["received", order.shipping.receivedAt],
     (order.status === "delivered" || order.status === "approved" || order.revisionRequested === true) && ["uploaded", addDays(at, 5)],

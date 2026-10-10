@@ -18,7 +18,7 @@ type ImageInputProps = {
   error?: string;
 };
 
-/** One image (logo, cover). Click or drop a file; it is resized in the browser and previewed. */
+/** One image (logo, cover). Tap the preview or drop a file on it; it is resized in the browser and previewed. */
 export function ImageInput({ name, label, hint, defaultValue, shape, error }: ImageInputProps) {
   const { t } = useI18n();
   const id = useId();
@@ -52,7 +52,18 @@ export function ImageInput({ name, label, hint, defaultValue, shape, error }: Im
       </span>
       <input type="hidden" name={name} value={value} />
       <div className={cn("flex gap-4", shape === "square" ? "items-center" : "flex-col")}>
-        {/* The preview is a click and drop target too, not just the button. */}
+        {/* The file field sits before the preview, so the preview shows its keyboard focus. */}
+        <input
+          ref={file}
+          id={id}
+          type="file"
+          accept={IMAGE_TYPES.join(",")}
+          aria-labelledby={`${id}-label`}
+          aria-invalid={shown ? true : undefined}
+          className="peer sr-only"
+          onChange={(e) => pick(e.target.files?.[0])}
+        />
+        {/* The preview is the way to pick or replace the image: tap it, or drop a file on it. */}
         <label
           htmlFor={id}
           onDragOver={(e) => {
@@ -66,7 +77,7 @@ export function ImageInput({ name, label, hint, defaultValue, shape, error }: Im
             pick(e.dataTransfer.files?.[0]);
           }}
           className={cn(
-            "relative grid shrink-0 cursor-pointer place-items-center overflow-hidden border border-dashed bg-surface text-text-muted transition-colors duration-[120ms] hover:border-primary hover:text-primary",
+            "relative grid shrink-0 cursor-pointer place-items-center overflow-hidden border border-dashed bg-surface text-text-muted transition-colors duration-[120ms] hover:border-primary hover:text-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary",
             shape === "square" ? "size-24 rounded-[var(--radius-lg)]" : "aspect-[3/1] w-full rounded-[var(--radius-lg)]",
             dragging ? "border-primary bg-primary-soft text-primary" : shown ? "border-error" : "border-border",
           )}
@@ -80,30 +91,14 @@ export function ImageInput({ name, label, hint, defaultValue, shape, error }: Im
             <ImagePlus aria-hidden className="size-7" strokeWidth={1.5} />
           )}
         </label>
-        <div className="flex flex-wrap items-center gap-2">
-          <label
-            htmlFor={id}
-            className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-[var(--radius-md)] bg-surface px-4 font-medium hover:bg-border focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary"
-          >
-            {value ? t("images.replace") : t("images.upload")}
-            <input
-              ref={file}
-              id={id}
-              type="file"
-              accept={IMAGE_TYPES.join(",")}
-              aria-labelledby={`${id}-label`}
-              aria-invalid={shown ? true : undefined}
-              className="sr-only"
-              onChange={(e) => pick(e.target.files?.[0])}
-            />
-          </label>
-          {value && (
+        {value && (
+          <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={() => setValue("")} className="inline-flex h-10 items-center gap-1 rounded-[var(--radius-md)] px-3 text-error hover:bg-error-soft">
               <X aria-hidden className="size-4" />
               {t("images.remove")}
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
       {shown ? <FieldError>{shown}</FieldError> : hint ? <p className="text-small text-text-muted">{hint}</p> : null}
     </div>

@@ -1,50 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, Compass, ListChecks, Megaphone, UserPlus } from "lucide-react";
+import { Megaphone, UserPlus } from "lucide-react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { buttonClass } from "@/components/ui/Button";
 import { Dropdown, menuItemClass } from "@/components/ui/Dropdown";
 
-/** "Add creator" on a campaign: invite from one of your lists, or browse creators and invite from a profile. */
+/** "Add creator" on a campaign: the invite page, to pick from your lists or from Explore. */
 export function AddCreatorMenu({ campaignId }: { campaignId: string }) {
   const { t } = useI18n();
   return (
-    <Dropdown
-      align="start"
-      panelClassName="w-72"
-      triggerClassName={buttonClass("secondary")}
-      trigger={
-        <>
-          <UserPlus aria-hidden />
-          {t("campaignDetail.addCreator")}
-          <ChevronDown aria-hidden className="size-4" />
-        </>
-      }
-    >
-      {(close) => (
-        <ul>
-          <li>
-            <Link href={`/campaigns/${campaignId}/invite`} onClick={close} className={menuItemClass}>
-              <ListChecks aria-hidden className="size-5 shrink-0 text-text-muted" />
-              <span>
-                <span className="block font-medium">{t("invite.fromList")}</span>
-                <span className="block text-small text-text-muted">{t("invite.fromListHint")}</span>
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link href="/explore" onClick={close} className={menuItemClass}>
-              <Compass aria-hidden className="size-5 shrink-0 text-text-muted" />
-              <span>
-                <span className="block font-medium">{t("invite.browse")}</span>
-                <span className="block text-small text-text-muted">{t("invite.browseHint")}</span>
-              </span>
-            </Link>
-          </li>
-        </ul>
-      )}
-    </Dropdown>
+    <Link href={`/campaigns/${campaignId}/invite`} className={buttonClass("secondary")}>
+      <UserPlus aria-hidden />
+      {t("campaignDetail.addCreator")}
+    </Link>
   );
 }
 

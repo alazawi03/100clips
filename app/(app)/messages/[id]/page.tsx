@@ -10,11 +10,13 @@ import { cn } from "@/lib/cn";
 import { DEMO_TODAY } from "@/lib/data/account";
 import { getCreator } from "@/lib/data/creators";
 import { getConversation, markRead } from "@/lib/data/messages";
-import { orders } from "@/lib/data/orders";
+import { getOrder, orders } from "@/lib/data/orders";
+import { isActiveOrder } from "@/lib/statuses";
 import { getI18n } from "@/lib/i18n/server";
 
-export default async function ConversationPage({ params }: PageProps<"/messages/[id]">) {
+export default async function ConversationPage({ params, searchParams }: PageProps<"/messages/[id]">) {
   const { id } = await params;
+  const query = await searchParams;
   const conversation = getConversation(id);
   if (!conversation) notFound();
   markRead(conversation.id);
@@ -23,9 +25,12 @@ export default async function ConversationPage({ params }: PageProps<"/messages/
   const creator = getCreator(conversation.creatorId)!;
   // Work still going on with this creator (anything not approved yet), newest first.
   const active = orders
-    .filter((o) => o.creatorId === conversation.creatorId && o.status !== "approved")
+    .filter((o) => o.creatorId === conversation.creatorId && isActiveOrder(o) && o.status !== "approved")
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const name = f.pick(creator.name);
+  // From "Ask for an ad code" on a clip: the request is ready in the box, to edit or send.
+  const draftOrder = query.draft === "adCode" && typeof query.order === "string" ? getOrder(query.order) : undefined;
+  const draft = draftOrder && draftOrder.creatorId === creator.id ? t("adCode.requestMessage", { name, title: f.pick(draftOrder.title) }) : undefined;
 
   return (
     <Card className="flex h-[calc(100dvh-12rem)] min-h-[420px] flex-col overflow-hidden md:h-[calc(100dvh-10rem)]">
@@ -61,7 +66,7 @@ export default async function ConversationPage({ params }: PageProps<"/messages/
         })}
       </ol>
 
-      <Composer conversationId={conversation.id} />
+      <Composer key={draft ?? "empty"} conversationId={conversation.id} defaultText={draft} />
     </Card>
   );
 }

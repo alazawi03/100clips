@@ -58,6 +58,45 @@ export const campaigns: Campaign[] = [
     status: "in_progress",
     deliveredClips: 1,
   },
+  // Every active order still waiting for the creator to accept (one creator declined): "Pending".
+  {
+    id: "app-launch",
+    productIds: ["roastery-app"],
+    brandId: "muharraq-roastery",
+    title: { ar: "إطلاق تطبيق المحمصة", en: "Roastery app launch" },
+    brief: {
+      ar: "حمّلوا تطبيقنا، اطلبوا مشروبكم المفضل، وصوروا الطلب من الجوال لين الاستلام من الفرع.",
+      en: "Download our app, order your favourite drink, and film it from the phone to the pickup at the branch.",
+    },
+    niche: "food",
+    clipsCount: 3,
+    budget: 135,
+    videoStyle: "howto",
+    deadline: "2026-10-30",
+    createdAt: "2026-10-03",
+    logistics: { "roastery-app": { type: "app", promoCode: "CLIPS100" } },
+    status: "in_progress",
+    deliveredClips: 0,
+  },
+  // Cancelled by the brand before anyone accepted (one creator had already declined).
+  {
+    id: "eid-linen",
+    productIds: ["linen-abaya"],
+    brandId: "nouf-abayas",
+    title: { ar: "عباية الكتان للعيد", en: "Linen abaya for Eid" },
+    brief: {
+      ar: "إطلالة العيد بعباية الكتان، من تجهيز الصبح لين زيارة الأهل.",
+      en: "An Eid look in the linen abaya, from getting ready in the morning to visiting family.",
+    },
+    niche: "fashion",
+    clipsCount: 2,
+    budget: 135,
+    videoStyle: "ad",
+    createdAt: "2026-09-05",
+    logistics: { "linen-abaya": { type: "physical", after: "keep" } },
+    status: "cancelled",
+    deliveredClips: 0,
+  },
 ];
 
 export function getCampaign(id: string): Campaign | undefined {

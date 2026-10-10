@@ -20,7 +20,6 @@ export type BrandRowView = {
   name: string;
   logo?: string;
   industry: string;
-  city: string;
   productsLabel: string;
   products: ProductView[];
 };
@@ -80,12 +79,6 @@ function BrandCard({ brand, expanded, onToggle, onOpenProduct }: { brand: BrandR
                 {t("common.separator")}
               </span>
               {brand.industry}
-              {brand.city && (
-                <>
-                  {t("common.separator")}
-                  {brand.city}
-                </>
-              )}
             </span>
           </span>
           <span className="hidden sm:block">

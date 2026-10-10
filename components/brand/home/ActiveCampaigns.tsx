@@ -1,23 +1,27 @@
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge, campaignTone } from "@/components/ui/Badge";
+import { CampaignStatus } from "@/components/brand/campaigns/CampaignStatus";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { getCreator } from "@/lib/data/creators";
 import { orders } from "@/lib/data/orders";
 import type { Campaign } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
+import { campaignProgress, isActiveOrder } from "@/lib/statuses";
 
 export function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign[]; i18n: I18n }) {
   const { t, tp, f } = i18n;
-  const active = campaigns.filter((c) => c.status === "in_progress");
+  // Campaigns still running: waiting for creators to accept, or in progress.
+  const active = campaigns
+    .map((c) => ({ campaign: c, progress: campaignProgress(c, orders) }))
+    .filter(({ progress }) => progress.status === "pending" || progress.status === "in_progress");
+  if (active.length === 0) return null;
 
   return (
     <section aria-labelledby="campaigns-title" className="min-w-0">
       <SectionHeader id="campaigns-title" title={t("brandHome.campaignsTitle")} action={{ href: "/campaigns", label: t("common.seeAll") }} />
       <Card className="divide-y divide-border">
-        {active.map((campaign) => {
-          const progress = Math.round((campaign.deliveredClips / campaign.clipsCount) * 100);
-          const hired = orders.filter((o) => o.campaignId === campaign.id && o.status !== "cancelled");
+        {active.map(({ campaign, progress }) => {
+          const hired = orders.filter((o) => o.campaignId === campaign.id && isActiveOrder(o));
           const delivered = hired.filter((o) => o.status === "delivered" || o.status === "approved").length;
           const faces = [...new Set(hired.map((o) => o.creatorId))].slice(0, 4).map((id) => getCreator(id)!);
           return (
@@ -33,15 +37,11 @@ export function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign[]; i1
                     {t("brandHome.creatorsDelivered", { done: f.number(delivered), total: f.number(hired.length) })}
                   </p>
                 </div>
-                <Badge tone={campaignTone[campaign.status]}>{t(`status.campaign.${campaign.status}`)}</Badge>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <div className="h-1.5 overflow-hidden rounded-full bg-surface" role="presentation">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
-                </div>
-                <div className="flex flex-wrap items-center justify-between gap-2 text-small text-text-muted">
-                  <span>{t("brandHome.clipsProgress", { done: f.number(campaign.deliveredClips), total: f.number(campaign.clipsCount) })}</span>
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <CampaignStatus progress={progress} className="flex-1" />
+                <div className="flex items-center gap-2 text-small text-text-muted">
                   <span className="flex items-center gap-2">
                     {faces.length > 0 && (
                       <span className="flex -space-x-2 rtl:space-x-reverse">

@@ -15,16 +15,16 @@ import { Tooltip } from "@/components/ui/Tooltip";
 import { cn } from "@/lib/cn";
 import { clipsByCreator } from "@/lib/data/clips";
 import { getCreator } from "@/lib/data/creators";
+import { isActiveMarket } from "@/lib/data/markets";
 import { platformOf, type Platform } from "@/lib/data/types";
 import { cartOf } from "@/lib/data/store";
 import { reviewsOf } from "@/lib/data/reviews";
 import { getI18n } from "@/lib/i18n/server";
 
-/** Profile URL per platform. Dummy data has one handle per creator, used on every platform. */
+/** Profile URL per platform, from the creator's own handle there. */
 const profileUrl: Record<Platform, (handle: string) => string> = {
   tiktok: (h) => `https://www.tiktok.com/@${h}`,
   instagram: (h) => `https://www.instagram.com/${h}`,
-  youtube: (h) => `https://www.youtube.com/@${h}`,
 };
 
 function Stars({ rating, label }: { rating: number; label: string }) {
@@ -40,13 +40,19 @@ function Stars({ rating, label }: { rating: number; label: string }) {
 export default async function CreatorProfilePage({ params }: PageProps<"/creators/[id]">) {
   const { id } = await params;
   const creator = getCreator(id);
-  if (!creator) notFound();
+  // Brands only see creators where 100clips runs; the rest are on the waitlist.
+  if (!creator || !isActiveMarket(creator.country)) notFound();
   const { t, f } = await getI18n();
   const name = f.pick(creator.name);
   const works = clipsByCreator(creator.id);
   const reviews = reviewsOf(creator.id);
   const line = cartOf().find((l) => l.creatorId === creator.id);
-  const socials = [...new Set(creator.formats.map((o) => platformOf[o.format]))];
+  // The accounts the creator added in the app; older profiles fall back to one handle on each platform they sell.
+  const handles: Partial<Record<Platform, string>> =
+    creator.instagram || creator.tiktok
+      ? { ...(creator.instagram && { instagram: creator.instagram }), ...(creator.tiktok && { tiktok: creator.tiktok }) }
+      : Object.fromEntries([...new Set(creator.formats.map((o) => platformOf[o.format]))].map((p) => [p, creator.handle]));
+  const socials = (Object.entries(handles) as [Platform, string][]).map(([platform, handle]) => ({ platform, handle }));
 
   return (
     <div className="flex flex-col gap-8">
@@ -59,7 +65,7 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
       <div className="flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,1fr)_340px] md:items-start md:gap-8">
       <div className="flex min-w-0 flex-col gap-8 md:order-1">
       <Card className="flex flex-col gap-5 p-5 md:p-6 lg:flex-row lg:items-start">
-        <Avatar id={creator.id} name={name} size="xl" ring={creator.hasNewClips ? "new" : undefined} className="self-start" />
+        <Avatar id={creator.id} name={name} src={creator.photo} size="xl" ring={creator.hasNewClips ? "new" : undefined} className="self-start" />
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           {/* Name, with icon-only actions at the far end of the same line; each says what it does on hover. */}
           <div className="flex items-center justify-between gap-3">
@@ -97,17 +103,17 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
             </div>
           </div>
           <ul aria-label={t("profile.socials")} className="flex flex-wrap gap-2">
-            {socials.map((platform) => (
+            {socials.map(({ platform, handle }) => (
               <li key={platform}>
                 <a
-                  href={profileUrl[platform](creator.handle)}
+                  href={profileUrl[platform](handle)}
                   target="_blank"
                   rel="noreferrer"
-                  aria-label={t("profile.openSocial", { platform: t(`platforms.${platform}`), handle: creator.handle })}
+                  aria-label={t("profile.openSocial", { platform: t(`platforms.${platform}`), handle })}
                   className="inline-flex h-9 items-center gap-2 rounded-full border border-border bg-card px-3 text-small font-medium hover:bg-surface"
                 >
                   <PlatformLogo platform={platform} className="size-4" />
-                  {t(`platforms.${platform}`)}
+                  <bdi dir="ltr">@{handle}</bdi>
                   <ExternalLink aria-hidden className="size-3.5 text-text-muted" />
                 </a>
               </li>

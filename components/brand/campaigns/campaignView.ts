@@ -1,10 +1,11 @@
-import { DEMO_TODAY, products } from "@/lib/data/account";
+import { DEMO_NOW, DEMO_TODAY, products } from "@/lib/data/account";
 import { getClip } from "@/lib/data/clips";
 import { getCreator } from "@/lib/data/creators";
 import { conversations } from "@/lib/data/messages";
-import type { Campaign, Clip, Order, OrderShipping, OrderStatus } from "@/lib/data/types";
+import { platformOf, type AdCode, type AdPlatform, type Campaign, type Clip, type ClipVersion, type DeclineReason, type Order, type OrderShipping, type OrderStatus } from "@/lib/data/types";
+import { brandPaid } from "@/lib/fees";
 import type { I18n } from "@/lib/i18n/server";
-import { actionWaitingDays, currentStep, isLate, nextAction, stepsFor, waitingFor, type NextAction, type OrderStep, type Waiting } from "@/lib/orderFlow";
+import { actionWaitingDays, clipVersions, currentStep, isLate, nextAction, offerHoursLeft, revisionUsed, stepsFor, waitingFor, type NextAction, type OrderStep, type Waiting } from "@/lib/orderFlow";
 
 /** Everything an order card on the campaign page shows, already worked out on the server. */
 export type OrderCardView = {
@@ -18,6 +19,15 @@ export type OrderCardView = {
   amount: number;
   status: OrderStatus;
   revisionRequested: boolean;
+  /** Pending only: hours left for the creator to accept. */
+  hoursLeft?: number;
+  declineReason?: DeclineReason;
+  declineNote?: string;
+  /** What comes back to the balance if the order ends without work: everything paid, fee included. */
+  refund: number;
+  /** Every uploaded version of the clip, oldest first. */
+  versions: ClipVersion[];
+  revisionsLeft: number;
   steps: OrderStep[];
   step: OrderStep;
   action?: NextAction;
@@ -35,7 +45,16 @@ export type OrderCardView = {
   shipping?: OrderShipping;
   note?: string;
   rating?: number;
+  /** The clip's platform when it can carry an ad code (TikTok, Instagram), and the code if the creator added one. */
+  adPlatform?: AdPlatform;
+  adCode?: AdCode;
+  today: string;
 };
+
+/** TikTok and Instagram clips can come with a Spark / Partnership Ads code. */
+export function adPlatformOf(order: Order): AdPlatform | undefined {
+  return order.items[0] && platformOf[order.items[0].format];
+}
 
 /** The campaign's one product, and how it reaches creators. */
 export function productOf(campaign: Campaign) {
@@ -75,9 +94,15 @@ export function orderCardView(order: Order, campaign: Campaign, i18n: I18n): Ord
     name: f.pick(creator.name),
     handle: creator.handle,
     itemsLabel: order.items.map((i) => t(`formats.${i.format}`)).join(t("common.separator")),
-    amount: order.amount,
+    amount: brandPaid(order),
     status: order.status,
     revisionRequested: !!order.revisionRequested,
+    hoursLeft: order.status === "pending" ? offerHoursLeft(order, DEMO_NOW) : undefined,
+    declineReason: order.declineReason,
+    declineNote: order.declineNote,
+    refund: brandPaid(order),
+    versions: clipVersions(order, order.clipId ? getClip(order.clipId) : undefined),
+    revisionsLeft: revisionUsed(order) ? 0 : 1,
     steps: stepsFor(physical),
     step: currentStep(order, physical),
     action,
@@ -94,5 +119,8 @@ export function orderCardView(order: Order, campaign: Campaign, i18n: I18n): Ord
     shipping: order.shipping,
     note: order.note,
     rating: order.rating,
+    adPlatform: adPlatformOf(order),
+    adCode: order.adCode,
+    today: DEMO_TODAY,
   };
 }

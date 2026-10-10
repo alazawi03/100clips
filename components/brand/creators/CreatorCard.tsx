@@ -15,6 +15,7 @@ import { fromPrice } from "@/lib/data/creators";
 import { allLists } from "@/lib/data/lists";
 import { platformOf, type Creator } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
+import { priceForBrand } from "@/lib/fees";
 
 /**
  * Links to the creator profile, where brands pick platforms and add to cart.
@@ -49,6 +50,7 @@ export function CreatorCard({
             <Avatar
               id={creator.id}
               name={name}
+              src={creator.photo}
               size="lg"
               ring={creator.hasNewClips ? "new" : undefined}
             />
@@ -104,7 +106,7 @@ export function CreatorCard({
               </span>
               {inCart && <Badge tone="brand">{t("cart.inCart")}</Badge>}
               <span className="ms-auto text-small font-medium">
-                {t("common.fromPrice", { price: f.money(fromPrice(creator)) })}
+                {t("common.fromPrice", { price: f.money(priceForBrand(fromPrice(creator))) })}
               </span>
             </div>
             {/* The whole card is the link; this only shows where it goes. */}

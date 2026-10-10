@@ -1,8 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
+import { OPEN_ORDER_EVENT } from "./OrderCard";
+
+/** Window event that shows the brief (the brief tab on phones) and scrolls to it. */
+export const SHOW_BRIEF_EVENT = "campaign:show-brief";
 
 const TABS = ["overview", "orders", "brief", "clips", "activity"] as const;
 type Tab = (typeof TABS)[number];
@@ -15,6 +19,21 @@ export function CampaignLayout(props: Record<"banner" | "orders" | "brief" | "cl
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("overview");
   const show = (...tabs: Tab[]) => cn(!tabs.includes(tab) && "max-lg:hidden");
+
+  // "Review now" in the banner opens an order: on phones that means the orders tab.
+  useEffect(() => {
+    const onOpen = () => setTab("orders");
+    const onBrief = () => {
+      setTab("brief");
+      requestAnimationFrame(() => document.getElementById("campaign-brief")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    };
+    window.addEventListener(OPEN_ORDER_EVENT, onOpen);
+    window.addEventListener(SHOW_BRIEF_EVENT, onBrief);
+    return () => {
+      window.removeEventListener(OPEN_ORDER_EVENT, onOpen);
+      window.removeEventListener(SHOW_BRIEF_EVENT, onBrief);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -40,7 +59,9 @@ export function CampaignLayout(props: Record<"banner" | "orders" | "brief" | "cl
           <div className={show("clips")}>{props.clips}</div>
         </div>
         <div className="flex min-w-0 flex-col gap-6">
-          <div className={show("brief")}>{props.brief}</div>
+          <div id="campaign-brief" className={cn("scroll-mt-32", show("brief"))}>
+            {props.brief}
+          </div>
           <div className={show("activity")}>{props.activity}</div>
         </div>
       </div>

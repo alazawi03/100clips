@@ -1,4 +1,6 @@
 import { campaigns } from "@/lib/data/campaigns";
+import { orders } from "@/lib/data/orders";
+import { CAMPAIGN_STATUS, campaignProgress } from "@/lib/statuses";
 import type { Product, ProductType } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 
@@ -56,12 +58,15 @@ export function productView(product: Product, { t, tp, f }: I18n): ProductView {
     benefits: product.benefits,
     concerns: product.concerns,
     info,
-    campaigns: using.map((c) => ({
-      id: c.id,
-      title: f.pick(c.title),
-      status: t(`status.campaign.${c.status}`),
-      clips: t("brandHome.clipsProgress", { done: f.number(c.deliveredClips), total: f.number(c.clipsCount) }),
-    })),
+    campaigns: using.map((c) => {
+      const progress = campaignProgress(c, orders);
+      return {
+        id: c.id,
+        title: f.pick(c.title),
+        status: f.pick(CAMPAIGN_STATUS[progress.status].label),
+        clips: t("campaignStatus.approvedOf", { done: f.number(progress.approved), total: f.number(progress.active) }),
+      };
+    }),
     campaignsLabel: tp("brandsPage.statCampaigns", using.length),
     clipsLabel: tp("brandsPage.statClips", clips),
   };

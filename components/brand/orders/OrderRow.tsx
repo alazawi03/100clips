@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge, orderTone } from "@/components/ui/Badge";
+import { ActionTag, StatusBadge } from "@/components/ui/StatusBadge";
+import { isActiveOrder, orderBadgeStatus } from "@/lib/statuses";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { hasManyBrands } from "@/lib/brandFilter";
 import { getBrand } from "@/lib/data/account";
@@ -10,6 +11,7 @@ import { orderFlags } from "@/components/brand/campaigns/campaignView";
 import { cn } from "@/lib/cn";
 import type { Order } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
+import { brandPaid } from "@/lib/fees";
 
 /**
  * One order in a list: who, what, where it came from, status and amount.
@@ -49,7 +51,7 @@ export function OrderRow({ order, i18n, lead = "order" }: { order: Order; i18n: 
             </>
           )}
         </div>
-        {order.status !== "cancelled" && (
+        {isActiveOrder(order) && (
           <div className="order-last flex w-full flex-col gap-1 ps-14 sm:order-none sm:w-44 sm:shrink-0 sm:ps-0">
             <span aria-hidden className="flex gap-0.5">
               {flags.steps.map((s, i) => (
@@ -57,7 +59,7 @@ export function OrderRow({ order, i18n, lead = "order" }: { order: Order; i18n: 
               ))}
             </span>
             <span className="truncate text-caption text-text-muted">
-              {t("flow.stepLabel", { n: flags.stepIndex + 1, total: flags.steps.length, step: t(`flow.steps.${flags.steps[flags.stepIndex]}`) })}
+              {t("flow.stepCount", { n: flags.stepIndex + 1, total: flags.steps.length })}
             </span>
           </div>
         )}
@@ -68,12 +70,9 @@ export function OrderRow({ order, i18n, lead = "order" }: { order: Order; i18n: 
           </div>
         )}
         <div className="flex w-full items-center gap-3 ps-14 sm:w-auto sm:ps-0">
-          {flags.late && <Badge tone="error">{t("flow.lateShort")}</Badge>}
-          {flags.action && <Badge tone="warning">{tp("flow.waitingDays", flags.actionDays ?? 0)}</Badge>}
-          {order.revisionRequested && <Badge tone="warning">{t("brandHome.revisionRequested")}</Badge>}
-          {/* The step line says where the order is; cancelled orders have no steps, so they keep the badge. */}
-          {order.status === "cancelled" && <Badge tone={orderTone[order.status]}>{t(`status.order.${order.status}`)}</Badge>}
-          <span className="ms-auto min-w-20 text-end font-medium tabular-nums sm:ms-0">{f.money(order.amount)}</span>
+          <StatusBadge order={orderBadgeStatus(order)} />
+          {flags.action && <ActionTag>{tp("flow.waitingDays", flags.actionDays ?? 0)}</ActionTag>}
+          <span className="ms-auto min-w-20 text-end font-medium tabular-nums sm:ms-0">{f.money(brandPaid(order))}</span>
         </div>
       </Link>
     </li>

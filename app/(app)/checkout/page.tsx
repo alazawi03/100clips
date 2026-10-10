@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { NeedBrandOnArrival } from "@/components/brand/campaigns/NeedBrandDialog";
 import { CheckoutForm } from "@/components/brand/cart/CheckoutForm";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { account, brands, DEMO_TODAY, productsOf } from "@/lib/data/account";
@@ -23,6 +24,16 @@ export default async function CheckoutPage() {
     subtotal: l.subtotal,
     summary: l.items.map((i) => t(`formats.${i.format}`)).join(t("common.separator")),
   }));
+
+  // No brand yet (the address bar, or the last one deleted): the dialog first; "Not now" goes back to the cart.
+  if (brands.length === 0) {
+    return (
+      <div className="flex flex-col gap-6">
+        <PageHeader title={t("checkout.title")} subtitle={t("checkout.subtitle")} />
+        <NeedBrandOnArrival then="checkout" back="/cart" />
+      </div>
+    );
+  }
 
   // Set by "Find creators for this product".
   const start = getCheckoutDefault();

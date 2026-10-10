@@ -11,8 +11,6 @@ import { cn } from "@/lib/cn";
 type Props = {
   orderId: string;
   creatorName: string;
-  /** Formatted amount released on approval, e.g. "45 BHD". */
-  amount: string;
   /** Revisions still available on this clip (one is included). */
   revisionsLeft: number;
 };
@@ -21,7 +19,7 @@ type Props = {
  * Approve the delivered clip (green, then a confirmation with stars and an optional comment),
  * or ask for a revision while one is still left.
  */
-export function ReviewActions({ orderId, creatorName, amount, revisionsLeft }: Props) {
+export function ReviewActions({ orderId, creatorName, revisionsLeft }: Props) {
   const { t, tp } = useI18n();
   const [revising, setRevising] = useState(false);
   const [state, sendRevision, pending] = useActionState<FormState, FormData>(requestRevision.bind(null, orderId), null);
@@ -73,7 +71,7 @@ export function ReviewActions({ orderId, creatorName, amount, revisionsLeft }: P
             <h2 id={`approve-${orderId}`} className="text-h3 font-medium">
               {t("orderDetail.approveTitle", { name: creatorName })}
             </h2>
-            <p className="text-small text-text-muted">{t("orderDetail.approveHint", { amount, name: creatorName })}</p>
+            <p className="text-small text-text-muted">{t("orderDetail.approveHint", { name: creatorName })}</p>
           </div>
 
           <fieldset className="flex flex-col gap-2">

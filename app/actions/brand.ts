@@ -4,8 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { account, DEMO_TODAY, getBrand, productsOf } from "@/lib/data/account";
 import * as lists from "@/lib/data/lists";
+import { getCampaign } from "@/lib/data/campaigns";
 import { getCreator } from "@/lib/data/creators";
+import { isSuspended } from "@/lib/data/moderation";
 import * as store from "@/lib/data/store";
+import { switchToDemoData, switchToNewAccount } from "@/lib/data/accountSwitch";
 import { VIDEO_STYLES, type ContentFormat, type Localized, type ProductLogistics, type VideoStyle } from "@/lib/data/types";
 import type { MessageKey } from "@/lib/i18n/messages";
 
@@ -115,19 +118,27 @@ function checkCard(form: FormData, byCard: number, errors: NonNullable<FormState
 }
 
 export async function checkout(_prev: CheckoutState, form: FormData): Promise<CheckoutState> {
+  // "New campaign" (mode=new) picks creators on the page instead of the cart, and can be saved as a draft.
+  const fromPicker = form.get("mode") === "new";
+  const picks = fromPicker ? parsePicks(form) : undefined;
+  const draftId = text(form, "draftId") || undefined;
   const errors: NonNullable<FormState>["errors"] = {};
   const brand = getBrand(text(form, "brandId"));
-  const { lines, total } = store.priceCart(store.cartOf());
+  // What the brand pays: creators' prices plus the service fee.
+  const { lines, toPay } = picks ? store.pricePicks(picks) : store.priceCart(store.cartOf());
+  if (fromPicker && lines.length === 0) errors.pick = "forms.errors.pickCreators";
   const title = text(form, "title");
   const brief = text(form, "brief");
   const promote = form.get("promote") === "brand" ? "brand" : "products";
   const productIds = promote === "products" ? form.getAll("productId").map(String) : [];
   const useBalance = form.get("useBalance") === "on";
-  const byCard = total - (useBalance ? Math.min(account.balance, total) : 0);
+  const byCard = toPay - (useBalance ? Math.min(account.balance, toPay) : 0);
 
-  if (lines.length === 0) errors.title = "forms.errors.cartEmpty";
+  if (!fromPicker && lines.length === 0) errors.title = "forms.errors.cartEmpty";
   if (!title) errors.title = "forms.errors.titleRequired";
   if (!brand) errors.brandId = "forms.errors.pickBrand";
+  // Suspended by 100clips: no new payments until it's lifted.
+  else if (isSuspended("brand", brand.id)) errors.brandId = "forms.errors.brandSuspended";
   // One product per campaign.
   else if (promote === "products" && (productIds.length !== 1 || !productsOf(brand.id).some((p) => p.id === productIds[0]))) errors.productId = "forms.errors.pickProduct";
   const logistics = brand ? parseLogistics(form, productsOf(brand.id).filter((p) => productIds.includes(p.id)), errors) : {};
@@ -141,24 +152,13 @@ export async function checkout(_prev: CheckoutState, form: FormData): Promise<Ch
   if (deadline && !isIsoDate(deadline)) errors.deadline = "forms.errors.dateInvalid";
   else if (deadline && deadline <= DEMO_TODAY) errors.deadline = "forms.errors.deadlineFuture";
   // More details (all optional): references must be links.
-  const references = form.getAll("reference").map((r) => String(r).trim());
-  references.forEach((r, i) => {
-    if (r && !isUrl(r)) errors[`reference-${i}`] = "forms.errors.urlInvalid";
-  });
-  const details = {
-    keyMessage: text(form, "keyMessage").slice(0, 200) || undefined,
-    references: references.filter(Boolean).slice(0, 5),
-    mustInclude: text(form, "mustInclude").slice(0, 500) || undefined,
-    avoid: text(form, "avoid").slice(0, 500) || undefined,
-  };
+  const { details, values } = parseDetails(form, errors);
   checkCard(form, byCard, errors);
-  // The reference links share a name; send them back one per field so they all refill.
-  const values = () => ({ ...submitted(form), ...Object.fromEntries(references.map((r, i) => [`reference-${i}`, r])) });
-  if (Object.keys(errors).length > 0) return { errors, values: values() };
+  if (Object.keys(errors).length > 0) return { errors, values };
 
   const notes = Object.fromEntries(lines.map((l) => [l.creator.id, text(form, `note-${l.creator.id}`)]));
-  const result = store.checkoutCart({ brandId: brand!.id, title: same(title), promote, productIds, logistics, brief: same(brief), videoStyle, deadline: deadline || undefined, details, notes, useBalance });
-  if (!result) return { errors: { title: "forms.errors.cartEmpty" }, values: values() };
+  const result = store.checkoutCart({ brandId: brand!.id, title: same(title), promote, productIds, logistics, brief: same(brief), videoStyle, deadline: deadline || undefined, details, notes, useBalance, picks, draftId });
+  if (!result) return { errors: { title: "forms.errors.cartEmpty" }, values };
   // No revalidatePath here: refreshing would re-render checkout with an empty cart and redirect away
   // mid-animation. The success screen moves on with a full page load, which brings everything up to date.
   return { errors: {}, values: {}, paid: { campaignId: result.campaign.id, creators: lines.map((l) => ({ id: l.creator.id, name: l.creator.name })) } };
@@ -190,8 +190,114 @@ export async function markOrderReturned(orderId: string) {
   revalidatePath("/", "layout");
 }
 
-export async function cancelCampaign(campaignId: string) {
-  store.cancelCampaign(campaignId);
+/** "Withdraw offer" on one order the creator hasn't answered yet; the money goes back to the balance. */
+export async function withdrawOffer(orderId: string) {
+  store.withdrawOffer(orderId);
+  revalidatePath("/", "layout");
+}
+
+/** The optional extra details, as checkout and "Edit details" send them. References must be links. */
+function parseDetails(form: FormData, errors: NonNullable<FormState>["errors"]) {
+  const references = form.getAll("reference").map((r) => String(r).trim());
+  references.forEach((r, i) => {
+    if (r && !isUrl(r)) errors[`reference-${i}`] = "forms.errors.urlInvalid";
+  });
+  const details = {
+    keyMessage: text(form, "keyMessage").slice(0, 200) || undefined,
+    references: references.filter(Boolean).slice(0, 5),
+    mustInclude: text(form, "mustInclude").slice(0, 500) || undefined,
+    avoid: text(form, "avoid").slice(0, 500) || undefined,
+  };
+  // The reference links share a name; send them back one per field so they all refill.
+  const values = { ...submitted(form), ...Object.fromEntries(references.map((r, i) => [`reference-${i}`, r])) };
+  return { details, values };
+}
+
+/** "Edit details": only while nobody has accepted (the store checks again). */
+export async function editCampaignDetails(campaignId: string, _prev: FormState, form: FormData): Promise<FormState> {
+  const errors: NonNullable<FormState>["errors"] = {};
+  const { details, values } = parseDetails(form, errors);
+  if (Object.keys(errors).length > 0) return { errors, values };
+  if (!store.editCampaignDetails(campaignId, details)) return { errors: { form: "forms.errors.editLocked" }, values };
+  revalidatePath("/", "layout");
+  return { errors: {}, values: {} };
+}
+
+/** "Extend deadline": a real date, later than the current deadline. */
+export async function extendDeadline(campaignId: string, _prev: FormState, form: FormData): Promise<FormState> {
+  const deadline = text(form, "deadline");
+  const current = getCampaign(campaignId)?.deadline;
+  if (!isIsoDate(deadline)) return { errors: { deadline: "forms.errors.dateInvalid" }, values: submitted(form) };
+  if (!current || deadline <= current || deadline <= DEMO_TODAY) return { errors: { deadline: "forms.errors.deadlineLater" }, values: submitted(form) };
+  store.extendDeadline(campaignId, deadline);
+  revalidatePath("/", "layout");
+  return { errors: {}, values: {} };
+}
+
+/**
+ * "Run again": a new campaign from this one, paid up front, without the cart. The picks are the
+ * creators ticked on the page (this campaign's or from a list); title, brief, deadline and extra
+ * details start as before and can be changed.
+ */
+export async function payCampaignAgain(campaignId: string, _prev: CheckoutState, form: FormData): Promise<CheckoutState> {
+  const errors: NonNullable<FormState>["errors"] = {};
+  const picks = parsePicks(form);
+  const title = text(form, "title");
+  const brief = text(form, "brief");
+  const deadline = text(form, "deadline");
+  const { toPay } = store.priceCart(picks.map((p) => ({ creatorId: p.creatorId, items: [{ format: p.format, quantity: 1 }] })).filter((l) => getCreator(l.creatorId)));
+  const useBalance = form.get("useBalance") === "on";
+  if (picks.length === 0) errors.pick = "forms.errors.pickCreators";
+  else if (isSuspended("brand", getCampaign(campaignId)?.brandId ?? "")) errors.pick = "forms.errors.brandSuspended";
+  if (!title) errors.title = "forms.errors.titleRequired";
+  if (brief.length < 20) errors.brief = "forms.errors.briefTooShort";
+  if (deadline && !isIsoDate(deadline)) errors.deadline = "forms.errors.dateInvalid";
+  else if (deadline && deadline <= DEMO_TODAY) errors.deadline = "forms.errors.deadlineFuture";
+  const { details, values } = parseDetails(form, errors);
+  checkCard(form, toPay - (useBalance ? Math.min(account.balance, toPay) : 0), errors);
+  if (Object.keys(errors).length > 0) return { errors, values };
+  const result = store.runCampaignAgain(campaignId, picks, { title: same(title), brief: same(brief), deadline: deadline || undefined, details }, useBalance);
+  if (!result) return { errors: { pick: "forms.errors.pickCreators" }, values };
+  // No revalidatePath: the success screen moves on with a full page load, like checkout.
+  return { errors: {}, values: {}, paid: { campaignId: result.campaign.id, creators: result.lines.map((l) => ({ id: l.creator.id, name: l.creator.name })) } };
+}
+
+/** Debug: the dashboard's switch between the demo account and a brand-new, empty one. */
+export async function switchDebugAccount(to: "new" | "demo") {
+  if (process.env.NODE_ENV === "production") return;
+  if (to === "new") switchToNewAccount();
+  else switchToDemoData();
+  revalidatePath("/", "layout");
+}
+
+/**
+ * New campaign saves itself as a draft while it's filled in: the form as it is (never card details) and
+ * the chosen creators. Returns the draft's id, so the page keeps updating the same one.
+ */
+export async function autosaveCampaignDraft(form: FormData): Promise<{ id: string }> {
+  const values = Object.fromEntries(Object.entries(submitted(form)).filter(([k]) => !k.startsWith("card") && !["pick", "mode", "draftId", "reference"].includes(k)));
+  values.references = form.getAll("reference").map(String).filter(Boolean).join("\n");
+  const id = store.saveCampaignDraft({
+    draftId: text(form, "draftId") || undefined,
+    brandId: text(form, "brandId"),
+    title: text(form, "title"),
+    brief: text(form, "brief"),
+    values,
+    picks: parsePicks(form),
+  });
+  return { id };
+}
+
+/** Throws a draft away, from its page or its card on Campaigns. */
+export async function deleteCampaignDraft(id: string) {
+  store.deleteCampaignDraft(id);
+  revalidatePath("/", "layout");
+  redirect("/campaigns?done=draftDeleted");
+}
+
+/** The bell's "Mark all as read". */
+export async function markAllNotificationsRead() {
+  store.markNotificationsRead();
   revalidatePath("/", "layout");
 }
 
@@ -202,22 +308,29 @@ export async function rateOrder(orderId: string, rating: number) {
 
 /* ---------- Invite creators to an existing campaign ---------- */
 
+/** The ticked creators, each "creatorId|format". One platform per creator: the first one sent counts. */
+function parsePicks(form: FormData) {
+  return form
+    .getAll("pick")
+    .map(String)
+    .map((v) => v.split("|"))
+    .filter((p): p is [string, string] => p.length === 2)
+    .map(([creatorId, format]) => ({ creatorId, format: format as ContentFormat }))
+    .filter((p, i, all) => all.findIndex((q) => q.creatorId === p.creatorId) === i);
+}
+
 /**
  * Invites the picked creators (each "creatorId|format") to this campaign, paid up front.
  * Same result shape as checkout, so the same success screen follows.
  */
 export async function inviteToCampaign(campaignId: string, _prev: CheckoutState, form: FormData): Promise<CheckoutState> {
   const errors: NonNullable<FormState>["errors"] = {};
-  const picks = form
-    .getAll("pick")
-    .map(String)
-    .map((v) => v.split("|"))
-    .filter((p): p is [string, string] => p.length === 2)
-    .map(([creatorId, format]) => ({ creatorId, format: format as ContentFormat }));
-  const total = store.priceCart(picks.map((p) => ({ creatorId: p.creatorId, items: [{ format: p.format, quantity: 1 }] })).filter((l) => getCreator(l.creatorId))).total;
+  const picks = parsePicks(form);
+  const { toPay } = store.priceCart(picks.map((p) => ({ creatorId: p.creatorId, items: [{ format: p.format, quantity: 1 }] })).filter((l) => getCreator(l.creatorId)));
   const useBalance = form.get("useBalance") === "on";
   if (picks.length === 0) errors.pick = "forms.errors.pickCreators";
-  checkCard(form, total - (useBalance ? Math.min(account.balance, total) : 0), errors);
+  else if (isSuspended("brand", getCampaign(campaignId)?.brandId ?? "")) errors.pick = "forms.errors.brandSuspended";
+  checkCard(form, toPay - (useBalance ? Math.min(account.balance, toPay) : 0), errors);
   if (Object.keys(errors).length > 0) return { errors, values: submitted(form) };
   const result = store.inviteToCampaign(campaignId, picks, useBalance);
   if (!result) return { errors: { pick: "forms.errors.pickCreators" }, values: submitted(form) };

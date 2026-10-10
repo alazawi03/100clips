@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { brands } from "@/lib/data/account";
 import { getCreator } from "@/lib/data/creators";
+import { getOrder } from "@/lib/data/orders";
 import { addReport, conversations, getConversation, openConversation, sendMessage } from "@/lib/data/messages";
 import { REPORT_REASONS, type ReportReason } from "@/lib/reportReasons";
 
@@ -26,6 +27,15 @@ export async function messageCreator(creatorId: string, brandId?: string) {
   const conversation = openConversation(brand, creatorId);
   revalidatePath("/messages", "layout");
   redirect(`/messages/${conversation.id}`);
+}
+
+/** "Ask for an ad code" on a clip: opens that chat with a ready-made request in the message box. */
+export async function requestAdCode(orderId: string) {
+  const order = getOrder(orderId);
+  if (!order) return;
+  const conversation = openConversation(order.brandId, order.creatorId);
+  revalidatePath("/messages", "layout");
+  redirect(`/messages/${conversation.id}?draft=adCode&order=${order.id}`);
 }
 
 /** "Report" in a chat: the admin reviews it. Messages stay visible to both sides. */

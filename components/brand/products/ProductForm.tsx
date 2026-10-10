@@ -45,14 +45,28 @@ type FieldsProps = {
   err: (name: string) => string | undefined;
   /** Product type is optional here (the brand wizard lets you skip the product). */
   optional?: boolean;
+  /** Already inside a card: no cards of its own. */
+  flat?: boolean;
 };
+
+type GroupProps = { className: string; first?: boolean; children: React.ReactNode };
+
+function PaddedCard({ className, children }: GroupProps) {
+  return <Card className={cn(className, "p-5 md:p-6")}>{children}</Card>;
+}
+
+function FlatGroup({ className, first, children }: GroupProps) {
+  return <div className={cn(className, !first && "mt-5 border-t border-border pt-5")}>{children}</div>;
+}
 
 /**
  * Every product field, without a form around it, so the same fields serve the standalone product form
  * and the last step of the brand wizard. Remount it (key) after a server response to restart from `v`.
  */
-export function ProductFields({ v, err, optional }: FieldsProps) {
+export function ProductFields({ v, err, optional, flat }: FieldsProps) {
   const { t } = useI18n();
+  // Inside another card (the brand wizard) the groups are divided by lines instead of being cards themselves.
+  const Box = flat ? FlatGroup : PaddedCard;
   const [type, setType] = useState<ProductType | undefined>(v.type);
   const [benefits, setBenefits] = useState<string[]>(() => {
     const list = asList(v.benefit);
@@ -70,7 +84,7 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
     <>
       {/* The submitted type lives in a hidden field: React's post-action form reset would uncheck the radios. */}
       <input type="hidden" name="type" value={type ?? ""} />
-      <Card className="flex flex-col gap-3 p-5 md:p-6">
+      <Box first className="flex flex-col gap-3">
         <fieldset>
           <legend className="mb-3 text-h3 font-medium">{t("productForm.typeLabel")}</legend>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -100,11 +114,11 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
         </fieldset>
         {err("type") && <FieldError>{err("type")}</FieldError>}
         {!type && !err("type") && !optional && <p className="text-small text-text-muted">{t("productForm.pickTypeFirst")}</p>}
-      </Card>
+      </Box>
 
       {type && (
         <>
-          <Card className="flex flex-col gap-5 p-5 md:p-6">
+          <Box className="flex flex-col gap-5">
             <Field label={t("productForm.name")} htmlFor="name" error={err("name")}>
               <Input id="name" name="name" defaultValue={v.name} placeholder={t("productForm.namePlaceholder")} aria-invalid={!!err("name")} aria-describedby={described("name")} />
             </Field>
@@ -117,9 +131,9 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
                 <Input id="price" name="price" type="number" inputMode="decimal" min={0} step="0.001" dir="ltr" defaultValue={v.price} placeholder={t("productForm.pricePlaceholder")} aria-invalid={!!err("price")} aria-describedby={described("price")} className="sm:max-w-60" />
               </Field>
             )}
-          </Card>
+          </Box>
 
-          <Card className="flex flex-col gap-4 p-5 md:p-6">
+          <Box className="flex flex-col gap-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-medium">{t("productForm.benefits")}</h2>
@@ -151,9 +165,9 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
                 </li>
               ))}
             </ul>
-          </Card>
+          </Box>
 
-          <Card className="flex flex-col gap-4 p-5 md:p-6">
+          <Box className="flex flex-col gap-4">
             <div>
               <h2 className="font-medium">
                 {t("productForm.concerns")} <span className="font-normal text-text-muted">({t("brandForm.optional")})</span>
@@ -194,9 +208,9 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
               <Plus aria-hidden />
               {t("productForm.addConcern")}
             </button>
-          </Card>
+          </Box>
 
-          <Card className="flex flex-col gap-5 p-5 md:p-6">
+          <Box className="flex flex-col gap-5">
             <h2 className="font-medium">{t("productForm.detailsTitle")}</h2>
             {type === "physical" && (
               <div className="grid gap-5 sm:grid-cols-2">
@@ -243,7 +257,7 @@ export function ProductFields({ v, err, optional }: FieldsProps) {
                 </Field>
               </>
             )}
-          </Card>
+          </Box>
 
         </>
       )}

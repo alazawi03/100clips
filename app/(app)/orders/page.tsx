@@ -8,6 +8,7 @@ import { brands } from "@/lib/data/account";
 import { orders as allOrders } from "@/lib/data/orders";
 import { ORDER_STATUSES } from "@/lib/data/types";
 import { getI18n } from "@/lib/i18n/server";
+import { ORDER_STATUS, statusOfOrderStatus } from "@/lib/statuses";
 
 export default async function OrdersPage({ searchParams }: PageProps<"/orders">) {
   const i18n = await getI18n();
@@ -23,7 +24,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
     { href: href("/orders", { brand: brandId }), label: t("common.all"), count: f.number(orders.length), active: !status },
     ...ORDER_STATUSES.map((s) => ({
       href: href("/orders", { status: s, brand: brandId }),
-      label: t(`status.order.${s}`),
+      label: f.pick(ORDER_STATUS[statusOfOrderStatus(s)].label),
       count: f.number(orders.filter((o) => o.status === s).length),
       active: status === s,
     })),
@@ -32,7 +33,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("ordersPage.title")}>
-        {hasManyBrands() && <BrandFilter brands={brands.map((b) => ({ id: b.id, name: f.pick(b.name) }))} value={brandId} />}
+        {hasManyBrands() && <BrandFilter brands={brands.map((b) => ({ id: b.id, name: f.pick(b.name), logo: b.logo }))} value={brandId} />}
       </PageHeader>
       <FilterTabs tabs={tabs} label={t("ordersPage.filterLabel")} />
       {shown.length > 0 ? (

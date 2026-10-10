@@ -1,9 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, Clapperboard, Gift, Hourglass, Megaphone } from "lucide-react";
+import { Check, Clapperboard, Clock, Download, Flag, Gift, Hourglass, Megaphone, MessageCircle, UserRound } from "lucide-react";
+import { markOrderReturned } from "@/app/actions/brand";
+import { messageCreator } from "@/app/actions/messages";
+import { AdCode } from "@/components/brand/orders/AdCode";
+import { ApprovalMoment } from "@/components/brand/orders/ApprovalMoment";
+import { ClipVersions, OfferWaiting, OrderClosedNote } from "@/components/brand/orders/OrderOutcome";
+import { ReportProblem } from "@/components/brand/orders/ReportProblem";
 import { ReviewActions } from "@/components/brand/orders/ReviewActions";
+import { adPlatformOf } from "@/components/brand/campaigns/campaignView";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge, orderTone } from "@/components/ui/Badge";
+import { ClipPoster } from "@/components/ui/ClipPoster";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Card } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -11,18 +19,22 @@ import { cn } from "@/lib/cn";
 import { getCampaign } from "@/lib/data/campaigns";
 import { getClip } from "@/lib/data/clips";
 import { getCreator } from "@/lib/data/creators";
-import { getOrder } from "@/lib/data/orders";
-import { DEMO_TODAY, products } from "@/lib/data/account";
-import { currentStep, isLate, nextAction, stepsFor, waitingFor } from "@/lib/orderFlow";
-import { NextActionButton, Stars } from "@/components/brand/campaigns/OrderCard";
-import { LinkButton } from "@/components/ui/Button";
+import { getOrder, orders } from "@/lib/data/orders";
+import { DEMO_NOW, DEMO_TODAY, products } from "@/lib/data/account";
+import { reportOf } from "@/lib/data/problems";
+import { clipVersions, currentStep, nextAction, offerHoursLeft, revisionUsed, stepsFor, waitingFor } from "@/lib/orderFlow";
+import { ShipButton, Stars } from "@/components/brand/campaigns/OrderCard";
+import { Button, LinkButton, buttonClass } from "@/components/ui/Button";
+import { conversations } from "@/lib/data/messages";
+import { campaignProgress, isActiveOrder, orderBadgeStatus } from "@/lib/statuses";
+import { brandPaid, priceForBrand } from "@/lib/fees";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function OrderDetailPage({ params, searchParams }: PageProps<"/orders/[id]">) {
   const { id } = await params;
   const order = getOrder(id);
   if (!order) notFound();
-  const { t, f } = await getI18n();
+  const { t, tp, f } = await getI18n();
   const { done } = await searchParams;
 
   const creator = getCreator(order.creatorId)!;
@@ -38,8 +50,19 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const steps = stepsFor(physical);
   const stepIndex = steps.indexOf(currentStep(order, physical));
   const action = nextAction(order, { physical, returns });
-  const late = isLate(order, campaign?.deadline, DEMO_TODAY);
   const watchable = clip && (order.status === "delivered" || order.status === "approved");
+  const active = isActiveOrder(order);
+  const report = reportOf(order.id);
+  // The chat with this creator for this brand, for the messages button (same as on the campaign page).
+  const conversation = conversations.find((c) => c.creatorId === order.creatorId && c.brandId === order.brandId);
+  const unread = conversation?.unread ?? 0;
+  // Just approved: the celebration, bigger when this was the campaign's last clip.
+  const justApproved = done === "approved" && order.status === "approved";
+  const progress = justApproved && campaign ? campaignProgress(campaign, orders) : undefined;
+  const campaignClips =
+    progress?.status === "completed"
+      ? orders.filter((o) => o.campaignId === campaign!.id && o.status === "approved" && o.clipId).flatMap((o) => getClip(o.clipId!) ?? [])
+      : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -48,9 +71,21 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
         subtitle={<bdi dir="ltr">#{order.id.replace("ord-", "")}</bdi>}
         back={{ href: "/orders", label: t("ordersPage.title") }}
       >
-        {late && <Badge tone="error">{t("flow.late")}</Badge>}
-        {order.revisionRequested && <Badge tone="warning">{t("brandHome.revisionRequested")}</Badge>}
-        <Badge tone={orderTone[order.status]}>{t(`status.order.${order.status}`)}</Badge>
+        <StatusBadge order={orderBadgeStatus(order)} />
+        <form action={messageCreator.bind(null, order.creatorId, order.brandId)}>
+          <button
+            type="submit"
+            aria-label={unread > 0 ? `${t("campaignDetail.messages")} · ${tp("chat.unread", unread)}` : t("campaignDetail.messages")}
+            className="relative grid size-9 place-items-center rounded-full border border-border text-text-muted transition-colors hover:bg-surface hover:text-text"
+          >
+            <MessageCircle aria-hidden className="size-[18px]" />
+            {unread > 0 && (
+              <span aria-hidden className="absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-caption font-medium text-on-accent tabular-nums">
+                {unread}
+              </span>
+            )}
+          </button>
+        </form>
         {campaign && (
           <LinkButton href={`/campaigns/${campaign.id}`} variant="secondary" className="h-9 md:h-9">
             <Megaphone aria-hidden />
@@ -60,52 +95,114 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
       </PageHeader>
 
       {done === "offerSent" && <Notice>{t("orderDetail.doneOfferSent", { name })}</Notice>}
-      {done === "approved" && <Notice>{t("orderDetail.doneApproved", { amount: f.money(order.amount), name })}</Notice>}
+      {justApproved && (
+        <ApprovalMoment
+          title={progress?.status === "completed" ? t("orderDetail.campaignCompleteTitle") : t("orderDetail.approvedTitle")}
+          subtitle={
+            progress?.status === "completed"
+              ? `${tp("orderDetail.campaignCompleteBody", progress.approved)} ${t("orderDetail.approvedPaid", { name })}`
+              : t("orderDetail.approvedPaid", { name })
+          }
+          closeHref={`/orders/${order.id}`}
+          closeLabel={t("nav.close")}
+          complete={
+            campaignClips.length > 1 && (
+              <ul className="grid w-full max-w-md grid-cols-4 gap-2 sm:grid-cols-6">
+                {campaignClips.map((c, i) => (
+                  <li key={c.id} className="motion-safe:animate-[pop_420ms_cubic-bezier(0.34,1.56,0.64,1)_both]" style={{ animationDelay: `${950 + i * 90}ms` }}>
+                    <ClipPoster clip={c} views={f.compact(c.views)} duration={f.duration(c.durationSec)} compact />
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+        >
+          {!order.rating && (
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-small font-medium">{t("orderDetail.rateCreator", { name })}</p>
+              <Stars orderId={order.id} label={t("orderDetail.rateCreator", { name })} />
+            </div>
+          )}
+          <div className="flex flex-wrap justify-center gap-2">
+            {clip && (
+              <a href={clip.videoSrc} download className={buttonClass("secondary", "h-10 md:h-10")}>
+                <Download aria-hidden />
+                {t("orderDetail.downloadClip")}
+              </a>
+            )}
+            <LinkButton href={`/creators/${creator.id}`} variant="secondary" className="h-10 md:h-10">
+              <UserRound aria-hidden />
+              {t("orderDetail.hireAgain", { name })}
+            </LinkButton>
+            {progress?.status === "completed" && (
+              <LinkButton href={`/campaigns/${campaign!.id}`} variant="primary" className="h-10 md:h-10">
+                <Megaphone aria-hidden />
+                {t("checkout.viewCampaign")}
+              </LinkButton>
+            )}
+          </div>
+        </ApprovalMoment>
+      )}
       {done === "revisionSent" && <Notice>{t("orderDetail.doneRevisionSent", { name })}</Notice>}
+      {order.status === "pending" && (
+        <Card className="p-4 sm:p-5">
+          <OfferWaiting orderId={order.id} name={name} hoursLeft={offerHoursLeft(order, DEMO_NOW)} refund={f.money(brandPaid(order))} />
+        </Card>
+      )}
+      {!active && (
+        <Card className="p-4 sm:p-5">
+          <OrderClosedNote status={order.status} reason={order.declineReason} note={order.declineNote} name={name} refund={f.money(brandPaid(order))} />
+        </Card>
+      )}
       {action && action !== "review" && product && (
-        <Card className="flex flex-wrap items-center justify-between gap-3 border-accent/40 p-4 sm:p-5">
-          <p className="font-medium">{t(`flow.action.${action}`, { name, product: f.pick(product.name) })}</p>
-          <NextActionButton orderId={order.id} action={action} />
+        <Card className="flex flex-wrap items-center justify-between gap-3 border-warning/40 bg-warning-soft p-4 sm:p-5">
+          <p className="flex items-start gap-2 font-medium">
+            <Clock aria-hidden className="mt-1 size-4 shrink-0 text-warning" />
+            {t(`flow.action.${action}`, { name, product: f.pick(product.name) })}
+          </p>
+          {action === "ship" ? (
+            <ShipButton orderId={order.id} name={name} productName={f.pick(product.name)} />
+          ) : (
+            <form action={markOrderReturned.bind(null, order.id)}>
+              <Button type="submit" variant="primary" className="h-9 md:h-9">
+                {t("flow.button.collect")}
+              </Button>
+            </form>
+          )}
         </Card>
       )}
 
       <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_320px] md:items-start">
         <div className="flex min-w-0 flex-col gap-6">
-          <Card className="flex flex-col gap-4 p-4 sm:p-5">
-            <h2 className="font-medium">{t("orderDetail.clip")}</h2>
-            {watchable ? (
-              <>
-                <div className="mx-auto w-full max-w-[320px]">
-                  <video
-                    dir="ltr"
-                    src={clip.videoSrc}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    aria-label={t("profile.play", { title: f.pick(clip.title) })}
-                    className="aspect-[9/16] w-full rounded-[var(--radius-md)] bg-black object-cover"
-                  />
+          {/* Nothing to show for an order that ended before any clip (declined, expired, withdrawn). */}
+          {(watchable || active) && (
+            <Card className="flex flex-col gap-4 p-4 sm:p-5">
+              <h2 className="font-medium">{t("orderDetail.clip")}</h2>
+              {watchable ? (
+                <>
+                  <ClipVersions versions={clipVersions(order, clip)} title={f.pick(clip.title)} className="mx-auto w-full max-w-[320px]" />
+                  {adPlatformOf(order) && <AdCode orderId={order.id} platform={adPlatformOf(order)!} code={order.adCode} today={DEMO_TODAY} />}
+                  {order.status === "delivered" && (
+                    <>
+                      <p className="text-small text-text-muted">{t("orderDetail.reviewHint")}</p>
+                      <ReviewActions orderId={order.id} creatorName={name} revisionsLeft={revisionUsed(order) ? 0 : 1} />
+                    </>
+                  )}
+                </>
+              ) : (
+                <div className="flex flex-col items-center gap-4 py-6 text-center">
+                  <span className="grid size-14 place-items-center rounded-full bg-surface text-text-muted">
+                    {order.status === "pending" ? <Hourglass aria-hidden className="size-6" /> : <Clapperboard aria-hidden className="size-6" />}
+                  </span>
+                  <p className="max-w-sm text-text-muted">
+                    {order.status === "pending" && t("orderDetail.waitingPending", { name })}
+                    {order.status === "in_progress" &&
+                      (waitingFor(order, physical) === "receive" ? t("flow.waiting.receive", { name }) : t("orderDetail.waitingProgress", { name }))}
+                  </p>
                 </div>
-                {order.status === "delivered" && (
-                  <>
-                    <p className="text-small text-text-muted">{t("orderDetail.reviewHint")}</p>
-                    <ReviewActions orderId={order.id} creatorName={name} amount={f.money(order.amount)} revisionsLeft={order.revisionRequested ? 0 : 1} />
-                  </>
-                )}
-              </>
-            ) : (
-              <div className="flex flex-col items-center gap-4 py-6 text-center">
-                <span className="grid size-14 place-items-center rounded-full bg-surface text-text-muted">
-                  {order.status === "pending" ? <Hourglass aria-hidden className="size-6" /> : <Clapperboard aria-hidden className="size-6" />}
-                </span>
-                <p className="max-w-sm text-text-muted">
-                  {order.status === "pending" && t("orderDetail.waitingPending", { name })}
-                  {order.status === "in_progress" &&
-                    (waitingFor(order, physical) === "receive" ? t("flow.waiting.receive", { name }) : t("orderDetail.waitingProgress", { name }))}
-                </p>
-              </div>
-            )}
-          </Card>
+              )}
+            </Card>
+          )}
 
           <Card className="p-5">
             <h2 className="mb-3 font-medium">{t("orderDetail.items")}</h2>
@@ -115,13 +212,13 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
                   <span>
                     {t(`formats.${item.format}`)}
                   </span>
-                  <span className="tabular-nums">{f.money(item.price * item.quantity)}</span>
+                  <span className="tabular-nums">{f.money(priceForBrand(item.price * item.quantity))}</span>
                 </li>
               ))}
             </ul>
           </Card>
 
-          {physical && order.status !== "cancelled" && (
+          {physical && active && (
             <Card className="flex flex-col gap-2 p-5">
               <h2 className="font-medium">{t("campaignDetail.shipping")}</h2>
               <ul className="flex flex-col gap-1 text-small">
@@ -193,7 +290,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
             <h2 className="mb-3 font-medium">{t("orderDetail.details")}</h2>
             <dl className="flex flex-col gap-2 text-small">
               {[
-                [t("orderDetail.amount"), <span key="a" className="font-medium tabular-nums">{f.money(order.amount)}</span>],
+                [t("orderDetail.totalPaid"), <span key="paid" className="font-medium tabular-nums">{f.money(brandPaid(order))}</span>],
                 [t("orderDetail.clips"), f.number(order.clips)],
                 [t("orderDetail.created"), f.date(order.createdAt)],
                 [
@@ -215,17 +312,34 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
             </dl>
           </Card>
 
+          {/* 100clips support: a report already sent and its answer, or a way to send one. */}
+          <Card className="flex flex-col gap-2 p-5">
+            <h2 className="font-medium">{t("orderDetail.problem.cardTitle")}</h2>
+            {report && (
+              <div className="flex flex-col gap-1 text-small">
+                <p className="flex items-center gap-1.5">
+                  <Flag aria-hidden className="size-4 shrink-0 text-text-muted" />
+                  {t(report.status === "open" ? "orderDetail.problem.open" : "orderDetail.problem.resolved", { date: f.date(report.at.slice(0, 10)) })}
+                </p>
+                <p className="text-text-muted">{t(`orderDetail.problem.reasons.${report.reason}`)}</p>
+                {report.resolution && <p className="rounded-[var(--radius-md)] bg-surface p-3">{report.resolution}</p>}
+              </div>
+            )}
+            {report?.status !== "open" && (
+              <>
+                {!report && <p className="text-small text-text-muted">{t("orderDetail.problem.hint")}</p>}
+                <ReportProblem orderId={order.id} />
+              </>
+            )}
+          </Card>
+
           <Card className="p-5">
             <h2 className="font-medium">{t("orderDetail.progress")}</h2>
-            {order.status !== "cancelled" && (
-              <p className="mb-3 text-small text-text-muted">
-                {t("flow.stepLabel", { n: stepIndex + 1, total: steps.length, step: t(`flow.steps.${steps[stepIndex]}`) })}
-              </p>
-            )}
+            {active && <p className="mb-3 text-small text-text-muted">{t("flow.stepCount", { n: stepIndex + 1, total: steps.length })}</p>}
             <ol className="flex flex-col">
               {steps.map((s, index) => {
                 const complete = index < stepIndex || order.status === "approved";
-                const current = index === stepIndex && order.status !== "approved" && order.status !== "cancelled";
+                const current = index === stepIndex && order.status !== "approved" && active;
                 return (
                   <li key={s} className="relative flex gap-3 pb-4 last:pb-0">
                     {index < steps.length - 1 && (
@@ -233,7 +347,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
                     )}
                     <span
                       className={cn(
-                        "relative grid size-6 shrink-0 place-items-center rounded-full border-2 text-caption font-medium tabular-nums",
+                        "relative grid size-6 shrink-0 place-items-center rounded-full border-2 text-caption leading-none font-medium tabular-nums",
                         complete && "border-primary bg-primary text-on-primary",
                         current && "border-primary bg-card",
                         !complete && !current && "border-border bg-card",

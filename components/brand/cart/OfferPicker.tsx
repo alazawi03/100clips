@@ -11,6 +11,7 @@ import { FormatLogo } from "@/components/ui/PlatformLogo";
 import { cn } from "@/lib/cn";
 import type { ContentFormat, FormatOffer } from "@/lib/data/types";
 import { createFormatters } from "@/lib/i18n/format";
+import { priceForBrand } from "@/lib/fees";
 
 type Props = {
   creatorId: string;
@@ -65,7 +66,7 @@ export function OfferPicker({ creatorId, creatorName, offers, inCart, variant = 
                 <span className="min-w-0">
                   <span className="block font-medium">{label}</span>
                   <span className="block text-small text-text-muted">
-                    {f.money(offer.price)} {t("profile.perClip")}
+                    {f.money(priceForBrand(offer.price))} {t("profile.perClip")}
                   </span>
                 </span>
               </span>
@@ -94,7 +95,7 @@ export function OfferPicker({ creatorId, creatorName, offers, inCart, variant = 
     <p className="text-small text-text-muted">
       {count > 0 ? (
         <>
-          <span className="font-medium text-text tabular-nums">{f.money(total)}</span>
+          <span className="font-medium text-text tabular-nums">{f.money(priceForBrand(total))}</span>
           {t("common.separator")}
           {t("cart.pickHint")}
         </>

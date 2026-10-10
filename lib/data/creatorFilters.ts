@@ -1,10 +1,15 @@
 import { fromPrice } from "./creators";
-import { platformOf, type ContentLanguage, type Creator, type Gender, type Niche, type Platform } from "./types";
+import { platformOf, type Creator, type Gender, type Niche, type Platform } from "./types";
 
-export const NICHES: Niche[] = ["food", "beauty", "fashion", "family", "fitness", "travel", "tech", "gaming"];
-export const GENDERS: Gender[] = ["female", "male"];
-export const CONTENT_LANGUAGES: ContentLanguage[] = ["ar", "en"];
-export const PLATFORMS: Platform[] = ["tiktok", "instagram", "youtube"];
+export const NICHES: Niche[] = ["general", "food", "beauty", "fashion", "family", "fitness", "travel", "tech", "gaming"];
+export const GENDERS: Gender[] = ["male", "female"];
+export const PLATFORMS: Platform[] = ["tiktok", "instagram"];
+/** Whether the creator's face is in their videos (what they set in the creator app). */
+export type Face = "shows" | "faceless";
+export const FACES: Face[] = ["shows", "faceless"];
+
+/** Creators who haven't said match neither choice. */
+export const matchesFace = (c: Pick<Creator, "showsFace">, faces: Face[]) => faces.length === 0 || (c.showsFace !== undefined && faces.includes(c.showsFace ? "shows" : "faceless"));
 
 export const SORTS = ["rating", "priceLow", "priceHigh", "orders"] as const;
 export type Sort = (typeof SORTS)[number];
@@ -14,8 +19,8 @@ export type CreatorFilters = {
   q?: string;
   niche: Niche[];
   gender: Gender[];
-  lang: ContentLanguage[];
   platform: Platform[];
+  face: Face[];
   sort: Sort;
 };
 
@@ -35,8 +40,8 @@ export function parseFilters(params: Record<string, string | string[] | undefine
     q: q || undefined,
     niche: pickMany(params.niche, NICHES),
     gender: pickMany(params.gender, GENDERS),
-    lang: pickMany(params.lang, CONTENT_LANGUAGES),
     platform: pickMany(params.platform, PLATFORMS),
+    face: pickMany(params.face, FACES),
     sort: pick(params.sort, SORTS) ?? "rating",
   };
 }
@@ -47,8 +52,8 @@ export function filterCreators(all: Creator[], f: CreatorFilters): Creator[] {
     if (q && ![c.name.ar, c.name.en.toLowerCase(), c.handle].some((s) => s.includes(q))) return false;
     if (f.niche.length && !c.niches.some((n) => f.niche.includes(n))) return false;
     if (f.gender.length && !f.gender.includes(c.gender)) return false;
-    if (f.lang.length && !c.languages.some((l) => f.lang.includes(l))) return false;
     if (f.platform.length && !c.formats.some((o) => f.platform.includes(platformOf[o.format]))) return false;
+    if (!matchesFace(c, f.face)) return false;
     return true;
   });
   const by: Record<Sort, (a: Creator, b: Creator) => number> = {

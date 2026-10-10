@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronDown, ChevronLeft, Package } from "lucide-react";
-import { Badge, orderTone } from "@/components/ui/Badge";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { orderBadgeStatus } from "@/lib/statuses";
 import type { Order } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 
@@ -9,13 +10,13 @@ import type { I18n } from "@/lib/i18n/server";
  * one order as a single row; several folded into "N active orders" that opens to the list.
  */
 export function ActiveOrders({ orders, i18n }: { orders: Order[]; i18n: I18n }) {
-  const { t, tp, f } = i18n;
+  const { tp, f } = i18n;
   if (orders.length === 0) return null;
 
   const row = (order: Order) => (
     <Link key={order.id} href={`/orders/${order.id}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-surface">
       <span className="min-w-0 flex-1 truncate text-small font-medium">{f.pick(order.title)}</span>
-      <Badge tone={orderTone[order.status]}>{t(`status.order.${order.status}`)}</Badge>
+      <StatusBadge order={orderBadgeStatus(order)} />
       <ChevronLeft aria-hidden className="size-4 shrink-0 text-text-muted ltr:rotate-180" />
     </Link>
   );

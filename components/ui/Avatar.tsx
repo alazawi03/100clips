@@ -1,6 +1,9 @@
+import Image from "next/image";
 import { cn, hueFrom } from "@/lib/cn";
 
 const sizes = {
+  "2xs": "size-5 text-[9px]",
+  xs: "size-7 text-[11px]",
   sm: "size-8 text-[13px]",
   md: "size-10 text-[15px]",
   lg: "size-14 text-[20px]",
@@ -13,13 +16,19 @@ type AvatarProps = {
   size?: keyof typeof sizes;
   /** "new": gradient story ring (new clips). "seen": border ring. */
   ring?: "new" | "seen";
+  /** The creator's photo; without one, the first letter on a tint. Uploaded photos skip optimisation. */
+  src?: string;
   className?: string;
 };
 
-/** Placeholder avatar: the first letter on a tint picked from the id, standing in for a photo. */
-export function Avatar({ id, name, size = "md", ring, className }: AvatarProps) {
+/** The creator's photo, or the first letter on a tint picked from the id. */
+export function Avatar({ id, name, size = "md", ring, src, className }: AvatarProps) {
   const hue = hueFrom(id);
-  const face = (
+  const face = src ? (
+    <span role="img" aria-label={name} className={cn("relative inline-block shrink-0 overflow-hidden rounded-full", sizes[size], !ring && className)}>
+      <Image src={src} alt="" fill unoptimized className="object-cover" />
+    </span>
+  ) : (
     <span
       role="img"
       aria-label={name}

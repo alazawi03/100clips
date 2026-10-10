@@ -28,6 +28,9 @@
   --canvas: #fafafa;
   --card: #ffffff;
   --surface: #f4f4f4;
+  /* Secondary buttons: the surface tint in light mode, a step lighter than cards in dark mode so they stand out. */
+  --button-secondary: #f4f4f4;
+  --button-secondary-hover: #ebebeb;
   --border: #ebebeb;
   --text: #0a0a0a;
   --text-muted: #737373;
@@ -44,6 +47,19 @@
   --scrim: rgb(0 0 0 / 0.4);
   --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.05);
   --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.05), 0 12px 32px rgb(0 0 0 / 0.08);
+  /* Status badges (lib/statuses.ts): soft background, darker text of the same hue. */
+  --status-gray-bg: #f3f4f6;
+  --status-gray-text: #374151;
+  --status-amber-bg: #fffbeb;
+  --status-amber-text: #b45309;
+  --status-blue-bg: #eff6ff;
+  --status-blue-text: #1d4ed8;
+  --status-purple-bg: #f5f3ff;
+  --status-purple-text: #6d28d9;
+  --status-green-bg: #ecfdf5;
+  --status-green-text: #047857;
+  --status-red-bg: #fef2f2;
+  --status-red-text: #b91c1c;
 }
 
 /* Dark tokens: on when the user picks Dark, or follows a dark device while not having picked Light.
@@ -62,6 +78,8 @@
     --canvas: #171717;
     --card: #212121;
     --surface: #2a2a2a;
+    --button-secondary: #3a3a3a;
+    --button-secondary-hover: #474747;
     --border: #383838;
     --text: #fafafa;
     --text-muted: #a3a3a3;
@@ -76,6 +94,18 @@
     --gradient-end: #ff3d88;
     --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
     --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.35);
+    --status-gray-bg: #2a2a2a;
+    --status-gray-text: #d1d5db;
+    --status-amber-bg: #3a2c12;
+    --status-amber-text: #fbbf24;
+    --status-blue-bg: #172554;
+    --status-blue-text: #93c5fd;
+    --status-purple-bg: #2e1065;
+    --status-purple-text: #c4b5fd;
+    --status-green-bg: #052e22;
+    --status-green-text: #6ee7b7;
+    --status-red-bg: #3b1212;
+    --status-red-text: #fca5a5;
     color-scheme: dark;
   }
 }
@@ -93,6 +123,8 @@
   --canvas: #171717;
   --card: #212121;
   --surface: #2a2a2a;
+  --button-secondary: #3a3a3a;
+  --button-secondary-hover: #474747;
   --border: #383838;
   --text: #fafafa;
   --text-muted: #a3a3a3;
@@ -107,6 +139,18 @@
   --gradient-end: #ff3d88;
   --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
   --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.35);
+  --status-gray-bg: #2a2a2a;
+  --status-gray-text: #d1d5db;
+  --status-amber-bg: #3a2c12;
+  --status-amber-text: #fbbf24;
+  --status-blue-bg: #172554;
+  --status-blue-text: #93c5fd;
+  --status-purple-bg: #2e1065;
+  --status-purple-text: #c4b5fd;
+  --status-green-bg: #052e22;
+  --status-green-text: #6ee7b7;
+  --status-red-bg: #3b1212;
+  --status-red-text: #fca5a5;
   color-scheme: dark;
 }
 
@@ -127,6 +171,8 @@
   --color-canvas: var(--canvas);
   --color-card: var(--card);
   --color-surface: var(--surface);
+  --color-button-secondary: var(--button-secondary);
+  --color-button-secondary-hover: var(--button-secondary-hover);
   --color-border: var(--border);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
@@ -137,6 +183,18 @@
   --color-error-soft: var(--error-soft);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
+  --color-status-gray-bg: var(--status-gray-bg);
+  --color-status-gray-text: var(--status-gray-text);
+  --color-status-amber-bg: var(--status-amber-bg);
+  --color-status-amber-text: var(--status-amber-text);
+  --color-status-blue-bg: var(--status-blue-bg);
+  --color-status-blue-text: var(--status-blue-text);
+  --color-status-purple-bg: var(--status-purple-bg);
+  --color-status-purple-text: var(--status-purple-text);
+  --color-status-green-bg: var(--status-green-bg);
+  --color-status-green-text: var(--status-green-text);
+  --color-status-red-bg: var(--status-red-bg);
+  --color-status-red-text: var(--status-red-text);
 
   /* "Inter" by name, not var(--font-inter): next/font appends an Arial-based "Inter Fallback"
      that has Arabic letters and would win over Thmanyah for Arabic text. */
@@ -236,6 +294,33 @@ body {
   70% {
     opacity: 1;
     transform: scale(1.08);
+  }
+}
+
+/* After approving a clip (ApprovalMoment): the logo's play triangle shrinks away as the check draws in,
+   and confetti bursts out from behind it, then falls. */
+@keyframes tri-out {
+  from {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.4) rotate(-25deg);
+  }
+}
+
+@keyframes burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.5) rotate(0deg);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), calc(var(--ty) + 70px)) scale(1) rotate(var(--rot));
   }
 }
 

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getBrand } from "@/lib/data/account";
 import * as store from "@/lib/data/brandsStore";
+import { isActiveMarket } from "@/lib/data/markets";
 import {
   APP_PLATFORMS,
   COUNTRIES,
@@ -96,17 +97,24 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
   const nameEn = text(form, "nameEn");
   const logo = text(form, "logo");
   const industry = oneOf<Industry>(text(form, "industry"), INDUSTRIES);
-  const city = text(form, "city");
   const about = text(form, "about");
   const website = withScheme(text(form, "website"));
   const instagram = handle(text(form, "instagram"));
   const tiktok = handle(text(form, "tiktok"));
-  const countries = all(form, "countries").filter((c): c is Country => (COUNTRIES as string[]).includes(c));
-  const crNumber = text(form, "crNumber");
-  // A newly picked file, or the one already saved (vatCertificateKeep).
-  const vatFile = form.get("vatCertificate");
-  const vatPicked = vatFile instanceof File && vatFile.size > 0 ? vatFile : undefined;
-  const vatCertificate = vatPicked ? vatPicked.name : text(form, "vatCertificateKeep");
+  // Only active markets (Bahrain for the MVP) can be picked.
+  const countries = all(form, "countries").filter((c): c is Country => (COUNTRIES as string[]).includes(c) && isActiveMarket(c));
+  // For each chosen country: its CR number (cr_bh) and VAT certificate (vat_bh), a newly picked
+  // file or the one already saved (vat_bhKeep). Both optional.
+  const registrations: NonNullable<Brand["registrations"]> = {};
+  for (const country of countries) {
+    const crNumber = text(form, `cr_${country}`);
+    const file = form.get(`vat_${country}`);
+    const picked = file instanceof File && file.size > 0 ? file : undefined;
+    if (picked && !DOCUMENT_TYPES.includes(picked.type)) errors[`vat_${country}`] = "forms.errors.fileType";
+    else if (picked && picked.size > MAX_DOCUMENT_BYTES) errors[`vat_${country}`] = "forms.errors.fileTooBig";
+    const vatCertificate = picked ? picked.name : text(form, `vat_${country}Keep`);
+    if (crNumber || vatCertificate) registrations[country] = { crNumber: crNumber || undefined, vatCertificate: vatCertificate || undefined };
+  }
 
   if (!nameAr && !nameEn) errors.nameAr = "forms.errors.brandNameRequired";
   if (logo && !isImage(logo)) errors.logo = "forms.errors.imageType";
@@ -115,8 +123,6 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
   if (website && !isUrl(website)) errors.website = "forms.errors.urlInvalid";
   if (instagram === null) errors.instagram = "forms.errors.handleInvalid";
   if (tiktok === null) errors.tiktok = "forms.errors.handleInvalid";
-  if (vatPicked && !DOCUMENT_TYPES.includes(vatPicked.type)) errors.vatCertificate = "forms.errors.fileType";
-  else if (vatPicked && vatPicked.size > MAX_DOCUMENT_BYTES) errors.vatCertificate = "forms.errors.fileTooBig";
   if (Object.keys(errors).length > 0) return { errors };
 
   return {
@@ -125,14 +131,12 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
       name: { ar: nameAr || nameEn, en: nameEn || nameAr },
       logo: logo || undefined,
       industry: industry!,
-      city: same(city),
       about: about ? same(about) : undefined,
       website: website || undefined,
       instagram: instagram || undefined,
       tiktok: tiktok || undefined,
       countries: countries.length > 0 ? countries : undefined,
-      crNumber: crNumber || undefined,
-      vatCertificate: vatCertificate || undefined,
+      registrations: Object.keys(registrations).length > 0 ? registrations : undefined,
     },
   };
 }
@@ -151,6 +155,9 @@ export async function createBrand(mode: "onboarding" | "add", _prev: BrandFormSt
   const created = store.createBrand(brandResult.brand);
   if (productResult?.product) store.createProduct({ brandId: created.id, ...productResult.product });
   revalidatePath("/", "layout");
+  // Started from "New campaign" or the cart without a brand: carry on there.
+  if (form.get("then") === "campaign") redirect("/campaigns/new");
+  if (form.get("then") === "checkout") redirect("/checkout");
   redirect(mode === "onboarding" ? "/dashboard" : "/brands?done=brandCreated");
 }
 

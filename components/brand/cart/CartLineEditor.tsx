@@ -11,6 +11,7 @@ import { FormatLogo } from "@/components/ui/PlatformLogo";
 import { cn } from "@/lib/cn";
 import type { ContentFormat, FormatOffer } from "@/lib/data/types";
 import { createFormatters } from "@/lib/i18n/format";
+import { priceForBrand } from "@/lib/fees";
 
 type Props = {
   creatorId: string;
@@ -76,7 +77,7 @@ export function CartLineEditor({ creatorId, creatorName, location, offers, quant
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-medium">{label}</span>
                 </span>
-                <span className="shrink-0 font-medium tabular-nums">{f.money(offer.price)}</span>
+                <span className="shrink-0 font-medium tabular-nums">{f.money(priceForBrand(offer.price))}</span>
               </li>
             );
           })}
@@ -98,7 +99,7 @@ export function CartLineEditor({ creatorId, creatorName, location, offers, quant
                 >
                   <FormatLogo format={offer.format} className="size-3.5" />
                   {label}
-                  <span className="text-text-muted tabular-nums">{f.money(offer.price)}</span>
+                  <span className="text-text-muted tabular-nums">{f.money(priceForBrand(offer.price))}</span>
                 </button>
               );
             })}
@@ -107,7 +108,7 @@ export function CartLineEditor({ creatorId, creatorName, location, offers, quant
 
         <div className="flex items-center justify-between gap-3 bg-surface/60 px-4 py-3">
           <span className="text-small text-text-muted">{t("cart.subtotal")}</span>
-          <span className="font-medium tabular-nums">{f.money(subtotal)}</span>
+          <span className="font-medium tabular-nums">{f.money(priceForBrand(subtotal))}</span>
         </div>
       </Card>
     </li>

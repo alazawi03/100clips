@@ -24,7 +24,6 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
     name: f.pick(brand.name),
     logo: brand.logo,
     industry: t(`industries.${brand.industry}`),
-    city: f.pick(brand.city),
     productsLabel: tp("brandsPage.products", productsOf(brand.id).length),
     products: productsOf(brand.id).map((p) => productView(p, i18n)),
   }));

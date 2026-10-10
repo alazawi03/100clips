@@ -1,18 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Field, Input, Select, Textarea } from "@/components/ui/Form";
 import { FileInput } from "@/components/ui/FileInput";
 import { ImageInput } from "@/components/ui/ImageInput";
 import { countryFlag, industryEmoji } from "@/lib/data/emojis";
-import { COUNTRIES, INDUSTRIES } from "@/lib/data/types";
+import { brandCountries } from "@/lib/data/markets";
+import { INDUSTRIES, type Country } from "@/lib/data/types";
 
 /** Starting values for every brand field, as plain strings. */
-export type BrandValues = Partial<
-  Record<"nameAr" | "nameEn" | "logo" | "industry" | "city" | "about" | "website" | "instagram" | "tiktok" | "crNumber" | "vatCertificate", string>
-> & { countries?: string | string[] };
+export type BrandValues = Partial<Record<"nameAr" | "nameEn" | "logo" | "industry" | "about" | "website" | "instagram" | "tiktok", string>> & {
+  countries?: string | string[];
+  /** Per country: cr_bh, vat_bh, … */
+  [field: string]: string | string[] | undefined;
+};
 
-type SectionProps = { v: BrandValues; err: (name: string) => string | undefined };
+type SectionProps = {
+  v: BrandValues;
+  err: (name: string) => string | undefined;
+};
 
 function described(err: SectionProps["err"], name: string) {
   return err(name) ? `${name}-error` : undefined;
@@ -44,9 +51,6 @@ export function BasicsFields({ v, err }: SectionProps) {
           ))}
         </Select>
       </Field>
-      <Field label={`${t("brandForm.city")} (${t("brandForm.optional")})`} htmlFor="city">
-        <Input id="city" name="city" defaultValue={v.city} placeholder={t("brandForm.cityPlaceholder")} />
-      </Field>
     </div>
   );
 }
@@ -59,9 +63,7 @@ export function AboutFields({ v, err }: SectionProps) {
         <Textarea id="about" name="about" rows={3} maxLength={300} defaultValue={v.about} placeholder={t("brandForm.aboutPlaceholder")} aria-invalid={!!err("about")} aria-describedby={described(err, "about")} />
       </Field>
       <fieldset className="flex flex-col gap-4">
-        <legend className="mb-1 font-medium">
-          {t("brandForm.links")}
-        </legend>
+        <legend className="mb-1 font-medium">{t("brandForm.links")}</legend>
         <Field label={`${t("brandForm.website")} (${t("brandForm.optional")})`} htmlFor="website" error={err("website")}>
           <Input id="website" name="website" type="url" inputMode="url" dir="ltr" defaultValue={v.website} placeholder={t("brandForm.websitePlaceholder")} aria-invalid={!!err("website")} aria-describedby={described(err, "website")} />
         </Field>
@@ -78,42 +80,77 @@ export function AboutFields({ v, err }: SectionProps) {
   );
 }
 
-/** All optional: the countries the brand works in, its CR number and its VAT certificate. */
+/**
+ * All optional: the countries the brand works in, then for each one ticked, its CR number and
+ * VAT certificate (fields cr_bh, vat_bh, …). Only the active markets are offered; with just one
+ * (Bahrain for the MVP) there's nothing to pick, so its registration shows straight away.
+ */
 export function ExtrasFields({ v, err }: SectionProps) {
   const { t } = useI18n();
-  const countries = new Set(Array.isArray(v.countries) ? v.countries : v.countries ? [v.countries] : []);
+  const offered = brandCountries();
+  const only = offered.length === 1 ? offered[0] : undefined;
+  const [chosen, setChosen] = useState<Set<Country>>(() => (only ? new Set([only]) : new Set((Array.isArray(v.countries) ? v.countries : v.countries ? [v.countries] : []).filter((c): c is Country => offered.includes(c as Country)))));
+  const toggle = (c: Country) =>
+    setChosen((set) => {
+      const next = new Set(set);
+      if (next.has(c)) next.delete(c);
+      else next.add(c);
+      return next;
+    });
+  const field = (name: string) => (typeof v[name] === "string" ? (v[name] as string) : undefined);
+
   return (
     <div className="flex flex-col gap-5">
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 font-medium">
-          {t("brandForm.countries")} <span className="font-normal text-text-muted">({t("brandForm.optional")})</span>
-        </legend>
-        <p className="-mt-1 text-small text-text-muted">{t("brandForm.countriesHint")}</p>
-        <div className="flex flex-wrap gap-2">
-          {COUNTRIES.map((c) => (
-            <label
-              key={c}
-              className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-border px-4 text-small font-medium transition-colors duration-[120ms] hover:bg-surface has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:checked]:text-primary-on-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary"
-            >
-              <input type="checkbox" name="countries" value={c} defaultChecked={countries.has(c)} className="sr-only" />
-              <span aria-hidden className="text-base leading-none">
+      {only ? (
+        <>
+          <input type="hidden" name="countries" value={only} />
+          <p className="text-small text-text-muted">
+            {t("brandForm.onlyCountryHint", {
+              country: t(`countries.${only}`),
+            })}
+          </p>
+        </>
+      ) : (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 font-medium">
+            {t("brandForm.countries")} <span className="font-normal text-text-muted">({t("brandForm.optional")})</span>
+          </legend>
+          <p className="-mt-1 text-small text-text-muted">{t("brandForm.countriesHint")}</p>
+          <div className="flex flex-wrap gap-2">
+            {offered.map((c) => (
+              <label
+                key={c}
+                className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-border px-4 text-small font-medium transition-colors duration-[120ms] hover:bg-surface has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:checked]:text-primary-on-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary"
+              >
+                <input type="checkbox" name="countries" value={c} checked={chosen.has(c)} onChange={() => toggle(c)} className="sr-only" />
+                <span aria-hidden className="text-base leading-none">
+                  {countryFlag[c]}
+                </span>
+                {t(`countries.${c}`)}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+
+      {/* One card per chosen country, in the list's order. */}
+      {offered
+        .filter((c) => chosen.has(c))
+        .map((c) => (
+          <section key={c} aria-labelledby={`reg-${c}`} className="flex flex-col gap-4 rounded-[var(--radius-lg)] border border-border p-4">
+            <h3 id={`reg-${c}`} className="flex items-center gap-2 font-medium">
+              <span aria-hidden className="text-lg leading-none">
                 {countryFlag[c]}
               </span>
-              {t(`countries.${c}`)}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-      <Field label={`${t("brandForm.crNumber")} (${t("brandForm.optional")})`} htmlFor="crNumber">
-        <Input id="crNumber" name="crNumber" dir="ltr" inputMode="numeric" defaultValue={v.crNumber} placeholder={t("brandForm.crPlaceholder")} />
-      </Field>
-      <FileInput
-        name="vatCertificate"
-        label={`${t("brandForm.vatCertificate")} (${t("brandForm.optional")})`}
-        hint={t("brandForm.vatHint")}
-        defaultName={v.vatCertificate}
-        error={err("vatCertificate")}
-      />
+              {t("brandForm.registrationIn", { country: t(`countries.${c}`) })}
+            </h3>
+            <Field label={`${t("brandForm.crNumber")} (${t("brandForm.optional")})`} htmlFor={`cr_${c}`}>
+              <Input id={`cr_${c}`} name={`cr_${c}`} dir="ltr" inputMode="numeric" defaultValue={field(`cr_${c}`)} placeholder={t("brandForm.crPlaceholder")} />
+            </Field>
+            <FileInput name={`vat_${c}`} label={`${t("brandForm.vatCertificate")} (${t("brandForm.optional")})`} hint={t("brandForm.vatHint")} defaultName={field(`vat_${c}`)} error={err(`vat_${c}`)} />
+          </section>
+        ))}
+      {chosen.size === 0 && <p className="text-small text-text-muted">{t("brandForm.registrationsHint")}</p>}
     </div>
   );
 }

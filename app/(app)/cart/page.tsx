@@ -1,10 +1,14 @@
 import { Compass, Plus } from "lucide-react";
+import { NeedBrandButton } from "@/components/brand/campaigns/NeedBrandDialog";
 import { CartLineEditor } from "@/components/brand/cart/CartLineEditor";
+import { FeeTotal } from "@/components/brand/cart/FeeTotal";
 import { LinkButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
+import { brands } from "@/lib/data/account";
 import { cartOf, priceCart } from "@/lib/data/store";
 import { getI18n } from "@/lib/i18n/server";
+import { priceForBrand } from "@/lib/fees";
 
 export default async function CartPage() {
   const { t, tp, f } = await getI18n();
@@ -58,17 +62,17 @@ export default async function CartPage() {
             {lines.map((line) => (
               <div key={line.creator.id} className="flex justify-between gap-2">
                 <dt className="truncate text-text-muted">{f.pick(line.creator.name)}</dt>
-                <dd className="tabular-nums">{f.money(line.subtotal)}</dd>
+                <dd className="tabular-nums">{f.money(priceForBrand(line.subtotal))}</dd>
               </div>
             ))}
-            <div className="flex justify-between gap-2 border-t border-border pt-2 text-body">
-              <dt className="font-medium">{t("cart.total")}</dt>
-              <dd className="font-medium tabular-nums">{f.money(total)}</dd>
+            <div className="flex flex-col gap-2 border-t border-border pt-2">
+              <FeeTotal creatorsTotal={total} />
             </div>
           </dl>
-          <LinkButton href="/checkout" variant="hero" className="w-full">
+          {/* The order becomes a campaign for one of your brands: no brand yet, the dialog says so first. */}
+          <NeedBrandButton hasBrand={brands.length > 0} href="/checkout" then="checkout" variant="hero" className="w-full">
             {t("cart.checkout")}
-          </LinkButton>
+          </NeedBrandButton>
         </Card>
       </div>
     </div>

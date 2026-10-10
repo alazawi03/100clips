@@ -10,14 +10,18 @@ export function brandToValues(b: Brand, locale: Locale): BrandValues {
     nameEn: b.name.en,
     logo: b.logo,
     industry: b.industry,
-    city: b.city[locale],
     about: b.about?.[locale],
     website: b.website,
     instagram: b.instagram,
     tiktok: b.tiktok,
     countries: b.countries,
-    crNumber: b.crNumber,
-    vatCertificate: b.vatCertificate,
+    // Per country: cr_bh, vat_bh, … (the form's field names).
+    ...Object.fromEntries(
+      Object.entries(b.registrations ?? {}).flatMap(([country, r]) => [
+        [`cr_${country}`, r?.crNumber],
+        [`vat_${country}`, r?.vatCertificate],
+      ]),
+    ),
   };
 }
 
