@@ -143,7 +143,7 @@ export function deadlineOf(order: Order): string | undefined {
 
 export type ApplicationStatus = "pending" | "changes_requested" | "rejected" | "approved";
 export type Decision = { at: string; status: Exclude<ApplicationStatus, "pending">; note?: string };
-export type SampleClip = { id: string; title: Localized; videoSrc: string; durationSec: number };
+export type SampleClip = { id: string; videoSrc: string };
 
 /** A creator who signed up in the app and waits for 100clips to check their profile and samples. */
 export type Application = {
@@ -158,8 +158,9 @@ export type Application = {
   bio: Localized;
   niches: Niche[];
   formats: FormatOffer[];
-  instagram?: { handle: string; followers: number };
-  tiktok?: { handle: string; followers: number };
+  /** Usernames, without @. */
+  instagram?: string;
+  tiktok?: string;
   samples: SampleClip[];
   appliedAt: string;
   status: ApplicationStatus;
@@ -167,7 +168,7 @@ export type Application = {
   decisions: Decision[];
 };
 
-const sample = (id: string, ar: string, en: string, n: number, durationSec: number): SampleClip => ({ id, title: { ar, en }, videoSrc: `/clips/sample-${n}.mp4`, durationSec });
+const sample = (id: string, n: number): SampleClip => ({ id, videoSrc: `/clips/sample-${n}.mp4` });
 
 export const applications: Application[] = [
   {
@@ -181,9 +182,9 @@ export const applications: Application[] = [
     bio: { ar: "روتين عناية بسيط وصادق، وأجرب كل منتج أسبوع قبل ما أتكلم عنه.", en: "Simple, honest skincare. I try every product for a week before I talk about it." },
     niches: ["beauty"],
     formats: [{ format: "instagram_reel", price: 35 }, { format: "instagram_story", price: 18 }, { format: "tiktok_video", price: 30 }],
-    instagram: { handle: "dana.glow", followers: 18400 },
-    tiktok: { handle: "dana.glow", followers: 9100 },
-    samples: [sample("s-dana-1", "روتين الصباح", "Morning routine", 1, 28), sample("s-dana-2", "مراجعة واقي شمس", "Sunscreen review", 2, 41), sample("s-dana-3", "قبل وبعد", "Before and after", 3, 19)],
+    instagram: "dana.glow",
+    tiktok: "dana.glow",
+    samples: [sample("s-dana-1", 1), sample("s-dana-2", 2), sample("s-dana-3", 3)],
     appliedAt: "2026-10-02T08:30:00Z",
     status: "pending",
     decisions: [],
@@ -199,8 +200,8 @@ export const applications: Application[] = [
     bio: { ar: "أجرب مطاعم المحرق القديمة والجديدة، وأقول رأيي بدون مجاملة.", en: "Old and new Muharraq restaurants, reviewed straight." },
     niches: ["food"],
     formats: [{ format: "tiktok_video", price: 40 }, { format: "instagram_reel", price: 42 }],
-    tiktok: { handle: "omar.eats", followers: 26300 },
-    samples: [sample("s-omar-1", "أفضل كرك في المحرق", "The best karak in Muharraq", 2, 35), sample("s-omar-2", "برجر جديد في السيف", "A new burger in Seef", 3, 30)],
+    tiktok: "omar.eats",
+    samples: [sample("s-omar-1", 2), sample("s-omar-2", 3)],
     appliedAt: "2026-10-01T15:10:00Z",
     status: "pending",
     decisions: [],
@@ -216,9 +217,9 @@ export const applications: Application[] = [
     bio: { ar: "ألعاب وأجهزة، وأشرح التقنية بلغة بسيطة.", en: "Games and gadgets, tech explained simply." },
     niches: ["gaming", "tech"],
     formats: [{ format: "tiktok_video", price: 28 }],
-    tiktok: { handle: "majed.plays", followers: 41200 },
-    instagram: { handle: "majed.plays", followers: 3900 },
-    samples: [sample("s-majed-1", "فتح صندوق يد تحكم", "Unboxing a controller", 1, 44), sample("s-majed-2", "إعداد غرفة الألعاب", "Gaming room setup", 2, 52), sample("s-majed-3", "سماعات تحت 20 دينار", "Earbuds under 20 BHD", 3, 38)],
+    tiktok: "majed.plays",
+    instagram: "majed.plays",
+    samples: [sample("s-majed-1", 1), sample("s-majed-2", 2), sample("s-majed-3", 3)],
     appliedAt: "2026-09-30T19:45:00Z",
     status: "pending",
     decisions: [],
@@ -234,8 +235,8 @@ export const applications: Application[] = [
     bio: { ar: "تنسيقات عبايات للدوام والمناسبات.", en: "Abaya styling for work and occasions." },
     niches: ["fashion"],
     formats: [{ format: "instagram_reel", price: 45 }, { format: "instagram_story", price: 22 }],
-    instagram: { handle: "sara.styles", followers: 12700 },
-    samples: [sample("s-sara-1", "ثلاث إطلالات للدوام", "Three looks for work", 3, 33), sample("s-sara-2", "تنسيق عباية سهرة", "Styling an evening abaya", 1, 29)],
+    instagram: "sara.styles",
+    samples: [sample("s-sara-1", 3), sample("s-sara-2", 1)],
     appliedAt: "2026-09-27T11:00:00Z",
     status: "changes_requested",
     decisions: [{ at: "2026-09-29T09:20:00Z", status: "changes_requested", note: "Both samples have music in the background. Please upload versions without music, or new clips." }],
@@ -251,8 +252,8 @@ export const applications: Application[] = [
     bio: { ar: "رحلات بحرية وصيد.", en: "Boat trips and fishing." },
     niches: ["travel"],
     formats: [{ format: "tiktok_video", price: 35 }],
-    tiktok: { handle: "jassim.trips", followers: 2100 },
-    samples: [sample("s-jassim-1", "رحلة صيد", "A fishing trip", 2, 61)],
+    tiktok: "jassim.trips",
+    samples: [sample("s-jassim-1", 2)],
     appliedAt: "2026-09-22T16:00:00Z",
     status: "rejected",
     decisions: [{ at: "2026-09-24T10:05:00Z", status: "rejected", note: "The sample doesn't follow our content rules (clothing). You're welcome to apply again with new clips." }],

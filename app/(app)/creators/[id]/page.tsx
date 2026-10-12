@@ -161,21 +161,17 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
         <SectionHeader id="work-title" title={t("profile.portfolio")} />
         {portfolio.length > 0 ? (
           <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            {portfolio.map((clip) => (
-              <li key={clip.id} className="flex flex-col gap-2">
+            {portfolio.map((clip, i) => (
+              <li key={clip.id}>
                 <video
                   dir="ltr"
                   src={clip.videoSrc}
                   controls
                   playsInline
                   preload="metadata"
-                  aria-label={t("profile.play", { title: f.pick(clip.title) })}
+                  aria-label={t("profile.play", { title: t("profile.sample", { n: i + 1 }) })}
                   className="aspect-[9/16] w-full rounded-[var(--radius-lg)] bg-black object-cover"
                 />
-                <p className="flex items-baseline justify-between gap-2">
-                  <span className="line-clamp-2 font-medium">{f.pick(clip.title)}</span>
-                  <span className="shrink-0 text-small text-text-muted tabular-nums">{f.duration(clip.durationSec)}</span>
-                </p>
               </li>
             ))}
           </ul>

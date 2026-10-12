@@ -182,6 +182,7 @@
     "reviews": "Reviews from brands",
     "noReviews": "No reviews yet.",
     "play": "Play {title}",
+    "sample": "Sample {n}",
     "perClip": "per clip",
     "hire": "Hire",
     "socials": "Social media",
@@ -1341,7 +1342,6 @@
         "one": "1 sample",
         "other": "{count} samples"
       },
-      "followers": "{count} followers",
       "appliedOn": "Applied {date}",
       "samplesTitle": "Sample videos",
       "samplesHint": "Watch each one against the content rules before deciding.",

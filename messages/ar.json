@@ -194,6 +194,7 @@
     "reviews": "تقييمات العلامات التجارية",
     "noReviews": "ما فيه تقييمات بعد.",
     "play": "شغّل {title}",
+    "sample": "العينة {n}",
     "perClip": "للمقطع",
     "hire": "وظّف",
     "socials": "حسابات التواصل",
@@ -1467,7 +1468,6 @@
         "many": "{count} مقطع",
         "other": "{count} مقطع"
       },
-      "followers": "{count} متابع",
       "appliedOn": "قدّم {date}",
       "samplesTitle": "المقاطع النموذجية",
       "samplesHint": "شاهد كل مقطع وقارنه بقواعد المحتوى قبل القرار.",

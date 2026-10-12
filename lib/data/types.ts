@@ -45,7 +45,7 @@ export type Creator = {
 };
 
 /** A sample video on a creator's profile. */
-export type PortfolioClip = { id: string; title: Localized; videoSrc: string; durationSec: number };
+export type PortfolioClip = { id: string; videoSrc: string };
 
 /** Placeholder poster art until real thumbnails exist. Hues are 0–360. */
 export type ClipPoster = { from: number; to: number; niche: Niche };

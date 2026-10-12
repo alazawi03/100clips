@@ -33,7 +33,6 @@ export default async function AdminApprovalsPage({ searchParams }: PageProps<"/a
           <ul className="divide-y divide-border">
             {list.map((a) => {
               const name = f.pick(a.name);
-              const followers = (a.instagram?.followers ?? 0) + (a.tiktok?.followers ?? 0);
               return (
                 <li key={a.id}>
                   <Link href={`/admin/approvals/${a.id}`} className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4 hover:bg-surface sm:px-5">
@@ -44,13 +43,10 @@ export default async function AdminApprovalsPage({ searchParams }: PageProps<"/a
                         <bdi dir="ltr">@{a.handle}</bdi> · {f.pick(a.city)} · {list_.format(a.niches.map((n) => t(`niches.${n}`)))}
                       </p>
                     </div>
-                    <div className="text-small text-text-muted">
-                      <p className="flex items-center gap-1">
-                        <Film aria-hidden className="size-4" strokeWidth={1.75} />
-                        {tp("admin.approvals.samples", a.samples.length)}
-                      </p>
-                      <p>{t("admin.approvals.followers", { count: f.compact(followers) })}</p>
-                    </div>
+                    <p className="flex items-center gap-1 text-small text-text-muted">
+                      <Film aria-hidden className="size-4" strokeWidth={1.75} />
+                      {tp("admin.approvals.samples", a.samples.length)}
+                    </p>
                     <div className="text-end text-small text-text-muted">
                       <Badge tone={APPLICATION_TONE[a.status]}>{t(`admin.approvals.status.${a.status}`)}</Badge>
                       <p className="mt-1">{t("admin.approvals.appliedOn", { date: f.date(a.appliedAt.slice(0, 10)) })}</p>

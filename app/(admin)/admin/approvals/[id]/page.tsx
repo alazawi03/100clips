@@ -23,9 +23,9 @@ export default async function AdminApplicationPage({ params, searchParams }: Pag
   const list = new Intl.ListFormat(locale);
   const last = a.decisions.at(-1);
   const socials = [
-    a.instagram && { label: t("platforms.instagram"), handle: a.instagram.handle, followers: a.instagram.followers, href: `https://www.instagram.com/${a.instagram.handle}` },
-    a.tiktok && { label: t("platforms.tiktok"), handle: a.tiktok.handle, followers: a.tiktok.followers, href: `https://www.tiktok.com/@${a.tiktok.handle}` },
-  ].filter((s): s is NonNullable<typeof s> => !!s);
+    a.instagram && { label: t("platforms.instagram"), handle: a.instagram, href: `https://www.instagram.com/${a.instagram}` },
+    a.tiktok && { label: t("platforms.tiktok"), handle: a.tiktok, href: `https://www.tiktok.com/@${a.tiktok}` },
+  ].filter((s): s is Exclude<typeof s, "" | undefined> => !!s);
 
   return (
     <div className="flex flex-col gap-6">
@@ -41,12 +41,10 @@ export default async function AdminApplicationPage({ params, searchParams }: Pag
             <h2 className="text-h3 font-medium">{t("admin.approvals.samplesTitle")}</h2>
             <p className="text-small text-text-muted">{t("admin.approvals.samplesHint")}</p>
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {a.samples.map((s) => (
-                <li key={s.id} className="flex flex-col gap-1.5">
+              {a.samples.map((s, i) => (
+                <li key={s.id}>
                   {/* Media stays left-to-right in both languages. */}
-                  <video dir="ltr" src={s.videoSrc} controls playsInline preload="metadata" aria-label={f.pick(s.title)} className="aspect-[9/16] w-full rounded-[var(--radius-md)] bg-black object-cover" />
-                  <span className="truncate text-small font-medium">{f.pick(s.title)}</span>
-                  <span className="text-caption text-text-muted tabular-nums">{f.duration(s.durationSec)}</span>
+                  <video dir="ltr" src={s.videoSrc} controls playsInline preload="metadata" aria-label={t("profile.sample", { n: i + 1 })} className="aspect-[9/16] w-full rounded-[var(--radius-md)] bg-black object-cover" />
                 </li>
               ))}
             </ul>
@@ -89,10 +87,7 @@ export default async function AdminApplicationPage({ params, searchParams }: Pag
                         @{s.handle}
                       </bdi>
                     </span>
-                    <span className="flex items-center gap-2 text-small text-text-muted">
-                      {t("admin.approvals.followers", { count: f.compact(s.followers) })}
-                      <ExternalLink aria-hidden className="size-4" />
-                    </span>
+                    <ExternalLink aria-hidden className="size-4 shrink-0 text-text-muted" />
                   </a>
                 </li>
               ))}

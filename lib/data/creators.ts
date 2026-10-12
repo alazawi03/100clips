@@ -12,8 +12,8 @@ export const creators: Creator[] = [
     tiktok: "noura.kaabi",
     showsFace: true,
     portfolio: [
-      { id: "pf-noura-1", title: { ar: "قهوة الصباح", en: "Morning coffee" }, videoSrc: "/clips/sample-1.mp4", durationSec: 28 },
-      { id: "pf-noura-2", title: { ar: "إطلالة دوام", en: "A workday look" }, videoSrc: "/clips/sample-2.mp4", durationSec: 41 },
+      { id: "pf-noura-1", videoSrc: "/clips/sample-1.mp4" },
+      { id: "pf-noura-2", videoSrc: "/clips/sample-2.mp4" },
     ],
     city: { ar: "الرفاع", en: "Riffa" },
     gender: "female",
