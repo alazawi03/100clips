@@ -1,0 +1,5 @@
+node_modules
+dist
+.env
+# The root ignores every .env*; the example has no secrets and documents the settings.
+!.env.example

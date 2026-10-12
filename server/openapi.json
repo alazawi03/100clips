@@ -1,0 +1,1412 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        },
+        "summary": "API and database are up",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/waitlist": {
+      "post": {
+        "description": "\"Tell me when you launch\" in the creator app. Works before signing in.",
+        "operationId": "WaitlistController_join",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinWaitlistDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Added to the list"
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Join the waitlist",
+        "tags": [
+          "Public"
+        ]
+      }
+    },
+    "/me": {
+      "get": {
+        "description": "Their account, creator profile (creators) and brands (brand owners).",
+        "operationId": "MeController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The signed-in person",
+        "tags": [
+          "Me"
+        ]
+      },
+      "post": {
+        "description": "First step after signing in for the first time: creator or brand.",
+        "operationId": "MeController_createAccount",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Already exists, or the wrong state for this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create my account",
+        "tags": [
+          "Me"
+        ]
+      }
+    },
+    "/creators": {
+      "get": {
+        "description": "Approved creators brands can book, with rating and lowest price (before the fee).",
+        "operationId": "CreatorsController_explore",
+        "parameters": [
+          {
+            "name": "niche",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Niche"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 24,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExploreCreator"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Explore creators",
+        "tags": [
+          "Creators"
+        ]
+      }
+    },
+    "/creators/{id}": {
+      "get": {
+        "description": "Prices, socials, portfolio, reviews and public clips. 404 if you can't see them.",
+        "operationId": "CreatorsController_profile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatorProfile"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Creator profile",
+        "tags": [
+          "Creators"
+        ]
+      }
+    },
+    "/brands": {
+      "get": {
+        "operationId": "BrandsController_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Brand"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "My brands",
+        "tags": [
+          "Brands"
+        ]
+      },
+      "post": {
+        "description": "Brand accounts only. Needs a name in Arabic or English.",
+        "operationId": "BrandsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBrandDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Brand"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a brand",
+        "tags": [
+          "Brands"
+        ]
+      }
+    },
+    "/brands/{id}": {
+      "patch": {
+        "description": "Only the fields sent change.",
+        "operationId": "BrandsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBrandDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Brand"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a brand",
+        "tags": [
+          "Brands"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "100clips API",
+    "description": "For the brand dashboard and the creator app. Sign in with Supabase Auth and send the access token as `Authorization: Bearer <token>`. Each request runs as that user in Postgres, so row-level security decides what they see.",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "Supabase access token"
+      }
+    },
+    "schemas": {
+      "Health": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "JoinWaitlistDto": {
+        "type": "object",
+        "properties": {
+          "country": {
+            "type": "string",
+            "description": "ISO country code",
+            "example": "SA",
+            "pattern": "^[A-Za-z]{2}$"
+          },
+          "contact": {
+            "type": "string",
+            "description": "A phone number or an email",
+            "example": "+966501234567",
+            "minLength": 3,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "country",
+          "contact"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer",
+            "example": 400
+          },
+          "message": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "What went wrong, for people. Input checks give a list.",
+            "example": "Choose an address"
+          },
+          "error": {
+            "type": "string",
+            "example": "Bad Request"
+          },
+          "code": {
+            "type": "string",
+            "description": "Postgres error code, when the database refused",
+            "example": "23514"
+          }
+        },
+        "required": [
+          "statusCode",
+          "message"
+        ]
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "creator",
+          "brand",
+          "admin"
+        ]
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Role"
+              }
+            ]
+          },
+          "name_ar": {
+            "type": "string",
+            "nullable": true
+          },
+          "name_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "notifications_seen_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "name_ar",
+          "name_en",
+          "phone",
+          "notifications_seen_at",
+          "created_at"
+        ]
+      },
+      "CreatorStatus": {
+        "type": "string",
+        "enum": [
+          "incomplete",
+          "pending",
+          "changes_requested",
+          "rejected",
+          "approved"
+        ]
+      },
+      "Gender": {
+        "type": "string",
+        "enum": [
+          "female",
+          "male"
+        ]
+      },
+      "Niche": {
+        "type": "string",
+        "enum": [
+          "general",
+          "beauty",
+          "food",
+          "fashion",
+          "family",
+          "fitness",
+          "travel",
+          "tech",
+          "gaming"
+        ]
+      },
+      "Creator": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CreatorStatus"
+              }
+            ]
+          },
+          "name_ar": {
+            "type": "string",
+            "nullable": true
+          },
+          "name_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "handle": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "example": "BH"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "gender": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Gender"
+              }
+            ]
+          },
+          "shows_face": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "niches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Niche"
+            }
+          },
+          "photo_path": {
+            "type": "string",
+            "nullable": true
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completed_orders": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "name_ar",
+          "name_en",
+          "handle",
+          "country",
+          "city",
+          "bio",
+          "gender",
+          "shows_face",
+          "niches",
+          "photo_path",
+          "approved_at",
+          "completed_orders",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "Industry": {
+        "type": "string",
+        "enum": [
+          "food_beverage",
+          "fashion",
+          "tech",
+          "real_estate",
+          "automotive",
+          "health",
+          "education",
+          "home_living",
+          "other"
+        ]
+      },
+      "Brand": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "account_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name_ar": {
+            "type": "string",
+            "nullable": true
+          },
+          "name_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "logo_path": {
+            "type": "string",
+            "nullable": true,
+            "description": "Path in the public storage bucket"
+          },
+          "industry": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Industry"
+              }
+            ]
+          },
+          "about": {
+            "type": "string",
+            "nullable": true
+          },
+          "website": {
+            "type": "string",
+            "nullable": true
+          },
+          "instagram": {
+            "type": "string",
+            "nullable": true
+          },
+          "tiktok": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "name_ar",
+          "name_en",
+          "logo_path",
+          "industry",
+          "about",
+          "website",
+          "instagram",
+          "tiktok",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "Me": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "creator": {
+            "nullable": true,
+            "description": "Creators only",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Creator"
+              }
+            ]
+          },
+          "brands": {
+            "description": "Brand owners only; empty for creators",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Brand"
+            }
+          }
+        },
+        "required": [
+          "account",
+          "creator",
+          "brands"
+        ]
+      },
+      "CreateAccountDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "creator",
+              "brand"
+            ],
+            "description": "Admins are made by hand, never through the API"
+          },
+          "name_ar": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "name_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 20,
+            "example": "+97333123456"
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "ExploreCreator": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name_ar": {
+            "type": "string",
+            "nullable": true
+          },
+          "name_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "handle": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "gender": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Gender"
+              }
+            ]
+          },
+          "niches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Niche"
+            }
+          },
+          "photo_path": {
+            "type": "string",
+            "nullable": true
+          },
+          "completed_orders": {
+            "type": "integer"
+          },
+          "rating": {
+            "type": "number",
+            "nullable": true,
+            "description": "Average stars, null before the first review"
+          },
+          "review_count": {
+            "type": "integer"
+          },
+          "from_price": {
+            "type": "number",
+            "nullable": true,
+            "description": "Lowest format price in BHD, before the platform fee"
+          }
+        },
+        "required": [
+          "id",
+          "name_ar",
+          "name_en",
+          "handle",
+          "city",
+          "bio",
+          "gender",
+          "niches",
+          "photo_path",
+          "completed_orders",
+          "rating",
+          "review_count",
+          "from_price"
+        ]
+      },
+      "PublicCreator": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name_ar": {
+            "type": "string",
+            "nullable": true
+          },
+          "name_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "handle": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "example": "BH"
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true
+          },
+          "gender": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Gender"
+              }
+            ]
+          },
+          "shows_face": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "niches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Niche"
+            }
+          },
+          "photo_path": {
+            "type": "string",
+            "nullable": true
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "completed_orders": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name_ar",
+          "name_en",
+          "handle",
+          "country",
+          "city",
+          "bio",
+          "gender",
+          "shows_face",
+          "niches",
+          "photo_path",
+          "approved_at",
+          "completed_orders",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "ContentFormat": {
+        "type": "string",
+        "enum": [
+          "tiktok_video",
+          "instagram_reel",
+          "instagram_story"
+        ]
+      },
+      "FormatPrice": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContentFormat"
+              }
+            ]
+          },
+          "price": {
+            "type": "number",
+            "description": "BHD, before the platform fee"
+          }
+        },
+        "required": [
+          "format",
+          "price"
+        ]
+      },
+      "SocialPlatform": {
+        "type": "string",
+        "enum": [
+          "instagram",
+          "tiktok"
+        ]
+      },
+      "Social": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SocialPlatform"
+              }
+            ]
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "username"
+        ]
+      },
+      "PortfolioVideo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "video_path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "video_path"
+        ]
+      },
+      "Rating": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number"
+          },
+          "review_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rating",
+          "review_count"
+        ]
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brand_name_ar": {
+            "type": "string",
+            "nullable": true
+          },
+          "brand_name_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "review": {
+            "type": "string",
+            "nullable": true
+          },
+          "rated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "order_id",
+          "brand_name_ar",
+          "brand_name_en",
+          "rating",
+          "review",
+          "rated_at"
+        ]
+      },
+      "Clip": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brand_name_ar": {
+            "type": "string",
+            "nullable": true
+          },
+          "brand_name_en": {
+            "type": "string",
+            "nullable": true
+          },
+          "views": {
+            "type": "integer",
+            "nullable": true
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "video_path": {
+            "type": "string"
+          },
+          "duration_sec": {
+            "type": "integer",
+            "nullable": true
+          }
+        },
+        "required": [
+          "order_id",
+          "brand_name_ar",
+          "brand_name_en",
+          "views",
+          "approved_at",
+          "video_path",
+          "duration_sec"
+        ]
+      },
+      "CreatorProfile": {
+        "type": "object",
+        "properties": {
+          "creator": {
+            "$ref": "#/components/schemas/PublicCreator"
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FormatPrice"
+            }
+          },
+          "socials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Social"
+            }
+          },
+          "portfolio": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PortfolioVideo"
+            }
+          },
+          "rating": {
+            "nullable": true,
+            "description": "Null before the first review",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Rating"
+              }
+            ]
+          },
+          "reviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Review"
+            }
+          },
+          "clips": {
+            "description": "Clips the brand agreed to show publicly",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Clip"
+            }
+          }
+        },
+        "required": [
+          "creator",
+          "formats",
+          "socials",
+          "portfolio",
+          "rating",
+          "reviews",
+          "clips"
+        ]
+      },
+      "CreateBrandDto": {
+        "type": "object",
+        "properties": {
+          "name_ar": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "example": "محمصة المحرق"
+          },
+          "name_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "example": "Muharraq Roastery"
+          },
+          "logo_path": {
+            "type": "string",
+            "description": "Path in the public storage bucket"
+          },
+          "industry": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Industry"
+              }
+            ]
+          },
+          "about": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "website": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "instagram": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "description": "Username, without @"
+          },
+          "tiktok": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "description": "Username, without @"
+          }
+        },
+        "required": [
+          "industry"
+        ]
+      },
+      "UpdateBrandDto": {
+        "type": "object",
+        "properties": {
+          "name_ar": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "example": "محمصة المحرق"
+          },
+          "name_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "example": "Muharraq Roastery"
+          },
+          "logo_path": {
+            "type": "string",
+            "description": "Path in the public storage bucket"
+          },
+          "industry": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Industry"
+              }
+            ]
+          },
+          "about": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "website": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com"
+          },
+          "instagram": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "description": "Username, without @"
+          },
+          "tiktok": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30,
+            "description": "Username, without @"
+          }
+        }
+      }
+    }
+  }
+}
