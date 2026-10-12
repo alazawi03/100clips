@@ -1,0 +1,686 @@
+// 100clips database, schema v2. Generated from supabase/migrations/20261010120000_initial_schema.sql.
+// Paste into dbdiagram.io to see it.
+
+Enum user_role {
+  creator
+  brand
+  admin
+}
+
+Enum actor {
+  creator
+  brand
+  admin
+  system
+}
+
+Enum niche {
+  general
+  beauty
+  food
+  fashion
+  family
+  fitness
+  travel
+  tech
+  gaming
+}
+
+Enum gender {
+  female
+  male
+}
+
+Enum content_format {
+  tiktok_video
+  instagram_reel
+  instagram_story
+}
+
+Enum social_platform {
+  instagram
+  tiktok
+}
+
+Enum address_type {
+  home
+  work
+}
+
+Enum creator_status {
+  incomplete
+  pending
+  changes_requested
+  rejected
+  approved
+}
+
+Enum industry {
+  food_beverage
+  fashion
+  tech
+  real_estate
+  automotive
+  health
+  education
+  home_living
+  other
+}
+
+Enum product_type {
+  physical
+  app
+  service
+  venue
+}
+
+Enum video_style {
+  ad
+  review
+  routine
+  unboxing
+  howto
+  other
+}
+
+Enum campaign_status {
+  draft
+  live
+  cancelled
+}
+
+Enum order_status {
+  pending
+  in_progress
+  delivered
+  approved
+  declined
+  cancelled
+}
+
+Enum decline_reason {
+  busy
+  not_my_niche
+  other
+  expired
+}
+
+Enum order_event_type {
+  offered
+  accepted
+  declined
+  expired
+  cancelled
+  sent
+  received
+  uploaded
+  revision_requested
+  approved
+  returned
+  ad_code_added
+  deadline_moved
+  deadline_passed
+}
+
+Enum payment_kind {
+  checkout
+  top_up
+}
+
+Enum payment_status {
+  pending
+  paid
+  failed
+}
+
+Enum ledger_type {
+  top_up
+  card_payment
+  charge
+  refund
+  earning
+  payout
+  withdrawal
+  withdrawal_returned
+  adjustment
+}
+
+Enum transfer_kind {
+  withdrawal
+  payout
+}
+
+Enum transfer_status {
+  requested
+  sent
+  rejected
+}
+
+Enum report_reason {
+  off_platform
+  abuse
+  spam
+  not_delivered
+  not_as_agreed
+  product_issue
+  creator_conduct
+  brand_conduct
+  payment
+  other
+}
+
+Enum report_status {
+  open
+  resolved
+}
+
+Enum admin_action {
+  creator_approved
+  changes_requested
+  creator_rejected
+  suspended
+  unsuspended
+  login_reset
+  deadline_extended
+  order_cancelled
+  payout_sent
+  withdrawal_sent
+  withdrawal_rejected
+  report_resolved
+}
+
+Table accounts {
+  id uuid [pk]
+  role user_role [not null]
+  name_ar text [note: 'Brand owners: the account name, in both languages. Creators keep their name on creators.']
+  name_en text
+  phone text
+  notifications_seen_at timestamptz [not null, note: 'Notifications newer than this show as new (the bell).']
+  created_at timestamptz [not null]
+
+  Note: 'Everyone who signs in: creators, brand owners and the 100clips team. Email and phone sign-in live in auth.users. For a brand owner this row is also the brand account: one login, one balance, several brands. (Several people per brand account would come later, as an account_members table.)'
+}
+
+Table waitlist_requests {
+  id uuid [pk]
+  country "char(2)" [not null]
+  email text
+  phone text
+  created_at timestamptz [not null]
+
+  Note: '"Not in Bahrain?" in the creator app. The sheet has one box ("Your number or email"); join_waitlist puts it in email when it has an @, otherwise in phone.'
+}
+
+Table creators {
+  id uuid [pk, ref: > accounts.id]
+  status creator_status [not null, default: 'incomplete']
+  name_ar text
+  name_en text
+  handle text [not null, unique]
+  country "char(2)" [not null, default: 'BH']
+  city text [note: 'Typed freely in the profile.']
+  bio text
+  gender gender
+  shows_face boolean
+  niches "niche[]" [not null, default: '{}']
+  photo_path text
+  approved_at timestamptz
+  completed_orders integer [not null, default: 0, note: 'Kept up to date when orders are approved, because orders are private.']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table creator_formats {
+  creator_id uuid [ref: > creators.id]
+  format content_format
+  price "numeric(10, 3)" [not null]
+
+  indexes {
+    (creator_id, format) [pk]
+  }
+
+  Note: 'What a creator offers, with a price per clip (what the creator gets; brands see it plus the fee).'
+}
+
+Table creator_socials {
+  creator_id uuid [ref: > creators.id]
+  platform social_platform
+  username text [not null]
+
+  indexes {
+    (creator_id, platform) [pk]
+  }
+
+  Note: 'The creator\'s Instagram / TikTok usernames, one per platform. At least one is needed to apply.'
+}
+
+Table creator_portfolio {
+  id uuid [pk]
+  creator_id uuid [not null, ref: > creators.id]
+  video_path text [not null]
+  created_at timestamptz [not null]
+
+  Note: 'Up to 3 sample clips: reviewed at sign-up, then shown on the profile, oldest first.'
+}
+
+Table creator_addresses {
+  id uuid [pk]
+  creator_id uuid [not null, ref: > creators.id]
+  type address_type [not null]
+  label text
+  address_text text [not null]
+  latitude double
+  longitude double
+  created_at timestamptz [not null]
+
+  Note: 'Delivery addresses, up to 5. Private: brands get a copy on the order when the creator accepts. The sheet: type chips (home / work), an optional name under them ("Parents\' house"), the address text, and a pin on the map.'
+}
+
+Table creator_approvals {
+  id uuid [pk]
+  creator_id uuid [not null, ref: > creators.id]
+  intro_video_path text [not null]
+  sample_paths "text[]" [not null]
+  submitted_at timestamptz [not null]
+  decision creator_status [note: 'Null while it waits.']
+  note text
+  decided_by uuid [ref: > accounts.id]
+  decided_at timestamptz
+
+  Note: 'Each time a creator sends their application: the intro and samples as they were, and the admin\'s verdict on that version. The admin compares it with the one before; the creator sees the latest note. Files named here are never deleted (see the storage migration).'
+}
+
+Table brands {
+  id uuid [pk]
+  account_id uuid [not null, ref: > accounts.id]
+  name_ar text
+  name_en text
+  logo_path text
+  industry industry [not null]
+  about text
+  website text
+  instagram text
+  tiktok text
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+}
+
+Table brand_registrations {
+  brand_id uuid [pk, ref: > brands.id]
+  cr_number text
+  vat_certificate_path text
+  updated_at timestamptz [not null]
+
+  Note: 'A brand\'s registration in Bahrain, both optional. Kept apart from brands so only the owner and admins see it; the VAT certificate file sits in the private-docs bucket.'
+}
+
+Table products {
+  id uuid [pk]
+  brand_id uuid [not null, ref: > brands.id]
+  type product_type [not null]
+  name text [not null]
+  photos "text[]" [not null, default: '{}']
+  description text
+  price "numeric(10, 3)" [note: 'What customers pay. Venues have none. (A physical product\'s unit value is in details.)']
+  benefits "text[]" [not null, default: '{}']
+  concerns jsonb [not null, default: '[]', note: '[{ "question": "...", "answer": "..." }]']
+  details jsonb [not null, default: '{}', note: 'The fields for the type: physical {value, size}, app {downloadLink, platforms}, service {delivery}, venue {kind, location, hours, mapUrl}.']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  indexes {
+    (id, brand_id) [unique]
+  }
+}
+
+Table cart_items {
+  id uuid [pk]
+  account_id uuid [not null, ref: > accounts.id]
+  creator_id uuid [not null, ref: > creators.id]
+  format content_format [not null]
+  quantity smallint [not null, default: 1]
+  added_at timestamptz [not null]
+
+  indexes {
+    (account_id, creator_id, format) [unique]
+  }
+
+  Note: 'One row per creator and format, with how many videos. Adding the same format again bumps quantity. Checkout empties it. (Checkout still takes one video per creator per campaign for now.)'
+}
+
+Table creator_lists {
+  id uuid [pk]
+  account_id uuid [not null, ref: > accounts.id]
+  name text [not null, default: '']
+  is_favorites boolean [not null, default: false]
+  created_at timestamptz [not null]
+
+  Note: '"Favourites" (exactly one per account, made on first use) and the brand\'s own named lists.'
+}
+
+Table creator_list_items {
+  list_id uuid [ref: > creator_lists.id]
+  creator_id uuid [ref: > creators.id]
+  added_at timestamptz [not null]
+
+  indexes {
+    (list_id, creator_id) [pk]
+  }
+
+  Note: 'The creators in each list (the page shows the newest first). A deleted creator drops out.'
+}
+
+Table campaigns {
+  id uuid [pk]
+  brand_id uuid [not null, ref: > brands.id]
+  status campaign_status [not null, default: 'draft']
+  product_id uuid
+  title text
+  brief text
+  video_style video_style
+  deadline date [note: 'When clips are due. Each order gets a copy, which an admin can move for one creator.']
+  key_message text
+  reference_links "text[]" [not null, default: '{}']
+  must_include text
+  avoid text
+  logistics jsonb [not null, default: '{}', note: 'How the product reaches creators. physical {after: keep|return}, venue {visitFrom, visitTo, included}. The app link, test account and promo code are in campaign_secrets.']
+  draft jsonb [note: 'A draft\'s form as it was saved (every field by name) and its picked creators.']
+  copied_from uuid [ref: > campaigns.id, note: '"Run again": the campaign this one was copied from.']
+  events jsonb [not null, default: '[]', note: 'Changes after paying, oldest first: {type: details_edited, at, changes: [{field, before, after}]} (only before anyone accepted) or {type: deadline_moved, at, from, to} (later only).']
+  created_at timestamptz [not null]
+  launched_at timestamptz
+  cancelled_at timestamptz
+  updated_at timestamptz [not null]
+
+  Note: 'One brief for one product, sent to one or more creators. Drafts can be half filled in; once paid ("live") the brief is complete.'
+}
+
+Table campaign_secrets {
+  campaign_id uuid [pk, ref: > campaigns.id]
+  access_link text [note: 'App download link today; a booking page for a venue or service later.']
+  login_details text [note: 'An app\'s test account (username and password).']
+  code text [note: 'A promo, voucher or booking code.']
+
+  Note: 'Only for creators who accepted: hidden from offers that are still waiting.'
+}
+
+Table payments {
+  id uuid [pk]
+  account_id uuid [not null, ref: > accounts.id]
+  kind payment_kind [not null]
+  campaign_id uuid [ref: > campaigns.id]
+  total "numeric(10, 3)" [not null]
+  from_balance "numeric(10, 3)" [not null, default: 0]
+  by_card "numeric(10, 3)" [not null, default: 0]
+  picks jsonb [note: 'Checkout: [{creator_id, format, note}], turned into orders when paid.']
+  status payment_status [not null, default: 'pending']
+  provider text [note: 'The card provider is still to be chosen.']
+  provider_ref text
+  created_at timestamptz [not null]
+  paid_at timestamptz
+
+  Note: 'One card checkout or wallet top-up. The balance part (if any) and the card part make up the total. Orders are created only once the payment is paid (straight away when the balance covers it all).'
+}
+
+Table orders {
+  id uuid [pk]
+  number bigint [increment, unique, note: 'Shown as "ord-1043".']
+  campaign_id uuid [not null, ref: > campaigns.id]
+  brand_id uuid [not null, ref: > brands.id]
+  creator_id uuid [not null, ref: > creators.id]
+  payment_id uuid [ref: > payments.id]
+  format content_format [not null]
+  amount "numeric(10, 3)" [not null, note: 'The creator\'s price, fixed when ordered. The fee is in order_fees (creators never see it).']
+  note text [note: 'The brand\'s note to this creator, sent with the offer.']
+  status order_status [not null, default: 'pending']
+  deadline date
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+  accepted_at timestamptz
+  terms_version text [note: 'Which wording of the rules the creator agreed to.']
+  ship_to jsonb [note: 'A copy of the creator\'s address and phone, made on accepting (physical products only).']
+  decline_reason decline_reason
+  decline_note text
+  declined_at timestamptz
+  cancelled_at timestamptz
+  cancelled_by actor
+  sent_at timestamptz
+  ship_note text [note: 'Instead of a tracking number: "with our driver, Thursday".']
+  received_at timestamptz
+  returned_at timestamptz
+  delivered_at timestamptz [note: 'Clip and review']
+  revision_requested_at timestamptz
+  revision_note text
+  approved_at timestamptz
+  approved_by actor [note: 'brand, or system when approved automatically.']
+  ad_code text
+  ad_code_expires_at timestamptz
+  clip_public boolean [not null, default: true, note: 'Whether other brands can see the approved clip on the creator\'s card.']
+  views integer
+  views_updated_at timestamptz
+  creator_seen_approval_at timestamptz [note: 'The creator saw the approval celebration.']
+  rating smallint [note: 'The brand\'s stars and comment, given when approving (or stars later). Locked once given.']
+  review text
+  rated_at timestamptz
+
+  indexes {
+    (id, brand_id, creator_id) [unique]
+  }
+}
+
+Table order_clips {
+  id uuid [pk]
+  order_id uuid [not null, ref: > orders.id]
+  version smallint [not null]
+  video_path text [not null, note: 'In the clips bucket, under the order\'s folder.']
+  duration_sec integer
+  size_bytes bigint
+  note text [note: 'The creator\'s note for the brand.']
+  uploaded_at timestamptz [not null]
+
+  indexes {
+    (order_id, version) [unique]
+  }
+
+  Note: 'Each clip the creator uploads for an order: version 1, and version 2 after the revision.'
+}
+
+Table order_fees {
+  order_id uuid [pk, ref: > orders.id]
+  fee "numeric(10, 3)" [not null]
+
+  Note: '100clips\' service fee on each order. Brands and admins only.'
+}
+
+Table order_events {
+  id uuid [pk]
+  order_id uuid [not null, ref: > orders.id]
+  type order_event_type [not null]
+  actor actor [not null]
+  actor_id uuid [ref: > accounts.id]
+  data jsonb [not null, default: '{}']
+  at timestamptz [not null]
+
+  Note: 'What happened to an order, in order. Both apps\' timelines and notifications come from here.'
+}
+
+Table bank_accounts {
+  id uuid [pk]
+  account_id uuid [not null, ref: > accounts.id]
+  holder_name text [not null]
+  iban text [not null]
+  created_at timestamptz [not null]
+  replaced_at timestamptz
+
+  Note: 'One bank account per owner (a creator or a brand account) at a time; replaced ones stay as history (the admin sees changes).'
+}
+
+Table bank_transfers {
+  id uuid [pk]
+  kind transfer_kind [not null]
+  account_id uuid [not null, ref: > accounts.id, note: 'Withdrawals: the brand account. Payouts: the creator.']
+  amount "numeric(10, 3)" [not null]
+  status transfer_status [not null, default: 'requested']
+  requested_at timestamptz [not null]
+  sent_at timestamptz
+  bank_ref text
+  iban text [note: 'The bank account it went to, copied when sent.']
+  holder_name text
+  reject_note text [note: 'Why a withdrawal was rejected, shown to the brand.']
+  handled_by uuid [ref: > accounts.id]
+
+  Note: 'Money 100clips sends to a bank account by hand: a brand\'s withdrawal from its balance (it leaves the balance when requested; sent or rejected later), or a payout to a creator for approved orders.'
+}
+
+Table payout_orders {
+  transfer_id uuid [ref: > bank_transfers.id]
+  order_id uuid [unique, ref: > orders.id]
+
+  indexes {
+    (transfer_id, order_id) [pk]
+  }
+
+  Note: 'The approved orders a payout covers. An order can be paid out only once.'
+}
+
+Table ledger {
+  id uuid [pk]
+  account_id uuid [not null, ref: > accounts.id, note: 'A brand account or a creator (their account id).']
+  type ledger_type [not null]
+  amount "numeric(10, 3)" [not null]
+  order_id uuid [ref: > orders.id]
+  payment_id uuid [ref: > payments.id]
+  transfer_id uuid [ref: > bank_transfers.id]
+  note text
+  created_at timestamptz [not null]
+
+  Note: 'Every movement of money, for a brand account or a creator. Balances are its sums.'
+}
+
+Table conversations {
+  id uuid [pk]
+  brand_id uuid [ref: > brands.id]
+  creator_id uuid [not null, ref: > creators.id]
+  order_id uuid [ref: > orders.id, note: 'The order that opened it.']
+  brand_read_at timestamptz [note: 'Unread counts: messages newer than each side\'s last visit. The brand side is the 100clips team in a support chat.']
+  creator_read_at timestamptz
+  created_at timestamptz [not null]
+
+  indexes {
+    (brand_id, creator_id) [unique]
+  }
+
+  Note: 'One chat per brand and creator, opened when the creator accepts an order. A chat with no brand is the creator\'s support chat with the 100clips team (one per creator).'
+}
+
+Table messages {
+  id uuid [pk]
+  conversation_id uuid [not null, ref: > conversations.id]
+  sender actor [not null, note: 'admin: the 100clips team, in a support chat.']
+  sender_id uuid [not null, ref: > accounts.id]
+  body text [not null]
+  created_at timestamptz [not null]
+}
+
+Table reports {
+  id uuid [pk]
+  conversation_id uuid [ref: > conversations.id]
+  order_id uuid [ref: > orders.id]
+  reporter actor [not null]
+  reported_by uuid [not null, ref: > accounts.id]
+  reason report_reason [not null]
+  details text
+  status report_status [not null, default: 'open']
+  resolution text [note: 'The admin\'s reply, shown to whoever reported it.']
+  resolved_by uuid [ref: > accounts.id]
+  resolved_at timestamptz
+  created_at timestamptz [not null]
+
+  Note: '"Report" in a chat (the messages stay visible) or "Report a problem" on an order, from either side. One open report per side per order.'
+}
+
+Table suspensions {
+  id uuid [pk]
+  account_id uuid [not null, ref: > accounts.id, note: 'A creator or a brand account.']
+  reason text [not null]
+  suspended_by uuid [not null, ref: > accounts.id]
+  suspended_at timestamptz [not null]
+  lifted_by uuid [ref: > accounts.id]
+  lifted_at timestamptz
+
+  Note: 'A suspended creator can\'t be found or booked; a suspended account can\'t pay for new work. Orders already running carry on. Lifted suspensions stay as history.'
+}
+
+Table admin_log {
+  id uuid [pk]
+  admin_id uuid [not null, ref: > accounts.id]
+  action admin_action [not null]
+  target_kind text [not null]
+  target_id uuid [not null]
+  note text
+  detail text [note: 'A bank reference, a new date or an amount.']
+  at timestamptz [not null]
+
+  Note: 'Everything an admin did.'
+}
+
+Ref: campaigns.(product_id, brand_id) > products.(id, brand_id)
+
+// People
+TableGroup people {
+  accounts
+  waitlist_requests
+}
+
+// Creators
+TableGroup creators {
+  creators
+  creator_formats
+  creator_socials
+  creator_portfolio
+  creator_approvals
+  creator_addresses
+}
+
+// Brands
+TableGroup brands {
+  brands
+  brand_registrations
+  products
+  cart_items
+  creator_lists
+  creator_list_items
+}
+
+// Campaigns and orders
+TableGroup campaigns_and_orders {
+  campaigns
+  campaign_secrets
+  orders
+  order_clips
+  order_fees
+  order_events
+}
+
+// Money
+TableGroup money {
+  payments
+  ledger
+  bank_accounts
+  bank_transfers
+  payout_orders
+}
+
+// Chat and support
+TableGroup chat_and_support {
+  conversations
+  messages
+  reports
+}
+
+// Admin
+TableGroup admin {
+  suspensions
+  admin_log
+}
+
