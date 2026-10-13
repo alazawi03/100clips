@@ -3,7 +3,6 @@ import { ArrowRight, Check, ImagePlus, Package, Search, Store } from "lucide-rea
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { ClipPoster } from "@/components/ui/ClipPoster";
 import { LinkButton } from "@/components/ui/Button";
-import { productsOf } from "@/lib/data/account";
 import { clips } from "@/lib/data/clips";
 import { getCreator } from "@/lib/data/creators";
 import type { Brand } from "@/lib/data/types";
@@ -13,7 +12,7 @@ import type { I18n } from "@/lib/i18n/server";
  * The dashboard before a brand's first campaign: one clear way in (choose creators), how it works in
  * three steps, what's missing from the brand's setup, and real clips for inspiration.
  */
-export function Welcome({ brands, i18n }: { brands: Brand[]; i18n: I18n }) {
+export function Welcome({ brands, productCounts, i18n }: { brands: Brand[]; productCounts: Record<string, number>; i18n: I18n }) {
   const { t, f } = i18n;
   const steps = [
     { title: t("brandHome.step1Title"), body: t("brandHome.step1Body") },
@@ -26,7 +25,7 @@ export function Welcome({ brands, i18n }: { brands: Brand[]; i18n: I18n }) {
     ...(brands.length === 0 ? [{ key: "brand", label: t("brandHome.setupBrand"), href: "/brands/new", icon: Store }] : []),
     ...brands.flatMap((b) => [
     ...(b.logo ? [] : [{ key: `${b.id}-logo`, label: t("brandHome.setupLogo", { brand: f.pick(b.name) }), href: `/brands/${b.id}/edit`, icon: ImagePlus }]),
-    ...(productsOf(b.id).length > 0
+    ...((productCounts[b.id] ?? 0) > 0
       ? []
       : [{ key: `${b.id}-product`, label: t("brandHome.setupProduct", { brand: f.pick(b.name) }), href: `/brands/products/new?brand=${b.id}`, icon: Package }]),
     ]),

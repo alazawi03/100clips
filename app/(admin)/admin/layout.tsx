@@ -4,12 +4,14 @@ import { ExternalLink } from "lucide-react";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { LanguageToggle } from "@/components/shell/LanguageToggle";
 import { Badge } from "@/components/ui/Badge";
-import { applications } from "@/lib/admin/data";
+import { redirect } from "next/navigation";
+import { listApplications } from "@/lib/admin/applicationsApi";
 import { owedToCreators } from "@/lib/admin/money";
 import { DEMO_TODAY } from "@/lib/data/account";
 import { problemReports } from "@/lib/data/problems";
 import { openWithdrawals } from "@/lib/data/wallet";
 import { getI18n } from "@/lib/i18n/server";
+import { getMe } from "@/lib/session";
 
 export async function generateMetadata() {
   const { t } = await getI18n();
@@ -18,10 +20,13 @@ export async function generateMetadata() {
 
 /** 100clips' own panel: money, transfers to creators, and (later) orders, brands, creators and reports. */
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
+  // Admin accounts only (made by hand in the database); everyone else goes to their own dashboard.
+  const me = await getMe();
+  if (me?.account.role !== "admin") redirect("/dashboard");
   const { t } = await getI18n();
   // What waits on the admin: applications to review, creators to pay.
   const counts = {
-    "/admin/approvals": applications.filter((a) => a.status === "pending").length,
+    "/admin/approvals": (await listApplications()).filter((a) => a.status === "pending").length,
     "/admin/payouts": owedToCreators(DEMO_TODAY).length + openWithdrawals().length,
     "/admin/reports": problemReports.filter((r) => r.status === "open").length,
   };

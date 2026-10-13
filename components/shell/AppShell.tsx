@@ -7,7 +7,9 @@ import { unreadCount } from "@/lib/data/messages";
 import { cartOf, expireOffers } from "@/lib/data/store";
 import { getTheme } from "@/lib/theme";
 import { getI18n } from "@/lib/i18n/server";
+import { displayName, getUser, requireBrandAccount } from "@/lib/session";
 import { AccountMenu } from "./AccountMenu";
+import { DemoBanner } from "./DemoBanner";
 import { LanguageToggle } from "./LanguageToggle";
 import { NotificationBell } from "./NotificationBell";
 import { notificationRows } from "./notificationRows";
@@ -15,6 +17,9 @@ import { HOME_HREF } from "./nav";
 import { BottomNav, SideNav } from "./SideNav";
 
 export async function AppShell({ children }: { children: ReactNode }) {
+  // Signed in (proxy.ts) with a brand owner's account; otherwise onboarding first.
+  const me = await requireBrandAccount();
+  const user = await getUser();
   // Offers nobody answered in time give their money back before anything is shown.
   expireOffers(DEMO_NOW);
   const i18n = await getI18n();
@@ -72,14 +77,17 @@ export async function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex">
         <SideNav account={<AccountMenu
-              id={account.id}
-              name={f.pick(account.name)}
-              email={account.email}
+              id={me.account.id}
+              name={displayName(me, i18n.locale, user?.email)}
+              email={user?.email ?? ""}
               theme={await getTheme()}
             />} />
         {/* Pages marked data-hug (messages) sit right beside the sidebar instead of centred. */}
         <main className="min-w-0 flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-12 md:pt-8 md:has-[[data-hug]]:ps-4">
-          <div className="mx-auto w-full max-w-[1200px] has-[[data-hug]]:mx-0">{children}</div>
+          <div className="mx-auto w-full max-w-[1200px] has-[[data-hug]]:mx-0">
+            <DemoBanner />
+            {children}
+          </div>
         </main>
       </div>
 

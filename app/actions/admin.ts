@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { decide as decideOnApi } from "@/lib/admin/applicationsApi";
 import { addPayout, addSupportMessage } from "@/lib/admin/data";
 import { getCreator } from "@/lib/data/creators";
 import { owedToCreators } from "@/lib/admin/money";
@@ -56,7 +57,7 @@ export async function decideApplication(id: string, _prev: AdminFormState, form:
   else if (decision === "approve" && CONTENT_RULES.some((r) => form.get(`rule-${r}`) !== "on")) errors.rules = "admin.approvals.errors.checkRules";
   else if (decision !== "approve" && !note) errors.note = "admin.approvals.errors.noteRequired";
   if (Object.keys(errors).length > 0) return { errors };
-  if (!users.decideApplication(id, decision as users.ApplicationDecision, note)) return { errors: { decision: "admin.approvals.errors.alreadyDecided" } };
+  if ((await decideOnApi(id, decision as "approve" | "changes" | "reject", note)) === "taken") return { errors: { decision: "admin.approvals.errors.alreadyDecided" } };
   revalidatePath("/admin", "layout");
   revalidatePath("/explore");
   redirect(`/admin/approvals/${id}?decided=1`);

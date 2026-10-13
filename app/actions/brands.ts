@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getBrand } from "@/lib/data/account";
-import * as store from "@/lib/data/brandsStore";
+import { ApiError } from "@/lib/api";
+import * as store from "@/lib/data/brandsApi";
+import { pathOfPublicUrl, storeDocument } from "@/lib/data/storage";
 import { isActiveMarket } from "@/lib/data/markets";
 import {
   APP_PLATFORMS,
@@ -51,9 +52,15 @@ function oneOf<T extends string>(value: string, allowed: readonly T[]): T | unde
   return (allowed as readonly string[]).includes(value) ? (value as T) : undefined;
 }
 
-/** Images arrive as resized data URLs from the browser, or as existing placeholder paths. */
+/** Images arrive as resized data URLs from the browser, or as links to ones already in storage. */
 function isImage(value: string) {
-  return /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(value) || /^\/placeholders\/[\w-]+\.svg$/.test(value);
+  return /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(value) || pathOfPublicUrl(value) !== undefined;
+}
+
+/** The API refused or couldn't be reached: shown on the form's first field, and logged. */
+function saveFailed(error: unknown, field: string, form: FormData): BrandFormState {
+  console.error("Saving failed:", error instanceof ApiError ? `${error.status} ${error.message}` : error);
+  return { errors: { [field]: "forms.errors.saveFailed" }, values: submitted(form) };
 }
 
 function isUrl(value: string) {
@@ -128,7 +135,8 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
   return {
     errors,
     brand: {
-      name: { ar: nameAr || nameEn, en: nameEn || nameAr },
+      // As typed: an empty one stays empty (the API stores each language in its own column).
+      name: { ar: nameAr, en: nameEn },
       logo: logo || undefined,
       industry: industry!,
       about: about ? same(about) : undefined,
@@ -152,8 +160,13 @@ export async function createBrand(mode: "onboarding" | "add", _prev: BrandFormSt
   const errors = { ...brandResult.errors, ...productResult?.errors };
   if (!brandResult.brand || (withProduct && !productResult?.product)) return { errors, values: submitted(form) };
 
-  const created = store.createBrand(brandResult.brand);
-  if (productResult?.product) store.createProduct({ brandId: created.id, ...productResult.product });
+  try {
+    const created = await store.createBrand(brandResult.brand);
+    await saveRegistration(created.id, form, brandResult.brand);
+    if (productResult?.product) await store.createProduct(created.id, productResult.product);
+  } catch (e) {
+    return saveFailed(e, "nameAr", form);
+  }
   revalidatePath("/", "layout");
   // Started from "New campaign" or the cart without a brand: carry on there.
   if (form.get("then") === "campaign") redirect("/campaigns/new");
@@ -164,9 +177,30 @@ export async function createBrand(mode: "onboarding" | "add", _prev: BrandFormSt
 export async function updateBrand(brandId: string, _prev: BrandFormState, form: FormData): Promise<BrandFormState> {
   const { brand, errors } = parseBrand(form);
   if (!brand) return { errors, values: submitted(form) };
-  if (!store.updateBrand(brandId, brand)) redirect("/brands");
+  try {
+    await store.updateBrand(brandId, brand);
+    await saveRegistration(brandId, form, brand);
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) redirect("/brands");
+    return saveFailed(e, "nameAr", form);
+  }
   revalidatePath("/", "layout");
   redirect(`/brands?done=brandSaved&brand=${brandId}`);
+}
+
+/**
+ * Bahrain's CR number and VAT certificate (the MVP's one market). A newly picked certificate is
+ * uploaded to private-docs; otherwise the saved one is kept, unless Bahrain was unticked.
+ */
+async function saveRegistration(brandId: string, form: FormData, brand: Omit<Brand, "id">) {
+  const bh = brand.registrations?.bh;
+  const file = form.get("vat_bh");
+  const picked = file instanceof File && file.size > 0 ? file : undefined;
+  const saved = await store.registrationOf(brandId);
+  const vatPath = picked ? await storeDocument(picked, "vat") : bh?.vatCertificate ? (saved?.vat_certificate_path ?? null) : null;
+  const crNumber = bh?.crNumber ?? null;
+  if (crNumber === (saved?.cr_number ?? null) && vatPath === (saved?.vat_certificate_path ?? null)) return;
+  await store.setRegistration(brandId, crNumber, vatPath);
 }
 
 function parseProduct(form: FormData): { product?: Omit<Product, "id" | "brandId">; errors: NonNullable<BrandFormState>["errors"] } {
@@ -224,8 +258,13 @@ function parseProduct(form: FormData): { product?: Omit<Product, "id" | "brandId
 export async function createProduct(brandId: string, _prev: BrandFormState, form: FormData): Promise<BrandFormState> {
   const { product, errors } = parseProduct(form);
   if (!product) return { errors, values: submitted(form) };
-  if (!getBrand(brandId)) redirect("/brands");
-  const created = store.createProduct({ brandId, ...product });
+  let created;
+  try {
+    created = await store.createProduct(brandId, product);
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 403) redirect("/brands");
+    return saveFailed(e, "name", form);
+  }
   revalidatePath("/", "layout");
   // Inline mode (the checkout drawer): stay on the page and hand the new product back to the form.
   if (form.get("inline") === "1") return { errors: {}, values: {}, createdId: created.id };
@@ -233,15 +272,21 @@ export async function createProduct(brandId: string, _prev: BrandFormState, form
 }
 
 export async function duplicateProduct(productId: string) {
-  const copy = store.duplicateProduct(productId);
+  const copy = await store.duplicateProduct(productId);
   revalidatePath("/", "layout");
   if (copy) redirect(`/brands?done=productDuplicated&product=${copy.id}`);
 }
 
 export async function deleteProduct(productId: string) {
-  const product = store.getProduct(productId);
+  const product = await store.getProduct(productId);
   if (!product) return;
-  store.deleteProduct(productId);
+  try {
+    await store.deleteProduct(productId);
+  } catch (e) {
+    // A campaign features it (409): it stays, and the page shows it as before.
+    if (e instanceof ApiError && e.status === 409) redirect(`/brands?done=productInUse&brand=${product.brandId}`);
+    throw e;
+  }
   revalidatePath("/", "layout");
   redirect(`/brands?done=productDeleted&brand=${product.brandId}`);
 }
@@ -249,9 +294,12 @@ export async function deleteProduct(productId: string) {
 export async function updateProduct(productId: string, _prev: BrandFormState, form: FormData): Promise<BrandFormState> {
   const { product, errors } = parseProduct(form);
   if (!product) return { errors, values: submitted(form) };
-  const existing = store.getProduct(productId);
-  if (!existing) redirect("/brands");
-  store.updateProduct(productId, product);
+  try {
+    await store.updateProduct(productId, product);
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) redirect("/brands");
+    return saveFailed(e, "name", form);
+  }
   revalidatePath("/", "layout");
   redirect(`/brands?done=productSaved&product=${productId}`);
 }

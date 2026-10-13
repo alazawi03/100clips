@@ -162,6 +162,8 @@ export type Application = {
   instagram?: string;
   tiktok?: string;
   samples: SampleClip[];
+  /** The intro video sent for review (a short-lived link); the API's applications have one. */
+  intro?: string;
   appliedAt: string;
   status: ApplicationStatus;
   /** Every decision, oldest first, with the note the creator sees. */

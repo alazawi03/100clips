@@ -9,13 +9,14 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { activityFor, getApplication } from "@/lib/admin/data";
+import { getApplication } from "@/lib/admin/applicationsApi";
+import { activityFor } from "@/lib/admin/data";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function AdminApplicationPage({ params, searchParams }: PageProps<"/admin/approvals/[id]">) {
   const { id } = await params;
   const { decided } = await searchParams;
-  const a = getApplication(id);
+  const a = await getApplication(id);
   if (!a) notFound();
   const i18n = await getI18n();
   const { t, f, locale } = i18n;
@@ -37,7 +38,15 @@ export default async function AdminApplicationPage({ params, searchParams }: Pag
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
-          <Card className="flex flex-col gap-4 p-5">
+          {a.intro && (
+            <Card className="flex flex-col gap-4 p-5">
+              <h2 className="text-h3 font-medium">{t("admin.approvals.intro")}</h2>
+              <p className="text-small text-text-muted">{t("admin.approvals.introHint")}</p>
+              <video dir="ltr" src={a.intro} controls playsInline preload="metadata" aria-label={t("admin.approvals.intro")} className="aspect-[9/16] w-full max-w-60 rounded-[var(--radius-md)] bg-black object-cover" />
+            </Card>
+          )}
+
+          {a.samples.length > 0 && <Card className="flex flex-col gap-4 p-5">
             <h2 className="text-h3 font-medium">{t("admin.approvals.samplesTitle")}</h2>
             <p className="text-small text-text-muted">{t("admin.approvals.samplesHint")}</p>
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -48,7 +57,7 @@ export default async function AdminApplicationPage({ params, searchParams }: Pag
                 </li>
               ))}
             </ul>
-          </Card>
+          </Card>}
 
           <Card className="flex flex-col gap-4 p-5">
             <div className="flex items-center gap-3">

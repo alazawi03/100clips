@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import { LogOut, MoreHorizontal, X } from "lucide-react";
+import { signOut } from "@/app/actions/auth";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
 import { LanguageToggle } from "./LanguageToggle";
@@ -97,10 +98,12 @@ export function BottomNav({ balanceLabel }: { balanceLabel: string }) {
           {moreItems.map((item) => (
             <SideLink key={item.href} item={item} active={isActive(item, pathname)} label={t(item.label)} />
           ))}
-          <Link href="/login" className="flex h-11 items-center gap-3 rounded-[var(--radius-md)] px-3 text-text hover:bg-surface">
-            <LogOut aria-hidden className="size-5 text-icon-inactive rtl:-scale-x-100" strokeWidth={1.75} />
-            {t("header.signOut")}
-          </Link>
+          <form action={signOut}>
+            <button type="submit" className="flex h-11 w-full items-center gap-3 rounded-[var(--radius-md)] px-3 text-text hover:bg-surface">
+              <LogOut aria-hidden className="size-5 text-icon-inactive rtl:-scale-x-100" strokeWidth={1.75} />
+              {t("header.signOut")}
+            </button>
+          </form>
           <div className="mt-2 flex items-center justify-between gap-3 rounded-[var(--radius-md)] bg-surface px-3 py-2">
             <span className="text-small text-text-muted">{balanceLabel}</span>
             <LanguageToggle />

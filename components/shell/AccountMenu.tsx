@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChevronsUpDown, LogOut, Settings } from "lucide-react";
+import { signOut } from "@/app/actions/auth";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Dropdown, menuItemClass } from "@/components/ui/Dropdown";
@@ -55,10 +56,12 @@ export function AccountMenu({ id, name, email, theme }: Props) {
             <Settings aria-hidden className="size-5 text-icon-inactive" strokeWidth={1.75} />
             {t("nav.settings")}
           </Link>
-          <Link href="/login" onClick={close} className={menuItemClass}>
-            <LogOut aria-hidden className="size-5 text-icon-inactive rtl:-scale-x-100" strokeWidth={1.75} />
-            {t("header.signOut")}
-          </Link>
+          <form action={signOut}>
+            <button type="submit" className={`${menuItemClass} w-full`}>
+              <LogOut aria-hidden className="size-5 text-icon-inactive rtl:-scale-x-100" strokeWidth={1.75} />
+              {t("header.signOut")}
+            </button>
+          </form>
         </div>
       )}
     </Dropdown>

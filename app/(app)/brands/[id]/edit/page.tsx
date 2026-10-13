@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 import { BrandEditForm } from "@/components/brand/brands/BrandEditForm";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { getBrand } from "@/lib/data/account";
+import { myBrand } from "@/lib/data/brandsApi";
 import { brandToValues } from "@/lib/data/formValues";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function EditBrandPage({ params }: PageProps<"/brands/[id]/edit">) {
   const { id } = await params;
-  const brand = getBrand(id);
+  const brand = await myBrand(id);
   if (!brand) notFound();
   const { t, f, locale } = await getI18n();
   return (

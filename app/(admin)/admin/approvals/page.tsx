@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { FilterTabs } from "@/components/ui/FilterTabs";
 import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
-import { applications, type ApplicationStatus } from "@/lib/admin/data";
+import { listApplications } from "@/lib/admin/applicationsApi";
+import type { ApplicationStatus } from "@/lib/admin/data";
 import { getI18n } from "@/lib/i18n/server";
 
 const TABS: ApplicationStatus[] = ["pending", "changes_requested", "rejected", "approved"];
@@ -15,6 +16,7 @@ export default async function AdminApprovalsPage({ searchParams }: PageProps<"/a
   const { tab } = await searchParams;
   const status: ApplicationStatus = TABS.includes(tab as ApplicationStatus) ? (tab as ApplicationStatus) : "pending";
   const { t, tp, f, locale } = await getI18n();
+  const applications = await listApplications();
   const list_ = new Intl.ListFormat(locale);
   // Oldest first: whoever applied first is reviewed first.
   const list = applications.filter((a) => a.status === status).sort((a, b) => a.appliedAt.localeCompare(b.appliedAt));

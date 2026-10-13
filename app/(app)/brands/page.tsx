@@ -5,8 +5,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { brands, getBrand, productsOf } from "@/lib/data/account";
-import { getProduct } from "@/lib/data/brandsStore";
+import { getProduct, myBrands, productsOf } from "@/lib/data/brandsApi";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function BrandsPage({ searchParams }: PageProps<"/brands">) {
@@ -14,19 +13,25 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
   const { t, tp, f } = i18n;
   const query = await searchParams;
   const done = typeof query.done === "string" ? query.done : undefined;
-  const doneProduct = typeof query.product === "string" ? getProduct(query.product) : undefined;
-  const doneBrand = typeof query.brand === "string" ? getBrand(query.brand) : undefined;
+  const brands = await myBrands();
+  const doneProduct = typeof query.product === "string" ? await getProduct(query.product) : undefined;
+  const doneBrand = typeof query.brand === "string" ? brands.find((b) => b.id === query.brand) : undefined;
   // Open the brand the user just worked on.
   const openId = doneProduct?.brandId ?? doneBrand?.id;
 
-  const rows = brands.map((brand) => ({
-    id: brand.id,
-    name: f.pick(brand.name),
-    logo: brand.logo,
-    industry: t(`industries.${brand.industry}`),
-    productsLabel: tp("brandsPage.products", productsOf(brand.id).length),
-    products: productsOf(brand.id).map((p) => productView(p, i18n)),
-  }));
+  const rows = await Promise.all(
+    brands.map(async (brand) => {
+      const products = await productsOf(brand.id);
+      return {
+        id: brand.id,
+        name: f.pick(brand.name),
+        logo: brand.logo,
+        industry: t(`industries.${brand.industry}`),
+        productsLabel: tp("brandsPage.products", products.length),
+        products: products.map((p) => productView(p, i18n)),
+      };
+    }),
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,6 +43,7 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
       {done === "productSaved" && doneProduct && <Notice>{t("brandsPage.doneProductSaved", { name: f.pick(doneProduct.name) })}</Notice>}
       {done === "productDuplicated" && doneProduct && <Notice>{t("brandsPage.doneProductDuplicated", { name: f.pick(doneProduct.name) })}</Notice>}
       {done === "productDeleted" && <Notice>{t("brandsPage.doneProductDeleted")}</Notice>}
+      {done === "productInUse" && <Notice tone="info">{t("brandsPage.productInUse")}</Notice>}
 
       <section aria-labelledby="brands-title">
         <SectionHeader id="brands-title" title={t("brandsPage.myBrands")}>

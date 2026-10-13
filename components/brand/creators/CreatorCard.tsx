@@ -20,19 +20,23 @@ import { priceForBrand } from "@/lib/fees";
 /**
  * Links to the creator profile, where brands pick platforms and add to cart.
  * The save button sits on top of the link (a button can't live inside one), beside the rating.
+ * browseOnly: a creator from the API, while lists, invites and the cart are still demo data: no
+ * save, invite or "in cart".
  */
 export function CreatorCard({
   creator,
   inCart,
   i18n,
+  browseOnly = false,
 }: {
   creator: Creator;
   inCart: boolean;
   i18n: I18n;
+  browseOnly?: boolean;
 }) {
   const { t, f } = i18n;
   const works = clipsByCreator(creator.id).slice(0, 3);
-  const active = campaigns.filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: i18n.f.pick(c.title) }));
+  const active = browseOnly ? [] : campaigns.filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: i18n.f.pick(c.title) }));
   const name = f.pick(creator.name);
   const platforms = [
     ...new Set(creator.formats.map((o) => platformOf[o.format])),
@@ -74,7 +78,7 @@ export function CreatorCard({
               </span>
             )}
             {/* Room for the save and invite buttons, which are placed over this spot. */}
-            <span aria-hidden className={cn("h-9 shrink-0", active.length > 0 ? "w-[76px]" : "w-9")} />
+            {!browseOnly && <span aria-hidden className={cn("h-9 shrink-0", active.length > 0 ? "w-[76px]" : "w-9")} />}
           </div>
 
           {works.length > 0 && (
@@ -119,7 +123,7 @@ export function CreatorCard({
           </div>
         </Card>
       </Link>
-      <div className="absolute end-4 top-[26px] z-10 flex gap-1">
+      {!browseOnly && <div className="absolute end-4 top-[26px] z-10 flex gap-1">
         <InviteToCampaignMenu variant="icon" creatorIds={[creator.id]} campaigns={active} label={t("invite.creatorToCampaign", { name })} />
         <SaveToListButton
           compact
@@ -127,7 +131,7 @@ export function CreatorCard({
           name={name}
           lists={allLists().map((l) => ({ id: l.id, name: l.name, favorites: l.favorites, count: l.creatorIds.length, has: l.creatorIds.includes(creator.id) }))}
         />
-      </div>
+      </div>}
     </div>
   );
 }
