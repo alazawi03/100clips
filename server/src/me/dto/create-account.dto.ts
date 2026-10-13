@@ -7,11 +7,11 @@ export class CreateAccountDto {
   @IsIn(["creator", "brand"])
   role: "creator" | "brand";
 
-  @ApiPropertyOptional({ minLength: 1, maxLength: 80 })
+  @ApiPropertyOptional({ minLength: 1, maxLength: 80, example: "ريم", description: "The person's name, not a brand's (brands are added with POST /brands)" })
   @IsOptional() @IsString() @Length(1, 80)
   name_ar?: string;
 
-  @ApiPropertyOptional({ minLength: 1, maxLength: 80 })
+  @ApiPropertyOptional({ minLength: 1, maxLength: 80, example: "Reem", description: "The person's name, not a brand's" })
   @IsOptional() @IsString() @Length(1, 80)
   name_en?: string;
 

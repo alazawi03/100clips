@@ -9,6 +9,7 @@ import { setupDocs } from "./common/openapi/docs";
 import { CreatorsModule } from "./creators/creators.module";
 import { HealthModule } from "./health/health.module";
 import { MeModule } from "./me/me.module";
+import { ProductsModule } from "./products/products.module";
 import { WaitlistModule } from "./waitlist/waitlist.module";
 
 /** The whole API: the shared core plus one module per feature. */
@@ -17,7 +18,7 @@ export class AppModule {
   static with(db: Db, verifier: TokenVerifier): DynamicModule {
     return {
       module: AppModule,
-      imports: [CoreModule.with(db, verifier), HealthModule, WaitlistModule, MeModule, CreatorsModule, BrandsModule],
+      imports: [CoreModule.with(db, verifier), HealthModule, WaitlistModule, MeModule, CreatorsModule, BrandsModule, ProductsModule],
     };
   }
 }

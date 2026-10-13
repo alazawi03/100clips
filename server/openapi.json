@@ -34,6 +34,22 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/JoinWaitlistDto"
+              },
+              "examples": {
+                "With_an_email": {
+                  "summary": "With an email",
+                  "value": {
+                    "country": "SA",
+                    "contact": "reem@example.com"
+                  }
+                },
+                "With_a_phone": {
+                  "summary": "With a phone",
+                  "value": {
+                    "country": "SA",
+                    "contact": "+966501234567"
+                  }
+                }
               }
             }
           }
@@ -116,6 +132,25 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateAccountDto"
+              },
+              "examples": {
+                "Brand_owner": {
+                  "summary": "Brand owner",
+                  "value": {
+                    "role": "brand",
+                    "name_ar": "ريم",
+                    "name_en": "Reem"
+                  }
+                },
+                "Creator": {
+                  "summary": "Creator",
+                  "value": {
+                    "role": "creator",
+                    "name_ar": "دانة",
+                    "name_en": "Dana",
+                    "phone": "+97333123456"
+                  }
+                }
               }
             }
           }
@@ -168,6 +203,87 @@
           }
         ],
         "summary": "Create my account",
+        "tags": [
+          "Me"
+        ]
+      },
+      "patch": {
+        "description": "Name and phone (settings). Only the fields sent change; null clears one.",
+        "operationId": "MeController_updateAccount",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAccountDto"
+              },
+              "examples": {
+                "Name_and_phone": {
+                  "summary": "Name and phone",
+                  "value": {
+                    "name_en": "Reem",
+                    "phone": "+97333123456"
+                  }
+                },
+                "Clear_the_phone": {
+                  "summary": "Clear the phone",
+                  "value": {
+                    "phone": null
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit my account",
         "tags": [
           "Me"
         ]
@@ -370,6 +486,26 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateBrandDto"
+              },
+              "examples": {
+                "A_roastery": {
+                  "summary": "A roastery",
+                  "value": {
+                    "name_ar": "محمصة المحرق",
+                    "name_en": "Muharraq Roastery",
+                    "industry": "food_beverage",
+                    "about": "Specialty coffee roasted in Muharraq.",
+                    "website": "https://example.com",
+                    "instagram": "muharraq.roastery"
+                  }
+                },
+                "Name_only": {
+                  "summary": "Name only",
+                  "value": {
+                    "name_en": "Glow Studio",
+                    "industry": "health"
+                  }
+                }
               }
             }
           }
@@ -447,6 +583,20 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateBrandDto"
+              },
+              "examples": {
+                "Change_the_about": {
+                  "summary": "Change the about",
+                  "value": {
+                    "about": "Single-origin coffee, roasted weekly."
+                  }
+                },
+                "Add_TikTok": {
+                  "summary": "Add TikTok",
+                  "value": {
+                    "tiktok": "muharraq.roastery"
+                  }
+                }
               }
             }
           }
@@ -503,6 +653,433 @@
           "Brands"
         ]
       }
+    },
+    "/brands/{brandId}/products": {
+      "get": {
+        "description": "Oldest first.",
+        "operationId": "ProductsController_list",
+        "parameters": [
+          {
+            "name": "brandId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A brand's products",
+        "tags": [
+          "Products"
+        ]
+      },
+      "post": {
+        "description": "The brand's owner only. `details` must match `type`.",
+        "operationId": "ProductsController_create",
+        "parameters": [
+          {
+            "name": "brandId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProductDto"
+              },
+              "examples": {
+                "Physical_product": {
+                  "summary": "Physical product",
+                  "value": {
+                    "type": "physical",
+                    "name": "Ethiopian single origin",
+                    "description": "Fruity, medium roast. 250 g bag.",
+                    "price": 4.5,
+                    "benefits": [
+                      "Roasted weekly",
+                      "Fruity notes"
+                    ],
+                    "concerns": [
+                      {
+                        "question": "Is it too strong?",
+                        "answer": "No, it's a medium roast"
+                      }
+                    ],
+                    "details": {
+                      "value": 4.5,
+                      "size": "250 g"
+                    }
+                  }
+                },
+                "App": {
+                  "summary": "App",
+                  "value": {
+                    "type": "app",
+                    "name": "Muharraq Rewards",
+                    "details": {
+                      "downloadLink": "https://example.com/app",
+                      "platforms": [
+                        "ios",
+                        "android"
+                      ]
+                    }
+                  }
+                },
+                "Service": {
+                  "summary": "Service",
+                  "value": {
+                    "type": "service",
+                    "name": "Home barista class",
+                    "price": 25,
+                    "details": {
+                      "delivery": [
+                        "at_home",
+                        "online"
+                      ]
+                    }
+                  }
+                },
+                "Venue": {
+                  "summary": "Venue",
+                  "value": {
+                    "type": "venue",
+                    "name": "Muharraq branch",
+                    "details": {
+                      "kind": "cafe",
+                      "location": "Muharraq, Block 208",
+                      "hours": "Daily 7am–11pm"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a product",
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "operationId": "ProductsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A product",
+        "tags": [
+          "Products"
+        ]
+      },
+      "patch": {
+        "description": "Only the fields sent change. Send type and details together.",
+        "operationId": "ProductsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProductDto"
+              },
+              "examples": {
+                "Change_the_price": {
+                  "summary": "Change the price",
+                  "value": {
+                    "price": 5
+                  }
+                },
+                "Change_the_type": {
+                  "summary": "Change the type",
+                  "value": {
+                    "type": "venue",
+                    "details": {
+                      "kind": "cafe",
+                      "hours": "Daily 7am–11pm"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a product",
+        "tags": [
+          "Products"
+        ]
+      },
+      "delete": {
+        "description": "Not possible once a campaign features it (409).",
+        "operationId": "ProductsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in, or the session expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found, or not yours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Already exists, or the wrong state for this",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a product",
+        "tags": [
+          "Products"
+        ]
+      }
     }
   },
   "info": {
@@ -512,7 +1089,12 @@
     "contact": {}
   },
   "tags": [],
-  "servers": [],
+  "servers": [
+    {
+      "url": "http://localhost:4000",
+      "description": "Local"
+    }
+  ],
   "components": {
     "securitySchemes": {
       "bearer": {
@@ -902,12 +1484,16 @@
           "name_ar": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 80
+            "maxLength": 80,
+            "example": "ريم",
+            "description": "The person's name, not a brand's (brands are added with POST /brands)"
           },
           "name_en": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 80
+            "maxLength": 80,
+            "example": "Reem",
+            "description": "The person's name, not a brand's"
           },
           "phone": {
             "type": "string",
@@ -919,6 +1505,31 @@
         "required": [
           "role"
         ]
+      },
+      "UpdateAccountDto": {
+        "type": "object",
+        "properties": {
+          "name_ar": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "example": "ريم",
+            "description": "The person's name, not a brand's (brands are added with POST /brands)"
+          },
+          "name_en": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "example": "Reem",
+            "description": "The person's name, not a brand's"
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 20,
+            "example": "+97333123456"
+          }
+        }
       },
       "ExploreCreator": {
         "type": "object",
@@ -1404,6 +2015,345 @@
             "minLength": 1,
             "maxLength": 30,
             "description": "Username, without @"
+          }
+        }
+      },
+      "PhysicalDetails": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "description": "Retail value of one unit, in BHD",
+            "minimum": 0
+          },
+          "size": {
+            "type": "string",
+            "maxLength": 60,
+            "example": "250 g"
+          }
+        }
+      },
+      "AppDetails": {
+        "type": "object",
+        "properties": {
+          "downloadLink": {
+            "type": "string",
+            "format": "uri"
+          },
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ios",
+                "android",
+                "web"
+              ]
+            }
+          }
+        }
+      },
+      "ServiceDetails": {
+        "type": "object",
+        "properties": {
+          "delivery": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "online",
+                "at_home",
+                "at_location"
+              ]
+            }
+          }
+        }
+      },
+      "VenueDetails": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "cafe",
+              "restaurant",
+              "salon",
+              "gym",
+              "clinic",
+              "other"
+            ]
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "hours": {
+            "type": "string",
+            "maxLength": 200,
+            "example": "Daily 7am–11pm"
+          },
+          "mapUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Google Maps link"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "ProductType": {
+        "type": "string",
+        "enum": [
+          "physical",
+          "app",
+          "service",
+          "venue"
+        ]
+      },
+      "ConcernDto": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 200,
+            "example": "Is it too strong?"
+          },
+          "answer": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "brand_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "photos": {
+            "description": "Paths in the public storage bucket, first is the cover",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "nullable": true,
+            "description": "BHD"
+          },
+          "benefits": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "concerns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConcernDto"
+            }
+          },
+          "details": {
+            "description": "Fields for the product type: physical {value, size}, app {downloadLink, platforms}, service {delivery}, venue {kind, location, hours, mapUrl}",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PhysicalDetails"
+              },
+              {
+                "$ref": "#/components/schemas/AppDetails"
+              },
+              {
+                "$ref": "#/components/schemas/ServiceDetails"
+              },
+              {
+                "$ref": "#/components/schemas/VenueDetails"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "brand_id",
+          "type",
+          "name",
+          "photos",
+          "description",
+          "price",
+          "benefits",
+          "concerns",
+          "details",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateProductDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "example": "Ethiopian single origin"
+          },
+          "photos": {
+            "maxItems": 6,
+            "description": "Paths in the public storage bucket, first is the cover",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "description": "What customers pay, in BHD. Venues have none."
+          },
+          "benefits": {
+            "maxItems": 5,
+            "description": "Short selling points",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "concerns": {
+            "maxItems": 10,
+            "description": "What customers ask before buying",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConcernDto"
+            }
+          },
+          "details": {
+            "description": "Fields for the product type: physical {value, size}, app {downloadLink, platforms}, service {delivery}, venue {kind, location, hours, mapUrl}",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PhysicalDetails"
+              },
+              {
+                "$ref": "#/components/schemas/AppDetails"
+              },
+              {
+                "$ref": "#/components/schemas/ServiceDetails"
+              },
+              {
+                "$ref": "#/components/schemas/VenueDetails"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "name"
+        ]
+      },
+      "UpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "example": "Ethiopian single origin"
+          },
+          "photos": {
+            "maxItems": 6,
+            "description": "Paths in the public storage bucket, first is the cover",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0,
+            "description": "What customers pay, in BHD. Venues have none."
+          },
+          "benefits": {
+            "maxItems": 5,
+            "description": "Short selling points",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "concerns": {
+            "maxItems": 10,
+            "description": "What customers ask before buying",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConcernDto"
+            }
+          },
+          "type": {
+            "description": "Send with details",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProductType"
+              }
+            ]
+          },
+          "details": {
+            "description": "Fields for the product type: physical {value, size}, app {downloadLink, platforms}, service {delivery}, venue {kind, location, hours, mapUrl}. Send with type.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PhysicalDetails"
+              },
+              {
+                "$ref": "#/components/schemas/AppDetails"
+              },
+              {
+                "$ref": "#/components/schemas/ServiceDetails"
+              },
+              {
+                "$ref": "#/components/schemas/VenueDetails"
+              }
+            ]
           }
         }
       }

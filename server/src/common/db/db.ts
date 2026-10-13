@@ -35,9 +35,14 @@ export const TYPE_PARSERS: Record<number, (value: string) => unknown> = {
   20: Number, // bigint
   1700: Number, // numeric
   1082: String, // date
-  1114: String, // timestamp
-  1184: String, // timestamptz
+  1114: isoTimestamp, // timestamp
+  1184: isoTimestamp, // timestamptz
 };
+
+/** "2026-10-12 23:00:23.8+00" → "2026-10-12T23:00:23.8+00:00", the same as timestamps inside to_jsonb(). */
+export function isoTimestamp(value: string): string {
+  return value.replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00");
+}
 
 /** Pass as `types` when creating the pg Pool. */
 export const pgTypes = {

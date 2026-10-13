@@ -148,7 +148,7 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"role\": \"brand\",\n  \"name_ar\": \"محمصة المحرق\",\n  \"name_en\": \"Muharraq Roastery\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"brand\",\n  \"name_ar\": \"ريم\",\n  \"name_en\": \"Reem\"\n}" },
             "url": { "raw": "{{baseUrl}}/me", "host": ["{{baseUrl}}"], "path": ["me"] }
           }
         },

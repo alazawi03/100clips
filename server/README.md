@@ -38,7 +38,7 @@ src/
     auth/                  AuthGuard, @Public(), @CurrentCaller(), Supabase token check
     db/                    Db.run (one transaction as the caller), DbErrorFilter, database.types.ts (generated)
     openapi/               /docs setup, @ApiErrors(), shared property helpers, ErrorResponse
-  <feature>/               health, waitlist, me, creators, brands
+  <feature>/               health, waitlist, me, creators, brands, products
     <feature>.module.ts    the feature's parts list
     <feature>.controller.ts  HTTP only: routes, params, status codes, 404s
     <feature>.service.ts   the work: SQL and database function calls through Db.run
@@ -86,11 +86,17 @@ documented fields.
 | POST | /waitlist | anyone | "Tell me when you launch" (country, contact) |
 | GET | /me | signed in | Account, creator profile, brands |
 | POST | /me | signed in | Create the account: role creator or brand |
+| PATCH | /me | signed in | Edit my name and phone (settings) |
 | GET | /creators | signed in | Explore bookable creators (niche, limit, offset) |
 | GET | /creators/:id | signed in | Profile: prices, socials, portfolio, reviews, public clips |
 | GET | /brands | brand owner | My brands |
 | POST | /brands | brand owner | Add a brand |
 | PATCH | /brands/:id | brand owner | Edit a brand |
+| GET | /brands/:brandId/products | signed in | A brand's products |
+| POST | /brands/:brandId/products | brand owner | Add a product (`details` must match `type`) |
+| GET | /products/:id | signed in | A product |
+| PATCH | /products/:id | brand owner | Edit a product (send `type` and `details` together) |
+| DELETE | /products/:id | brand owner | Delete a product (409 once a campaign features it) |
 
 Database errors come back with their message: 400 invalid input, 403 not allowed, 404 not found,
 409 wrong state or already exists.

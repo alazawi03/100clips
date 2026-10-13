@@ -1,8 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { Caller, Db } from "../common/db/db";
 import { CreateAccountDto } from "./dto/create-account.dto";
+import { UpdateAccountDto } from "./dto/update-account.dto";
 import { Account } from "./entities/account.entity";
 import { Me } from "./entities/me.entity";
+
+/** Columns people may change on their own account, in a fixed order (never taken from the request). */
+const EDITABLE = ["name_ar", "name_en", "phone"] as const;
 
 @Injectable()
 export class MeService {
@@ -24,6 +28,18 @@ export class MeService {
     const [account] = await this.db.run(caller, async (q) => (await q.query<Account>(
       `insert into public.accounts (id, role, name_ar, name_en, phone) values ((select auth.uid()), $1, $2, $3, $4) returning *`,
       [dto.role, dto.name_ar ?? null, dto.name_en ?? null, dto.phone ?? null],
+    )).rows);
+    return account;
+  }
+
+  /** The updated account, or undefined before the account exists. */
+  async updateAccount(caller: Caller, dto: UpdateAccountDto): Promise<Account | undefined> {
+    const sent = EDITABLE.filter((c) => dto[c] !== undefined);
+    const [account] = await this.db.run(caller, async (q) => (await q.query<Account>(
+      sent.length
+        ? `update public.accounts set ${sent.map((c, i) => `${c} = $${i + 1}`).join(", ")} where id = (select auth.uid()) returning *`
+        : `select * from public.accounts where id = (select auth.uid())`,
+      sent.map((c) => dto[c]),
     )).rows);
     return account;
   }
