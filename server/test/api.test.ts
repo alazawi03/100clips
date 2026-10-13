@@ -15,7 +15,7 @@ class FakeVerifier extends TokenVerifier {
 }
 
 const id = (n: number) => `00000000-0000-0000-0000-0000000000${String(n).padStart(2, "0")}`;
-const [ADMIN, BRAND, CREATOR, BRAND2, CREATOR2] = [1, 2, 3, 4, 5].map(id);
+const [ADMIN, BRAND, CREATOR, BRAND2, CREATOR2, CREATOR3] = [1, 2, 3, 4, 5, 6].map(id);
 
 let app: INestApplication;
 let db: PgliteDb;
@@ -39,7 +39,7 @@ async function call(method: string, path: string, user?: string, body?: unknown)
 
 before(async () => {
   db = await PgliteDb.create();
-  for (const u of [ADMIN, BRAND, CREATOR, BRAND2, CREATOR2]) await db.seed("insert into auth.users values ($1)", [u]);
+  for (const u of [ADMIN, BRAND, CREATOR, BRAND2, CREATOR2, CREATOR3]) await db.seed("insert into auth.users values ($1)", [u]);
   await db.seed("insert into public.accounts (id, role) values ($1, 'admin')", [ADMIN]);
   app = await createApp(db, new FakeVerifier());
   await app.listen(0);
@@ -57,7 +57,10 @@ describe("public routes", () => {
   });
 
   test("waitlist: anyone joins, junk is refused", async () => {
-    assert.equal((await call("POST", "/waitlist", undefined, { country: "sa", contact: "reem@example.com" })).status, 204);
+    assert.equal((await call("POST", "/waitlist", undefined, { country: "sa", contact: " Reem@Example.com " })).status, 204);
+    assert.equal((await call("POST", "/waitlist", undefined, { country: "KW", contact: "+965 9876-5432" })).status, 204);
+    const saved = await db.select("select country, email, phone from public.waitlist_requests order by created_at");
+    assert.deepEqual(saved, [{ country: "SA", email: "reem@example.com", phone: null }, { country: "KW", email: null, phone: "+96598765432" }]);
     const junk = await call("POST", "/waitlist", undefined, { country: "SA", contact: "not a contact" });
     assert.equal(junk.status, 400);
     assert.equal((await call("POST", "/waitlist", undefined, { country: "Saudi", contact: "x@y.com" })).status, 400);
@@ -311,6 +314,13 @@ describe("campaigns", () => {
     assert.equal((await call("PUT", `/campaigns/${draftId}/details`, BRAND, { key_message: "x" })).status, 409); // still a draft
     // Paying makes it live; checkout comes with the cart, so it's set directly here.
     await db.seed("update public.campaigns set status = 'live', launched_at = now(), draft = null where id = $1", [draftId]);
+    // An offer waiting on it (offers come with checkout), from a creator made directly here.
+    await db.seed("insert into public.accounts (id, role) values ($1, 'creator')", [CREATOR3]);
+    await db.seed("insert into public.creators (id, handle, name_en) values ($1, 'third.one', 'Third')", [CREATOR3]);
+    const [{ id: orderId }] = await db.select<{ id: string }>(
+      "insert into public.orders (campaign_id, brand_id, creator_id, format, amount, deadline) values ($1, $2, $3, 'instagram_reel', 20, '2099-12-01') returning id",
+      [draftId, brandId, CREATOR3],
+    );
 
     assert.equal((await call("PATCH", `/campaigns/${draftId}`, BRAND, { title: "Changed" })).status, 409);
     assert.equal((await call("DELETE", `/campaigns/${draftId}`, BRAND)).status, 409);
@@ -320,12 +330,25 @@ describe("campaigns", () => {
     assert.equal(edited.body.key_message, "Roasted this week");
     assert.deepEqual(edited.body.reference_links, []); // left out, so cleared
     assert.equal(edited.body.events[0].type, "details_edited");
+    assert.deepEqual(edited.body.events[0].changes.map((c: { field: string }) => c.field), ["keyMessage", "references", "mustInclude"]);
+    const same = await call("PUT", `/campaigns/${draftId}/details`, BRAND, { key_message: "Roasted this week", must_include: "The label" });
+    assert.equal(same.body.events.length, 1); // nothing changed, nothing recorded
 
     assert.equal((await call("PUT", `/campaigns/${draftId}/deadline`, BRAND, { deadline: "2099-11-01" })).status, 400); // earlier
     const moved = await call("PUT", `/campaigns/${draftId}/deadline`, BRAND, { deadline: "2099-12-08" });
     assert.equal(moved.status, 200);
     assert.equal(moved.body.deadline, "2099-12-08");
     assert.equal(moved.body.events[1].type, "deadline_moved");
+    // The waiting offer was on the old date, so it moved too, with a note in its history.
+    assert.deepEqual(await db.select("select deadline from public.orders where id = $1", [orderId]), [{ deadline: "2099-12-08" }]);
+    assert.deepEqual(
+      await db.select("select type, actor, actor_id, data from public.order_events where order_id = $1", [orderId]),
+      [{ type: "deadline_moved", actor: "brand", actor_id: BRAND, data: { from: "2099-12-01", to: "2099-12-08" } }],
+    );
+    // Once a creator accepts, the details are fixed.
+    await db.seed("update public.orders set status = 'in_progress', accepted_at = now() where id = $1", [orderId]);
+    const locked = await call("PUT", `/campaigns/${draftId}/details`, BRAND, { key_message: "Changed again" });
+    assert.deepEqual([locked.status, locked.body.message], [409, "A creator already accepted"]);
     assert.equal((await call("PUT", `/campaigns/${draftId}/deadline`, BRAND2, { deadline: "2099-12-09" })).status, 404);
   });
 });
@@ -391,7 +414,7 @@ describe("creator sign-up and review", () => {
   test("sending too early says what's missing", async () => {
     const early = await call("POST", "/me/creator/application", CREATOR2, { intro_video_path: own("intro.mp4") });
     assert.equal(early.status, 400);
-    assert.match(early.body.message, /sample, a social account/);
+    assert.equal(early.body.message, "Still needed: a sample clip, a social account, your prices");
   });
 
   test("prices and socials replace the whole list", async () => {
@@ -453,8 +476,14 @@ describe("creator sign-up and review", () => {
     assert.deepEqual([told.creator.status, told.application.note], ["changes_requested", "Add a daylight sample."]);
 
     assert.equal((await call("POST", "/me/creator/application", CREATOR2, {})).status, 201); // same intro again
+    const intros = await db.select<{ p: string }>("select intro_video_path p from public.creator_approvals where creator_id = $1", [CREATOR2]);
+    assert.deepEqual(intros.map((r) => r.p), [own("intro.mp4"), own("intro.mp4")]);
     assert.equal((await decide({ decision: "approved" })).status, 204);
     assert.equal((await decide({ decision: "approved" })).status, 409); // nothing waiting
+    assert.deepEqual(
+      await db.select("select admin_id, action, note from public.admin_log where target_id = $1 order by at", [CREATOR2]),
+      [{ admin_id: ADMIN, action: "changes_requested", note: "Add a daylight sample." }, { admin_id: ADMIN, action: "creator_approved", note: null }],
+    );
     const explore = (await call("GET", "/creators", BRAND)).body;
     assert.ok(explore.some((c: { handle: string }) => c.handle === "sara.makes"));
   });

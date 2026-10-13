@@ -1767,14 +1767,6 @@ export type Database = {
         Returns: undefined
       }
       confirm_received: { Args: { order_id: string }; Returns: undefined }
-      decide_creator: {
-        Args: {
-          creator_id: string
-          decision: Database["public"]["Enums"]["creator_status"]
-          note?: string
-        }
-        Returns: undefined
-      }
       decline_offer: {
         Args: {
           note?: string
@@ -1783,30 +1775,12 @@ export type Database = {
         }
         Returns: undefined
       }
-      edit_campaign_details: {
-        Args: {
-          avoid: string
-          campaign_id: string
-          key_message: string
-          must_include: string
-          reference_links: string[]
-        }
-        Returns: undefined
-      }
       expire_offers: { Args: never; Returns: number }
-      extend_deadline: {
-        Args: { campaign_id: string; deadline: string }
-        Returns: undefined
-      }
       fail_payment: {
         Args: { payment_id: string; provider: string; provider_ref: string }
         Returns: undefined
       }
       has_name: { Args: { ar: string; en: string }; Returns: boolean }
-      join_waitlist: {
-        Args: { contact: string; country: string }
-        Returns: undefined
-      }
       mark_approval_seen: { Args: { order_id: string }; Returns: undefined }
       mark_deadlines_passed: { Args: never; Returns: number }
       mark_payout_paid: {
@@ -1853,10 +1827,6 @@ export type Database = {
         Returns: undefined
       }
       start_top_up: { Args: { amount: number }; Returns: string }
-      submit_application: {
-        Args: { intro_video_path?: string }
-        Returns: undefined
-      }
       submit_clip: {
         Args: {
           ad_code?: string

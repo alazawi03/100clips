@@ -49,6 +49,11 @@ export class PgliteDb extends Db {
     });
   }
 
+  /** Reads the database directly, to check what an action left behind. */
+  async select<T = Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T[]> {
+    return (await this.pg.query<T>(sql, params)).rows;
+  }
+
   /** Test setup that the API doesn't do itself: sign-in users and the first admin. */
   async seed(sql: string, params: unknown[] = []) {
     await this.pg.query(sql, params);

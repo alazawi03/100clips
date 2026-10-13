@@ -1,11 +1,23 @@
 import { Pool, types } from "pg";
 
 /**
- * Who a query runs as. The API never bypasses the database rules: each request runs as the
- * signed-in user (role `authenticated`, auth.uid() = their id), as a visitor (`anon`), or, for the
- * card webhook and jobs only, as `service_role`. Row-level security and the functions decide the rest.
+ * Who a query runs as. Reads and simple own-row writes run as the signed-in user (role
+ * `authenticated`, auth.uid() = their id) or a visitor (`anon`), so row-level security applies.
+ * Business actions that write protected tables (orders, ledger, reviews...) run as `service_role`,
+ * past row-level security: the service checks permissions itself, and `userId` keeps who acted.
  */
-export type Caller = { role: "anon" } | { role: "authenticated"; userId: string } | { role: "service_role" };
+export type Caller = { role: "anon" } | { role: "authenticated"; userId: string } | { role: "service_role"; userId?: string };
+
+/** The same person, past row-level security: for a service that checks permissions itself. */
+export function elevated(caller: Caller): Caller {
+  return { role: "service_role", userId: "userId" in caller ? caller.userId : undefined };
+}
+
+/** The signed-in user's id. Every route except @Public() ones has one. */
+export function userIdOf(caller: Caller): string {
+  if (!("userId" in caller) || !caller.userId) throw new Error("This needs a signed-in user");
+  return caller.userId;
+}
 
 export interface Queryable {
   query<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<{ rows: T[] }>;
@@ -18,7 +30,7 @@ export abstract class Db {
 
 /** The claims Supabase's auth.uid() and auth.role() read, for one transaction. */
 export function claimsFor(caller: Caller) {
-  const sub = caller.role === "authenticated" ? caller.userId : "";
+  const sub = ("userId" in caller && caller.userId) || "";
   return { json: JSON.stringify({ sub: sub || undefined, role: caller.role }), sub };
 }
 

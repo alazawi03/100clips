@@ -2,10 +2,15 @@
 
 NestJS on the Supabase database, for the brand dashboard and the creator app.
 
-Each request runs **as the signed-in user inside Postgres** (role `authenticated`, `auth.uid()` = their
-id), so the row-level security and the database functions in `../supabase/migrations` are the rules.
-The API checks the Supabase token, validates input, and shapes responses; it doesn't repeat permission
-checks.
+The business logic lives here, in the services. The database keeps the safety rails: row-level
+security, constraints and a few small triggers (`../supabase/migrations`).
+
+- **Reads and simple own-row writes** (profile, brands, drafts) run **as the signed-in user inside
+  Postgres** (role `authenticated`, `auth.uid()` = their id), so row-level security decides.
+- **Business actions** (send for review, admin decisions, live campaign changes, and orders and money
+  as they come) write tables users can't touch. They run as the service role (`elevated(caller)`): the
+  service checks permissions itself (`common/db/access.ts`), locks the rows it changes
+  (`select ... for update`), and records who acted.
 
 ## Run
 
@@ -41,17 +46,18 @@ src/
   <feature>/               health, waitlist, me, creators, brands, products, campaigns, creator-profile, admin
     <feature>.module.ts    the feature's parts list
     <feature>.controller.ts  HTTP only: routes, params, status codes, 404s
-    <feature>.service.ts   the work: SQL and database function calls through Db.run
+    <feature>.service.ts   the work: SQL through Db.run, business rules, permission checks for actions
     dto/                   request bodies and query strings, with validation
     entities/              response shapes for the docs; table rows `implements Tables<"…">`
 ```
 
 ### Conventions
 
-- **The database decides permissions.** Services run every query with `db.run(caller, …)`, so row-level
-  security and the database functions apply. No permission checks in TypeScript.
-- **Controllers never touch `Db`**; services never throw HTTP errors (they return `undefined` for "not
-  found", and the controller turns it into a 404). Database refusals become HTTP in `DbErrorFilter`.
+- **No business logic in database functions.** Rules live in services. Run as the caller whenever
+  row-level security covers it; use `elevated(caller)` only for actions, and then check permissions first.
+- **Controllers never touch `Db`.** Services don't know HTTP: they return `undefined` for a plain "not
+  found", or throw `InputError`, `ForbiddenError`, `NotFoundError`, `ConflictError` (`common/errors.ts`)
+  with a message for people. `DbErrorFilter` turns those, and Postgres errors, into HTTP.
 - **SQL is parameterized** (`$1, $2`). Column names come from fixed lists in code, never from requests.
 - **Types come from the schema.** After a migration, run `npm run db:types` (needs `npx supabase@2 login` once).
   Entities that mirror a table `implements Tables<"table">`, so a schema change that breaks them fails

@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { Caller, Db, Queryable } from "../common/db/db";
+import { logOrderEvent, ownsBrand } from "../common/db/access";
+import { Caller, Db, elevated, Queryable, userIdOf } from "../common/db/db";
+import { ConflictError, InputError, NotFoundError } from "../common/errors";
 import { CampaignDetailsDto, ExtendDeadlineDto } from "./dto/campaign-details.dto";
 import { CampaignSecretsDto } from "./dto/campaign-secrets.dto";
 import { CreateCampaignDto } from "./dto/create-campaign.dto";
@@ -22,12 +24,10 @@ const param = (c: Column, value: unknown) => (JSON_COLUMNS.has(c) && value != nu
 
 /** Why a draft-only write changed nothing. */
 export type NotWritable = "not_found" | "not_draft";
-/** Why a live-only change can't happen. */
-export type NotLive = "not_found" | "not_live";
 
 /**
- * Row-level security lets owners write drafts only. A live campaign changes through the database
- * functions edit_campaign_details and extend_deadline, which record each change.
+ * Row-level security lets owners write drafts only. A live campaign changes only through "Edit
+ * details" and "Extend deadline", which record each change in the campaign's events.
  */
 @Injectable()
 export class CampaignsService {
@@ -97,28 +97,76 @@ export class CampaignsService {
     });
   }
 
-  /** edit_campaign_details: live campaigns only, and 409 once a creator accepted. */
-  async editDetails(caller: Caller, id: string, dto: CampaignDetailsDto): Promise<CampaignWithSecrets | NotLive> {
-    return this.db.run(caller, async (q) => {
-      const notLive = await this.whyNotLive(q, id);
-      if (notLive) return notLive;
-      await q.query(`select public.edit_campaign_details($1, $2, $3, $4, $5)`, [
-        id, dto.key_message ?? null, dto.reference_links ?? null, dto.must_include ?? null, dto.avoid ?? null,
-      ]);
+  /**
+   * "Edit details" on a live campaign: key message, references, must include, avoid. Only while no
+   * creator has accepted, so nobody is held to something new. Each changed field is recorded.
+   */
+  async editDetails(caller: Caller, id: string, dto: CampaignDetailsDto): Promise<CampaignWithSecrets> {
+    return this.db.run(elevated(caller), async (q) => {
+      const campaign = await this.lockLive(q, userIdOf(caller), id);
+      const { rows: accepted } = await q.query(
+        `select 1 from public.orders where campaign_id = $1 and status in ('in_progress', 'delivered', 'approved') limit 1`, [id],
+      );
+      if (accepted.length) throw new ConflictError("A creator already accepted");
+
+      const next = {
+        key_message: dto.key_message ?? null,
+        reference_links: dto.reference_links ?? [],
+        must_include: dto.must_include ?? null,
+        avoid: dto.avoid ?? null,
+      };
+      // Field names as the dashboard shows them in the history.
+      const label = { key_message: "keyMessage", reference_links: "references", must_include: "mustInclude", avoid: "avoid" } as const;
+      const changes = (Object.keys(next) as (keyof typeof next)[])
+        .filter((f) => JSON.stringify(campaign[f]) !== JSON.stringify(next[f]))
+        .map((f) => ({ field: label[f], before: campaign[f], after: next[f] }));
+      if (changes.length) {
+        await q.query(`
+          update public.campaigns set key_message = $2, reference_links = $3, must_include = $4, avoid = $5,
+            events = events || jsonb_build_object('type', 'details_edited', 'at', now(), 'changes', $6::jsonb)
+          where id = $1
+        `, [id, next.key_message, next.reference_links, next.must_include, next.avoid, JSON.stringify(changes)]);
+      }
       return (await this.withSecrets(q, id))!;
     });
   }
 
-  /** extend_deadline: live campaigns only; 400 unless later than the current deadline and today. */
-  async extendDeadline(caller: Caller, id: string, { deadline }: ExtendDeadlineDto): Promise<CampaignWithSecrets | NotLive> {
-    return this.db.run(caller, async (q) => {
-      const notLive = await this.whyNotLive(q, id);
-      if (notLive) return notLive;
-      await q.query(`select public.extend_deadline($1, $2::date)`, [id, deadline]);
+  /**
+   * "Extend deadline" on a live campaign: later only (creators agreed to the old date). Orders
+   * still on the old date, waiting or in progress, move with it, each with a note in its history.
+   */
+  async extendDeadline(caller: Caller, id: string, { deadline }: ExtendDeadlineDto): Promise<CampaignWithSecrets> {
+    const userId = userIdOf(caller);
+    return this.db.run(elevated(caller), async (q) => {
+      const campaign = await this.lockLive(q, userId, id);
+      const [{ later }] = (await q.query<{ later: boolean }>(
+        `select $1::date > current_date and $1::date > $2::date as later`, [deadline, campaign.deadline],
+      )).rows;
+      if (!campaign.deadline || !later) throw new InputError("The deadline can only move later");
+
+      await q.query(`
+        update public.campaigns set deadline = $2,
+          events = events || jsonb_build_object('type', 'deadline_moved', 'at', now(), 'from', $3::date, 'to', $2::date)
+        where id = $1
+      `, [id, deadline, campaign.deadline]);
+      const { rows: moved } = await q.query<{ id: string }>(`
+        update public.orders set deadline = $2
+        where campaign_id = $1 and deadline = $3 and status in ('pending', 'in_progress') returning id
+      `, [id, deadline, campaign.deadline]);
+      for (const order of moved) {
+        await logOrderEvent(q, order.id, "deadline_moved", "brand", userId, { from: campaign.deadline, to: deadline });
+      }
       return (await this.withSecrets(q, id))!;
     });
   }
 
+  /** The caller's live campaign, locked for a change: 404 if not theirs, 409 if not live. */
+  private async lockLive(q: Queryable, userId: string, id: string): Promise<Campaign> {
+    const [campaign] = (await q.query<Campaign>(`select * from public.campaigns where id = $1 for update`, [id])).rows;
+    if (!campaign || !(await ownsBrand(q, userId, campaign.brand_id))) throw new NotFoundError("Campaign not found");
+    if (campaign.status !== "live") throw new ConflictError("Only a live campaign changes this way. Save the draft instead.");
+    return campaign;
+  }
   /** The saved secrets, or undefined if the campaign isn't the caller's. */
   async setSecrets(caller: Caller, id: string, dto: CampaignSecretsDto): Promise<CampaignSecrets | undefined> {
     return this.db.run(caller, async (q) => {
@@ -151,11 +199,6 @@ export class CampaignsService {
     return row?.status;
   }
 
-  /** Before a live-only change: undefined if it may go ahead. */
-  private async whyNotLive(q: Queryable, id: string): Promise<NotLive | undefined> {
-    const status = await this.ownStatus(q, id);
-    return !status ? "not_found" : status !== "live" ? "not_live" : undefined;
-  }
 
   /** After a draft-only write touched no row: not the caller's campaign, or no longer a draft. */
   private async whyNot(q: Queryable, id: string): Promise<NotWritable> {

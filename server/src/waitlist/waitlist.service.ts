@@ -6,8 +6,15 @@ import { JoinWaitlistDto } from "./dto/join-waitlist.dto";
 export class WaitlistService {
   constructor(private readonly db: Db) {}
 
-  /** join_waitlist checks the contact and stores it as an email or a phone. Runs as a visitor. */
+  /**
+   * The sheet's one box holds an email or a phone: an @ means email (stored lowercase), anything
+   * else is a phone (spaces, dashes and brackets removed). The table's checks refuse junk (400).
+   * Visitors can't write the table, so this runs as the service role.
+   */
   async join({ country, contact }: JoinWaitlistDto) {
-    await this.db.run({ role: "anon" }, (q) => q.query("select public.join_waitlist($1, $2)", [country, contact]));
+    const value = contact.trim();
+    const [email, phone] = value.includes("@") ? [value.toLowerCase(), null] : [null, value.replace(/[\s()-]/g, "")];
+    await this.db.run({ role: "service_role" }, (q) =>
+      q.query(`insert into public.waitlist_requests (country, email, phone) values ($1, $2, $3)`, [country.toUpperCase(), email, phone]));
   }
 }

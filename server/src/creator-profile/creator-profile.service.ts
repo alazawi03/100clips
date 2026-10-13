@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { Caller, Db, Queryable } from "../common/db/db";
-import { assertOwnPath } from "../common/errors";
+import { Caller, Db, elevated, Queryable, userIdOf } from "../common/db/db";
+import { assertOwnPath, ConflictError, InputError, NotFoundError } from "../common/errors";
 import { Creator } from "../creators/entities/creator.entity";
 import { CreateAddressDto, UpdateAddressDto } from "./dto/address.dto";
 import { AddSampleDto, SubmitApplicationDto } from "./dto/application.dto";
@@ -16,9 +16,8 @@ const ADDRESS_COLUMNS = "id, type, label, address_text, latitude, longitude, cre
 const profileParam = (c: (typeof PROFILE)[number], n: number) => (c === "niches" ? `$${n}::text[]::public.niche[]` : `$${n}`);
 
 /**
- * The signed-in creator's own profile. Row-level security limits every write to the caller's rows;
- * the database also caps samples (3) and addresses (5), and submit_application checks the profile
- * is complete before it goes to review.
+ * The signed-in creator's own profile. Row-level security limits every write to the caller's rows,
+ * and the database caps samples (3) and addresses (5). Sending for review is checked here.
  */
 @Injectable()
 export class CreatorProfileService {
@@ -125,11 +124,45 @@ export class CreatorProfileService {
     return rows.length > 0;
   }
 
-  /** submit_application: checks the profile is complete and snapshots the intro and samples for review. */
+  /**
+   * "Send for review": at sign-up, or again after changes were requested or a rejection. Checks the
+   * profile is complete, then keeps the intro and samples as they are now, for the admin to judge.
+   * The status and the application are the admin's to change, so this runs as the service role.
+   */
   async submit(caller: Caller, { intro_video_path }: SubmitApplicationDto): Promise<MyCreatorProfile> {
     assertOwnPath(caller, intro_video_path, "intro_video_path");
-    return this.db.run(caller, async (q) => {
-      await q.query(`select public.submit_application($1)`, [intro_video_path ?? null]);
+    const userId = userIdOf(caller);
+    return this.db.run(elevated(caller), async (q) => {
+      // Locked, so two taps on "Send" make one application.
+      const [creator] = (await q.query<Creator>(`select * from public.creators where id = $1 for update`, [userId])).rows;
+      if (!creator) throw new NotFoundError("No creator profile yet. Create it first.");
+      if (!["incomplete", "changes_requested", "rejected"].includes(creator.status)) throw new ConflictError("Already sent");
+
+      // Left out on a resubmission: the previous intro is sent again.
+      const [previous] = (await q.query<{ intro_video_path: string }>(
+        `select intro_video_path from public.creator_approvals where creator_id = $1 order by submitted_at desc limit 1`, [userId],
+      )).rows;
+      const intro = intro_video_path ?? previous?.intro_video_path;
+      const [has] = (await q.query<{ sample: boolean; social: boolean; price: boolean }>(`
+        select exists (select 1 from public.creator_portfolio where creator_id = $1) as sample,
+          exists (select 1 from public.creator_socials where creator_id = $1) as social,
+          exists (select 1 from public.creator_formats where creator_id = $1) as price
+      `, [userId])).rows;
+      const missing = [
+        !intro && "an intro video",
+        !has.sample && "a sample clip",
+        !has.social && "a social account",
+        !creator.city && "your city",
+        creator.niches.length === 0 && "your niches",
+        !has.price && "your prices",
+      ].filter(Boolean);
+      if (missing.length) throw new InputError(`Still needed: ${missing.join(", ")}`);
+
+      await q.query(`update public.creators set status = 'pending' where id = $1`, [userId]);
+      await q.query(`
+        insert into public.creator_approvals (creator_id, intro_video_path, sample_paths)
+        values ($1, $2, array(select video_path from public.creator_portfolio where creator_id = $1 order by created_at))
+      `, [userId, intro]);
       return (await this.load(q))!;
     });
   }

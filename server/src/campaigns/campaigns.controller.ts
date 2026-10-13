@@ -5,7 +5,7 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse,
 import { CurrentCaller } from "../common/auth/decorators";
 import { Caller } from "../common/db/db";
 import { ApiBodyExamples, ApiErrors } from "../common/openapi/docs";
-import { CampaignsService, NotLive, NotWritable } from "./campaigns.service";
+import { CampaignsService, NotWritable } from "./campaigns.service";
 import { CampaignDetailsDto, ExtendDeadlineDto } from "./dto/campaign-details.dto";
 import { CampaignSecretsDto } from "./dto/campaign-secrets.dto";
 import { CreateCampaignDto } from "./dto/create-campaign.dto";
@@ -17,9 +17,6 @@ const notWritable = (why: NotWritable) =>
   why === "not_draft"
     ? new ConflictException("Only drafts change this way. A live campaign changes through /details and /deadline.")
     : new NotFoundException("Campaign not found");
-
-const notLive = (why: NotLive) =>
-  why === "not_live" ? new ConflictException("Only a live campaign changes this way. Save the draft instead.") : new NotFoundException("Campaign not found");
 
 const BRIEF_EXAMPLE = {
   title: "Morning coffee ritual",
@@ -108,9 +105,7 @@ export class CampaignsController {
   @ApiOkResponse({ type: CampaignWithSecrets })
   @ApiErrors(400, 401, 404, 409)
   async editDetails(@CurrentCaller() caller: Caller, @Param("id", ParseUUIDPipe) id: string, @Body() body: CampaignDetailsDto): Promise<CampaignWithSecrets> {
-    const result = await this.campaigns.editDetails(caller, id, body);
-    if (typeof result === "string") throw notLive(result);
-    return result;
+    return this.campaigns.editDetails(caller, id, body);
   }
 
   @Put("campaigns/:id/deadline")
@@ -119,9 +114,7 @@ export class CampaignsController {
   @ApiOkResponse({ type: CampaignWithSecrets })
   @ApiErrors(400, 401, 404, 409)
   async extendDeadline(@CurrentCaller() caller: Caller, @Param("id", ParseUUIDPipe) id: string, @Body() body: ExtendDeadlineDto): Promise<CampaignWithSecrets> {
-    const result = await this.campaigns.extendDeadline(caller, id, body);
-    if (typeof result === "string") throw notLive(result);
-    return result;
+    return this.campaigns.extendDeadline(caller, id, body);
   }
 
   @Put("campaigns/:id/secrets")

@@ -89,17 +89,22 @@ await denied(CREATOR, `insert into creator_socials (creator_id, platform, userna
 await denied(CREATOR, `insert into creator_socials (creator_id, platform, username) values ($1, 'tiktok', 'x') returning creator_id`, [CREATOR2], "adds a social to another creator");
 await denied(CREATOR, `insert into accounts (id, role) values ($1, 'admin')`, [CREATOR2], "self-made admin");
 
-await denied(CREATOR, `select submit_application()`, [], "apply without an intro");
-await denied(CREATOR, `select submit_application($1::uuid::text || '/intro.mp4')`, [CREATOR2], "apply with someone else's intro");
-await as(CREATOR, `select submit_application($1::uuid::text || '/intro.mp4')`, [CREATOR]);
-await as(CREATOR2, `select submit_application($1::uuid::text || '/intro.mp4')`, [CREATOR2]);
+// Sending for review and the admin's verdict are API actions (server/test). Set up here as they leave it.
+const apply = (c) => db.exec(`
+  update creators set status = 'pending' where id = $1;
+  insert into creator_approvals (creator_id, intro_video_path, sample_paths)
+  values ($1, $1::uuid::text || '/intro.mp4', array(select video_path from creator_portfolio where creator_id = $1 order by created_at))`.replace(/\$1/g, `'${c}'`));
+const decide = (c, decision, note = null) => db.exec(`
+  update creator_approvals set decision = '${decision}', note = ${note ? `'${note}'` : "null"}, decided_by = '${ADMIN}', decided_at = now() where creator_id = '${c}' and decision is null;
+  update creators set status = '${decision}', approved_at = case when '${decision}' = 'approved' then now() else approved_at end where id = '${c}'`);
+await apply(CREATOR);
+await apply(CREATOR2);
 ok((await one(BRAND, `select count(*)::int n from creators`)).n === 0, "brand can't see pending creators");
-await as(ADMIN, `select decide_creator($1, 'changes_requested', 'Samples have music')`, [CREATOR2]);
-await as(CREATOR2, `select submit_application()`);
-await as(ADMIN, `select decide_creator($1, 'approved')`, [CREATOR]);
-await as(ADMIN, `select decide_creator($1, 'approved')`, [CREATOR2]);
-await denied(CREATOR, `select decide_creator($1, 'approved')`, [CREATOR2], "creator decides");
-ok((await one(ADMIN, `select count(*)::int n from admin_log where target_id = $1 and action in ('changes_requested', 'creator_approved')`, [CREATOR2])).n === 2, "decision history in admin_log");
+await decide(CREATOR2, "changes_requested", "Samples have music");
+await apply(CREATOR2);
+await decide(CREATOR, "approved");
+await decide(CREATOR2, "approved");
+await denied(CREATOR, `update creators set status = 'approved' where id = $1 returning id`, [CREATOR2], "creator approves another");
 {
   const apps = (await as(CREATOR2, `select decision, note, cardinality(sample_paths) n, decided_by from creator_approvals where creator_id = $1 order by submitted_at`, [CREATOR2])).rows;
   ok(apps.length === 2 && apps[0].decision === 'changes_requested' && apps[0].note === 'Samples have music' && apps[1].decision === 'approved' && apps[0].n === 3 && apps[1].decided_by === ADMIN, `each submission kept with its verdict (${JSON.stringify(apps)})`);
@@ -114,7 +119,6 @@ ok((await one(ADMIN, `select count(*)::int n from admin_log where target_id = $1
   ok(intros.length === 2 && intros.every((r) => r.p === `${CREATOR2}/intro.mp4`), "resubmission reuses the previous intro");
 }
 await as(CREATOR, `update creator_socials set username = 'dana.new' where creator_id = $1 and platform = 'instagram'`, [CREATOR]);
-await denied(ADMIN, `select decide_creator($1, 'rejected')`, [CREATOR], "reject without a note");
 
 // ---- Brand onboarding
 for (const b of [BRAND, BRAND2]) {
@@ -185,8 +189,7 @@ ok((await one(CREATOR, `select title from campaigns`)).title === "Morning coffee
 ok((await one(BRAND2, `select count(*)::int n from orders`)).n === 0, "other brand sees no orders");
 
 // ---- Edit details while nobody accepted, then accept
-await as(BRAND, `select edit_campaign_details($1, 'Fresh every morning', '{https://tiktok.com/x}', null, null)`, [camp]);
-ok((await one(BRAND, `select jsonb_array_length(events) n from campaigns where id = $1`, [camp])).n === 1, "edit logged on the campaign");
+await denied(BRAND, `update campaigns set key_message = 'x' where id = $1 returning id`, [camp], "brand writes a live campaign directly");
 await denied(CREATOR, `select accept_offer($1)`, [order], "accept physical without address");
 const addr = (await one(CREATOR, `select id from creator_addresses`)).id;
 await as(CREATOR, `select accept_offer($1, $2, '2026-10')`, [order, addr]);
@@ -194,7 +197,6 @@ ok((await one(BRAND, `select ship_to->>'phone' phone from orders where id = $1`,
 ok((await one(BRAND, `select ship_to->>'type' t, (ship_to->>'latitude')::float lat from orders where id = $1`, [order])).lat === 26.2235, "address copy has type and pin");
 ok((await one(BRAND, `select count(*)::int n from creator_addresses`)).n === 0, "addresses stay private");
 ok((await one(CREATOR, `select code from campaign_secrets`))?.code === "SIP10", "secrets after accepting");
-await denied(BRAND, `select edit_campaign_details($1, 'x', null, null, null)`, [camp], "edit after acceptance");
 await denied(CREATOR, `update orders set status = 'approved' where id = $1 returning id`, [order], "creator writes order");
 await denied(CREATOR, `select approve_order($1)`, [order], "creator approves own order");
 
@@ -263,9 +265,8 @@ await su(`update orders set delivered_at = now() - interval '8 days' where id = 
 ok((await as("service", `select auto_approve_orders() n`)).rows[0].n === 1, "auto-approved after 7 days");
 ok((await one(BRAND, `select approved_by from orders where id = $1`, [order3])).approved_by === "system", "approved by system");
 
-// ---- Deadlines
-await denied(BRAND, `select extend_deadline($1, current_date + 5)`, [camp], "deadline earlier");
-await as(BRAND, `select extend_deadline($1, current_date + 20)`, [camp]);
+// ---- Deadlines ("Extend deadline" is an API action; this is what it leaves behind.)
+await su(`update campaigns set deadline = current_date + 20 where id = $1`, [camp]);
 
 // ---- Money out
 await denied(BRAND, `select request_withdrawal(10)`, [], "withdraw without a bank account");
@@ -314,19 +315,13 @@ ok((await one(BRAND, `select count(*)::int n from creators where id = $1`, [CREA
 await as(ADMIN, `select suspend('account', $1, 'Chargebacks')`, [acct]);
 const c2 = (await one(BRAND, `insert into campaigns (brand_id, product_id, title, brief, video_style) values ($1, $2, 'Again', 'Same as before, a new season of the coffee.', 'ad') returning id`, [brand, product])).id;
 await denied(BRAND, `select checkout($1, $2, true)`, [c2, JSON.stringify([{ creator_id: CREATOR, format: "instagram_reel" }])], "suspended account pays");
-ok((await one(ADMIN, `select count(*)::int n from admin_log`)).n === 9, "admin actions logged");
+ok((await one(ADMIN, `select count(*)::int n from admin_log`)).n === 6, "admin actions logged"); // creator decisions are logged by the API
 
 // ---- Waitlist and anon
-await db.transaction(async (tx) => {
-  await tx.exec("set local role anon");
-  await tx.query(`select join_waitlist('sa', ' Reem@Example.com ')`);
-  await tx.query(`select join_waitlist('KW', '+965 9876-5432')`);
-});
-{
-  const w = (await one(ADMIN, `select string_agg(country || ':' || coalesce(email, '-') || ':' || coalesce(phone, '-'), ',' order by created_at, country) s from waitlist_requests`)).s;
-  ok(w === 'KW:-:+96598765432,SA:reem@example.com:-' || w === 'SA:reem@example.com:-,KW:-:+96598765432', `waitlist sorts email and phone (${w})`);
-}
-await denied(ADMIN, `select join_waitlist('SA', 'not a contact')`, [], "waitlist rejects junk");
+// Joining is an API action (as the service role); the table refuses junk on its own.
+await as("service", `insert into waitlist_requests (country, email) values ('SA', 'reem@example.com')`);
+await denied("service", `insert into waitlist_requests (country, phone) values ('SA', 'notacontact') returning id`, [], "waitlist rejects junk");
+ok((await one(ADMIN, `select count(*)::int n from waitlist_requests`)).n === 1, "admins read the waitlist");
 await db.transaction(async (tx) => {
   await tx.exec("set local role anon");
   let blocked = false;

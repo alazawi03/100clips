@@ -1,10 +1,18 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from "@nestjs/common";
 import type { Response } from "express";
-import { InputError } from "../errors";
+import { ConflictError, ForbiddenError, InputError, NotFoundError } from "../errors";
+
+/** The services' rule errors (common/errors.ts), each with its status. */
+const STATUS_BY_ERROR: [new (...args: never[]) => Error, number][] = [
+  [InputError, HttpStatus.BAD_REQUEST],
+  [ForbiddenError, HttpStatus.FORBIDDEN],
+  [NotFoundError, HttpStatus.NOT_FOUND],
+  [ConflictError, HttpStatus.CONFLICT],
+];
 
 /**
- * The database functions raise errors with a code and a message meant for people ("Choose an
- * address", "No revision left"). This turns them into HTTP answers with that message.
+ * Errors from Postgres itself: row-level security refusing a write, constraints, and the database
+ * functions that are still there (raised with a code and a message for people).
  */
 const STATUS_BY_CODE: Record<string, number> = {
   "42501": HttpStatus.FORBIDDEN, // not allowed (also row-level security refusing a write)
@@ -33,6 +41,8 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   creator_socials_creator_id_fkey: "Create your creator profile first",
   creator_portfolio_creator_id_fkey: "Create your creator profile first",
   creator_addresses_creator_id_fkey: "Create your creator profile first",
+  waitlist_requests_email_check: "Enter a valid email or phone number",
+  waitlist_requests_phone_check: "Enter a valid email or phone number",
 };
 
 @Catch()
@@ -45,8 +55,9 @@ export class DbErrorFilter implements ExceptionFilter {
       res.status(error.getStatus()).json(error.getResponse());
       return;
     }
-    if (error instanceof InputError) {
-      res.status(HttpStatus.BAD_REQUEST).json({ statusCode: 400, message: error.message });
+    const rule = STATUS_BY_ERROR.find(([type]) => error instanceof type);
+    if (rule) {
+      res.status(rule[1]).json({ statusCode: rule[1], message: (error as Error).message });
       return;
     }
     const code = (error as { code?: string })?.code;
