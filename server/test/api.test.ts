@@ -15,7 +15,7 @@ class FakeVerifier extends TokenVerifier {
 }
 
 const id = (n: number) => `00000000-0000-0000-0000-0000000000${String(n).padStart(2, "0")}`;
-const [ADMIN, BRAND, CREATOR, BRAND2] = [1, 2, 3, 4].map(id);
+const [ADMIN, BRAND, CREATOR, BRAND2, CREATOR2] = [1, 2, 3, 4, 5].map(id);
 
 let app: INestApplication;
 let db: PgliteDb;
@@ -39,7 +39,7 @@ async function call(method: string, path: string, user?: string, body?: unknown)
 
 before(async () => {
   db = await PgliteDb.create();
-  for (const u of [ADMIN, BRAND, CREATOR, BRAND2]) await db.seed("insert into auth.users values ($1)", [u]);
+  for (const u of [ADMIN, BRAND, CREATOR, BRAND2, CREATOR2]) await db.seed("insert into auth.users values ($1)", [u]);
   await db.seed("insert into public.accounts (id, role) values ($1, 'admin')", [ADMIN]);
   app = await createApp(db, new FakeVerifier());
   await app.listen(0);
@@ -74,10 +74,18 @@ describe("OpenAPI", () => {
   test("/openapi.json lists every endpoint", () => {
     const routes = Object.entries(spec.paths).flatMap(([path, ops]) => Object.keys(ops).map((m) => `${m.toUpperCase()} ${path}`));
     assert.deepEqual(routes.sort(), [
-      "DELETE /products/{id}", "GET /brands", "GET /brands/{brandId}/products", "GET /creators", "GET /creators/{id}",
-      "GET /health", "GET /me", "GET /products/{id}", "PATCH /brands/{id}", "PATCH /me", "PATCH /products/{id}",
-      "POST /brands", "POST /brands/{brandId}/products", "POST /me", "POST /waitlist",
-    ]);
+      "DELETE /campaigns/{id}", "DELETE /products/{id}",
+      "GET /brands", "GET /brands/{brandId}/products", "GET /campaigns", "GET /campaigns/{id}", "GET /creators", "GET /creators/{id}",
+      "GET /health", "GET /me", "GET /products/{id}",
+      "PATCH /brands/{id}", "PATCH /campaigns/{id}", "PATCH /me", "PATCH /products/{id}",
+      "POST /brands", "POST /brands/{brandId}/campaigns", "POST /brands/{brandId}/products", "POST /campaigns/{id}/copy", "POST /me",
+      "POST /waitlist",
+      "PUT /campaigns/{id}/deadline", "PUT /campaigns/{id}/details", "PUT /campaigns/{id}/secrets",
+      "GET /me/creator", "POST /me/creator", "PATCH /me/creator", "PUT /me/creator/formats", "PUT /me/creator/socials",
+      "POST /me/creator/portfolio", "DELETE /me/creator/portfolio/{id}", "GET /me/creator/addresses", "POST /me/creator/addresses",
+      "PATCH /me/creator/addresses/{id}", "DELETE /me/creator/addresses/{id}", "POST /me/creator/application",
+      "GET /admin/applications", "POST /admin/creators/{id}/decision",
+    ].sort());
   });
 });
 
@@ -221,6 +229,107 @@ describe("products", () => {
   });
 });
 
+describe("campaigns", () => {
+  let brandId: string;
+  let productId: string;
+  let draftId: string;
+  const brief = {
+    title: "Morning coffee ritual",
+    brief: "Show how you make your morning cup with our beans, start to first sip.",
+    video_style: "routine",
+    deadline: "2099-12-01",
+    key_message: "Roasted weekly",
+    reference_links: ["https://www.tiktok.com/@example/video/1"],
+    logistics: { after: "keep" },
+  };
+
+  before(async () => {
+    brandId = (await call("GET", "/brands", BRAND)).body[0].id;
+    productId = (await call("POST", `/brands/${brandId}/products`, BRAND, { type: "physical", name: "Campaign beans" })).body.id;
+  });
+
+  test("the owner starts a draft and fills it in", async () => {
+    const started = await call("POST", `/brands/${brandId}/campaigns`, BRAND, { title: "Morning coffee ritual" });
+    assert.equal(started.status, 201);
+    assertShape(started.body, "Campaign");
+    assert.equal(started.body.status, "draft");
+    assert.deepEqual([started.body.reference_links, started.body.logistics, started.body.events], [[], {}, []]);
+    draftId = started.body.id;
+
+    const saved = await call("PATCH", `/campaigns/${draftId}`, BRAND, { ...brief, product_id: productId, draft: { values: { title: "x" }, picks: [] } });
+    assert.equal(saved.status, 200);
+    assert.equal(saved.body.deadline, "2099-12-01");
+    assert.deepEqual(saved.body.logistics, { after: "keep" });
+    assert.equal((await call("PATCH", `/campaigns/${draftId}`, BRAND, { deadline: null })).body.deadline, null);
+    const drafts = (await call("GET", `/campaigns?brand_id=${brandId}&status=draft`, BRAND)).body;
+    assert.ok(drafts.some((c: { id: string }) => c.id === draftId) && drafts.every((c: { status: string }) => c.status === "draft"));
+  });
+
+  test("drafts are checked field by field", async () => {
+    const save = (body: object) => call("PATCH", `/campaigns/${draftId}`, BRAND, body);
+    assert.equal((await save({ reference_links: ["https://a.com", "https://b.com", "https://c.com", "https://d.com"] })).status, 400);
+    assert.equal((await save({ video_style: "dance" })).status, 400);
+    assert.equal((await save({ deadline: "12/01/2099" })).status, 400);
+    assert.equal((await save({ logistics: { after: "keep", shipping: "dhl" } })).status, 400);
+    assert.equal((await save({ draft: { big: "x".repeat(21_000) } })).status, 400);
+    // Another brand's product, refused by the database with words for people.
+    await call("POST", "/brands", BRAND2, { name_en: "Other", industry: "other" });
+    const otherBrand = (await call("GET", "/brands", BRAND2)).body[0].id;
+    const otherProduct = (await call("POST", `/brands/${otherBrand}/products`, BRAND2, { type: "physical", name: "Theirs" })).body.id;
+    const wrong = await save({ product_id: otherProduct });
+    assert.equal(wrong.status, 400);
+    assert.equal(wrong.body.message, "Pick one of this brand's products");
+  });
+
+  test("only the owner sees and changes drafts", async () => {
+    assert.equal((await call("POST", `/brands/${brandId}/campaigns`, BRAND2, { title: "Mine" })).status, 403);
+    assert.equal((await call("GET", `/campaigns/${draftId}`, BRAND2)).status, 404);
+    assert.equal((await call("PATCH", `/campaigns/${draftId}`, BRAND2, { title: "Mine" })).status, 404);
+    assert.equal((await call("DELETE", `/campaigns/${draftId}`, BRAND2)).status, 404);
+    assert.equal((await call("PUT", `/campaigns/${draftId}/secrets`, BRAND2, { code: "X" })).status, 404);
+    assert.deepEqual((await call("GET", "/campaigns", CREATOR)).body, []);
+  });
+
+  test("secrets, and Run again", async () => {
+    const secrets = await call("PUT", `/campaigns/${draftId}/secrets`, BRAND, { access_link: "https://example.com/app", code: "100CLIPS" });
+    assert.equal(secrets.status, 200);
+    assert.deepEqual(secrets.body, { access_link: "https://example.com/app", login_details: null, code: "100CLIPS" });
+    const full = await call("GET", `/campaigns/${draftId}`, BRAND);
+    assertShape(full.body, "CampaignWithSecrets");
+    assert.equal(full.body.secrets.code, "100CLIPS");
+
+    await call("PATCH", `/campaigns/${draftId}`, BRAND, { deadline: "2099-12-01" });
+    const copy = await call("POST", `/campaigns/${draftId}/copy`, BRAND);
+    assert.equal(copy.status, 201);
+    assert.deepEqual([copy.body.copied_from, copy.body.title, copy.body.deadline, copy.body.draft], [draftId, brief.title, null, null]);
+    assert.equal((await call("GET", `/campaigns/${copy.body.id}`, BRAND)).body.secrets.code, "100CLIPS");
+    assert.equal((await call("DELETE", `/campaigns/${copy.body.id}`, BRAND)).status, 204);
+    assert.equal((await call("GET", `/campaigns/${copy.body.id}`, BRAND)).status, 404);
+  });
+
+  test("a live campaign changes only through details and deadline", async () => {
+    assert.equal((await call("PUT", `/campaigns/${draftId}/details`, BRAND, { key_message: "x" })).status, 409); // still a draft
+    // Paying makes it live; checkout comes with the cart, so it's set directly here.
+    await db.seed("update public.campaigns set status = 'live', launched_at = now(), draft = null where id = $1", [draftId]);
+
+    assert.equal((await call("PATCH", `/campaigns/${draftId}`, BRAND, { title: "Changed" })).status, 409);
+    assert.equal((await call("DELETE", `/campaigns/${draftId}`, BRAND)).status, 409);
+
+    const edited = await call("PUT", `/campaigns/${draftId}/details`, BRAND, { key_message: "Roasted this week", must_include: "The label" });
+    assert.equal(edited.status, 200);
+    assert.equal(edited.body.key_message, "Roasted this week");
+    assert.deepEqual(edited.body.reference_links, []); // left out, so cleared
+    assert.equal(edited.body.events[0].type, "details_edited");
+
+    assert.equal((await call("PUT", `/campaigns/${draftId}/deadline`, BRAND, { deadline: "2099-11-01" })).status, 400); // earlier
+    const moved = await call("PUT", `/campaigns/${draftId}/deadline`, BRAND, { deadline: "2099-12-08" });
+    assert.equal(moved.status, 200);
+    assert.equal(moved.body.deadline, "2099-12-08");
+    assert.equal(moved.body.events[1].type, "deadline_moved");
+    assert.equal((await call("PUT", `/campaigns/${draftId}/deadline`, BRAND2, { deadline: "2099-12-09" })).status, 404);
+  });
+});
+
 describe("creators", () => {
   test("explore shows only approved, complete creators", async () => {
     assert.deepEqual((await call("GET", "/creators", BRAND)).body, []);
@@ -234,6 +343,7 @@ describe("creators", () => {
     const all = await call("GET", "/creators", BRAND);
     assert.equal(all.body.length, 1);
     assertShape(all.body[0], "ExploreCreator");
+    assert.deepEqual(all.body[0].niches, ["beauty"]);
     assert.equal(all.body[0].from_price, 35);
     assert.equal(all.body[0].review_count, 0);
     assert.equal((await call("GET", "/creators?niche=food", BRAND)).body.length, 0);
@@ -256,5 +366,96 @@ describe("creators", () => {
     await db.seed(`insert into public.suspensions (account_id, reason, suspended_by) values ($1, 'Test', $2)`, [CREATOR, ADMIN]);
     assert.equal((await call("GET", "/creators", BRAND)).body.length, 0);
     assert.equal((await call("GET", `/creators/${CREATOR}`, BRAND)).status, 404);
+  });
+});
+
+describe("creator sign-up and review", () => {
+  const own = (file: string) => `${CREATOR2}/${file}`;
+  const profile = () => call("GET", "/me/creator", CREATOR2);
+
+  test("a creator account makes its profile; brands can't", async () => {
+    assert.equal((await call("POST", "/me/creator", BRAND, { handle: "not.me", name_en: "X" })).status, 403);
+    await call("POST", "/me", CREATOR2, { role: "creator", phone: "+97333999888" });
+    assert.equal((await profile()).status, 404);
+    const made = await call("POST", "/me/creator", CREATOR2, { handle: "sara.makes", name_en: "Sara", city: "Riffa", niches: ["food"] });
+    assert.equal(made.status, 201);
+    assertShape(made.body, "Creator");
+    assert.deepEqual([made.body.status, made.body.country, made.body.niches], ["incomplete", "BH", ["food"]]); // niches is a list, not "{food}"
+    assert.equal((await call("POST", "/me/creator", CREATOR2, { handle: "sara.two", name_en: "Sara" })).body.message, "You already have a creator profile");
+    const taken = await call("PATCH", "/me/creator", CREATOR2, { handle: "dana.glow" });
+    assert.deepEqual([taken.status, taken.body.message], [409, "That handle is taken"]);
+    assert.equal((await call("PATCH", "/me/creator", CREATOR2, { handle: "Sara!" })).status, 400);
+    assert.equal((await call("PATCH", "/me/creator", CREATOR2, { niches: ["food", "travel", "tech", "gaming"] })).status, 400);
+  });
+
+  test("sending too early says what's missing", async () => {
+    const early = await call("POST", "/me/creator/application", CREATOR2, { intro_video_path: own("intro.mp4") });
+    assert.equal(early.status, 400);
+    assert.match(early.body.message, /sample, a social account/);
+  });
+
+  test("prices and socials replace the whole list", async () => {
+    const dup = [{ format: "instagram_reel", price: 20 }, { format: "instagram_reel", price: 25 }];
+    assert.equal((await call("PUT", "/me/creator/formats", CREATOR2, { formats: dup })).status, 400);
+    assert.equal((await call("PUT", "/me/creator/formats", CREATOR2, { formats: [{ format: "tiktok_video", price: 0 }] })).status, 400);
+    const prices = await call("PUT", "/me/creator/formats", CREATOR2, { formats: [{ format: "tiktok_video", price: 30 }, { format: "instagram_reel", price: 25.5 }] });
+    assert.deepEqual(prices.body, [{ format: "tiktok_video", price: 30 }, { format: "instagram_reel", price: 25.5 }]); // in the enum's order
+    assert.equal((await call("PUT", "/me/creator/socials", CREATOR2, { socials: [{ platform: "instagram", username: "@sara" }] })).status, 400);
+    const socials = await call("PUT", "/me/creator/socials", CREATOR2, { socials: [{ platform: "tiktok", username: "sara.makes" }] });
+    assert.deepEqual(socials.body, [{ platform: "tiktok", username: "sara.makes" }]);
+  });
+
+  test("samples: own uploads only, at most 3", async () => {
+    const theirs = await call("POST", "/me/creator/portfolio", CREATOR2, { video_path: `${CREATOR}/s1.mp4` });
+    assert.equal(theirs.status, 400);
+    assert.match(theirs.body.message, /your own upload/);
+    const ids = [];
+    for (const n of [1, 2, 3]) ids.push((await call("POST", "/me/creator/portfolio", CREATOR2, { video_path: own(`s${n}.mp4`) })).body.id);
+    const fourth = await call("POST", "/me/creator/portfolio", CREATOR2, { video_path: own("s4.mp4") });
+    assert.deepEqual([fourth.status, fourth.body.message], [400, "At most 3 samples"]);
+    assert.equal((await call("DELETE", `/me/creator/portfolio/${ids[2]}`, CREATOR2)).status, 204);
+    assert.equal((await call("DELETE", `/me/creator/portfolio/${ids[2]}`, CREATOR2)).status, 404);
+    assert.equal((await call("PATCH", "/me/creator", CREATOR2, { photo_path: `${CREATOR}/photo.jpg` })).status, 400);
+    assert.equal((await call("PATCH", "/me/creator", CREATOR2, { photo_path: own("photo.jpg") })).status, 200);
+  });
+
+  test("addresses are private to the creator", async () => {
+    assert.equal((await call("POST", "/me/creator/addresses", CREATOR2, { type: "home", address_text: "Villa 12, Riffa", latitude: 26.1 })).status, 400);
+    const added = await call("POST", "/me/creator/addresses", CREATOR2, { type: "home", address_text: "Villa 12, Road 33, Riffa", latitude: 26.13, longitude: 50.55 });
+    assert.equal(added.status, 201);
+    assertShape(added.body, "Address");
+    const renamed = await call("PATCH", `/me/creator/addresses/${added.body.id}`, CREATOR2, { label: "Parents' house", latitude: null, longitude: null });
+    assert.deepEqual([renamed.body.label, renamed.body.latitude], ["Parents' house", null]);
+    assert.equal((await call("PATCH", `/me/creator/addresses/${added.body.id}`, BRAND, { label: "x" })).status, 404);
+    assert.equal((await call("GET", "/me/creator/addresses", CREATOR2)).body.length, 1);
+  });
+
+  test("send for review, then the admin decides", async () => {
+    assert.equal((await call("POST", "/me/creator/application", CREATOR2, { intro_video_path: `${CREATOR}/intro.mp4` })).status, 400);
+    const sent = await call("POST", "/me/creator/application", CREATOR2, { intro_video_path: own("intro.mp4") });
+    assert.equal(sent.status, 201);
+    assertShape(sent.body, "MyCreatorProfile");
+    assert.equal(sent.body.creator.status, "pending");
+    assert.deepEqual([sent.body.application.decision, sent.body.application.sample_paths.length], [null, 2]);
+    assert.equal((await call("POST", "/me/creator/application", CREATOR2, {})).status, 409); // already sent
+
+    assert.equal((await call("GET", "/admin/applications", BRAND)).status, 403);
+    const waiting = await call("GET", "/admin/applications", ADMIN);
+    assert.equal(waiting.status, 200);
+    assert.equal(waiting.body[0].creator.handle, "sara.makes");
+    assertShape(waiting.body[0], "PendingApplication");
+
+    const decide = (body: object, who = ADMIN) => call("POST", `/admin/creators/${CREATOR2}/decision`, who, body);
+    assert.equal((await decide({ decision: "approved" }, BRAND)).status, 403);
+    assert.equal((await decide({ decision: "changes_requested" })).status, 400); // needs a note
+    assert.equal((await decide({ decision: "changes_requested", note: "Add a daylight sample." })).status, 204);
+    const told = (await profile()).body;
+    assert.deepEqual([told.creator.status, told.application.note], ["changes_requested", "Add a daylight sample."]);
+
+    assert.equal((await call("POST", "/me/creator/application", CREATOR2, {})).status, 201); // same intro again
+    assert.equal((await decide({ decision: "approved" })).status, 204);
+    assert.equal((await decide({ decision: "approved" })).status, 409); // nothing waiting
+    const explore = (await call("GET", "/creators", BRAND)).body;
+    assert.ok(explore.some((c: { handle: string }) => c.handle === "sara.makes"));
   });
 });

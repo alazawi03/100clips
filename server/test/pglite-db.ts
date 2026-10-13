@@ -1,7 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { Caller, claimsFor, Db, Queryable, roleOf, TYPE_PARSERS } from "../src/common/db/db";
+import { Caller, claimsFor, Db, Queryable, registerEnumArrays, roleOf, TYPE_PARSERS } from "../src/common/db/db";
 
 /** What Supabase provides before our migrations run (same stand-ins as supabase/tests/db.test.mjs). */
 const SUPABASE_STANDINS = `
@@ -35,6 +35,7 @@ export class PgliteDb extends Db {
     for (const f of readdirSync(migrationsDir).filter((f) => f.endsWith(".sql") && !f.endsWith("_cron.sql")).sort()) {
       await pg.exec(readFileSync(join(migrationsDir, f), "utf8"));
     }
+    await registerEnumArrays({ query: (sql, params) => pg.query(sql, params) as never });
     return new PgliteDb(pg);
   }
 
@@ -43,7 +44,8 @@ export class PgliteDb extends Db {
       await tx.exec(`set local role ${roleOf(caller)}`);
       const { json, sub } = claimsFor(caller);
       await tx.query("select set_config('request.jwt.claims', $1, true), set_config('request.jwt.claim.sub', $2, true)", [json, sub]);
-      return fn({ query: (sql, params) => tx.query(sql, params) as never });
+      // Parsers per query, so the enum arrays registered after start-up apply too.
+      return fn({ query: (sql, params) => tx.query(sql, params, { parsers: TYPE_PARSERS }) as never });
     });
   }
 

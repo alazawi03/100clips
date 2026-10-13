@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from "@nestjs/common";
 import type { Response } from "express";
+import { InputError } from "../errors";
 
 /**
  * The database functions raise errors with a code and a message meant for people ("Choose an
@@ -16,6 +17,24 @@ const STATUS_BY_CODE: Record<string, number> = {
   "55000": HttpStatus.CONFLICT, // wrong state for this action
 };
 
+/**
+ * Constraint errors carry Postgres's wording ("violates foreign key constraint ..."). These are the
+ * ones people can hit through the API, by constraint name, in words for people.
+ */
+const CONSTRAINT_MESSAGES: Record<string, string> = {
+  campaigns_product_id_brand_id_fkey: "Pick one of this brand's products",
+  accounts_pkey: "You already have an account",
+  creators_pkey: "You already have a creator profile",
+  creators_handle_key: "That handle is taken",
+  creators_check: "Give a name in Arabic or English",
+  brands_check: "Give a name in Arabic or English",
+  creator_addresses_check: "Send both latitude and longitude, or neither",
+  creator_formats_creator_id_fkey: "Create your creator profile first",
+  creator_socials_creator_id_fkey: "Create your creator profile first",
+  creator_portfolio_creator_id_fkey: "Create your creator profile first",
+  creator_addresses_creator_id_fkey: "Create your creator profile first",
+};
+
 @Catch()
 export class DbErrorFilter implements ExceptionFilter {
   private readonly log = new Logger("API");
@@ -26,10 +45,16 @@ export class DbErrorFilter implements ExceptionFilter {
       res.status(error.getStatus()).json(error.getResponse());
       return;
     }
+    if (error instanceof InputError) {
+      res.status(HttpStatus.BAD_REQUEST).json({ statusCode: 400, message: error.message });
+      return;
+    }
     const code = (error as { code?: string })?.code;
     const status = code ? STATUS_BY_CODE[code] : undefined;
     if (status) {
-      res.status(status).json({ statusCode: status, message: (error as Error).message, code });
+      const constraint = (error as { constraint?: string }).constraint;
+      const message = (constraint && CONSTRAINT_MESSAGES[constraint]) || (error as Error).message;
+      res.status(status).json({ statusCode: status, message, code });
       return;
     }
     this.log.error(error);

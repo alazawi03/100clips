@@ -38,7 +38,7 @@ src/
     auth/                  AuthGuard, @Public(), @CurrentCaller(), Supabase token check
     db/                    Db.run (one transaction as the caller), DbErrorFilter, database.types.ts (generated)
     openapi/               /docs setup, @ApiErrors(), shared property helpers, ErrorResponse
-  <feature>/               health, waitlist, me, creators, brands, products
+  <feature>/               health, waitlist, me, creators, brands, products, campaigns, creator-profile, admin
     <feature>.module.ts    the feature's parts list
     <feature>.controller.ts  HTTP only: routes, params, status codes, 404s
     <feature>.service.ts   the work: SQL and database function calls through Db.run
@@ -56,7 +56,7 @@ src/
 - **Types come from the schema.** After a migration, run `npm run db:types` (needs `npx supabase@2 login` once).
   Entities that mirror a table `implements Tables<"table">`, so a schema change that breaks them fails
   to compile. Enum values (`ENUMS.niche`…) come from the same file.
-- **Values:** numeric and bigint arrive as numbers, timestamps as ISO strings (`TYPE_PARSERS`).
+- **Values:** numeric and bigint arrive as numbers, timestamps as ISO strings, enum arrays (niches) as lists (`TYPE_PARSERS`, `registerEnumArrays`).
 - **Every endpoint has a test** in `test/api.test.ts`, run against the real migrations.
 
 ### Adding a feature
@@ -97,6 +97,27 @@ documented fields.
 | GET | /products/:id | signed in | A product |
 | PATCH | /products/:id | brand owner | Edit a product (send `type` and `details` together) |
 | DELETE | /products/:id | brand owner | Delete a product (409 once a campaign features it) |
+| GET | /campaigns | signed in | Campaigns: owners see their brands', creators the ones offered to them (brand_id, status) |
+| POST | /brands/:brandId/campaigns | brand owner | Start a draft (every field optional) |
+| GET | /campaigns/:id | signed in | A campaign, with secrets for the owner and for creators who accepted |
+| PATCH | /campaigns/:id | brand owner | Save a draft (409 once live) |
+| DELETE | /campaigns/:id | brand owner | Delete a draft (409 once live) |
+| POST | /campaigns/:id/copy | brand owner | Run again: a new draft with the same brief and secrets |
+| PUT | /campaigns/:id/details | brand owner | Live: edit key message, references, must include, avoid (409 once a creator accepted) |
+| PUT | /campaigns/:id/deadline | brand owner | Live: move the deadline later |
+| PUT | /campaigns/:id/secrets | brand owner | App link, test account, code (creators see them once they accept) |
+| GET | /me/creator | creator | My profile, prices, socials, samples, addresses and latest application |
+| POST | /me/creator | creator | Create my creator profile (after POST /me with role creator) |
+| PATCH | /me/creator | creator | Edit my profile |
+| PUT | /me/creator/formats | creator | Set my prices (replaces the list) |
+| PUT | /me/creator/socials | creator | Set my Instagram / TikTok usernames (replaces the list) |
+| POST | /me/creator/portfolio | creator | Add a sample clip (up to 3, own uploads only) |
+| DELETE | /me/creator/portfolio/:id | creator | Remove a sample |
+| GET, POST | /me/creator/addresses | creator | My addresses / add one (up to 5) |
+| PATCH, DELETE | /me/creator/addresses/:id | creator | Edit / remove an address |
+| POST | /me/creator/application | creator | Send for review (says what's missing if incomplete) |
+| GET | /admin/applications | admin | Creators waiting for review, with the previous application |
+| POST | /admin/creators/:id/decision | admin | Approve, ask for changes or reject (note required unless approved) |
 
 Database errors come back with their message: 400 invalid input, 403 not allowed, 404 not found,
 409 wrong state or already exists.

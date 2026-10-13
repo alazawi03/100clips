@@ -44,6 +44,19 @@ export function isoTimestamp(value: string): string {
   return value.replace(" ", "T").replace(/([+-]\d\d)$/, "$1:00");
 }
 
+/**
+ * Arrays of our enums (niche[], ...) have ids that differ per database, so drivers return them as
+ * text like "{beauty,food}". Call once at start-up with the database, so they arrive as lists.
+ */
+export async function registerEnumArrays(q: Queryable) {
+  const { rows } = await q.query<{ oid: number }>(`
+    select t.typarray::int as oid from pg_type t join pg_namespace n on n.oid = t.typnamespace
+    where n.nspname = 'public' and t.typtype = 'e'
+  `);
+  const parseTextArray: (value: string) => unknown = types.getTypeParser(1009 as never); // 1009 is text[]
+  for (const { oid } of rows) TYPE_PARSERS[oid] = parseTextArray;
+}
+
 /** Pass as `types` when creating the pg Pool. */
 export const pgTypes = {
   getTypeParser: ((oid: number, format?: string) =>

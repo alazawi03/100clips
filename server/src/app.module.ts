@@ -1,11 +1,14 @@
 import { DynamicModule, INestApplication, Module, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { AdminModule } from "./admin/admin.module";
 import { BrandsModule } from "./brands/brands.module";
+import { CampaignsModule } from "./campaigns/campaigns.module";
 import { TokenVerifier } from "./common/auth/token-verifier";
 import { CoreModule } from "./common/core.module";
 import { Db } from "./common/db/db";
 import { DbErrorFilter } from "./common/db/db-error.filter";
 import { setupDocs } from "./common/openapi/docs";
+import { CreatorProfileModule } from "./creator-profile/creator-profile.module";
 import { CreatorsModule } from "./creators/creators.module";
 import { HealthModule } from "./health/health.module";
 import { MeModule } from "./me/me.module";
@@ -18,7 +21,7 @@ export class AppModule {
   static with(db: Db, verifier: TokenVerifier): DynamicModule {
     return {
       module: AppModule,
-      imports: [CoreModule.with(db, verifier), HealthModule, WaitlistModule, MeModule, CreatorsModule, BrandsModule, ProductsModule],
+      imports: [CoreModule.with(db, verifier), HealthModule, WaitlistModule, MeModule, CreatorsModule, BrandsModule, ProductsModule, CampaignsModule, CreatorProfileModule, AdminModule],
     };
   }
 }
