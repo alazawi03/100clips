@@ -1,27 +1,57 @@
+import { Search } from "lucide-react";
+import { ActiveCampaigns } from "@/components/brand/home/ActiveCampaigns";
+import { NeedsYou } from "@/components/brand/home/NeedsYou";
+import { ReadyForReview } from "@/components/brand/home/ReadyForReview";
+import { ResultsRow } from "@/components/brand/home/ResultsRow";
 import { Welcome } from "@/components/brand/home/Welcome";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { BrandFilter } from "@/components/brand/BrandFilter";
-import { myBrands, productsOf } from "@/lib/data/brandsApi";
+import { LinkButton } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { brandFilterOf, hasManyBrands } from "@/lib/brandFilter";
+import { workspace } from "@/lib/data/live";
+import { needsYou, results } from "@/lib/dashboard";
 import { getI18n } from "@/lib/i18n/server";
+import { today } from "@/lib/today";
 
 /**
- * The brand's home. Campaigns and orders aren't on the API yet, so every account is at the start:
- * the welcome (how it works, one way in, and what's left to set up for each brand). Results, what
- * needs them now and clips to review come back here with the campaigns and orders slices.
+ * The brand's home: results at a glance, what needs them now, clips to review, and running campaigns.
+ * Before the first campaign it's a welcome instead: how it works, one way in, and what's left to set up.
  */
 export default async function BrandHome({ searchParams }: PageProps<"/dashboard">) {
   const i18n = await getI18n();
-  const brands = await myBrands();
-  const raw = (await searchParams).brand;
-  const brandId = brands.length > 1 && brands.some((b) => b.id === raw) ? (raw as string) : undefined;
-  const shown = brandId ? brands.filter((b) => b.id === brandId) : brands;
-  const productCounts = Object.fromEntries(await Promise.all(shown.map(async (b) => [b.id, (await productsOf(b.id)).length] as const)));
+  const ws = await workspace();
+  const brandId = brandFilterOf((await searchParams).brand, ws.brands);
+  const orders = brandId ? ws.orders.filter((o) => o.brandId === brandId) : ws.orders;
+  // Drafts don't count: the welcome stays until something was paid for.
+  const campaigns = (brandId ? ws.campaigns.filter((c) => c.brandId === brandId) : ws.campaigns).filter((c) => c.status !== "draft");
+  const fresh = campaigns.length === 0 && orders.length === 0;
+  const shownBrands = brandId ? ws.brands.filter((b) => b.id === brandId) : ws.brands;
+  const day = today();
 
   return (
     <div className="flex flex-col gap-10">
-      {brands.length > 1 && <BrandFilter brands={brands.map((b) => ({ id: b.id, name: i18n.f.pick(b.name), logo: b.logo }))} value={brandId} />}
-      <PageHeader title={i18n.t("nav.dashboard")} />
-      <Welcome brands={shown} productCounts={productCounts} i18n={i18n} />
+      {hasManyBrands(ws.brands) && <BrandFilter brands={ws.brands.map((b) => ({ id: b.id, name: i18n.f.pick(b.name), logo: b.logo }))} value={brandId} />}
+
+      <PageHeader title={i18n.t("nav.dashboard")}>
+        {/* The welcome has its own way in; one gradient button per screen. */}
+        {!fresh && (
+          <LinkButton href="/explore" variant="hero">
+            <Search aria-hidden />
+            {i18n.t("nav.hireCreator")}
+          </LinkButton>
+        )}
+      </PageHeader>
+
+      {fresh ? (
+        <Welcome brands={shownBrands} productCounts={Object.fromEntries(shownBrands.map((b) => [b.id, ws.productsOf(b.id).length]))} i18n={i18n} />
+      ) : (
+        <>
+          <ResultsRow results={results(orders, day)} i18n={i18n} />
+          <NeedsYou items={needsYou(orders, day, ws)} i18n={i18n} />
+          <ReadyForReview orders={orders} i18n={i18n} />
+          <ActiveCampaigns campaigns={campaigns} i18n={i18n} />
+        </>
+      )}
     </div>
   );
 }

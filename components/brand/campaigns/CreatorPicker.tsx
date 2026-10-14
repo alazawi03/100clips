@@ -26,6 +26,7 @@ export type InviteCreator = {
   showsFace?: boolean;
   inCampaign: boolean;
   packages: Array<{ format: ContentFormat; label: string; price: number }>;
+  photo?: string;
 };
 
 export type PickerOptions = {
@@ -285,7 +286,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                   const added = ticked.has(c.id);
                   return (
                     <li key={c.id} className="flex items-center gap-3 px-5 py-3">
-                      <Avatar id={c.id} name={c.name} size="sm" />
+                      <Avatar id={c.id} name={c.name} src={c.photo} size="sm" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-medium">{c.name}</span>
                         <span className="block truncate text-small text-text-muted">
@@ -353,7 +354,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                 return (
                   <li key={c.id} id={`invitee-${c.id}`} className="flex flex-col gap-3 px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <Avatar id={c.id} name={c.name} size="md" />
+                      <Avatar id={c.id} name={c.name} src={c.photo} size="md" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-medium">{c.name}</span>
                         <span className="block truncate text-small text-text-muted">

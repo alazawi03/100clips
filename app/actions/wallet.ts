@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { FormState } from "@/app/actions/brand";
-import { getOrder } from "@/lib/data/orders";
+import { workspace } from "@/lib/data/live";
 import { ACTIVE_MARKETS } from "@/lib/data/markets";
 import { addProblemReport } from "@/lib/data/problems";
 import { PROBLEM_REASONS, type ProblemReason } from "@/lib/data/types";
@@ -54,7 +54,7 @@ export async function removeBankAccount() {
 
 /** "Report a problem" on an order: a reason and what happened, for 100clips support. */
 export async function reportProblem(orderId: string, _prev: FormState, form: FormData): Promise<FormState> {
-  const order = getOrder(orderId);
+  const order = (await workspace()).order(orderId);
   const reason = text(form, "reason");
   const details = text(form, "details").slice(0, 1000);
   const errors: NonNullable<FormState>["errors"] = {};

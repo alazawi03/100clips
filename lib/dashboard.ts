@@ -1,5 +1,4 @@
-import { products } from "@/lib/data/account";
-import { getCampaign } from "@/lib/data/campaigns";
+import type { Workspace } from "@/lib/data/live";
 import type { Campaign, Order } from "@/lib/data/types";
 import { brandPaid } from "@/lib/fees";
 import { actionWaitingDays, nextAction } from "@/lib/orderFlow";
@@ -11,9 +10,9 @@ import { campaignProgress } from "@/lib/statuses";
  */
 
 /** Whether the order's product is physical, and whether it comes back after filming. */
-export function productFlow(order: Order) {
-  const campaign = order.campaignId ? getCampaign(order.campaignId) : undefined;
-  const product = campaign ? products.find((p) => p.id === campaign.productIds?.[0]) : undefined;
+export function productFlow(order: Order, ws: Pick<Workspace, "campaign" | "product">) {
+  const campaign = ws.campaign(order.campaignId);
+  const product = campaign ? ws.product(campaign.productIds?.[0]) : undefined;
   const logistics = product && campaign ? campaign.logistics?.[product.id] : undefined;
   return {
     physical: product?.details.type === "physical",
@@ -30,11 +29,11 @@ export type Attention =
   | { kind: "declined"; orders: Order[]; campaign: Campaign };
 
 /** One entry per kind of thing the brand has to do, most urgent first. */
-export function needsYou(orders: Order[], today: string): Attention[] {
+export function needsYou(orders: Order[], today: string, ws: Pick<Workspace, "campaign" | "product">): Attention[] {
   const out: Attention[] = [];
   for (const kind of ["review", "ship", "collect"] as const) {
     const these = orders
-      .filter((o) => nextAction(o, productFlow(o)) === kind)
+      .filter((o) => nextAction(o, productFlow(o, ws)) === kind)
       .map((o) => ({ order: o, days: actionWaitingDays(o, kind, today) }))
       .sort((a, b) => b.days - a.days);
     if (these.length > 0) out.push({ kind, orders: these.map((t) => t.order), waitingDays: these[0].days });
@@ -47,7 +46,7 @@ export function needsYou(orders: Order[], today: string): Attention[] {
     byCampaign.set(o.campaignId, [...(byCampaign.get(o.campaignId) ?? []), o]);
   }
   for (const [id, declined] of byCampaign) {
-    const campaign = getCampaign(id);
+    const campaign = ws.campaign(id);
     if (!campaign) continue;
     const status = campaignProgress(campaign, orders).status;
     if (status === "pending" || status === "in_progress") out.push({ kind: "declined", orders: declined, campaign });

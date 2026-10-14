@@ -2,14 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { inviteToCampaign } from "@/app/actions/brand";
-import { InviteForm, type InviteCreator } from "@/components/brand/campaigns/InviteForm";
-import { account } from "@/lib/data/account";
-import { getCampaign } from "@/lib/data/campaigns";
-import { bookableCreators } from "@/lib/data/creators";
+import { InviteForm } from "@/components/brand/campaigns/InviteForm";
+import { inviteView, pickerLists } from "@/components/brand/campaigns/campaignView";
 import { NICHES } from "@/lib/data/creatorFilters";
-import { allLists, creatorsIn } from "@/lib/data/lists";
-import { orders } from "@/lib/data/orders";
-import type { Creator } from "@/lib/data/types";
+import { workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 import { isActiveOrder } from "@/lib/statuses";
 
@@ -19,27 +15,19 @@ import { isActiveOrder } from "@/lib/statuses";
  */
 export default async function InvitePage({ params, searchParams }: PageProps<"/campaigns/[id]/invite">) {
   const { id } = await params;
-  const campaign = getCampaign(id);
-  if (!campaign || campaign.status === "cancelled") notFound();
-  const { t, f } = await getI18n();
+  const ws = await workspace();
+  const campaign = ws.campaign(id);
+  if (!campaign || campaign.status !== "in_progress") notFound();
+  const i18n = await getI18n();
+  const { t, f } = i18n;
   const query = await searchParams;
-  const inCampaign = new Set(orders.filter((o) => o.campaignId === id && isActiveOrder(o)).map((o) => o.creatorId));
+  const inCampaign = new Set(ws.orders.filter((o) => o.campaignId === id && isActiveOrder(o)).map((o) => o.creatorId));
+  const view = (c: (typeof ws.bookable)[number]) => inviteView(c, i18n, inCampaign.has(c.id));
 
-  const view = (c: Creator): InviteCreator => ({
-    id: c.id,
-    name: f.pick(c.name),
-    handle: c.handle,
-    city: f.pick(c.city),
-    niches: c.niches,
-    inCampaign: inCampaign.has(c.id),
-    showsFace: c.showsFace,
-    packages: c.formats.map((o) => ({ format: o.format, label: t(`formats.${o.format}`), price: o.price })),
-  });
-
-  const lists = allLists().map((l) => ({ id: l.id, name: l.favorites ? t("lists.favorites") : l.name, creators: creatorsIn(l).map(view) }));
+  const lists = await pickerLists(ws, i18n, (creatorId) => inCampaign.has(creatorId));
   // ?creators=a,b from creator cards or a profile; ?list= from a list's "Invite to campaign".
   const presetIds = typeof query.creators === "string" ? query.creators.split(",") : [];
-  const preset = bookableCreators().filter((c) => presetIds.includes(c.id));
+  const preset = ws.bookable.filter((c) => presetIds.includes(c.id));
   const listId = typeof query.list === "string" && lists.some((l) => l.id === query.list) ? query.list : undefined;
 
   return (
@@ -55,11 +43,11 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/c
       <InviteForm
         action={inviteToCampaign.bind(null, id)}
         lists={lists}
-        explore={{ creators: bookableCreators().map(view), niches: NICHES.map((n) => ({ id: n, label: t(`niches.${n}`) })) }}
+        explore={{ creators: ws.bookable.map(view), niches: NICHES.map((n) => ({ id: n, label: t(`niches.${n}`) })) }}
         preset={preset.length > 0 ? preset.map(view) : undefined}
         initialListId={listId ?? lists.find((l) => l.creators.length > 0)?.id ?? "explore"}
         tickList={!!listId}
-        balance={account.balance}
+        balance={ws.balance}
       />
     </div>
   );

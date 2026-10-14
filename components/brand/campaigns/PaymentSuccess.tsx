@@ -14,11 +14,14 @@ const CHECK = 36;
  */
 export function PaymentSuccess({
   creators,
+  pending,
   t,
   tp,
   children,
 }: {
   creators: Array<{ id: string; name: string }>;
+  /** Part was paid by card and waits for it to be confirmed: the offers go out then. */
+  pending?: boolean;
   t: Translator["t"];
   tp: Translator["tp"];
   children?: ReactNode;
@@ -35,8 +38,8 @@ export function PaymentSuccess({
       </svg>
 
       <div className="flex flex-col gap-1 motion-safe:animate-[fade-up_400ms_ease-out_650ms_both]">
-        <h2 className="text-h2 font-medium">{t("campaignDetail.paidTitle")}</h2>
-        <p className="text-text-muted">{tp("campaignDetail.paidSentTo", creators.length)}</p>
+        <h2 className="text-h2 font-medium">{pending ? t("campaignDetail.cardPendingTitle") : t("campaignDetail.paidTitle")}</h2>
+        <p className="text-text-muted">{pending ? t("campaignDetail.cardPendingBody") : tp("campaignDetail.paidSentTo", creators.length)}</p>
       </div>
 
       {creators.length > 0 && (
@@ -54,9 +57,11 @@ export function PaymentSuccess({
         </ul>
       )}
 
-      <p className="text-small text-text-muted motion-safe:animate-[fade-up_400ms_ease-out_both]" style={{ animationDelay: `${last}ms` }}>
-        {t("campaignDetail.paidNext")}
-      </p>
+      {!pending && (
+        <p className="text-small text-text-muted motion-safe:animate-[fade-up_400ms_ease-out_both]" style={{ animationDelay: `${last}ms` }}>
+          {t("campaignDetail.paidNext")}
+        </p>
+      )}
 
       {children && (
         <div className="mt-2 flex flex-col items-center gap-3 motion-safe:animate-[fade-up_400ms_ease-out_both]" style={{ animationDelay: `${last + 100}ms` }}>

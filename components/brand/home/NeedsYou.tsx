@@ -2,7 +2,7 @@ import { UserPlus } from "lucide-react";
 import { ActionCallout, CalmCallout } from "@/components/brand/ActionCallout";
 import { SectionHeader } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
-import { getCreator } from "@/lib/data/creators";
+import { workspace } from "@/lib/data/live";
 import type { Attention } from "@/lib/dashboard";
 import type { I18n } from "@/lib/i18n/server";
 
@@ -10,9 +10,10 @@ import type { I18n } from "@/lib/i18n/server";
  * One callout per kind of thing the brand has to do, across all its campaigns. Same cards and words
  * as the campaign page's banner, plus declines on running campaigns (invite someone else).
  */
-export function NeedsYou({ items, i18n }: { items: Attention[]; i18n: I18n }) {
+export async function NeedsYou({ items, i18n }: { items: Attention[]; i18n: I18n }) {
   const { t, tp, f } = i18n;
-  const names = (item: Attention) => item.orders.map((o) => f.pick(getCreator(o.creatorId)?.name ?? { ar: "", en: "" })).join(t("common.separator"));
+  const { creator } = await workspace();
+  const names = (item: Attention) => item.orders.map((o) => f.pick(creator(o.creatorId)?.name ?? { ar: "", en: "" })).join(t("common.separator"));
   const button = (href: string, label: string) => (
     <LinkButton href={href} variant="primary" className="h-9 shrink-0 md:h-9">
       {label}

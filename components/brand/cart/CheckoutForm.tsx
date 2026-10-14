@@ -75,7 +75,7 @@ const styleIcon: Record<VideoStyle, LucideIcon> = { ad: Megaphone, review: Star,
 
 /** Which step holds a field, so a server error can send you back to it. */
 const baseStepOf = (name: string) =>
-  name.startsWith("card") ? 2 : name.startsWith("reference-") || ["title", "brief", "videoStyle", "deadline", "keyMessage", "mustInclude", "avoid"].includes(name) ? 1 : 0;
+  name.startsWith("card") || name === "pay" ? 2 : name.startsWith("reference-") || ["title", "brief", "videoStyle", "deadline", "keyMessage", "mustInclude", "avoid"].includes(name) ? 1 : 0;
 
 /** What DateInput sends for a full, real date. */
 const isIsoDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -170,7 +170,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
   useEffect(() => {
     if (!paid) return;
     window.scrollTo({ top: 0 });
-    const timer = setTimeout(() => window.location.replace(`/campaigns/${paid.campaignId}`), REDIRECT_MS);
+    const timer = setTimeout(() => window.location.replace(paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`), REDIRECT_MS);
     return () => clearTimeout(timer);
   }, [paid]);
   const [step, setStep] = useState(0);
@@ -285,15 +285,15 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
 
   // Paid: the success screen replaces the form, then the campaign opens after a few seconds.
   if (paid) {
-    const href = `/campaigns/${paid.campaignId}`;
+    const href = paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`;
     return (
-      <PaymentSuccess t={t} tp={tp} creators={paid.creators.map((c) => ({ id: c.id, name: f.pick(c.name) }))}>
+      <PaymentSuccess t={t} tp={tp} pending={paid.pending} creators={paid.creators.map((c) => ({ id: c.id, name: f.pick(c.name) }))}>
         <p className="text-small text-text-muted">{t("checkout.redirecting")}</p>
         <span aria-hidden className="block h-1 w-40 overflow-hidden rounded-full bg-surface">
           <span className="block h-full origin-left bg-primary motion-safe:animate-[fill_3s_linear_both] rtl:origin-right" />
         </span>
         <Link href={href} replace className={buttonClass("secondary")}>
-          {t("checkout.viewCampaign")}
+          {paid.pending ? t("campaignsPage.title") : t("checkout.viewCampaign")}
         </Link>
       </PaymentSuccess>
     );
@@ -528,7 +528,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
                         {/* Title on one side, "+ Add another" on the other. */}
                         <legend className="mb-2 flex w-full items-center justify-between gap-3 font-medium">
                           {t("checkout.references")}
-                          {refList.length < 5 && (
+                          {refList.length < 3 && (
                             <button
                               type="button"
                               onClick={() => setRefList((list) => [...list, ""])}

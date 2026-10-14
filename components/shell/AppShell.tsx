@@ -2,9 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { MessageCircle, ShoppingBag, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
-import { account, DEMO_NOW } from "@/lib/data/account";
+import { workspace } from "@/lib/data/live";
 import { unreadCount } from "@/lib/data/messages";
-import { cartOf, expireOffers } from "@/lib/data/store";
 import { getTheme } from "@/lib/theme";
 import { getI18n } from "@/lib/i18n/server";
 import { displayName, getUser, requireBrandAccount } from "@/lib/session";
@@ -20,14 +19,13 @@ export async function AppShell({ children }: { children: ReactNode }) {
   // Signed in (proxy.ts) with a brand owner's account; otherwise onboarding first.
   const me = await requireBrandAccount();
   const user = await getUser();
-  // Offers nobody answered in time give their money back before anything is shown.
-  expireOffers(DEMO_NOW);
   const i18n = await getI18n();
   const { t, f } = i18n;
-  const notifications = notificationRows(i18n, 8);
-  const cartCount = cartOf().length;
+  const ws = await workspace();
+  const notifications = await notificationRows(i18n, 8);
+  const cartCount = ws.cart.length;
   const unread = unreadCount();
-  const balanceLabel = t("header.balanceShort", { amount: f.money(account.balance) });
+  const balanceLabel = t("header.balanceShort", { amount: f.money(ws.balance) });
 
   return (
     <div className="min-h-dvh">
@@ -46,7 +44,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
               className="hidden h-9 items-center gap-1.5 rounded-full bg-surface px-3 text-small font-medium tabular-nums hover:bg-border sm:flex"
             >
               <Wallet aria-hidden className="size-4 text-text-muted" strokeWidth={1.75} />
-              {f.money(account.balance)}
+              {f.money(ws.balance)}
             </Link>
             <div className="hidden sm:block">
               <LanguageToggle />

@@ -16,16 +16,13 @@ import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
-import { DEMO_TODAY, getBrand } from "@/lib/data/account";
-import { getCampaign } from "@/lib/data/campaigns";
-import { getCreator } from "@/lib/data/creators";
-import { orders as allOrders } from "@/lib/data/orders";
-import { nobodyAccepted } from "@/lib/data/store";
-import type { Platform } from "@/lib/data/types";
+import { workspace, type Workspace } from "@/lib/data/live";
+import type { Campaign, Platform } from "@/lib/data/types";
 import { getI18n, type I18n } from "@/lib/i18n/server";
 import { eventsOf } from "@/lib/orderFlow";
 import { campaignProgress } from "@/lib/statuses";
 import { cn } from "@/lib/cn";
+import { nextDay, today } from "@/lib/today";
 
 
 /** Which platform a reference link points to, for its logo. */
@@ -33,13 +30,6 @@ function platformOfUrl(url: string): Platform | undefined {
   const host = url.replace(/^https?:\/\/(www\.|m\.)?/, "").split("/")[0];
   if (host.endsWith("tiktok.com")) return "tiktok";
   if (host.endsWith("instagram.com")) return "instagram";
-}
-
-/** "2026-10-03" → "2026-10-04". */
-function nextDay(iso: string) {
-  const d = new Date(`${iso}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + 1);
-  return d.toISOString().slice(0, 10);
 }
 
 /** Brand actions first (late ones first), in the order they unblock creators. */
@@ -54,28 +44,29 @@ export default async function CampaignDetailPage({ params, searchParams }: PageP
   const { id } = await params;
   // Set by the ⋯ menu after saving: confirm it, and mark what changed.
   const { done } = await searchParams;
-  const campaign = getCampaign(id);
+  const ws = await workspace();
+  const campaign = ws.campaign(id);
   if (!campaign) notFound();
   // A draft has nothing to show yet: it opens where it was left.
   if (campaign.status === "draft") redirect(`/campaigns/new?draft=${campaign.id}`);
   const i18n = await getI18n();
   const { t, tp, f } = i18n;
 
-  const brand = getBrand(campaign.brandId);
-  const { product } = productOf(campaign);
+  const brand = ws.brand(campaign.brandId);
+  const { product } = productOf(campaign, ws);
   const productName = product ? f.pick(product.name) : "";
-  const its = allOrders.filter((o) => o.campaignId === campaign.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  const views = its.map((o) => orderCardView(o, campaign, i18n));
-  const progress = campaignProgress(campaign, allOrders);
+  const its = ws.orders.filter((o) => o.campaignId === campaign.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const views = its.map((o) => orderCardView(o, campaign, i18n, ws));
+  const progress = campaignProgress(campaign, ws.orders);
   const cancelled = campaign.status === "cancelled";
-  // Edits only while no creator is held to the old details.
-  const canEdit = nobodyAccepted(campaign.id) && !cancelled;
+  // Edits only while no creator is held to the old details (every offer still waiting, or ended unanswered).
+  const canEdit = its.every((o) => o.status === "pending" || o.status === "cancelled" || o.status === "declined") && !cancelled;
   // A later deadline only helps creators who still owe a clip.
   const canExtend = !!campaign.deadline && its.some((o) => o.status === "pending" || o.status === "in_progress");
   const extended = campaign.events?.some((e) => e.type === "deadlineMoved") ?? false;
   const lastEdit = campaign.events?.findLast((e) => e.type === "detailsEdited");
   const lastEditFields = lastEdit?.type === "detailsEdited" && lastEdit.changes?.length ? lastEdit.changes.map((c) => t(DETAIL_LABEL[c.field])).join(t("common.separator")) : undefined;
-  const tomorrow = nextDay(DEMO_TODAY);
+  const tomorrow = nextDay(today());
 
   /* ---------- Header ---------- */
   const header = (
@@ -187,7 +178,7 @@ export default async function CampaignDetailPage({ params, searchParams }: PageP
 
   /* ---------- Activity ---------- */
   const events = [
-    ...its.flatMap((o) => eventsOf(o).map((e, i) => ({ ...e, key: `${o.id}-${i}`, text: t(`flow.events.${e.type}`, { name: f.pick(getCreator(o.creatorId)!.name) }) }))),
+    ...its.flatMap((o) => eventsOf(o).map((e, i) => ({ ...e, key: `${o.id}-${i}`, text: t(`flow.events.${e.type}`, { name: f.pick(ws.creator(o.creatorId)!.name) }) }))),
     ...(campaign.createdAt ? [{ type: "created", at: campaign.createdAt, key: "created", text: t("campaignDetail.campaignCreated") }] : []),
     ...(campaign.events ?? []).map((e, i) => ({
       ...e,
@@ -244,7 +235,7 @@ export default async function CampaignDetailPage({ params, searchParams }: PageP
       <CampaignLayout
         banner={banner}
         orders={ordersSection}
-        brief={<BriefPanel campaignId={campaign.id} i18n={i18n} justEdited={done === "detailsEdited"} />}
+        brief={<BriefPanel campaign={campaign} ws={ws} i18n={i18n} justEdited={done === "detailsEdited"} />}
         clips={<ClipsGallery items={clipItems} />}
         activity={activity}
       />
@@ -276,7 +267,7 @@ function Timeline({ events, i18n }: { events: TimelineEvent[]; i18n: I18n }) {
               </dl>
             )}
             {/* Edits carry a time, so they show it; order events are by day. */}
-            <span className="text-caption text-text-muted">{e.at.length > 10 ? f.messageTime(e.at, DEMO_TODAY) : f.date(e.at.slice(0, 10))}</span>
+            <span className="text-caption text-text-muted">{e.at.length > 10 ? f.messageTime(e.at, today()) : f.date(e.at.slice(0, 10))}</span>
           </span>
         </li>
       ))}
@@ -285,11 +276,10 @@ function Timeline({ events, i18n }: { events: TimelineEvent[]; i18n: I18n }) {
 }
 
 /** Read-only brief: the basics locked at payment, the extra details, logistics and notes. */
-function BriefPanel({ campaignId, i18n, justEdited }: { campaignId: string; i18n: I18n; justEdited?: boolean }) {
+function BriefPanel({ campaign, ws, i18n, justEdited }: { campaign: Campaign; ws: Workspace; i18n: I18n; justEdited?: boolean }) {
   const { t, f } = i18n;
-  const campaign = getCampaign(campaignId)!;
-  const { product, returns, physical } = productOf(campaign);
-  const notes = allOrders.filter((o) => o.campaignId === campaignId && o.note);
+  const { product, returns, physical } = productOf(campaign, ws);
+  const notes = ws.orders.filter((o) => o.campaignId === campaign.id && o.note);
   // Marked so creators and the brand can tell the details changed after the offer went out.
   const editedAt = campaign.events?.findLast((e) => e.type === "detailsEdited")?.at;
   return (
@@ -310,7 +300,7 @@ function BriefPanel({ campaignId, i18n, justEdited }: { campaignId: string; i18n
           </BriefGroup>
 
           {(campaign.keyMessage || campaign.references?.length || campaign.mustInclude || campaign.avoid || product?.benefits.length || product?.concerns.length) && (
-            <BriefGroup title={t("campaignDetail.stage2")} hint={editedAt ? t("campaignDetail.edited", { date: f.messageTime(editedAt, DEMO_TODAY) }) : undefined} highlight={justEdited}>
+            <BriefGroup title={t("campaignDetail.stage2")} hint={editedAt ? t("campaignDetail.edited", { date: f.messageTime(editedAt, today()) }) : undefined} highlight={justEdited}>
               {campaign.keyMessage && <BriefRow label={t("checkout.keyMessage")}>{campaign.keyMessage}</BriefRow>}
               {campaign.references && campaign.references.length > 0 && (
                 <BriefRow label={t("checkout.references")}>
@@ -377,7 +367,7 @@ function BriefPanel({ campaignId, i18n, justEdited }: { campaignId: string; i18n
           {notes.length > 0 && (
             <BriefGroup title={t("campaignDetail.notesTitle")}>
               {notes.map((o) => (
-                <BriefRow key={o.id} label={f.pick(getCreator(o.creatorId)!.name)}>
+                <BriefRow key={o.id} label={f.pick(ws.creator(o.creatorId)!.name)}>
                   {o.note}
                 </BriefRow>
               ))}

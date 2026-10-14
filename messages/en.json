@@ -146,7 +146,10 @@
       "editLocked": "A creator has already accepted, so the details can't change now.",
       "deadlineLater": "Choose a date after the current deadline.",
       "brandSuspended": "This brand is suspended by 100clips, so it can't pay for new work. Contact support.",
-      "saveFailed": "Couldn't save. Try again."
+      "saveFailed": "Couldn't save. Try again.",
+      "payFailed": "Couldn't complete the payment. Try again.",
+      "creatorUnavailable": "One of these creators can't take new work right now. Remove them and try again.",
+      "alreadyOffered": "One of these creators already has an offer on this campaign."
     },
     "datePlaceholder": "DD/MM/YYYY",
     "openCalendar": "Open calendar"
@@ -298,7 +301,16 @@
     "detailsEditedFields": "You edited {fields}",
     "deadlineMovedFrom": "Deadline moved from {from} to {to}",
     "emptyValue": "(empty)",
-    "doneDetailsEditedFields": "Details saved: {fields} changed. Creators see the update in their offer."
+    "doneDetailsEditedFields": "Details saved: {fields} changed. Creators see the update in their offer.",
+    "cardPendingTitle": "Waiting for the card payment",
+    "cardPendingBody": "Your offers go out as soon as the card payment is confirmed.",
+    "shipTo": "Send it to",
+    "shipToPhone": "Phone: {phone}",
+    "openMap": "Open in Maps",
+    "addressTypes": {
+      "home": "Home",
+      "work": "Work"
+    }
   },
   "ordersPage": {
     "title": "Orders",
@@ -429,7 +441,9 @@
         "tooSmall": "Enter at least 1 BHD.",
         "tooMuch": "That's more than your available balance."
       }
-    }
+    },
+    "cardPending": "{amount} by card, waiting for confirmation",
+    "cardPaymentLabel": "Paid by card"
   },
   "industries": {
     "food_beverage": "Food & beverage",
@@ -508,7 +522,7 @@
     "cardExpiry": "Expiry",
     "cardExpiryPlaceholder": "MM/YY",
     "cardCvc": "Security code",
-    "demoCard": "This is a demo form. Nothing is charged.",
+    "demoCard": "Card payments aren't live yet: nothing is charged, and 100clips confirms the payment by hand.",
     "pay": "Pay {amount}",
     "payBalance": "Pay from balance",
     "summary": "Order summary",
@@ -1069,7 +1083,8 @@
       "later": "Not now",
       "bodyOrder": "Your order becomes a campaign for one of your brands and the product its clips show. It takes a couple of minutes, and you'll come straight back to finish your order.",
       "step3Order": "Come back and finish your order: the brief and payment."
-    }
+    },
+    "cardPending": "Waiting for the card payment"
   },
   "admin": {
     "title": "Admin",
@@ -1084,7 +1099,8 @@
       "approvals": "Approvals",
       "orders": "Orders",
       "users": "Users",
-      "reports": "Reports"
+      "reports": "Reports",
+      "payments": "Card payments"
     },
     "ranges": {
       "30d": "Last 30 days",
@@ -1619,6 +1635,19 @@
         "one": "1 request",
         "other": "{count} requests"
       }
+    },
+    "payments": {
+      "title": "Card payments",
+      "subtitle": "Until the card provider is connected, confirm each card payment here once the money is in. Confirming sends the offers, or adds the top-up to the balance.",
+      "empty": "No card payments waiting.",
+      "checkout": "Campaign · {campaign}",
+      "topUp": "Balance top-up",
+      "amounts": "{card} by card, of {total}",
+      "confirm": "Confirm",
+      "fail": "Mark failed",
+      "done": "Payment confirmed.",
+      "doneFailed": "Payment marked failed.",
+      "error": "Couldn't update the payment. Try again."
     }
   },
   "offer": {

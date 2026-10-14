@@ -16,6 +16,7 @@ import { priceForBrand } from "@/lib/fees";
 type Props = {
   creatorId: string;
   creatorName: string;
+  photo?: string;
   location: string;
   offers: FormatOffer[];
   quantities: Partial<Record<ContentFormat, number>>;
@@ -25,7 +26,7 @@ type Props = {
  * One creator in the cart, on its own card: one video in one format (one order = one video).
  * Switching format or removing is saved straight away; the totals refresh from the server.
  */
-export function CartLineEditor({ creatorId, creatorName, location, offers, quantities }: Props) {
+export function CartLineEditor({ creatorId, creatorName, photo, location, offers, quantities }: Props) {
   const { t, locale } = useI18n();
   const f = createFormatters(locale);
   const [format, setFormat] = useState<ContentFormat | undefined>(() => offers.find((o) => (quantities[o.format] ?? 0) > 0)?.format);
@@ -45,7 +46,7 @@ export function CartLineEditor({ creatorId, creatorName, location, offers, quant
       <Card className={cn("overflow-hidden transition-opacity", pending && "opacity-70")}>
         <div className="flex items-center gap-3 p-4">
           <Link href={`/creators/${creatorId}`} className="rounded-full">
-            <Avatar id={creatorId} name={creatorName} size="md" />
+            <Avatar id={creatorId} name={creatorName} src={photo} size="md" />
           </Link>
           <div className="min-w-0 flex-1">
             <Link href={`/creators/${creatorId}`} className="block truncate font-medium hover:underline">

@@ -1,5 +1,4 @@
-import { getCampaign } from "@/lib/data/campaigns";
-import { getCreator } from "@/lib/data/creators";
+import type { Workspace } from "@/lib/data/live";
 import type { Order } from "@/lib/data/types";
 import { eventsOf, isLate } from "@/lib/orderFlow";
 
@@ -20,7 +19,7 @@ export type BrandNotification = {
   creatorId: string;
 };
 
-export function brandNotifications(orders: Order[], today: string): BrandNotification[] {
+export function brandNotifications(orders: Order[], today: string, ws: Pick<Workspace, "campaign" | "creator">): BrandNotification[] {
   const out: BrandNotification[] = [];
   for (const order of orders) {
     const events = [...eventsOf(order)].reverse(); // oldest first, to tell a first upload from a new version
@@ -46,10 +45,10 @@ export function brandNotifications(orders: Order[], today: string): BrandNotific
     const lastUpload = events.findLast((e) => e.type === "uploaded");
     if (order.adCode && lastUpload) out.push({ key: `${order.id}-ad`, kind: "adCode", at: lastUpload.at, orderId: order.id, creatorId: order.creatorId });
     // Past the deadline with no clip yet: dated the day after the deadline.
-    const deadline = order.campaignId ? getCampaign(order.campaignId)?.deadline : undefined;
+    const deadline = order.deadline ?? ws.campaign(order.campaignId)?.deadline;
     if (deadline && isLate(order, deadline, today)) out.push({ key: `${order.id}-late`, kind: "late", at: nextDay(deadline), orderId: order.id, creatorId: order.creatorId });
   }
-  return out.filter((n) => getCreator(n.creatorId)).sort((a, b) => b.at.localeCompare(a.at));
+  return out.filter((n) => ws.creator(n.creatorId)).sort((a, b) => b.at.localeCompare(a.at));
 }
 
 /** Notifications newer than the last time the brand marked them read. */

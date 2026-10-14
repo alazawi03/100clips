@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowLeftRight, Flag, LayoutDashboard, Package, UserCheck, Users, Wallet, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, CreditCard, Flag, LayoutDashboard, Package, UserCheck, Users, Wallet, type LucideIcon } from "lucide-react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
 import type { MessageKey } from "@/lib/i18n/messages";
@@ -13,6 +13,7 @@ const items: Item[] = [
   { href: "/admin", label: "admin.nav.overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/approvals", label: "admin.nav.approvals", icon: UserCheck },
   { href: "/admin/orders", label: "admin.nav.orders", icon: Package },
+  { href: "/admin/payments", label: "admin.nav.payments", icon: CreditCard },
   { href: "/admin/payouts", label: "admin.nav.payouts", icon: ArrowLeftRight },
   { href: "/admin/reports", label: "admin.nav.reports", icon: Flag },
   { href: "/admin/money", label: "admin.nav.money", icon: Wallet },

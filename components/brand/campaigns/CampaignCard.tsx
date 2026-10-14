@@ -5,9 +5,7 @@ import { DeleteDraftButton } from "./DeleteDraftButton";
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
 import { hasManyBrands } from "@/lib/brandFilter";
-import { getBrand, productsOf } from "@/lib/data/account";
-import { getCreator } from "@/lib/data/creators";
-import { orders } from "@/lib/data/orders";
+import { pendingPayments, workspace } from "@/lib/data/live";
 import type { Campaign } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 import { campaignProgress, isActiveOrder } from "@/lib/statuses";
@@ -17,16 +15,19 @@ import { withFee } from "@/lib/fees";
  * One campaign in the list. The brand's name only when the list shows every brand of an account that has
  * several; the product's only when its brand has more than one. A draft opens where it was left.
  */
-export function CampaignCard({ campaign, i18n, showBrand }: { campaign: Campaign; i18n: I18n; showBrand: boolean }) {
+export async function CampaignCard({ campaign, i18n, showBrand }: { campaign: Campaign; i18n: I18n; showBrand: boolean }) {
   const { t, f } = i18n;
-  const progress = campaignProgress(campaign, orders);
+  const [ws, pending] = await Promise.all([workspace(), pendingPayments()]);
+  const progress = campaignProgress(campaign, ws.orders);
   const draft = campaign.status === "draft";
-  const brand = showBrand && hasManyBrands() ? getBrand(campaign.brandId) : undefined;
+  // Paid partly by card, and the card payment isn't confirmed yet: the offers go out once it is.
+  const cardPending = draft && pending.has(campaign.id);
+  const brand = showBrand && hasManyBrands(ws.brands) ? ws.brand(campaign.brandId) : undefined;
   const productId = campaign.productIds?.[0] ?? (draft ? campaign.draft?.values.productId : undefined);
-  const product = productId && productsOf(campaign.brandId).length > 1 ? productsOf(campaign.brandId).find((p) => p.id === productId) : undefined;
-  const hired = orders.filter((o) => o.campaignId === campaign.id && isActiveOrder(o));
+  const product = productId && ws.productsOf(campaign.brandId).length > 1 ? ws.product(productId) : undefined;
+  const hired = ws.orders.filter((o) => o.campaignId === campaign.id && isActiveOrder(o));
   const creatorIds = draft ? (campaign.draft?.picks ?? []).map((p) => p.creatorId) : hired.map((o) => o.creatorId);
-  const faces = [...new Set(creatorIds)].slice(0, 4).flatMap((id) => getCreator(id) ?? []);
+  const faces = [...new Set(creatorIds)].slice(0, 4).flatMap((id) => ws.creator(id) ?? []);
   const meta = [brand && f.pick(brand.name), product && f.pick(product.name), t(`niches.${campaign.niche}`)].filter(Boolean).join(t("common.separator"));
 
   return (
@@ -44,8 +45,10 @@ export function CampaignCard({ campaign, i18n, showBrand }: { campaign: Campaign
 
           {/* Status (with "1 to review" when clips wait for you) and approved clips out of active orders. */}
           <CampaignStatus progress={progress} />
-          {draft && campaign.draft && (
-            <p className="text-small text-text-muted">{t("newCampaign.savedOn", { date: f.date(campaign.draft.savedAt.slice(0, 10)) })}</p>
+          {cardPending ? (
+            <p className="text-small font-medium text-warning">{t("newCampaign.cardPending")}</p>
+          ) : (
+            draft && campaign.draft && <p className="text-small text-text-muted">{t("newCampaign.savedOn", { date: f.date(campaign.draft.savedAt.slice(0, 10)) })}</p>
           )}
 
           <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-small">
@@ -54,7 +57,7 @@ export function CampaignCard({ campaign, i18n, showBrand }: { campaign: Campaign
             {faces.length > 0 && (
               <span className="flex -space-x-2 rtl:space-x-reverse">
                 {faces.map((c) => (
-                  <Avatar key={c.id} id={c.id} name={f.pick(c.name)} size="sm" className="ring-2 ring-card" />
+                  <Avatar key={c.id} id={c.id} name={f.pick(c.name)} src={c.photo} size="sm" className="ring-2 ring-card" />
                 ))}
               </span>
             )}

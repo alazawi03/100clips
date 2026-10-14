@@ -69,6 +69,26 @@ export interface paths {
         patch: operations["MeController_updateAccount"];
         trace?: never;
     };
+    "/me/notifications-seen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark notifications read
+         * @description Everything up to now counts as read (notifications_seen_at).
+         */
+        post: operations["MeController_notificationsSeen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/creators": {
         parameters: {
             query?: never;
@@ -721,6 +741,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My balance history
+         * @description Every movement of money, newest first: top-ups, card payments, charges, refunds, earnings, payouts.
+         */
+        get: operations["PaymentsController_ledger"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My payments
+         * @description Brand accounts: checkouts and top-ups, newest first (status=pending: waiting for the card).
+         */
+        get: operations["PaymentsController_mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Payments (admin)
+         * @description Newest first, with who paid and the campaign. status=pending: card payments to confirm or fail.
+         */
+        get: operations["PaymentsController_all"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/payments/{id}": {
         parameters: {
             query?: never;
@@ -790,7 +870,7 @@ export interface paths {
         };
         /**
          * Orders
-         * @description Creators: their own. Brand owners: their brands'. Admins: all. Newest first.
+         * @description Creators: their own. Brand owners: their brands'. Admins: all. Newest first, each with its clips and history.
          */
         get: operations["OrdersController_list"];
         put?: never;
@@ -810,7 +890,7 @@ export interface paths {
         };
         /**
          * An order
-         * @description With every clip version and its history, oldest first.
+         * @description With every clip version (each with a link to watch it for an hour) and its history, oldest first.
          */
         get: operations["OrdersController_get"];
         put?: never;
@@ -1116,6 +1196,112 @@ export interface paths {
          */
         post: operations["OrdersController_cancel"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/cart": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My cart
+         * @description Brand accounts: creators to hire together, one video each. Oldest first.
+         */
+        get: operations["CartController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/cart/{creatorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Put a creator in the cart
+         * @description For one video in a format they offer; replaces the format they were in it for.
+         */
+        put: operations["CartController_set"];
+        post?: never;
+        /** Take a creator out of the cart */
+        delete: operations["CartController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My saved creators
+         * @description Brand accounts. Favourites first (once used), then named lists oldest first.
+         */
+        get: operations["ListsController_all"];
+        put?: never;
+        /**
+         * New list
+         * @description Named; with a first creator when saving from a profile.
+         */
+        post: operations["ListsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/lists/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a list */
+        delete: operations["ListsController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/lists/{id}/creators/{creatorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save a creator to a list
+         * @description `favorites` as the list id saves to Favourites (made on first use).
+         */
+        put: operations["ListsController_add"];
+        post?: never;
+        /**
+         * Take a creator out of a list
+         * @description `favorites` as the list id for Favourites.
+         */
+        delete: operations["ListsController_drop"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1965,6 +2151,56 @@ export interface components {
             /** @description BHD available to spend (or withdraw) */
             balance: number;
         };
+        /** @enum {string} */
+        LedgerType: "top_up" | "card_payment" | "charge" | "refund" | "earning" | "payout" | "withdrawal" | "withdrawal_returned" | "adjustment";
+        LedgerEntry: {
+            /** Format: uuid */
+            id: string;
+            type: components["schemas"]["LedgerType"];
+            /** @description BHD: in is positive, out is negative */
+            amount: number;
+            /** Format: uuid */
+            order_id: string | null;
+            /** Format: uuid */
+            payment_id: string | null;
+            /** Format: uuid */
+            transfer_id: string | null;
+            note: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        PaymentAccount: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+        };
+        AdminPayment: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            account_id: string;
+            kind: components["schemas"]["PaymentKind"];
+            /** Format: uuid */
+            campaign_id: string | null;
+            /** @description BHD: creators' prices plus the fee */
+            total: number;
+            /** @description BHD taken from the balance */
+            from_balance: number;
+            /** @description BHD to pay by card (0: paid at once from the balance) */
+            by_card: number;
+            picks: components["schemas"]["PaidPick"][] | null;
+            status: components["schemas"]["PaymentStatus"];
+            provider: string | null;
+            provider_ref: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            paid_at: string | null;
+            account: components["schemas"]["PaymentAccount"];
+            /** @description The campaign's title (checkouts) */
+            campaign_title: string | null;
+        };
         ProviderResultDto: {
             /** @example tap */
             provider: string;
@@ -1995,6 +2231,10 @@ export interface components {
             name_en: string | null;
             /** @description Path in the public storage bucket */
             logo_path: string | null;
+            industry: components["schemas"]["Industry"];
+            instagram: string | null;
+            tiktok: string | null;
+            website: string | null;
         };
         OrderCreator: {
             /** Format: uuid */
@@ -2004,12 +2244,47 @@ export interface components {
             handle: string;
             /** @description Path in the public storage bucket */
             photo_path: string | null;
+            gender: components["schemas"]["Gender"] | null;
         };
         OrderCampaign: {
             title: string | null;
             product_type: components["schemas"]["ProductType"] | null;
             /** @description A physical product goes back to the brand after filming */
             product_returns: boolean;
+        };
+        OrderClip: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {integer} */
+            version: 1 | 2;
+            /** @description Path in the clips bucket */
+            video_path: string;
+            duration_sec: number | null;
+            size_bytes: number | null;
+            note: string | null;
+            /** Format: date-time */
+            uploaded_at: string;
+            /** @description A link to watch it, for an hour */
+            url: string | null;
+        };
+        /** @enum {string} */
+        OrderEventType: "offered" | "accepted" | "declined" | "expired" | "cancelled" | "sent" | "received" | "uploaded" | "revision_requested" | "approved" | "returned" | "ad_code_added" | "deadline_moved" | "deadline_passed";
+        OrderEvent: {
+            /** Format: uuid */
+            id: string;
+            type: components["schemas"]["OrderEventType"];
+            actor: components["schemas"]["Actor"];
+            /**
+             * Format: uuid
+             * @description Who did it; null for the system
+             */
+            actor_id: string | null;
+            /** @description declined: {reason}; uploaded: {version}; deadline_moved: {from, to}; deadline_passed: {deadline} */
+            data: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            at: string;
         };
         Order: {
             /** Format: uuid */
@@ -2081,110 +2356,9 @@ export interface components {
             brand: components["schemas"]["OrderBrand"];
             creator: components["schemas"]["OrderCreator"] | null;
             campaign: components["schemas"]["OrderCampaign"];
-        };
-        OrderClip: {
-            /** Format: uuid */
-            id: string;
-            /** @enum {integer} */
-            version: 1 | 2;
-            /** @description Path in the clips bucket */
-            video_path: string;
-            duration_sec: number | null;
-            size_bytes: number | null;
-            note: string | null;
-            /** Format: date-time */
-            uploaded_at: string;
-        };
-        /** @enum {string} */
-        OrderEventType: "offered" | "accepted" | "declined" | "expired" | "cancelled" | "sent" | "received" | "uploaded" | "revision_requested" | "approved" | "returned" | "ad_code_added" | "deadline_moved" | "deadline_passed";
-        OrderEvent: {
-            /** Format: uuid */
-            id: string;
-            type: components["schemas"]["OrderEventType"];
-            actor: components["schemas"]["Actor"];
-            /**
-             * Format: uuid
-             * @description Who did it; null for the system
-             */
-            actor_id: string | null;
-            /** @description declined: {reason}; uploaded: {version}; deadline_moved: {from, to}; deadline_passed: {deadline} */
-            data: {
-                [key: string]: unknown;
-            };
-            /** Format: date-time */
-            at: string;
-        };
-        OrderDetail: {
-            /** Format: uuid */
-            id: string;
-            /** @description Shown as "ord-1043" */
-            number: number;
-            /** Format: uuid */
-            campaign_id: string;
-            /** Format: uuid */
-            brand_id: string;
-            /** Format: uuid */
-            creator_id: string;
-            /** Format: uuid */
-            payment_id: string | null;
-            format: components["schemas"]["ContentFormat"];
-            /** @description The creator's price in BHD, fixed when ordered (what they're paid) */
-            amount: number;
-            /** @description The brand's note to this creator */
-            note: string | null;
-            status: components["schemas"]["OrderStatus"];
-            /** Format: date */
-            deadline: string | null;
-            /** Format: date-time */
-            created_at: string;
-            /** Format: date-time */
-            updated_at: string;
-            /** Format: date-time */
-            accepted_at: string | null;
-            terms_version: string | null;
-            ship_to: components["schemas"]["ShipTo"] | null;
-            decline_reason: components["schemas"]["DeclineReason"] | null;
-            decline_note: string | null;
-            /** Format: date-time */
-            declined_at: string | null;
-            /** Format: date-time */
-            cancelled_at: string | null;
-            cancelled_by: components["schemas"]["Actor"] | null;
-            /** Format: date-time */
-            sent_at: string | null;
-            ship_note: string | null;
-            /** Format: date-time */
-            received_at: string | null;
-            /** Format: date-time */
-            returned_at: string | null;
-            /** Format: date-time */
-            delivered_at: string | null;
-            /** Format: date-time */
-            revision_requested_at: string | null;
-            revision_note: string | null;
-            /** Format: date-time */
-            approved_at: string | null;
-            approved_by: components["schemas"]["Actor"] | null;
-            ad_code: string | null;
-            /** Format: date-time */
-            ad_code_expires_at: string | null;
-            /** @description Other brands may see the approved clip on the creator's card */
-            clip_public: boolean;
-            views: number | null;
-            /** Format: date-time */
-            views_updated_at: string | null;
-            /** Format: date-time */
-            creator_seen_approval_at: string | null;
-            rating: number | null;
-            review: string | null;
-            /** Format: date-time */
-            rated_at: string | null;
-            /** @description 100clips' fee the brand paid on top (BHD). Null for creators. */
-            fee: number | null;
-            brand: components["schemas"]["OrderBrand"];
-            creator: components["schemas"]["OrderCreator"] | null;
-            campaign: components["schemas"]["OrderCampaign"];
+            /** @description Every version of the clip, oldest first */
             clips: components["schemas"]["OrderClip"][];
+            /** @description The order's history, oldest first */
             events: components["schemas"]["OrderEvent"][];
         };
         AcceptOfferDto: {
@@ -2274,6 +2448,36 @@ export interface components {
         AdminCancelDto: {
             /** @example The creator stopped answering */
             note: string;
+        };
+        CartLine: {
+            /** Format: uuid */
+            creator_id: string;
+            format: components["schemas"]["ContentFormat"];
+            /** Format: date-time */
+            added_at: string;
+        };
+        CartLineDto: {
+            format: components["schemas"]["ContentFormat"];
+        };
+        CreatorList: {
+            /** Format: uuid */
+            id: string;
+            /** @description Empty for Favourites (the apps name it) */
+            name: string;
+            is_favorites: boolean;
+            /** Format: date-time */
+            created_at: string;
+            /** @description Newest first */
+            creator_ids: string[];
+        };
+        CreateListDto: {
+            /** @example Coffee lovers */
+            name: string;
+            /**
+             * Format: uuid
+             * @description Saved into the new list straight away
+             */
+            creator_id?: string;
         };
     };
     responses: never;
@@ -2449,6 +2653,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MeController_notificationsSeen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
                 };
             };
             /** @description Not signed in, or the session expired */
@@ -4541,6 +4782,137 @@ export interface operations {
             };
         };
     };
+    PaymentsController_ledger: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LedgerEntry"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_mine: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                status?: components["schemas"]["PaymentStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_all: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                status?: components["schemas"]["PaymentStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPayment"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     PaymentsController_get: {
         parameters: {
             query?: never;
@@ -4788,7 +5160,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -4840,7 +5212,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -4910,7 +5282,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -4976,7 +5348,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5046,7 +5418,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5116,7 +5488,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5182,7 +5554,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5239,7 +5611,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5309,7 +5681,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5379,7 +5751,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5449,7 +5821,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5519,7 +5891,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5589,7 +5961,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5646,7 +6018,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5716,7 +6088,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5786,7 +6158,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OrderDetail"];
+                    "application/json": components["schemas"]["Order"];
                 };
             };
             /** @description Invalid input */
@@ -5827,6 +6199,363 @@ export interface operations {
             };
             /** @description Already exists, or the wrong state for this */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    CartController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CartLine"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    CartController_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                creatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CartLineDto"];
+            };
+        };
+        responses: {
+            /** @description The whole cart */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CartLine"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    CartController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                creatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The whole cart */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CartLine"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ListsController_all: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatorList"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ListsController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateListDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatorList"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ListsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ListsController_add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A list's id, or favorites */
+                id: string;
+                creatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatorList"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ListsController_drop: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A list's id, or favorites */
+                id: string;
+                creatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatorList"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

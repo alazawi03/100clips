@@ -1,11 +1,11 @@
-import { brands } from "@/lib/data/account";
+import type { Brand } from "@/lib/data/types";
 
 /** More than one brand on the account: this is when brand columns and filters are shown. */
-export const hasManyBrands = () => brands.length > 1;
+export const hasManyBrands = (brands: Brand[]) => brands.length > 1;
 
 /** The brand id from ?brand=, if it is one of the account's brands and there is more than one. */
-export function brandFilterOf(raw: unknown): string | undefined {
-  return hasManyBrands() && brands.some((b) => b.id === raw) ? (raw as string) : undefined;
+export function brandFilterOf(raw: unknown, brands: Brand[]): string | undefined {
+  return hasManyBrands(brands) && brands.some((b) => b.id === raw) ? (raw as string) : undefined;
 }
 
 /** Builds "/path?status=x&brand=y", leaving out empty values. */

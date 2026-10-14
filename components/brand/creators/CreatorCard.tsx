@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { SaveToListButton } from "./SaveToListButton";
 import { InviteToCampaignMenu } from "@/components/brand/campaigns/InviteMenus";
-import { campaigns } from "@/lib/data/campaigns";
 import { cn } from "@/lib/cn";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -13,6 +12,7 @@ import { PlatformLogo } from "@/components/ui/PlatformLogo";
 import { clipsByCreator } from "@/lib/data/clips";
 import { fromPrice } from "@/lib/data/creators";
 import { allLists } from "@/lib/data/lists";
+import { workspace } from "@/lib/data/live";
 import { platformOf, type Creator } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 import { priceForBrand } from "@/lib/fees";
@@ -20,10 +20,9 @@ import { priceForBrand } from "@/lib/fees";
 /**
  * Links to the creator profile, where brands pick platforms and add to cart.
  * The save button sits on top of the link (a button can't live inside one), beside the rating.
- * browseOnly: a creator from the API, while lists, invites and the cart are still demo data: no
- * save, invite or "in cart".
+ * browseOnly: just the card, without save and invite.
  */
-export function CreatorCard({
+export async function CreatorCard({
   creator,
   inCart,
   i18n,
@@ -36,7 +35,8 @@ export function CreatorCard({
 }) {
   const { t, f } = i18n;
   const works = clipsByCreator(creator.id).slice(0, 3);
-  const active = browseOnly ? [] : campaigns.filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: i18n.f.pick(c.title) }));
+  const [ws, lists] = browseOnly ? [undefined, []] : await Promise.all([workspace(), allLists()]);
+  const active = (ws?.campaigns ?? []).filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: i18n.f.pick(c.title) }));
   const name = f.pick(creator.name);
   const platforms = [
     ...new Set(creator.formats.map((o) => platformOf[o.format])),
@@ -129,7 +129,7 @@ export function CreatorCard({
           compact
           creatorId={creator.id}
           name={name}
-          lists={allLists().map((l) => ({ id: l.id, name: l.name, favorites: l.favorites, count: l.creatorIds.length, has: l.creatorIds.includes(creator.id) }))}
+          lists={lists.map((l) => ({ id: l.id, name: l.name, favorites: l.favorites, count: l.creatorIds.length, has: l.creatorIds.includes(creator.id) }))}
         />
       </div>}
     </div>

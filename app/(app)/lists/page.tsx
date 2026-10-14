@@ -1,24 +1,23 @@
 import { Heart } from "lucide-react";
 import { CreatorCard } from "@/components/brand/creators/CreatorCard";
 import { InviteToCampaignMenu } from "@/components/brand/campaigns/InviteMenus";
-import { campaigns } from "@/lib/data/campaigns";
 import { NewListButton } from "@/components/brand/creators/SaveToListButton";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { allLists, creatorsIn } from "@/lib/data/lists";
-import { cartOf } from "@/lib/data/store";
+import { workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 
 /** The account's creator lists, one section each: Favourites first, then the brand's lists, newest first. */
 export default async function ListsPage() {
   const i18n = await getI18n();
   const { t, tp } = i18n;
-  const all = allLists();
+  const [ws, all] = await Promise.all([workspace(), allLists()]);
   const lists = [
     ...all.filter((l) => l.favorites),
     ...all.filter((l) => !l.favorites).reverse(),
   ];
-  const inCart = new Set(cartOf().map((l) => l.creatorId));
-  const active = campaigns
+  const inCart = new Set(ws.cart.map((l) => l.creatorId));
+  const active = ws.campaigns
     .filter((c) => c.status === "in_progress")
     .map((c) => ({ id: c.id, title: i18n.f.pick(c.title) }));
 
@@ -28,7 +27,7 @@ export default async function ListsPage() {
         <NewListButton />
       </PageHeader>
       {lists.map((list) => {
-        const members = creatorsIn(list);
+        const members = creatorsIn(list, ws);
         return (
           <section key={list.id} aria-labelledby={`${list.id}-title`}>
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">

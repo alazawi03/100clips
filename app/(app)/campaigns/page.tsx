@@ -6,10 +6,8 @@ import { FilterTabs } from "@/components/ui/FilterTabs";
 import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { BrandFilter } from "@/components/brand/BrandFilter";
 import { brandFilterOf, hasManyBrands, href } from "@/lib/brandFilter";
-import { brands } from "@/lib/data/account";
-import { campaigns as allCampaigns } from "@/lib/data/campaigns";
+import { workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
-import { orders } from "@/lib/data/orders";
 import { CAMPAIGN_STATUS, CAMPAIGN_STATUSES, campaignProgress } from "@/lib/statuses";
 
 
@@ -17,7 +15,8 @@ export default async function CampaignsPage({ searchParams }: PageProps<"/campai
   const i18n = await getI18n();
   const { t, f } = i18n;
   const query = await searchParams;
-  const brandId = brandFilterOf(query.brand);
+  const { brands, campaigns: allCampaigns, orders } = await workspace();
+  const brandId = brandFilterOf(query.brand, brands);
   const campaigns = brandId ? allCampaigns.filter((c) => c.brandId === brandId) : allCampaigns;
   const raw = query.status;
   // Statuses come from each campaign's orders (lib/statuses.ts), so the tabs filter on those.
@@ -38,7 +37,7 @@ export default async function CampaignsPage({ searchParams }: PageProps<"/campai
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("campaignsPage.title")}>
-        {hasManyBrands() && <BrandFilter brands={brands.map((b) => ({ id: b.id, name: f.pick(b.name), logo: b.logo }))} value={brandId} />}
+        {hasManyBrands(brands) && <BrandFilter brands={brands.map((b) => ({ id: b.id, name: f.pick(b.name), logo: b.logo }))} value={brandId} />}
         <NeedBrandButton hasBrand={brands.length > 0} href="/campaigns/new" then="campaign" variant="hero">
           <Plus aria-hidden />
           {t("newCampaign.button")}

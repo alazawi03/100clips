@@ -2,14 +2,14 @@ import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { CampaignStatus } from "@/components/brand/campaigns/CampaignStatus";
 import { Card, SectionHeader } from "@/components/ui/Card";
-import { getCreator } from "@/lib/data/creators";
-import { orders } from "@/lib/data/orders";
+import { workspace } from "@/lib/data/live";
 import type { Campaign } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 import { campaignProgress, isActiveOrder } from "@/lib/statuses";
 
-export function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign[]; i18n: I18n }) {
+export async function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign[]; i18n: I18n }) {
   const { t, tp, f } = i18n;
+  const { orders, creator } = await workspace();
   // Campaigns still running: waiting for creators to accept, or in progress.
   const active = campaigns
     .map((c) => ({ campaign: c, progress: campaignProgress(c, orders) }))
@@ -23,7 +23,7 @@ export function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign[]; i1
         {active.map(({ campaign, progress }) => {
           const hired = orders.filter((o) => o.campaignId === campaign.id && isActiveOrder(o));
           const delivered = hired.filter((o) => o.status === "delivered" || o.status === "approved").length;
-          const faces = [...new Set(hired.map((o) => o.creatorId))].slice(0, 4).map((id) => getCreator(id)!);
+          const faces = [...new Set(hired.map((o) => o.creatorId))].slice(0, 4).flatMap((id) => creator(id) ?? []);
           return (
             <Link
               key={campaign.id}
@@ -46,7 +46,7 @@ export function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign[]; i1
                     {faces.length > 0 && (
                       <span className="flex -space-x-2 rtl:space-x-reverse">
                         {faces.map((c) => (
-                          <Avatar key={c.id} id={c.id} name={f.pick(c.name)} size="sm" className="ring-2 ring-card" />
+                          <Avatar key={c.id} id={c.id} name={f.pick(c.name)} src={c.photo} size="sm" className="ring-2 ring-card" />
                         ))}
                       </span>
                     )}

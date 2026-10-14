@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Check, ChevronDown, Clapperboard, Clock, MessageCircle, ScanSearch, Star, Truck } from "lucide-react";
+import { Check, ChevronDown, Clapperboard, Clock, MapPin, MessageCircle, ScanSearch, Star, Truck } from "lucide-react";
 import { markOrderReturned, markOrderSent, rateOrder } from "@/app/actions/brand";
 import { messageCreator } from "@/app/actions/messages";
+import { CHAT_LIVE } from "@/lib/features";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { AdCode } from "@/components/brand/orders/AdCode";
 import { ClipVersions, OfferWaiting, OrderClosedNote } from "@/components/brand/orders/OrderOutcome";
@@ -16,6 +17,7 @@ import { Card } from "@/components/ui/Card";
 import { ClipPoster } from "@/components/ui/ClipPoster";
 import { Field, Input } from "@/components/ui/Form";
 import { cn } from "@/lib/cn";
+import type { ShipTo } from "@/lib/data/types";
 import { createFormatters } from "@/lib/i18n/format";
 import { isActiveOrder, orderBadgeStatus } from "@/lib/statuses";
 import type { OrderCardView } from "./campaignView";
@@ -51,7 +53,7 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
     <Card ref={card} className="relative scroll-mt-32 overflow-hidden">
       <button type="button" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((v) => !v)} className="flex w-full flex-col gap-3 p-4 text-start transition-colors hover:bg-surface/50 sm:p-5">
         <span className="flex w-full items-center gap-3">
-          <Avatar id={order.creatorId} name={order.name} size="md" />
+          <Avatar id={order.creatorId} name={order.name} src={order.photo} size="md" />
           <span className="min-w-0 flex-1">
             <span className="block truncate font-medium">{order.name}</span>
             <span className="block truncate text-small text-text-muted">{order.itemsLabel}</span>
@@ -59,7 +61,7 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
           {/* The status; the line under the bar only counts steps, so it isn't said twice. */}
           <StatusBadge order={orderBadgeStatus(order)} />
           {/* Room for the messages button, which sits on top of the header (a button can't hold a form). */}
-          <span aria-hidden className="size-10 shrink-0" />
+          {CHAT_LIVE && <span aria-hidden className="size-10 shrink-0" />}
           <ChevronDown aria-hidden className={cn("size-5 shrink-0 text-text-muted transition-transform", open && "rotate-180")} />
         </span>
 
@@ -86,7 +88,7 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
       </button>
 
       {/* Chat with this creator: opens the existing conversation, or starts one. */}
-      <form action={messageCreator.bind(null, order.creatorId, order.brandId)} className="absolute end-12 top-4 sm:end-[52px] sm:top-5">
+      {CHAT_LIVE && <form action={messageCreator.bind(null, order.creatorId, order.brandId)} className="absolute end-12 top-4 sm:end-[52px] sm:top-5">
         <button
           type="submit"
           aria-label={order.unread > 0 ? `${t("campaignDetail.messages")} · ${tp("chat.unread", order.unread)}` : t("campaignDetail.messages")}
@@ -99,7 +101,7 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
             </span>
           )}
         </button>
-      </form>
+      </form>}
 
       {/* The next step stays visible whether the card is open or not. */}
       {order.action && <OrderAction order={order} productName={productName} />}
@@ -249,6 +251,33 @@ function OrderAction({ order, productName }: { order: OrderCardView; productName
         )}
         {order.action === "ship" && <ShipButton orderId={order.id} name={order.name} productName={productName} />}
       </div>
+      {order.action === "ship" && order.shipTo && <ShipToLines to={order.shipTo} className="ps-6" />}
+    </div>
+  );
+}
+
+/** Where the creator asked for the product: the address they chose when accepting, with their phone. */
+export function ShipToLines({ to, className }: { to: ShipTo; className?: string }) {
+  const { t } = useI18n();
+  const map = to.latitude !== undefined && to.longitude !== undefined ? `https://www.google.com/maps?q=${to.latitude},${to.longitude}` : undefined;
+  return (
+    <div className={cn("flex flex-col gap-0.5 text-small", className)}>
+      <span className="flex items-center gap-1.5 font-medium">
+        <MapPin aria-hidden className="size-4 shrink-0 text-text-muted" />
+        {t("campaignDetail.shipTo")} · {to.label ?? t(`campaignDetail.addressTypes.${to.type}`)}
+      </span>
+      <span dir="auto" className="whitespace-pre-line">{to.address}</span>
+      {to.phone && (
+        <span className="text-text-muted">
+          {t("campaignDetail.shipToPhone", { phone: "" })}
+          <bdi dir="ltr">{to.phone}</bdi>
+        </span>
+      )}
+      {map && (
+        <a href={map} target="_blank" rel="noreferrer" className="w-fit font-medium text-primary hover:underline">
+          {t("campaignDetail.openMap")}
+        </a>
+      )}
     </div>
   );
 }

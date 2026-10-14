@@ -2,7 +2,7 @@
 
 import { ShieldCheck } from "lucide-react";
 import { useI18n } from "@/components/i18n/I18nProvider";
-import { Field, Input } from "@/components/ui/Form";
+import { Field, FieldError, Input } from "@/components/ui/Form";
 import { createFormatters } from "@/lib/i18n/format";
 
 /** "1228" → "12/28". While typing (`adding`), the slash appears right after the month. */
@@ -98,6 +98,8 @@ export function PaymentFields({ balance, useBalance, onUseBalance, byCard, err, 
           <ShieldCheck aria-hidden className="mt-0.5 size-5 shrink-0 text-success" strokeWidth={1.75} />
           {t("checkout.refundNote")}
         </p>
+        {/* Paying was refused (a creator no longer available, the account suspended...). */}
+        {err("pay") && <FieldError id="pay-error">{err("pay")}</FieldError>}
     </>
   );
 }

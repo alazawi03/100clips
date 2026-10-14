@@ -1,73 +1,72 @@
-import { ArrowDownLeft, ArrowUpFromLine, ArrowUpRight, Hourglass, Plus, Undo2 } from "lucide-react";
-import { WithdrawButton } from "@/components/brand/wallet/WithdrawButton";
+import { ArrowDownLeft, ArrowUpRight, CreditCard, Hourglass, Plus, Undo2 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { api } from "@/lib/api";
+import type { components } from "@/lib/api-types";
 import { cn } from "@/lib/cn";
-import { account, walletTopUps } from "@/lib/data/account";
-import { heldAmount } from "@/lib/data/store";
-import { getCreator } from "@/lib/data/creators";
-import { orders } from "@/lib/data/orders";
-import { expectedArrival, openWithdrawals, WITHDRAWAL_DAYS, withdrawals } from "@/lib/data/wallet";
-import type { Order, Withdrawal } from "@/lib/data/types";
+import { workspace } from "@/lib/data/live";
+import type { Order } from "@/lib/data/types";
 import { brandPaid } from "@/lib/fees";
-import { maskIban } from "@/lib/iban";
 import { eventsOf } from "@/lib/orderFlow";
 import { getI18n } from "@/lib/i18n/server";
+import { dayOf } from "@/lib/today";
+
+type LedgerEntry = components["schemas"]["LedgerEntry"];
+type Payment = components["schemas"]["Payment"];
 
 /**
- * One line in the history. Money in: top-ups, and refunds of orders that ended without work (declined,
- * expired, withdrawn). Money out: held for running orders, paid for approved ones, withdrawn to the bank.
+ * One line in the history. Money in: top-ups, card payments at checkout, and refunds of orders that
+ * ended without work (declined, expired, withdrawn). Money out: held for running orders, paid for
+ * approved ones. (Withdrawals to the bank come with the wallet slice.)
  */
-type EntryType = "topUp" | "hold" | "payment" | "refund" | "withdrawal";
-type Entry = { id: string; date: string; label: string; detail?: string; type: EntryType; amount: number; creatorId?: string; badge: { tone: BadgeTone; label: string }; struck?: boolean };
+type EntryType = "topUp" | "card" | "hold" | "payment" | "refund";
+type Entry = { id: string; date: string; label: string; detail?: string; type: EntryType; amount: number; creatorId?: string; badge: { tone: BadgeTone; label: string } };
 
-const typeIcon = { topUp: ArrowDownLeft, hold: Hourglass, payment: ArrowUpRight, refund: Undo2, withdrawal: ArrowUpFromLine };
+const typeIcon = { topUp: ArrowDownLeft, card: CreditCard, hold: Hourglass, payment: ArrowUpRight, refund: Undo2 };
 
 export default async function WalletPage() {
   const { t, f } = await getI18n();
+  const [ws, ledger, pending] = await Promise.all([
+    workspace(),
+    api<LedgerEntry[]>("/me/ledger?limit=200"),
+    api<Payment[]>("/me/payments?status=pending"),
+  ]);
+  const { orders } = ws;
+  const held = orders.filter((o) => o.status === "pending" || o.status === "in_progress" || o.status === "delivered").reduce((sum, o) => sum + brandPaid(o), 0);
   const netSpent = orders.filter((o) => o.status === "approved").reduce((sum, o) => sum + brandPaid(o), 0);
-  const netCharged = walletTopUps.reduce((sum, top) => sum + top.amount, 0);
-  // Everything on its way to the bank: the total, from the earliest to the latest expected arrival.
-  const onItsWay = openWithdrawals();
-  const pendingOut = onItsWay.length > 0 && {
-    amount: onItsWay.reduce((sum, w) => sum + w.amount, 0),
-    from: onItsWay.map((w) => expectedArrival(w).from).sort()[0],
-    to: onItsWay.map((w) => expectedArrival(w).to).sort().at(-1)!,
-  };
+  const moneyIn = ledger.filter((e) => e.type === "top_up" || e.type === "card_payment");
+  const netCharged = moneyIn.reduce((sum, e) => sum + e.amount, 0);
+  // Card payments not confirmed yet: nothing has moved, so they're a note rather than a line.
+  const waitingByCard = pending.reduce((sum, p) => sum + p.by_card, 0);
 
   const orderEntry = (o: Order): Entry => {
-    const creator = getCreator(o.creatorId)!;
+    const creator = ws.creator(o.creatorId)!;
     const name = f.pick(creator.name);
     const title = f.pick(o.title);
-    if (o.status === "approved") return { id: o.id, date: o.createdAt, label: t("walletPage.paymentLabel", { name }), detail: title, type: "payment", amount: -brandPaid(o), creatorId: o.creatorId, badge: { tone: "success", label: t("walletPage.typePayment") } };
+    const day = dayOf(o.createdAt);
+    if (o.status === "approved") return { id: o.id, date: day, label: t("walletPage.paymentLabel", { name }), detail: title, type: "payment", amount: -brandPaid(o), creatorId: o.creatorId, badge: { tone: "success", label: t("walletPage.typePayment") } };
     if (o.status === "declined" || o.status === "cancelled") {
       // Dated when the money came back: when the order ended.
       const ended = eventsOf(o).find((e) => e.type === "declined" || e.type === "expired" || e.type === "cancelled")?.at ?? o.createdAt;
       const why = o.status === "cancelled" ? t("walletPage.refundWhy.cancelled") : o.declineReason === "expired" ? t("walletPage.refundWhy.expired") : t("walletPage.refundWhy.declined", { name });
-      return { id: o.id, date: ended.slice(0, 10), label: t("walletPage.refundLabel", { title }), detail: why, type: "refund", amount: brandPaid(o), creatorId: o.creatorId, badge: { tone: "brand", label: t("walletPage.typeRefund") } };
+      return { id: o.id, date: dayOf(ended), label: t("walletPage.refundLabel", { title }), detail: why, type: "refund", amount: brandPaid(o), creatorId: o.creatorId, badge: { tone: "brand", label: t("walletPage.typeRefund") } };
     }
-    return { id: o.id, date: o.createdAt, label: t("walletPage.holdLabel", { title }), detail: name, type: "hold", amount: -brandPaid(o), creatorId: o.creatorId, badge: { tone: "warning", label: t("walletPage.typeHold") } };
-  };
-
-  const withdrawalEntry = (w: Withdrawal): Entry => {
-    const { from, to } = expectedArrival(w);
-    const detail =
-      w.status === "sent"
-        ? t("walletPage.withdrawal.sentDetail", { iban: maskIban(w.iban ?? ""), date: f.date(w.sentAt!.slice(0, 10)) })
-        : w.status === "rejected"
-          ? t("walletPage.withdrawal.rejectedDetail", { note: w.note ?? "" })
-          : t("walletPage.withdrawal.requestedDetail", { from: f.date(from), to: f.date(to) });
-    const badge = { requested: { tone: "warning" as const, label: t("walletPage.withdrawal.requested") }, sent: { tone: "success" as const, label: t("walletPage.withdrawal.sent") }, rejected: { tone: "neutral" as const, label: t("walletPage.withdrawal.rejected") } }[w.status];
-    return { id: w.id, date: w.requestedAt.slice(0, 10), label: t("walletPage.withdrawal.label"), detail, type: "withdrawal", amount: -w.amount, badge, struck: w.status === "rejected" };
+    return { id: o.id, date: day, label: t("walletPage.holdLabel", { title }), detail: name, type: "hold", amount: -brandPaid(o), creatorId: o.creatorId, badge: { tone: "warning", label: t("walletPage.typeHold") } };
   };
 
   const entries: Entry[] = [
-    ...walletTopUps.map((top) => ({ id: top.id, date: top.date, label: t("walletPage.topUpLabel"), type: "topUp" as const, amount: top.amount, badge: { tone: "brand" as const, label: t("walletPage.typeTopUp") } })),
+    ...moneyIn.map((e): Entry => ({
+      id: e.id,
+      date: dayOf(e.created_at),
+      label: e.type === "top_up" ? t("walletPage.topUpLabel") : t("walletPage.cardPaymentLabel"),
+      type: e.type === "top_up" ? "topUp" : "card",
+      amount: e.amount,
+      badge: { tone: "brand", label: t("walletPage.typeTopUp") },
+    })),
     ...orders.map(orderEntry),
-    ...withdrawals.map(withdrawalEntry),
   ].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
@@ -77,27 +76,18 @@ export default async function WalletPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="flex flex-col gap-4 p-5 md:col-span-1">
           <span className="text-small text-text-muted">{t("walletPage.available")}</span>
-          <span className="text-display font-medium tabular-nums">{f.money(account.balance)}</span>
-          {pendingOut && (
-            <p className="text-small text-text-muted">
-              {t("walletPage.withdrawal.pending", { amount: f.money(pendingOut.amount), from: f.date(pendingOut.from), to: f.date(pendingOut.to) })}
-            </p>
-          )}
+          <span className="text-display font-medium tabular-nums">{f.money(ws.balance)}</span>
+          {waitingByCard > 0 && <p className="text-small text-text-muted">{t("walletPage.cardPending", { amount: f.money(waitingByCard) })}</p>}
           <div className="mt-auto flex flex-col gap-2">
             <Button variant="primary" className="w-full">
               <Plus aria-hidden />
               {t("walletPage.topUp")}
             </Button>
-            <WithdrawButton
-              balance={account.balance}
-              bank={account.bankAccount && { holder: account.bankAccount.holder, iban: maskIban(account.bankAccount.iban) }}
-              days={WITHDRAWAL_DAYS}
-            />
           </div>
         </Card>
         <Card className="flex flex-col gap-2 p-5">
           <span className="text-small text-text-muted">{t("walletPage.reserved")}</span>
-          <span className="text-h1 font-medium tabular-nums">{f.money(heldAmount())}</span>
+          <span className="text-h1 font-medium tabular-nums">{f.money(held)}</span>
           <p className="text-small text-text-muted">{t("walletPage.reservedHint")}</p>
         </Card>
         <Card className="grid grid-cols-2 divide-x divide-border p-0 rtl:divide-x-reverse md:grid-cols-1 md:divide-x-0 md:divide-y">
@@ -118,11 +108,11 @@ export default async function WalletPage() {
           <ul className="divide-y divide-border">
             {entries.map((entry) => {
               const Icon = typeIcon[entry.type];
-              const creator = entry.creatorId ? getCreator(entry.creatorId) : undefined;
+              const creator = entry.creatorId ? ws.creator(entry.creatorId) : undefined;
               return (
                 <li key={`${entry.type}-${entry.id}`} className="flex items-center gap-4 p-4 sm:px-5">
                   {creator ? (
-                    <Avatar id={creator.id} name={f.pick(creator.name)} size="md" />
+                    <Avatar id={creator.id} name={f.pick(creator.name)} src={creator.photo} size="md" />
                   ) : (
                     <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-soft text-primary-on-soft">
                       <Icon aria-hidden className="size-5" strokeWidth={1.75} />
@@ -138,7 +128,7 @@ export default async function WalletPage() {
                   <Badge tone={entry.badge.tone} className="hidden sm:inline-flex">
                     {entry.badge.label}
                   </Badge>
-                  <span className={cn("min-w-24 text-end font-medium tabular-nums", entry.amount > 0 && "text-success", entry.struck && "text-text-muted line-through")}>{f.signedMoney(entry.amount)}</span>
+                  <span className={cn("min-w-24 text-end font-medium tabular-nums", entry.amount > 0 && "text-success")}>{f.signedMoney(entry.amount)}</span>
                 </li>
               );
             })}

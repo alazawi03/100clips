@@ -1,6 +1,5 @@
-import { campaigns } from "@/lib/data/campaigns";
-import { orders } from "@/lib/data/orders";
 import { CAMPAIGN_STATUS, campaignProgress } from "@/lib/statuses";
+import type { Workspace } from "@/lib/data/live";
 import type { Product, ProductType } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 
@@ -25,7 +24,7 @@ export type ProductView = {
   clipsLabel: string;
 };
 
-export function productView(product: Product, { t, tp, f }: I18n): ProductView {
+export function productView(product: Product, { t, tp, f }: I18n, { campaigns, orders }: Pick<Workspace, "campaigns" | "orders">): ProductView {
   const d = product.details;
   const info: ProductView["info"] = [];
   if (d.type === "physical") {
@@ -41,7 +40,7 @@ export function productView(product: Product, { t, tp, f }: I18n): ProductView {
     if (d.hours) info.push({ label: t("productForm.hours"), value: d.hours });
   }
 
-  const using = campaigns.filter((c) => c.productIds?.includes(product.id));
+  const using = campaigns.filter((c) => c.status !== "draft" && c.productIds?.includes(product.id));
   const clips = using.reduce((n, c) => n + c.deliveredClips, 0);
 
   return {

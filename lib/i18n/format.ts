@@ -26,7 +26,8 @@ export function createFormatters(locale: Locale) {
     signedMoney: (amount: number) => (Number.isInteger(amount) ? signedWhole : signed).format(amount),
     number: (value: number) => number.format(value),
     compact: (value: number) => compact.format(value),
-    date: (iso: string) => shortDate.format(new Date(`${iso}T12:00:00+03:00`)),
+    /** A date (yyyy-mm-dd), or a date-time from the API: the day it was in Bahrain. */
+    date: (iso: string) => shortDate.format(iso.length > 10 ? new Date(iso) : new Date(`${iso}T12:00:00+03:00`)),
     /** Message time: just the clock for today (Bahrain time), date and clock otherwise. */
     messageTime: (isoDateTime: string, today: string) => {
       const d = new Date(isoDateTime);

@@ -16,34 +16,32 @@ import { Card } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/cn";
-import { getCampaign } from "@/lib/data/campaigns";
-import { getClip } from "@/lib/data/clips";
-import { getCreator } from "@/lib/data/creators";
-import { getOrder, orders } from "@/lib/data/orders";
-import { DEMO_NOW, DEMO_TODAY, products } from "@/lib/data/account";
+import { clipOf, workspace } from "@/lib/data/live";
 import { reportOf } from "@/lib/data/problems";
 import { clipVersions, currentStep, nextAction, offerHoursLeft, revisionUsed, stepsFor, waitingFor } from "@/lib/orderFlow";
-import { ShipButton, Stars } from "@/components/brand/campaigns/OrderCard";
+import { ShipButton, ShipToLines, Stars } from "@/components/brand/campaigns/OrderCard";
 import { Button, LinkButton, buttonClass } from "@/components/ui/Button";
-import { conversations } from "@/lib/data/messages";
+import { CHAT_LIVE } from "@/lib/features";
+import { nowIso, today } from "@/lib/today";
 import { campaignProgress, isActiveOrder, orderBadgeStatus } from "@/lib/statuses";
 import { brandPaid, priceForBrand } from "@/lib/fees";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function OrderDetailPage({ params, searchParams }: PageProps<"/orders/[id]">) {
   const { id } = await params;
-  const order = getOrder(id);
+  const ws = await workspace();
+  const order = ws.order(id);
   if (!order) notFound();
   const { t, tp, f } = await getI18n();
   const { done } = await searchParams;
 
-  const creator = getCreator(order.creatorId)!;
+  const creator = ws.creator(order.creatorId)!;
   const name = f.pick(creator.name);
-  const campaign = order.campaignId ? getCampaign(order.campaignId) : undefined;
-  const clip = order.clipId ? getClip(order.clipId) : undefined;
+  const campaign = ws.campaign(order.campaignId);
+  const clip = clipOf(order, ws);
   const brief = order.brief ?? campaign?.brief;
   // Steps and next action follow the same rules as the campaign page.
-  const product = campaign ? products.find((p) => p.id === campaign.productIds?.[0]) : undefined;
+  const product = ws.product(campaign?.productIds?.[0]);
   const physical = product?.details.type === "physical";
   const logistics = product && campaign ? campaign.logistics?.[product.id] : undefined;
   const returns = logistics?.type === "physical" && logistics.after === "return";
@@ -53,26 +51,25 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const watchable = clip && (order.status === "delivered" || order.status === "approved");
   const active = isActiveOrder(order);
   const report = reportOf(order.id);
-  // The chat with this creator for this brand, for the messages button (same as on the campaign page).
-  const conversation = conversations.find((c) => c.creatorId === order.creatorId && c.brandId === order.brandId);
-  const unread = conversation?.unread ?? 0;
+  // Chat isn't on the backend yet.
+  const unread = 0;
   // Just approved: the celebration, bigger when this was the campaign's last clip.
   const justApproved = done === "approved" && order.status === "approved";
-  const progress = justApproved && campaign ? campaignProgress(campaign, orders) : undefined;
+  const progress = justApproved && campaign ? campaignProgress(campaign, ws.orders) : undefined;
   const campaignClips =
     progress?.status === "completed"
-      ? orders.filter((o) => o.campaignId === campaign!.id && o.status === "approved" && o.clipId).flatMap((o) => getClip(o.clipId!) ?? [])
+      ? ws.orders.filter((o) => o.campaignId === campaign!.id && o.status === "approved").flatMap((o) => clipOf(o, ws) ?? [])
       : [];
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={f.pick(order.title)}
-        subtitle={<bdi dir="ltr">#{order.id.replace("ord-", "")}</bdi>}
+        subtitle={order.number ? <bdi dir="ltr">#{order.number}</bdi> : undefined}
         back={{ href: "/orders", label: t("ordersPage.title") }}
       >
         <StatusBadge order={orderBadgeStatus(order)} />
-        <form action={messageCreator.bind(null, order.creatorId, order.brandId)}>
+        {CHAT_LIVE && <form action={messageCreator.bind(null, order.creatorId, order.brandId)}>
           <button
             type="submit"
             aria-label={unread > 0 ? `${t("campaignDetail.messages")} · ${tp("chat.unread", unread)}` : t("campaignDetail.messages")}
@@ -85,7 +82,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
               </span>
             )}
           </button>
-        </form>
+        </form>}
         {campaign && (
           <LinkButton href={`/campaigns/${campaign.id}`} variant="secondary" className="h-9 md:h-9">
             <Megaphone aria-hidden />
@@ -110,7 +107,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
               <ul className="grid w-full max-w-md grid-cols-4 gap-2 sm:grid-cols-6">
                 {campaignClips.map((c, i) => (
                   <li key={c.id} className="motion-safe:animate-[pop_420ms_cubic-bezier(0.34,1.56,0.64,1)_both]" style={{ animationDelay: `${950 + i * 90}ms` }}>
-                    <ClipPoster clip={c} views={f.compact(c.views)} duration={f.duration(c.durationSec)} compact />
+                    <ClipPoster clip={c} views={f.compact(c.views)} duration={c.durationSec ? f.duration(c.durationSec) : ""} compact />
                   </li>
                 ))}
               </ul>
@@ -146,7 +143,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
       {done === "revisionSent" && <Notice>{t("orderDetail.doneRevisionSent", { name })}</Notice>}
       {order.status === "pending" && (
         <Card className="p-4 sm:p-5">
-          <OfferWaiting orderId={order.id} name={name} hoursLeft={offerHoursLeft(order, DEMO_NOW)} refund={f.money(brandPaid(order))} />
+          <OfferWaiting orderId={order.id} name={name} hoursLeft={offerHoursLeft(order, nowIso())} refund={f.money(brandPaid(order))} />
         </Card>
       )}
       {!active && (
@@ -181,7 +178,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
               {watchable ? (
                 <>
                   <ClipVersions versions={clipVersions(order, clip)} title={f.pick(clip.title)} className="mx-auto w-full max-w-[320px]" />
-                  {adPlatformOf(order) && <AdCode orderId={order.id} platform={adPlatformOf(order)!} code={order.adCode} today={DEMO_TODAY} />}
+                  {adPlatformOf(order) && <AdCode orderId={order.id} platform={adPlatformOf(order)!} code={order.adCode} today={today()} />}
                   {order.status === "delivered" && (
                     <>
                       <p className="text-small text-text-muted">{t("orderDetail.reviewHint")}</p>
@@ -221,6 +218,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
           {physical && active && (
             <Card className="flex flex-col gap-2 p-5">
               <h2 className="font-medium">{t("campaignDetail.shipping")}</h2>
+              {order.shipTo && !order.shipping?.receivedAt && <ShipToLines to={order.shipTo} className="mb-1" />}
               <ul className="flex flex-col gap-1 text-small">
                 <li className={order.shipping?.sentAt ? "" : "text-text-muted"}>
                   {order.shipping?.sentAt ? t("campaignDetail.sentOn", { date: f.date(order.shipping.sentAt.slice(0, 10)) }) : t("campaignDetail.notSent")}
@@ -276,7 +274,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
           <Card className="flex flex-col gap-3 p-5">
             <h2 className="text-small text-text-muted">{t("orderDetail.creator")}</h2>
             <Link href={`/creators/${creator.id}`} className="flex items-center gap-3 rounded-[var(--radius-md)]">
-              <Avatar id={creator.id} name={name} size="md" ring={creator.hasNewClips ? "new" : undefined} />
+              <Avatar id={creator.id} name={name} src={creator.photo} size="md" ring={creator.hasNewClips ? "new" : undefined} />
               <span className="min-w-0">
                 <span className="block truncate font-medium">{name}</span>
                 <span className="block truncate text-small text-text-muted">

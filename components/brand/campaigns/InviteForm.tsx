@@ -55,19 +55,19 @@ export function InviteForm({ action: pay, details, balance, ...pickerOptions }: 
   useEffect(() => {
     if (!paid) return;
     window.scrollTo({ top: 0 });
-    const timer = setTimeout(() => window.location.replace(`/campaigns/${paid.campaignId}`), REDIRECT_MS);
+    const timer = setTimeout(() => window.location.replace(paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`), REDIRECT_MS);
     return () => clearTimeout(timer);
   }, [paid]);
 
   if (paid) {
     return (
-      <PaymentSuccess t={t} tp={tp} creators={paid.creators.map((c) => ({ id: c.id, name: f.pick(c.name) }))}>
+      <PaymentSuccess t={t} tp={tp} pending={paid.pending} creators={paid.creators.map((c) => ({ id: c.id, name: f.pick(c.name) }))}>
         <p className="text-small text-text-muted">{t("checkout.redirecting")}</p>
         <span aria-hidden className="block h-1 w-40 overflow-hidden rounded-full bg-surface">
           <span className="block h-full origin-left bg-primary motion-safe:animate-[fill_3s_linear_both] rtl:origin-right" />
         </span>
-        <Link href={`/campaigns/${paid.campaignId}`} replace className={buttonClass("secondary")}>
-          {t("checkout.viewCampaign")}
+        <Link href={paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`} replace className={buttonClass("secondary")}>
+          {paid.pending ? t("campaignsPage.title") : t("checkout.viewCampaign")}
         </Link>
       </PaymentSuccess>
     );

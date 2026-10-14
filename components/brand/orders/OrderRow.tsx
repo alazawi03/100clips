@@ -4,9 +4,7 @@ import { ActionTag, StatusBadge } from "@/components/ui/StatusBadge";
 import { isActiveOrder, orderBadgeStatus } from "@/lib/statuses";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { hasManyBrands } from "@/lib/brandFilter";
-import { getBrand } from "@/lib/data/account";
-import { getCampaign } from "@/lib/data/campaigns";
-import { getCreator } from "@/lib/data/creators";
+import { workspace } from "@/lib/data/live";
 import { orderFlags } from "@/components/brand/campaigns/campaignView";
 import { cn } from "@/lib/cn";
 import type { Order } from "@/lib/data/types";
@@ -17,20 +15,21 @@ import { brandPaid } from "@/lib/fees";
  * One order in a list: who, what, where it came from, status and amount.
  * Inside a campaign every order shares the campaign name, so "creator" leads with the creator and their clips instead.
  */
-export function OrderRow({ order, i18n, lead = "order" }: { order: Order; i18n: I18n; lead?: "order" | "creator" }) {
+export async function OrderRow({ order, i18n, lead = "order" }: { order: Order; i18n: I18n; lead?: "order" | "creator" }) {
   const { t, tp, f } = i18n;
-  const creator = getCreator(order.creatorId)!;
+  const ws = await workspace();
+  const creator = ws.creator(order.creatorId)!;
   // Brand column: only for accounts with several brands, and not inside a campaign (all one brand there).
-  const brand = lead === "order" && hasManyBrands() ? getBrand(order.brandId) : undefined;
+  const brand = lead === "order" && hasManyBrands(ws.brands) ? ws.brand(order.brandId) : undefined;
   const brandName = brand ? f.pick(brand.name) : undefined;
-  const flags = orderFlags(order, order.campaignId ? getCampaign(order.campaignId) : undefined);
+  const flags = orderFlags(order, ws.campaign(order.campaignId), ws);
   return (
     <li>
       <Link
         href={`/orders/${order.id}`}
         className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4 transition-colors duration-[120ms] hover:bg-surface/60 sm:flex-nowrap sm:px-5"
       >
-        <Avatar id={creator.id} name={f.pick(creator.name)} size="md" />
+        <Avatar id={creator.id} name={f.pick(creator.name)} src={creator.photo} size="md" />
         <div className="min-w-0 flex-1">
           {lead === "creator" ? (
             <>

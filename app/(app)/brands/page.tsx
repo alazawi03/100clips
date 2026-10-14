@@ -6,6 +6,7 @@ import { SectionHeader } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getProduct, myBrands, productsOf } from "@/lib/data/brandsApi";
+import { workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function BrandsPage({ searchParams }: PageProps<"/brands">) {
@@ -13,7 +14,7 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
   const { t, tp, f } = i18n;
   const query = await searchParams;
   const done = typeof query.done === "string" ? query.done : undefined;
-  const brands = await myBrands();
+  const [brands, ws] = await Promise.all([myBrands(), workspace()]);
   const doneProduct = typeof query.product === "string" ? await getProduct(query.product) : undefined;
   const doneBrand = typeof query.brand === "string" ? brands.find((b) => b.id === query.brand) : undefined;
   // Open the brand the user just worked on.
@@ -28,7 +29,7 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
         logo: brand.logo,
         industry: t(`industries.${brand.industry}`),
         productsLabel: tp("brandsPage.products", products.length),
-        products: products.map((p) => productView(p, i18n)),
+        products: products.map((p) => productView(p, i18n, ws)),
       };
     }),
   );

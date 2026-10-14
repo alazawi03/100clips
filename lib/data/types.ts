@@ -177,10 +177,15 @@ export type OrderShipping = { sentAt?: string; note?: string; receivedAt?: strin
 export type DeclineReason = "busy" | "notMyNiche" | "other" | "expired";
 
 /** One uploaded version of the clip. */
-export type ClipVersion = { videoSrc: string; uploadedAt: string };
+export type ClipVersion = { videoSrc: string; uploadedAt: string; durationSec?: number };
+
+/** A copy of the creator's address and phone, made when they accept a physical product: where the brand ships. */
+export type ShipTo = { type: "home" | "work"; label?: string; address: string; latitude?: number; longitude?: number; phone?: string };
 
 export type Order = {
   id: string;
+  /** Shown as #1043. */
+  number?: number;
   brandId: string;
   source: "offer" | "campaign";
   campaignId?: string;
@@ -213,6 +218,13 @@ export type Order = {
   shipping?: OrderShipping;
   /** Activity history; demo orders without one get it derived from their status (lib/orderFlow.ts). */
   events?: OrderEvent[];
+  /** Where to send a physical product, once the creator accepted. */
+  shipTo?: ShipTo;
+  /** This order's due date: the campaign's, unless 100clips moved it for this creator. */
+  deadline?: string;
+  /** Approved clips: whether other brands may see it on the creator's card. */
+  clipPublic?: boolean;
+  views?: number;
   /** 1–5 stars, given by the brand when approving (or later). */
   rating?: number;
   /** The brand's comment when approving. */

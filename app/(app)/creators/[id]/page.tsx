@@ -1,16 +1,20 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronRight, Clapperboard, ExternalLink, Star } from "lucide-react";
+import { InviteToCampaignMenu } from "@/components/brand/campaigns/InviteMenus";
+import { OfferPicker } from "@/components/brand/cart/OfferPicker";
+import { SaveToListButton } from "@/components/brand/creators/SaveToListButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card, SectionHeader } from "@/components/ui/Card";
-import { Notice } from "@/components/ui/Notice";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { cn } from "@/lib/cn";
 import { creatorProfile } from "@/lib/data/creatorsApi";
+import { allLists } from "@/lib/data/lists";
+import { workspace } from "@/lib/data/live";
 import { isActiveMarket } from "@/lib/data/markets";
-import { platformOf, type FormatOffer, type Platform } from "@/lib/data/types";
-import { priceForBrand } from "@/lib/fees";
-import { getI18n, type I18n } from "@/lib/i18n/server";
+import { platformOf, type Platform } from "@/lib/data/types";
+import { getI18n } from "@/lib/i18n/server";
 
 /** Profile URL per platform, from the creator's own handle there. */
 const profileUrl: Record<Platform, (handle: string) => string> = {
@@ -28,28 +32,6 @@ function Stars({ rating, label }: { rating: number; label: string }) {
   );
 }
 
-/**
- * The creator's prices as brands pay them. Read-only for now: adding to the cart, messaging, lists
- * and invites join real creators with the checkout slice.
- */
-function Prices({ offers, i18n }: { offers: FormatOffer[]; i18n: I18n }) {
-  const { t, f } = i18n;
-  return (
-    <Card className="flex flex-col gap-4 p-5">
-      <ul className="flex flex-col divide-y divide-border">
-        {offers.map((o) => (
-          <li key={o.format} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-            <PlatformLogo platform={platformOf[o.format]} className="size-5" />
-            <span className="flex-1">{t(`formats.${o.format}`)}</span>
-            <span className="font-medium tabular-nums">{f.money(priceForBrand(o.price))}</span>
-          </li>
-        ))}
-      </ul>
-      <Notice tone="info">{t("profile.bookingSoon")}</Notice>
-    </Card>
-  );
-}
-
 export default async function CreatorProfilePage({ params }: PageProps<"/creators/[id]">) {
   const { id } = await params;
   const profile = await creatorProfile(id);
@@ -58,7 +40,11 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
   const { creator, reviews } = profile;
   const i18n = await getI18n();
   const { t, f } = i18n;
+  const [ws, lists] = await Promise.all([workspace(), allLists()]);
   const name = f.pick(creator.name);
+  const line = ws.cart.find((l) => l.creatorId === creator.id);
+  const inCart = line ? Object.fromEntries(line.items.map((i) => [i.format, i.quantity])) : undefined;
+  const live = ws.campaigns.filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: f.pick(c.title) }));
   const portfolio = creator.portfolio ?? [];
   // The accounts the creator added in the app; older profiles fall back to one handle on each platform they sell.
   const handles: Partial<Record<Platform, string>> =
@@ -83,6 +69,21 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
           {/* Name, with icon-only actions at the far end of the same line; each says what it does on hover. */}
           <div className="flex items-center justify-between gap-3">
             <h1 className="min-w-0 flex-1 text-h1 font-medium text-balance">{name}</h1>
+            <div className="flex shrink-0 items-center gap-2">
+              {live.length > 0 && (
+                <Tooltip label={t("invite.toCampaign")}>
+                  <InviteToCampaignMenu variant="icon" label={t("invite.toCampaign")} creatorIds={[creator.id]} campaigns={live} />
+                </Tooltip>
+              )}
+              <Tooltip label={t("lists.save")}>
+                <SaveToListButton
+                  compact
+                  creatorId={creator.id}
+                  name={name}
+                  lists={lists.map((l) => ({ id: l.id, name: l.name, favorites: l.favorites, count: l.creatorIds.length, has: l.creatorIds.includes(creator.id) }))}
+                />
+              </Tooltip>
+            </div>
           </div>
           <ul aria-label={t("profile.socials")} className="flex flex-wrap gap-2">
             {socials.map(({ platform, handle }) => (
@@ -131,7 +132,7 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
 
       {/* Phones: the picker sits in the page right under the profile; desktop uses the sticky side column. */}
       <section aria-label={t("profile.offers")} className="md:hidden">
-        <Prices offers={creator.formats} i18n={i18n} />
+        <OfferPicker variant="compact" creatorId={creator.id} creatorName={name} offers={creator.formats} inCart={inCart} />
       </section>
 
       {/* The samples the creator chose in the app (up to 3), or a note that there are none yet. */}
@@ -191,7 +192,7 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
       {/* The aside itself is sticky: a sticky child of a content-height aside would have no room to move. */}
       <aside aria-labelledby="offers-title" className="hidden md:block md:sticky md:top-24 md:order-2 md:self-start">
         <h2 id="offers-title" className="mb-3 hidden text-h3 font-medium md:block">{t("profile.offers")}</h2>
-        <Prices offers={creator.formats} i18n={i18n} />
+        <OfferPicker creatorId={creator.id} creatorName={name} offers={creator.formats} inCart={inCart} />
       </aside>
       </div>
     </div>

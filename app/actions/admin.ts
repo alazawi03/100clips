@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { api, ApiError } from "@/lib/api";
 import { decide as decideOnApi } from "@/lib/admin/applicationsApi";
 import { addPayout, addSupportMessage } from "@/lib/admin/data";
 import { getCreator } from "@/lib/data/creators";
@@ -144,4 +145,22 @@ export async function resolveProblem(id: string, _prev: AdminFormState, form: Fo
   logAction("problemResolved", { kind: "order", id: report.orderId }, { note: resolution });
   revalidatePath("/", "layout");
   return { done: true };
+}
+
+/* ---------- Card payments (until the card provider's webhook exists) ---------- */
+
+/**
+ * The admin saw the money arrive (or not) and records it, as the card provider will: confirming
+ * completes the payment (the offers go out, or the top-up joins the balance); failing leaves nothing changed.
+ */
+export async function settleCardPayment(paymentId: string, outcome: "confirm" | "fail") {
+  let done: "paid" | "failed" | "error" = outcome === "confirm" ? "paid" : "failed";
+  try {
+    await api(`/admin/payments/${paymentId}/${outcome}`, { method: "POST", body: { provider: "manual", provider_ref: `admin-${new Date().toISOString().slice(0, 10)}` } });
+  } catch (e) {
+    console.error("Settling a card payment failed:", e instanceof ApiError ? `${e.status} ${e.message}` : e);
+    done = "error";
+  }
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/payments?done=${done}`);
 }

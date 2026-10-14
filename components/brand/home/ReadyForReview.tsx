@@ -1,15 +1,18 @@
 import Link from "next/link";
 import { SectionHeader } from "@/components/ui/Card";
 import { ClipPoster } from "@/components/ui/ClipPoster";
-import { getClip } from "@/lib/data/clips";
-import { getCreator } from "@/lib/data/creators";
+import { clipOf, workspace } from "@/lib/data/live";
 import type { Order } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 
 /** Delivered clips waiting for the brand: the main job of the home screen. */
-export function ReadyForReview({ orders, i18n }: { orders: Order[]; i18n: I18n }) {
+export async function ReadyForReview({ orders, i18n }: { orders: Order[]; i18n: I18n }) {
   const { t, f } = i18n;
-  const ready = orders.filter((o) => o.status === "delivered" && o.clipId);
+  const ws = await workspace();
+  const ready = orders.flatMap((o) => {
+    const clip = o.status === "delivered" ? clipOf(o, ws) : undefined;
+    return clip ? [{ order: o, clip }] : [];
+  });
   if (ready.length === 0) return null;
 
   return (
@@ -21,16 +24,15 @@ export function ReadyForReview({ orders, i18n }: { orders: Order[]; i18n: I18n }
         action={{ href: "/orders?status=delivered", label: t("common.seeAll") }}
       />
       <ul className="scrollbar-none -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:px-0">
-        {ready.map((order) => {
-          const clip = getClip(order.clipId!)!;
-          const creator = getCreator(order.creatorId)!;
+        {ready.map(({ order, clip }) => {
+          const creator = ws.creator(order.creatorId)!;
           return (
             <li key={order.id} className="w-40 shrink-0 snap-start sm:w-44">
               <Link href={`/orders/${order.id}`} className="group flex flex-col gap-2 rounded-[var(--radius-md)]">
                 <ClipPoster
                   clip={clip}
                   views={f.compact(clip.views)}
-                  duration={f.duration(clip.durationSec)}
+                  duration={clip.durationSec ? f.duration(clip.durationSec) : ""}
                   className="transition-transform duration-200 ease-out group-hover:-translate-y-0.5"
                 />
                 <div className="flex flex-col">

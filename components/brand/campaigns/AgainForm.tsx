@@ -225,7 +225,7 @@ function AgainDetails({
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 flex w-full items-center justify-between gap-3 font-medium">
             {t("checkout.references")}
-            {refs.length < 5 && (
+            {refs.length < 3 && (
               <button
                 type="button"
                 onClick={() => setRefs((list) => [...list, ""])}

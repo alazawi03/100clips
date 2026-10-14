@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Copy, Megaphone } from "lucide-react";
 import { requestAdCode } from "@/app/actions/messages";
+import { CHAT_LIVE } from "@/lib/features";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
 import { cn } from "@/lib/cn";
@@ -75,7 +76,9 @@ export function AdCode({ orderId, platform, code, today }: Props) {
   );
 }
 
+/** Asks in the chat with the creator, so only once chat is live. */
 function RequestButton({ orderId, label }: { orderId: string; label: string }) {
+  if (!CHAT_LIVE) return null;
   return (
     <form action={requestAdCode.bind(null, orderId)}>
       <button type="submit" className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3 text-small font-medium transition-colors hover:bg-surface">
