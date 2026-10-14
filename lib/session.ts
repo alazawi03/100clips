@@ -31,8 +31,9 @@ export async function ensureBrandAccount(): Promise<Me> {
   const meta = (user?.user_metadata ?? {}) as { name?: string; full_name?: string };
   const name = (meta.name ?? meta.full_name ?? "").trim().slice(0, 80);
   const arabic = /[؀-ۿ]/.test(name);
-  await api("/me", { method: "POST", body: { role: "brand", ...(name ? { [arabic ? "name_ar" : "name_en"]: name } : {}) } });
-  return (await apiOrNothing<Me>("/me"))!;
+  const account = await api<Me["account"]>("/me", { method: "POST", body: { role: "brand", ...(name ? { [arabic ? "name_ar" : "name_en"]: name } : {}) } });
+  // Not GET /me again: Next.js reuses a GET's answer within one render, which was "no account yet".
+  return { account, creator: null, brands: [] };
 }
 
 /** The person's name to show: their language first, then the other, then the email. */

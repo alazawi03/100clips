@@ -197,7 +197,7 @@ async function saveRegistration(brandId: string, form: FormData, brand: Omit<Bra
   const file = form.get("vat_bh");
   const picked = file instanceof File && file.size > 0 ? file : undefined;
   const saved = await store.registrationOf(brandId);
-  const vatPath = picked ? await storeDocument(picked, "vat") : bh?.vatCertificate ? (saved?.vat_certificate_path ?? null) : null;
+  const vatPath = picked ? await storeDocument(picked) : bh?.vatCertificate ? (saved?.vat_certificate_path ?? null) : null;
   const crNumber = bh?.crNumber ?? null;
   if (crNumber === (saved?.cr_number ?? null) && vatPath === (saved?.vat_certificate_path ?? null)) return;
   await store.setRegistration(brandId, crNumber, vatPath);

@@ -18,12 +18,6 @@ function localized(ar: string | null | undefined, en: string | null | undefined)
   return { ar: ar || en || "", en: en || ar || "" };
 }
 
-/** Typed text goes in the column for its script, so each language shows its own when there is one. */
-function byScript(text: string | undefined): { ar: string | null; en: string | null } {
-  if (!text) return { ar: null, en: null };
-  return /[؀-ۿ]/.test(text) ? { ar: text, en: null } : { ar: null, en: text };
-}
-
 function toBrand(row: BrandRow, registration?: Registration): Brand {
   const registered = registration && (registration.cr_number || registration.vat_certificate_path);
   return {
@@ -44,13 +38,13 @@ function toBrand(row: BrandRow, registration?: Registration): Brand {
 }
 
 function toProduct(row: ProductRow): Product {
-  const description = row.description_ar || row.description_en ? localized(row.description_ar, row.description_en) : undefined;
+  // A product's name and description are one text each, shown as the brand typed them.
   return {
     id: row.id,
     brandId: row.brand_id,
-    name: localized(row.name_ar, row.name_en),
+    name: localized(row.name, row.name),
     photos: row.photos.map((p) => publicUrl(p)!),
-    description,
+    description: row.description ? localized(row.description, row.description) : undefined,
     price: row.price ?? undefined,
     benefits: row.benefits,
     concerns: row.concerns.map((c) => ({ question: c.question, answer: c.answer || undefined })),
@@ -81,7 +75,7 @@ async function brandBody(brand: Omit<Brand, "id">) {
   return {
     name_ar: brand.name.ar || null,
     name_en: brand.name.en || null,
-    logo_path: brand.logo ? ((await storeImage(brand.logo, "logos")) ?? null) : null,
+    logo_path: brand.logo ? ((await storeImage(brand.logo, "logo")) ?? null) : null,
     industry: brand.industry,
     about: brand.about?.ar || brand.about?.en || null,
     website: brand.website ?? null,
@@ -113,16 +107,12 @@ export async function registrationOf(brandId: string) {
 
 /** The API's body for a product: new photos uploaded first, details without their type. */
 async function productBody(product: Omit<Product, "id" | "brandId">) {
-  const photos = (await Promise.all(product.photos.map((p) => storeImage(p, "products")))).filter((p): p is string => !!p);
-  const name = byScript(product.name.ar || product.name.en);
-  const description = byScript(product.description?.ar || product.description?.en);
+  const photos = (await Promise.all(product.photos.map((p) => storeImage(p, "product_photo")))).filter((p): p is string => !!p);
   const { type, ...details } = product.details;
   return {
     type,
-    name_ar: name.ar,
-    name_en: name.en,
-    description_ar: description.ar,
-    description_en: description.en,
+    name: product.name.ar || product.name.en,
+    description: product.description?.ar || product.description?.en || null,
     photos,
     price: product.price ?? null,
     benefits: product.benefits,

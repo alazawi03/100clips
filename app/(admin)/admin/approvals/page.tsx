@@ -42,12 +42,14 @@ export default async function AdminApprovalsPage({ searchParams }: PageProps<"/a
                     <div className="min-w-0 flex-1 basis-48">
                       <p className="truncate font-medium">{name}</p>
                       <p className="truncate text-small text-text-muted">
-                        <bdi dir="ltr">@{a.handle}</bdi> · {f.pick(a.city)} · {list_.format(a.niches.map((n) => t(`niches.${n}`)))}
+                        <bdi dir="ltr">@{a.handle}</bdi>
+                        {[f.pick(a.city), list_.format(a.niches.map((n) => t(`niches.${n}`)))].filter(Boolean).map((part) => ` · ${part}`)}
                       </p>
                     </div>
                     <p className="flex items-center gap-1 text-small text-text-muted">
                       <Film aria-hidden className="size-4" strokeWidth={1.75} />
-                      {tp("admin.approvals.samples", a.samples.length)}
+                      {/* Sign-up sends the intro; samples come after approval. */}
+                      {a.samples.length === 0 && a.hasIntro ? t("admin.approvals.intro") : tp("admin.approvals.samples", a.samples.length)}
                     </p>
                     <div className="text-end text-small text-text-muted">
                       <Badge tone={APPLICATION_TONE[a.status]}>{t(`admin.approvals.status.${a.status}`)}</Badge>

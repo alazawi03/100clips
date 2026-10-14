@@ -164,6 +164,8 @@ export type Application = {
   samples: SampleClip[];
   /** The intro video sent for review (a short-lived link); the API's applications have one. */
   intro?: string;
+  /** Whether an intro video was sent (lists don't sign its link). */
+  hasIntro?: boolean;
   appliedAt: string;
   status: ApplicationStatus;
   /** Every decision, oldest first, with the note the creator sees. */

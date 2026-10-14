@@ -1,8 +1,7 @@
 import { api, ApiError } from "@/lib/api";
 import type { components } from "@/lib/api-types";
-import { publicUrl } from "@/lib/data/storage";
+import { privateLink, publicUrl } from "@/lib/data/storage";
 import type { Localized } from "@/lib/data/types";
-import { createClient } from "@/lib/supabase/server";
 import type { Application, ApplicationStatus } from "./data";
 
 /** Creators' applications from the API, in the admin pages' shape (lib/admin/data.ts). Admins only. */
@@ -11,13 +10,6 @@ type Row = components["schemas"]["CreatorApplication"];
 
 const same = (text: string | null | undefined): Localized => ({ ar: text ?? "", en: text ?? "" });
 
-/** The intro sits in private-docs: an hour-long link, signed as the admin (storage lets admins read it). */
-async function signedIntro(path: string | undefined): Promise<string | undefined> {
-  if (!path) return undefined;
-  const supabase = await createClient();
-  const { data } = await supabase.storage.from("private-docs").createSignedUrl(path, 3600);
-  return data?.signedUrl;
-}
 
 async function toApplication(row: Row, withIntro: boolean): Promise<Application> {
   const c = row.creator;
@@ -38,7 +30,8 @@ async function toApplication(row: Row, withIntro: boolean): Promise<Application>
     tiktok: socials.tiktok,
     // What was sent with the latest submission (samples are public; the intro is private).
     samples: (latest?.sample_paths ?? []).map((p, i) => ({ id: `${latest!.id}-${i}`, videoSrc: publicUrl(p)! })),
-    intro: withIntro ? await signedIntro(latest?.intro_video_path) : undefined,
+    intro: withIntro ? await privateLink("private-docs", latest?.intro_video_path) : undefined,
+    hasIntro: !!latest?.intro_video_path,
     appliedAt: latest?.submitted_at ?? c.created_at,
     status: c.status as ApplicationStatus,
     decisions: row.applications

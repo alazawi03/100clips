@@ -621,6 +621,506 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get a link to upload a file
+         * @description PUT the file to `upload_url` with `headers` (exactly `size` bytes of `content_type`), then save `path` with its record.
+         */
+        post: operations["FilesController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/files/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A link to view a file
+         * @description Private files (intro videos, VAT certificates, clips) for whoever may see them, for an hour.
+         */
+        get: operations["FilesController_link"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/{id}/checkout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pay for offers
+         * @description A draft becomes live, or a live campaign invites more creators. The balance is used first; if a card part is left the payment waits for the card (status pending), otherwise the offers go out at once (status paid). One video per creator per campaign.
+         */
+        post: operations["PaymentsController_checkout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/top-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Top up the balance
+         * @description Brand accounts. A card payment that becomes balance once the card provider confirms it.
+         */
+        post: operations["PaymentsController_topUp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/balance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My balance
+         * @description BHD: top-ups, card payments and refunds in, offers paid out.
+         */
+        get: operations["PaymentsController_balance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A payment
+         * @description Your own. Watch it after paying by card: pending, then paid or failed.
+         */
+        get: operations["PaymentsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/payments/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a card payment paid (admin)
+         * @description Stands in for the card provider's webhook until the provider is chosen. Completes the payment: balance, or a live campaign and its offers.
+         */
+        post: operations["PaymentsController_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/payments/{id}/fail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a card payment failed (admin)
+         * @description Stands in for the card provider's webhook. Nothing else changes.
+         */
+        post: operations["PaymentsController_fail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Orders
+         * @description Creators: their own. Brand owners: their brands'. Admins: all. Newest first.
+         */
+        get: operations["OrdersController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * An order
+         * @description With every clip version and its history, oldest first.
+         */
+        get: operations["OrdersController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Accept an offer (creator)
+         * @description Within 96 hours of the offer. A physical product needs one of your addresses; the brand gets a copy with your phone. Opens the chat with the brand.
+         */
+        post: operations["OrdersController_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decline an offer (creator)
+         * @description The brand gets everything back. With no offer left, the campaign ends.
+         */
+        post: operations["OrdersController_decline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/received": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The product arrived (creator)
+         * @description After the brand marked it sent. Filming can start.
+         */
+        post: operations["OrdersController_received"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/clips": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send the clip (creator)
+         * @description Upload the file to the clips bucket under the order's folder ({order id}/...) first, then send its path. Version 1, or 2 after the revision. A physical product must have arrived. An ad code can come with it.
+         */
+        post: operations["OrdersController_submitClip"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/ad-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set the ad code (creator)
+         * @description Spark Ads (TikTok) or Partnership Ads (Instagram), once there's a clip. Replaces the previous one.
+         */
+        put: operations["OrdersController_setAdCode"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/approval-seen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The approval was celebrated (creator)
+         * @description So the "approved and paid" moment shows once. Does nothing before approval.
+         */
+        post: operations["OrdersController_approvalSeen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Withdraw an offer (brand)
+         * @description Before the creator answers. Everything paid goes back to the balance.
+         */
+        post: operations["OrdersController_withdraw"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/sent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The product is on its way (brand)
+         * @description Physical products, once the creator accepted. A note instead of a tracking number.
+         */
+        post: operations["OrdersController_sent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/revision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask for a revision (brand)
+         * @description Once per order, while the clip waits for review. Say what should change (10+ characters).
+         */
+        post: operations["OrdersController_revision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve the clip (brand)
+         * @description Pays the creator. Stars and a comment are optional (a comment needs stars). Unreviewed clips are approved automatically after 7 days.
+         */
+        post: operations["OrdersController_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/rating": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rate later (brand)
+         * @description Stars after approving without them. Once: ratings can't be changed.
+         */
+        post: operations["OrdersController_rate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/clip-public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Show or hide the clip (brand)
+         * @description Whether other brands may see the approved clip on the creator's card.
+         */
+        put: operations["OrdersController_clipPublic"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/orders/{id}/returned": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * The product was collected back (brand)
+         * @description After approval, when the campaign's product goes back after filming.
+         */
+        post: operations["OrdersController_returned"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/orders/{id}/deadline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Move one order's deadline (admin)
+         * @description While the clip is owed. The campaign's deadline stays as it is for everyone else.
+         */
+        put: operations["OrdersController_setDeadline"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel an order (admin)
+         * @description One that won't finish, before approval. The brand gets everything back.
+         */
+        post: operations["OrdersController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -958,12 +1458,10 @@ export interface components {
             /** Format: uuid */
             brand_id: string;
             type: components["schemas"]["ProductType"];
-            name_ar: string | null;
-            name_en: string | null;
+            name: string;
             /** @description Paths in the public storage bucket, first is the cover */
             photos: string[];
-            description_ar: string | null;
-            description_en: string | null;
+            description: string | null;
             /** @description BHD */
             price: number | null;
             benefits: string[];
@@ -978,19 +1476,13 @@ export interface components {
         CreateProductDto: {
             type: components["schemas"]["ProductType"];
             /**
-             * @description Arabic name. The database needs one name, Arabic or English.
-             * @example بن إثيوبي
-             */
-            name_ar?: string;
-            /**
-             * @description English name
+             * @description As the brand types it, in any language
              * @example Ethiopian single origin
              */
-            name_en?: string;
+            name: string;
             /** @description Paths in the public storage bucket, first is the cover */
             photos?: string[];
-            description_ar?: string;
-            description_en?: string;
+            description?: string;
             /** @description What customers pay, in BHD. Venues have none. */
             price?: number;
             /** @description Short selling points */
@@ -1002,19 +1494,13 @@ export interface components {
         };
         UpdateProductDto: {
             /**
-             * @description Arabic name. The database needs one name, Arabic or English.
-             * @example بن إثيوبي
-             */
-            name_ar?: string;
-            /**
-             * @description English name
+             * @description As the brand types it, in any language
              * @example Ethiopian single origin
              */
-            name_en?: string;
+            name?: string;
             /** @description Paths in the public storage bucket, first is the cover */
             photos?: string[];
-            description_ar?: string;
-            description_en?: string;
+            description?: string;
             /** @description What customers pay, in BHD. Venues have none. */
             price?: number;
             /** @description Short selling points */
@@ -1266,6 +1752,8 @@ export interface components {
             addresses: components["schemas"]["Address"][];
             /** @description Null before the first submission */
             application: components["schemas"]["Application"] | null;
+            /** @description Every submission and its verdict, oldest first (the review history) */
+            applications: components["schemas"]["Application"][];
         };
         HandleAvailability: {
             /** @example dana.glow */
@@ -1373,6 +1861,419 @@ export interface components {
             decision: "approved" | "changes_requested" | "rejected";
             /** @description Required unless approved: the creator sees it */
             note?: string;
+        };
+        /**
+         * @description photo, sample and intro: creators; logo, product_photo, vat_certificate: brands; clip: an order's creator
+         * @enum {string}
+         */
+        UploadKind: "photo" | "sample" | "intro" | "logo" | "product_photo" | "vat_certificate" | "clip";
+        UploadDto: {
+            /** @description photo, sample and intro: creators; logo, product_photo, vat_certificate: brands; clip: an order's creator */
+            kind: components["schemas"]["UploadKind"];
+            /** @example video/mp4 */
+            content_type: string;
+            /**
+             * @description Bytes. The upload must be exactly this size.
+             * @example 24000000
+             */
+            size: number;
+            /**
+             * Format: uuid
+             * @description For a clip: its order
+             */
+            order_id?: string;
+        };
+        /** @enum {string} */
+        FileArea: "public-media" | "private-docs" | "clips";
+        Upload: {
+            area: components["schemas"]["FileArea"];
+            /** @description Save this path with the record (photo_path, video_path, ...) once uploaded */
+            path: string;
+            /** @description PUT the file here within 15 minutes */
+            upload_url: string;
+            /** @description Headers to send with the PUT */
+            headers: {
+                [key: string]: string;
+            };
+            /** @description Its public link (public-media only) */
+            public_url: string | null;
+        };
+        FileLink: {
+            /** @description Works for an hour (public files: always) */
+            url: string;
+        };
+        PickDto: {
+            /** Format: uuid */
+            creator_id: string;
+            format: components["schemas"]["ContentFormat"];
+            /** @description The brand's note to this creator, sent with the offer */
+            note?: string;
+        };
+        CheckoutDto: {
+            /** @description One video per creator per campaign */
+            picks: components["schemas"]["PickDto"][];
+            /**
+             * @description Use the balance first; the rest is paid by card
+             * @default true
+             */
+            use_balance: boolean;
+        };
+        /** @enum {string} */
+        PaymentKind: "checkout" | "top_up";
+        PaidPick: {
+            /** Format: uuid */
+            creator_id: string;
+            format: components["schemas"]["ContentFormat"];
+            /** @description The brand's note to this creator, sent with the offer */
+            note?: string;
+            /** @description The creator's price, fixed at checkout (BHD, before the fee) */
+            price: number;
+        };
+        /** @enum {string} */
+        PaymentStatus: "pending" | "paid" | "failed";
+        Payment: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            account_id: string;
+            kind: components["schemas"]["PaymentKind"];
+            /** Format: uuid */
+            campaign_id: string | null;
+            /** @description BHD: creators' prices plus the fee */
+            total: number;
+            /** @description BHD taken from the balance */
+            from_balance: number;
+            /** @description BHD to pay by card (0: paid at once from the balance) */
+            by_card: number;
+            picks: components["schemas"]["PaidPick"][] | null;
+            status: components["schemas"]["PaymentStatus"];
+            provider: string | null;
+            provider_ref: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            paid_at: string | null;
+        };
+        TopUpDto: {
+            /**
+             * @description BHD
+             * @example 50
+             */
+            amount: number;
+        };
+        Balance: {
+            /** @description BHD available to spend (or withdraw) */
+            balance: number;
+        };
+        ProviderResultDto: {
+            /** @example tap */
+            provider: string;
+            /**
+             * @description The provider's charge reference
+             * @example chg_123
+             */
+            provider_ref: string;
+        };
+        /** @enum {string} */
+        OrderStatus: "pending" | "in_progress" | "delivered" | "approved" | "declined" | "cancelled";
+        ShipTo: {
+            type: components["schemas"]["AddressType"];
+            label: string | null;
+            address: string;
+            latitude: number | null;
+            longitude: number | null;
+            phone: string | null;
+        };
+        /** @enum {string} */
+        DeclineReason: "busy" | "not_my_niche" | "other" | "expired";
+        /** @enum {string} */
+        Actor: "creator" | "brand" | "admin" | "system";
+        OrderBrand: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            /** @description Path in the public storage bucket */
+            logo_path: string | null;
+        };
+        OrderCreator: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            handle: string;
+            /** @description Path in the public storage bucket */
+            photo_path: string | null;
+        };
+        OrderCampaign: {
+            title: string | null;
+            product_type: components["schemas"]["ProductType"] | null;
+            /** @description A physical product goes back to the brand after filming */
+            product_returns: boolean;
+        };
+        Order: {
+            /** Format: uuid */
+            id: string;
+            /** @description Shown as "ord-1043" */
+            number: number;
+            /** Format: uuid */
+            campaign_id: string;
+            /** Format: uuid */
+            brand_id: string;
+            /** Format: uuid */
+            creator_id: string;
+            /** Format: uuid */
+            payment_id: string | null;
+            format: components["schemas"]["ContentFormat"];
+            /** @description The creator's price in BHD, fixed when ordered (what they're paid) */
+            amount: number;
+            /** @description The brand's note to this creator */
+            note: string | null;
+            status: components["schemas"]["OrderStatus"];
+            /** Format: date */
+            deadline: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: date-time */
+            accepted_at: string | null;
+            terms_version: string | null;
+            ship_to: components["schemas"]["ShipTo"] | null;
+            decline_reason: components["schemas"]["DeclineReason"] | null;
+            decline_note: string | null;
+            /** Format: date-time */
+            declined_at: string | null;
+            /** Format: date-time */
+            cancelled_at: string | null;
+            cancelled_by: components["schemas"]["Actor"] | null;
+            /** Format: date-time */
+            sent_at: string | null;
+            ship_note: string | null;
+            /** Format: date-time */
+            received_at: string | null;
+            /** Format: date-time */
+            returned_at: string | null;
+            /** Format: date-time */
+            delivered_at: string | null;
+            /** Format: date-time */
+            revision_requested_at: string | null;
+            revision_note: string | null;
+            /** Format: date-time */
+            approved_at: string | null;
+            approved_by: components["schemas"]["Actor"] | null;
+            ad_code: string | null;
+            /** Format: date-time */
+            ad_code_expires_at: string | null;
+            /** @description Other brands may see the approved clip on the creator's card */
+            clip_public: boolean;
+            views: number | null;
+            /** Format: date-time */
+            views_updated_at: string | null;
+            /** Format: date-time */
+            creator_seen_approval_at: string | null;
+            rating: number | null;
+            review: string | null;
+            /** Format: date-time */
+            rated_at: string | null;
+            /** @description 100clips' fee the brand paid on top (BHD). Null for creators. */
+            fee: number | null;
+            brand: components["schemas"]["OrderBrand"];
+            creator: components["schemas"]["OrderCreator"] | null;
+            campaign: components["schemas"]["OrderCampaign"];
+        };
+        OrderClip: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {integer} */
+            version: 1 | 2;
+            /** @description Path in the clips bucket */
+            video_path: string;
+            duration_sec: number | null;
+            size_bytes: number | null;
+            note: string | null;
+            /** Format: date-time */
+            uploaded_at: string;
+        };
+        /** @enum {string} */
+        OrderEventType: "offered" | "accepted" | "declined" | "expired" | "cancelled" | "sent" | "received" | "uploaded" | "revision_requested" | "approved" | "returned" | "ad_code_added" | "deadline_moved" | "deadline_passed";
+        OrderEvent: {
+            /** Format: uuid */
+            id: string;
+            type: components["schemas"]["OrderEventType"];
+            actor: components["schemas"]["Actor"];
+            /**
+             * Format: uuid
+             * @description Who did it; null for the system
+             */
+            actor_id: string | null;
+            /** @description declined: {reason}; uploaded: {version}; deadline_moved: {from, to}; deadline_passed: {deadline} */
+            data: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            at: string;
+        };
+        OrderDetail: {
+            /** Format: uuid */
+            id: string;
+            /** @description Shown as "ord-1043" */
+            number: number;
+            /** Format: uuid */
+            campaign_id: string;
+            /** Format: uuid */
+            brand_id: string;
+            /** Format: uuid */
+            creator_id: string;
+            /** Format: uuid */
+            payment_id: string | null;
+            format: components["schemas"]["ContentFormat"];
+            /** @description The creator's price in BHD, fixed when ordered (what they're paid) */
+            amount: number;
+            /** @description The brand's note to this creator */
+            note: string | null;
+            status: components["schemas"]["OrderStatus"];
+            /** Format: date */
+            deadline: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: date-time */
+            accepted_at: string | null;
+            terms_version: string | null;
+            ship_to: components["schemas"]["ShipTo"] | null;
+            decline_reason: components["schemas"]["DeclineReason"] | null;
+            decline_note: string | null;
+            /** Format: date-time */
+            declined_at: string | null;
+            /** Format: date-time */
+            cancelled_at: string | null;
+            cancelled_by: components["schemas"]["Actor"] | null;
+            /** Format: date-time */
+            sent_at: string | null;
+            ship_note: string | null;
+            /** Format: date-time */
+            received_at: string | null;
+            /** Format: date-time */
+            returned_at: string | null;
+            /** Format: date-time */
+            delivered_at: string | null;
+            /** Format: date-time */
+            revision_requested_at: string | null;
+            revision_note: string | null;
+            /** Format: date-time */
+            approved_at: string | null;
+            approved_by: components["schemas"]["Actor"] | null;
+            ad_code: string | null;
+            /** Format: date-time */
+            ad_code_expires_at: string | null;
+            /** @description Other brands may see the approved clip on the creator's card */
+            clip_public: boolean;
+            views: number | null;
+            /** Format: date-time */
+            views_updated_at: string | null;
+            /** Format: date-time */
+            creator_seen_approval_at: string | null;
+            rating: number | null;
+            review: string | null;
+            /** Format: date-time */
+            rated_at: string | null;
+            /** @description 100clips' fee the brand paid on top (BHD). Null for creators. */
+            fee: number | null;
+            brand: components["schemas"]["OrderBrand"];
+            creator: components["schemas"]["OrderCreator"] | null;
+            campaign: components["schemas"]["OrderCampaign"];
+            clips: components["schemas"]["OrderClip"][];
+            events: components["schemas"]["OrderEvent"][];
+        };
+        AcceptOfferDto: {
+            /**
+             * Format: uuid
+             * @description One of your addresses. Required when the product is physical.
+             */
+            address_id?: string;
+            /**
+             * @description Which wording of the content rules the creator agreed to
+             * @example 2026-10
+             */
+            terms_version?: string;
+        };
+        /** @enum {string} */
+        CreatorDeclineReason: "busy" | "not_my_niche" | "other";
+        DeclineOfferDto: {
+            /** @default other */
+            reason: components["schemas"]["CreatorDeclineReason"];
+            /** @description In the creator's own words, for the brand */
+            note?: string;
+        };
+        SubmitClipDto: {
+            /**
+             * @description Its path in the clips bucket
+             * @example <order id>/v1.mp4
+             */
+            video_path: string;
+            /** @example 42 */
+            duration_sec?: number;
+            /** @example 84000000 */
+            size_bytes?: number;
+            /** @description The creator's note for the brand */
+            note?: string;
+            /** @description Spark Ads (TikTok) or Partnership Ads (Instagram) code, if ready */
+            ad_code?: string;
+            /**
+             * @description How long the code works
+             * @default 30
+             * @enum {number}
+             */
+            ad_code_days: 7 | 30 | 60 | 365;
+        };
+        AdCodeDto: {
+            /** @example #SPARK123 */
+            code: string;
+            /**
+             * @description How long the code works
+             * @enum {number}
+             */
+            valid_days: 7 | 30 | 60 | 365;
+        };
+        MarkSentDto: {
+            /** @example With our driver, Thursday */
+            note?: string;
+        };
+        RevisionDto: {
+            /** @example Show the cup in the first 3 seconds */
+            note: string;
+        };
+        ApproveDto: {
+            rating?: number;
+            /** @description Shown on the creator's profile with the stars */
+            comment?: string;
+            /**
+             * @description Other brands may see the clip on the creator's card
+             * @default true
+             */
+            clip_public: boolean;
+        };
+        RateDto: {
+            rating: number;
+        };
+        ClipPublicDto: {
+            /** @description Other brands may see the approved clip on the creator's card */
+            visible: boolean;
+        };
+        AdminDeadlineDto: {
+            /**
+             * Format: date
+             * @example 2026-12-08
+             */
+            deadline: string;
+            /** @description Why, for the admin history */
+            note?: string;
+        };
+        AdminCancelDto: {
+            /** @example The creator stopped answering */
+            note: string;
         };
     };
     responses: never;
@@ -3366,6 +4267,1557 @@ export interface operations {
             };
             /** @description Not allowed */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    FilesController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Upload"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    FilesController_link: {
+        parameters: {
+            query: {
+                area: components["schemas"]["FileArea"];
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileLink"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_checkout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_topUp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TopUpDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_balance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Balance"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProviderResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_fail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProviderResultDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_list: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["OrderStatus"];
+                /** @description Only this campaign's orders */
+                campaign_id?: string;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Order"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptOfferDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_decline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeclineOfferDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_received: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_submitClip: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmitClipDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_setAdCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdCodeDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_approvalSeen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_withdraw: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_sent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkSentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_revision: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevisionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_rate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RateDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_clipPublic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClipPublicDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_returned: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_setDeadline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminDeadlineDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    OrdersController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminCancelDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
