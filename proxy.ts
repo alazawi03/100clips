@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { supabaseKey, supabaseUrl } from "@/lib/supabase/env";
 
 /** Pages people can open signed out. Everything else sends them to /login first. */
-const PUBLIC = ["/login", "/signup", "/forgot-password", "/auth/"];
+const PUBLIC = ["/login", "/signup", "/forgot-password", "/auth/", "/privacy", "/delete-account"];
 
 /**
  * Runs before every page: refreshes the Supabase session (rewriting its cookies when the access
