@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
+import { sendMessage } from "@/lib/data/chat";
 import { decide as decideOnApi } from "@/lib/admin/applicationsApi";
-import { addPayout, addSupportMessage } from "@/lib/admin/data";
-import { getCreator } from "@/lib/data/creators";
+import { addPayout } from "@/lib/admin/data";
 import { owedToCreators } from "@/lib/admin/money";
 import * as orders from "@/lib/admin/orders";
 import * as users from "@/lib/admin/users";
@@ -102,11 +102,14 @@ export async function extendDeadline(orderId: string, _prev: AdminFormState, for
 /* ---------- 100Clips Support ---------- */
 
 /** Sends a message to the creator as "100Clips Support" (the official, verified account in their app). */
+/** Writes in the creator's support chat as 100Clips Support (the API opens the chat if needed). */
 export async function sendSupportMessage(creatorId: string, form: FormData) {
-  const text = String(form.get("text") ?? "").trim().slice(0, 2000);
-  if (!text || !getCreator(creatorId)) return;
-  addSupportMessage(creatorId, text);
+  const text = String(form.get("text") ?? "").trim().slice(0, 4000);
+  if (!text) return;
+  const chat = await api<{ id: string }>(`/admin/creators/${creatorId}/support`, { method: "POST" });
+  await sendMessage(chat.id, text);
   revalidatePath(`/admin/users/creators/${creatorId}/support`);
+  revalidatePath("/admin/support");
 }
 
 /* ---------- Withdrawals from brands ---------- */

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useI18n } from "@/components/i18n/I18nProvider";
 
 /** Pages that still read the in-memory demo data (lib/data). Remove each as it moves to the API. */
-const DEMO_PAGES = ["/messages", "/settings"];
+const DEMO_PAGES = ["/settings"];
 
 /** Says so on pages that show demo data, so it's never mistaken for the account's real data. */
 export function DemoBanner() {

@@ -9,16 +9,17 @@ This repo is the **brand dashboard** (web) and the admin panel. The creator app 
 On the backend (`lib/api.ts` calls the API as the signed-in user): sign-in (Supabase Auth: email and
 password, or Google), brands and products, Explore and creator profiles, the cart and saved lists,
 campaigns (drafts, checkout, invite, run again, edit details, extend deadline), orders (ship, review,
-revision, approve, rate, collect), notifications, the balance and its history, and the admin's
-approvals and card payments. `lib/data/live.ts` loads the account's data once per request in the
+revision, approve, rate, collect), chat with creators (opened when a creator accepts; the page checks
+for new messages every 10 seconds), notifications, the balance and its history, and the admin's
+approvals, card payments and creators' support chats. `lib/data/live.ts` loads the account's data once per request in the
 dashboard's shapes (`lib/data/types.ts`). Files are in Cloudflare R2.
 
 Card payments aren't live yet: the card form is a mock, and a payment with a card part waits until an
 admin confirms it under Admin › Card payments (standing in for the card provider). Then the offers go out.
 
-Still sample data (`lib/data/`, in memory until the dev server restarts), with a "demo data" banner:
-messages (chat), the bank account and withdrawals (settings), problem reports, and the admin's money,
-payouts, orders, users and reports pages.
+Still sample data (`lib/data/`, in memory until the dev server restarts): the bank account and
+withdrawals (settings, with a "demo data" banner), problem reports, and the admin's money, payouts,
+orders, users and reports pages.
 
 ## Run it
 

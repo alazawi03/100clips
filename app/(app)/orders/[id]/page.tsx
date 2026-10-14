@@ -21,7 +21,6 @@ import { reportOf } from "@/lib/data/problems";
 import { clipVersions, currentStep, nextAction, offerHoursLeft, revisionUsed, stepsFor, waitingFor } from "@/lib/orderFlow";
 import { ShipButton, ShipToLines, Stars } from "@/components/brand/campaigns/OrderCard";
 import { Button, LinkButton, buttonClass } from "@/components/ui/Button";
-import { CHAT_LIVE } from "@/lib/features";
 import { nowIso, today } from "@/lib/today";
 import { campaignProgress, isActiveOrder, orderBadgeStatus } from "@/lib/statuses";
 import { brandPaid, priceForBrand } from "@/lib/fees";
@@ -51,8 +50,9 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const watchable = clip && (order.status === "delivered" || order.status === "approved");
   const active = isActiveOrder(order);
   const report = reportOf(order.id);
-  // Chat isn't on the backend yet.
-  const unread = 0;
+  // The chat with this creator for this brand: there's one once they've accepted.
+  const chat = ws.chatWith(order.brandId, order.creatorId);
+  const unread = chat?.unread ?? 0;
   // Just approved: the celebration, bigger when this was the campaign's last clip.
   const justApproved = done === "approved" && order.status === "approved";
   const progress = justApproved && campaign ? campaignProgress(campaign, ws.orders) : undefined;
@@ -69,7 +69,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
         back={{ href: "/orders", label: t("ordersPage.title") }}
       >
         <StatusBadge order={orderBadgeStatus(order)} />
-        {CHAT_LIVE && <form action={messageCreator.bind(null, order.creatorId, order.brandId)}>
+        {chat && <form action={messageCreator.bind(null, order.creatorId, order.brandId)}>
           <button
             type="submit"
             aria-label={unread > 0 ? `${t("campaignDetail.messages")} · ${tp("chat.unread", unread)}` : t("campaignDetail.messages")}

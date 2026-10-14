@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
 import { listApplications } from "@/lib/admin/applicationsApi";
+import { chats } from "@/lib/data/chat";
 import { owedToCreators } from "@/lib/admin/money";
 import { DEMO_TODAY } from "@/lib/data/account";
 import { problemReports } from "@/lib/data/problems";
@@ -29,6 +30,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   const counts = {
     "/admin/approvals": (await listApplications()).filter((a) => a.status === "pending").length,
     "/admin/payments": (await api<unknown[]>("/admin/payments?status=pending")).length,
+    "/admin/support": (await chats("support")).filter((c) => c.unread > 0).length,
     "/admin/payouts": owedToCreators(DEMO_TODAY).length + openWithdrawals().length,
     "/admin/reports": problemReports.filter((r) => r.status === "open").length,
   };

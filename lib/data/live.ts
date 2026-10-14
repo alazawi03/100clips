@@ -5,6 +5,7 @@ import { serviceFee, withFee } from "@/lib/fees";
 import { isActiveOrder } from "@/lib/statuses";
 import { dayOf } from "@/lib/today";
 import { myBrands, productsOf } from "./brandsApi";
+import { chats as loadChats, type Chat } from "./chat";
 import { exploreCreators } from "./creatorsApi";
 import { publicUrl } from "./storage";
 import type {
@@ -38,6 +39,10 @@ export type Workspace = {
   cart: CartLine[];
   /** Creators brands may book now (Explore), most completed orders first. */
   bookable: Creator[];
+  /** Chats with creators, the most recently active first. */
+  chats: Chat[];
+  /** The chat between this brand and creator (opened when the creator accepted an order), if any. */
+  chatWith(brandId: string, creatorId: string): Chat | undefined;
   brand(id: string | undefined): Brand | undefined;
   product(id: string | undefined): Product | undefined;
   productsOf(brandId: string): Product[];
@@ -65,13 +70,14 @@ const names = (ar: string | null | undefined, en: string | null | undefined): Lo
 
 /** The account's data for this request. */
 export const workspace = cache(async (): Promise<Workspace> => {
-  const [brands, campaignRows, orderRows, { balance }, cartRows, bookable] = await Promise.all([
+  const [brands, campaignRows, orderRows, { balance }, cartRows, bookable, chats] = await Promise.all([
     myBrands(),
     everything<CampaignRow>("/campaigns"),
     everything<OrderRow>("/orders"),
     api<{ balance: number }>("/me/balance"),
     api<CartRow[]>("/me/cart"),
     exploreCreators(),
+    loadChats("brand"),
   ]);
   const products = (await Promise.all(brands.map((b) => productsOf(b.id)))).flat();
   // Admins can open the dashboard too: only the account's own brands' work shows here.
@@ -91,6 +97,9 @@ export const workspace = cache(async (): Promise<Workspace> => {
     balance,
     cart: cartRows.map((r) => ({ creatorId: r.creator_id, items: [{ format: r.format, quantity: 1 }] })),
     bookable,
+    // Admins also see reported chats here (read-only); the account's own are those of its brands.
+    chats: chats.filter((c) => c.brandId && own.has(c.brandId)),
+    chatWith: (brandId, creatorId) => chats.find((c) => c.brandId === brandId && c.creatorId === creatorId),
     brand: (id) => brands.find((b) => b.id === id),
     product: (id) => products.find((p) => p.id === id),
     productsOf: (brandId) => products.filter((p) => p.brandId === brandId),

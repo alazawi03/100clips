@@ -3,7 +3,6 @@ import Link from "next/link";
 import { MessageCircle, ShoppingBag, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
 import { workspace } from "@/lib/data/live";
-import { unreadCount } from "@/lib/data/messages";
 import { getTheme } from "@/lib/theme";
 import { getI18n } from "@/lib/i18n/server";
 import { displayName, getUser, requireBrandAccount } from "@/lib/session";
@@ -24,7 +23,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
   const ws = await workspace();
   const notifications = await notificationRows(i18n, 8);
   const cartCount = ws.cart.length;
-  const unread = unreadCount();
+  const unread = ws.chats.reduce((n, c) => n + c.unread, 0);
   const balanceLabel = t("header.balanceShort", { amount: f.money(ws.balance) });
 
   return (
