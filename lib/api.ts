@@ -22,15 +22,21 @@ export async function api<T = unknown>(path: string, init: { method?: string; bo
   const supabase = await createClient();
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  const res = await fetch(`${API_URL}${path}`, {
-    method: init.method ?? "GET",
-    headers: {
-      ...(token ? { authorization: `Bearer ${token}` } : {}),
-      ...(init.body === undefined ? {} : { "content-type": "application/json" }),
-    },
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: init.method ?? "GET",
+      headers: {
+        ...(token ? { authorization: `Bearer ${token}` } : {}),
+        ...(init.body === undefined ? {} : { "content-type": "application/json" }),
+      },
+      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      cache: "no-store",
+    });
+  } catch (e) {
+    // Usually the API isn't running: say where it was looked for.
+    throw new Error(`The 100clips API isn't reachable at ${API_URL} (run "npm run dev" in 100clips-backend, or check API_URL in .env.local).`, { cause: e });
+  }
   if (res.status === 204) return undefined as T;
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
