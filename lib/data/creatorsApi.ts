@@ -1,6 +1,6 @@
 import { api, apiOrNothing } from "@/lib/api";
 import type { components } from "@/lib/api-types";
-import { publicUrl } from "./storage";
+import { privateLink, publicUrl } from "./storage";
 import type { Creator, Localized, Review } from "./types";
 
 /**
@@ -37,7 +37,10 @@ export async function exploreCreators(): Promise<Creator[]> {
 }
 
 /** One creator's profile and reviews, or undefined if the brand can't see them. */
-export async function creatorProfile(id: string): Promise<{ creator: Creator; reviews: Review[] } | undefined> {
+/** A clip the creator made for a brand, approved and shown publicly: plays through a link for an hour. */
+export type BrandClip = { id: string; brand: Localized; videoSrc: string };
+
+export async function creatorProfile(id: string): Promise<{ creator: Creator; reviews: Review[]; clips: BrandClip[] } | undefined> {
   const p = await apiOrNothing<ProfileRow>(`/creators/${id}`);
   if (!p) return undefined;
   const c = p.creator;
@@ -69,5 +72,14 @@ export async function creatorProfile(id: string): Promise<{ creator: Creator; re
     comment: same(r.review),
     date: r.rated_at.slice(0, 10),
   }));
-  return { creator, reviews };
+  // Clips stay in private storage; a public one gets a link for anyone signed in. One that fails is left out.
+  const clips = (
+    await Promise.all(
+      p.clips.map(async (c): Promise<BrandClip | undefined> => {
+        const videoSrc = await privateLink("clips", c.video_path).catch(() => undefined);
+        return videoSrc ? { id: c.order_id, brand: names(c.brand_name_ar, c.brand_name_en), videoSrc } : undefined;
+      }),
+    )
+  ).filter((c): c is BrandClip => !!c);
+  return { creator, reviews, clips };
 }

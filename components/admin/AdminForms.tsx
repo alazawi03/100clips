@@ -126,10 +126,11 @@ function ResetForm({ kind, id, onClose }: { kind: SuspendedKind; id: string; onC
 
 /* ---------- Orders ---------- */
 
-export function ExtendDeadlineButton({ orderId, current, min }: { orderId: string; current?: string; min: string }) {
+/** `reference`: the order as people know it (#1043). */
+export function ExtendDeadlineButton({ orderId, reference, current, min }: { orderId: string; reference: string; current?: string; min: string }) {
   const { t } = useI18n();
   return (
-    <ActionDrawer label={t("admin.orders.extend")} title={t("admin.orders.extendTitle", { id: orderId })} icon={CalendarClock}>
+    <ActionDrawer label={t("admin.orders.extend")} title={t("admin.orders.extendTitle", { id: reference })} icon={CalendarClock}>
       {(close) => <ExtendForm orderId={orderId} current={current} min={min} onClose={close} />}
     </ActionDrawer>
   );
@@ -137,7 +138,7 @@ export function ExtendDeadlineButton({ orderId, current, min }: { orderId: strin
 
 function ExtendForm({ orderId, current, min, onClose }: { orderId: string; current?: string; min: string; onClose: () => void }) {
   const { t } = useI18n();
-  const [state, action, pending] = useActionState<AdminFormState, FormData>(extendDeadline.bind(null, orderId), null);
+  const [state, action, pending] = useActionState<AdminFormState, FormData>(extendDeadline.bind(null, orderId, current), null);
   const err = useErr(state);
   if (state?.done) return <Done text={t("admin.orders.extendDone")} onClose={onClose} />;
   return (
@@ -154,10 +155,10 @@ function ExtendForm({ orderId, current, min, onClose }: { orderId: string; curre
   );
 }
 
-export function CancelOrderButton({ orderId, amount }: { orderId: string; amount: string }) {
+export function CancelOrderButton({ orderId, reference, amount }: { orderId: string; reference: string; amount: string }) {
   const { t } = useI18n();
   return (
-    <ActionDrawer label={t("admin.orders.cancel")} title={t("admin.orders.cancelTitle", { id: orderId })} icon={OctagonX} variant="destructive">
+    <ActionDrawer label={t("admin.orders.cancel")} title={t("admin.orders.cancelTitle", { id: reference })} icon={OctagonX} variant="destructive">
       {(close) => <CancelForm orderId={orderId} amount={amount} onClose={close} />}
     </ActionDrawer>
   );

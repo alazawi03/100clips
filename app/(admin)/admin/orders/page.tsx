@@ -7,15 +7,12 @@ import { Card } from "@/components/ui/Card";
 import { FilterTabs } from "@/components/ui/FilterTabs";
 import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { platformBrand } from "@/lib/admin/money";
-import { adminOrderRows, isOrderFilter, matchesFilter, matchesSearch, ORDER_FILTERS, type OrderFilter } from "@/lib/admin/orders";
-import { DEMO_TODAY } from "@/lib/data/account";
-import { getCampaign } from "@/lib/data/campaigns";
-import { getCreator } from "@/lib/data/creators";
+import { adminOrderRows, isOrderFilter, matchesFilter, matchesSearch, ORDER_FILTERS, orderRef, type OrderFilter } from "@/lib/admin/orders";
 import { brandPaid } from "@/lib/fees";
 import { getI18n } from "@/lib/i18n/server";
 import { daysUntil } from "@/lib/orderFlow";
 import { orderBadgeStatus, READY_FOR_BRAND } from "@/lib/statuses";
+import { today } from "@/lib/today";
 
 export default async function AdminOrdersPage({ searchParams }: PageProps<"/admin/orders">) {
   const params = await searchParams;
@@ -23,7 +20,8 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
   const q = typeof params.q === "string" ? params.q.trim() : "";
   const i18n = await getI18n();
   const { t, tp, f } = i18n;
-  const searched = adminOrderRows(DEMO_TODAY).filter((r) => matchesSearch(r, q));
+  const day = today();
+  const searched = (await adminOrderRows(day)).filter((r) => matchesSearch(r, q));
   const rows = searched.filter((r) => matchesFilter(r, filter));
   const href = (next: OrderFilter) => `/admin/orders?filter=${next}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
 
@@ -40,29 +38,24 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
       ) : (
         <Card>
           <ul className="divide-y divide-border">
-            {rows.map(({ order, deadline, late, waiting, stuck }) => {
-              const brand = platformBrand(order.brandId);
-              const brandName = brand ? f.pick(brand.name) : order.brandId;
-              const creator = getCreator(order.creatorId);
-              const campaign = order.campaignId ? getCampaign(order.campaignId) : undefined;
+            {rows.map(({ order, deadline, late, waiting, brand, creator }) => {
+              const brandName = f.pick(brand.name);
               return (
                 <li key={order.id}>
                   <Link href={`/admin/orders/${order.id}`} className="grid gap-x-4 gap-y-2 p-4 hover:bg-surface sm:px-5 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] md:items-center">
                     <div className="flex min-w-0 items-center gap-3">
-                      <BrandLogo id={order.brandId} name={brandName} src={brand?.logo} size="sm" />
+                      <BrandLogo id={order.brandId} name={brandName} src={brand.logo} size="sm" />
                       <div className="min-w-0">
                         <p className="truncate font-medium">{f.pick(order.title)}</p>
                         <p className="truncate text-small text-text-muted">
-                          {brandName} · {creator ? f.pick(creator.name) : order.creatorId} · <bdi dir="ltr">{order.id}</bdi>
-                          {campaign && <> · {t("admin.orders.campaign")}</>}
+                          {brandName} · {f.pick(creator.name)} · <bdi dir="ltr">{orderRef(order)}</bdi>
                         </p>
                       </div>
                     </div>
                     <div className="flex min-w-0 flex-col gap-1">
                       <WaitingOnTag waiting={waiting} i18n={i18n} />
                       <span className="text-small text-text-muted">
-                        {deadline ? (late ? <span className="font-medium text-warning">{tp("admin.orders.lateBy", -daysUntil(deadline, DEMO_TODAY))}</span> : t("admin.orders.due", { date: f.date(deadline) })) : t("admin.orders.noDeadline")}
-                        {stuck && <> · {tp(`admin.stuck.reasons.${stuck.reason}`, stuck.days)}</>}
+                        {deadline ? (late ? <span className="font-medium text-warning">{tp("admin.orders.lateBy", -daysUntil(deadline, day))}</span> : t("admin.orders.due", { date: f.date(deadline) })) : t("admin.orders.noDeadline")}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-3 md:justify-end">

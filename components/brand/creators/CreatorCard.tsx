@@ -109,9 +109,11 @@ export async function CreatorCard({
                 ))}
               </span>
               {inCart && <Badge tone="brand">{t("cart.inCart")}</Badge>}
-              <span className="ms-auto text-small font-medium">
-                {t("common.fromPrice", { price: f.money(priceForBrand(fromPrice(creator))) })}
-              </span>
+              {fromPrice(creator) !== undefined && (
+                <span className="ms-auto text-small font-medium">
+                  {t("common.fromPrice", { price: f.money(priceForBrand(fromPrice(creator)!)) })}
+                </span>
+              )}
             </div>
             {/* The whole card is the link; this only shows where it goes. */}
             <span

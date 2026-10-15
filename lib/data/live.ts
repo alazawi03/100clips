@@ -51,7 +51,7 @@ export type Workspace = {
 const PAGE = 100;
 
 /** Every row of a list endpoint, a page at a time. */
-async function everything<T>(path: string): Promise<T[]> {
+export async function everything<T>(path: string): Promise<T[]> {
   const rows: T[] = [];
   for (let offset = 0; ; offset += PAGE) {
     const page = await api<T[]>(`${path}${path.includes("?") ? "&" : "?"}limit=${PAGE}&offset=${offset}`);
@@ -143,7 +143,7 @@ const EVENT: Partial<Record<OrderRow["events"][number]["type"], OrderEventType>>
   returned: "returned",
 };
 
-function toOrder(row: OrderRow): Order {
+export function toOrder(row: OrderRow): Order {
   const events = row.events.flatMap((e): OrderEvent[] => {
     const type = EVENT[e.type];
     if (!type) return [];

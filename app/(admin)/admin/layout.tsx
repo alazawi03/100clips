@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { signOut } from "@/app/actions/auth";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { LanguageToggle } from "@/components/shell/LanguageToggle";
 import { Badge } from "@/components/ui/Badge";
@@ -51,10 +52,15 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
         <AdminNav
           counts={counts}
           footer={
-            <Link href="/dashboard" className="flex h-11 items-center gap-3 rounded-[var(--radius-md)] px-3 text-small text-text-muted hover:bg-surface hover:text-text">
-              <ExternalLink aria-hidden className="size-4" strokeWidth={1.75} />
-              {t("admin.nav.brandApp")}
-            </Link>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="flex h-11 w-full items-center gap-3 rounded-[var(--radius-md)] px-3 text-small text-text-muted hover:bg-surface hover:text-text"
+              >
+                <LogOut aria-hidden className="size-4 rtl:-scale-x-100" strokeWidth={1.75} />
+                {t("header.signOut")}
+              </button>
+            </form>
           }
         />
         <main className="min-w-0 flex-1 px-4 pb-16 pt-6 md:px-8 md:pt-8">

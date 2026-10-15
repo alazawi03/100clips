@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ActivityList } from "@/components/admin/ActivityList";
 import { CancelOrderButton, ExtendDeadlineButton } from "@/components/admin/AdminForms";
 import { WaitingOnTag } from "@/components/admin/WaitingOnTag";
 import { BrandLogo } from "@/components/ui/BrandLogo";
@@ -8,36 +7,30 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { activityFor, approvedOn, deadlineOf, deadlineOverrides, payouts } from "@/lib/admin/data";
-import { platformBrand } from "@/lib/admin/money";
-import { canChange, getPlatformOrder, waitingOn } from "@/lib/admin/orders";
-import { DEMO_TODAY } from "@/lib/data/account";
+import { adminOrder, canCancel, canMoveDeadline, orderRef, waitingOn } from "@/lib/admin/orders";
 import { reportOf } from "@/lib/data/problems";
 import { ResolveProblemButton } from "@/components/admin/AdminForms";
 import { Badge } from "@/components/ui/Badge";
-import { getCampaign } from "@/lib/data/campaigns";
-import { getCreator } from "@/lib/data/creators";
 import { SERVICE_FEE_RATE, brandPaid, feeOf } from "@/lib/fees";
 import { getI18n } from "@/lib/i18n/server";
 import { eventsOf, isLate } from "@/lib/orderFlow";
 import { orderBadgeStatus, READY_FOR_BRAND } from "@/lib/statuses";
+import { today } from "@/lib/today";
 
 export default async function AdminOrderPage({ params }: PageProps<"/admin/orders/[id]">) {
   const { id } = await params;
-  const order = getPlatformOrder(id);
-  if (!order) notFound();
+  const found = await adminOrder(id);
+  if (!found) notFound();
+  const { order, brand, creator } = found;
   const i18n = await getI18n();
   const { t, tp, f } = i18n;
-  const brand = platformBrand(order.brandId);
-  const brandName = brand ? f.pick(brand.name) : order.brandId;
-  const creator = getCreator(order.creatorId);
-  const creatorName = creator ? f.pick(creator.name) : order.creatorId;
-  const campaign = order.campaignId ? getCampaign(order.campaignId) : undefined;
-  const deadline = deadlineOf(order);
-  const moved = deadlineOverrides[order.id];
-  const paidIn = payouts.find((p) => p.orderIds.includes(order.id));
-  const waiting = waitingOn(order, new Set(payouts.flatMap((p) => p.orderIds)));
-  const approved = approvedOn(order);
+  const day = today();
+  const brandName = f.pick(brand.name);
+  const creatorName = f.pick(creator.name);
+  const deadline = order.deadline;
+  const waiting = waitingOn(found);
+  // Transfers to creators aren't on the API yet: owed since approval.
+  const approved = order.events?.find((e) => e.type === "approved")?.at.slice(0, 10);
   const problem = reportOf(order.id);
 
   const facts: Array<[string, React.ReactNode]> = [
@@ -48,30 +41,32 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/order
       deadline ? (
         <span key="d">
           {f.date(deadline)}
-          {isLate(order, deadline, DEMO_TODAY) && <span className="font-medium text-warning"> · {t("admin.orders.late")}</span>}
-          {moved && <span className="text-text-muted"> · {t("admin.orders.extendedFrom", { date: moved.from ? f.date(moved.from) : t("admin.orders.noDeadline") })}</span>}
+          {isLate(order, deadline, day) && <span className="font-medium text-warning"> · {t("admin.orders.late")}</span>}
+          {found.movedFrom !== undefined && (
+            <span className="text-text-muted"> · {t("admin.orders.extendedFrom", { date: found.movedFrom ? f.date(found.movedFrom) : t("admin.orders.noDeadline") })}</span>
+          )}
         </span>
       ) : (
         t("admin.orders.noDeadline")
       ),
     ],
-    [t("admin.orders.source"), campaign ? t("admin.orders.fromCampaign", { title: f.pick(campaign.title) }) : t("admin.orders.directOffer")],
+    [t("admin.orders.source"), t("admin.orders.fromCampaign", { title: f.pick(found.campaignTitle) })],
   ];
   if (order.revisionNote) facts.push([t("admin.orders.revisionNote"), `“${order.revisionNote}”`]);
   if (order.shipping?.sentAt) facts.push([t("admin.orders.shipping"), order.shipping.receivedAt ? t("admin.orders.received", { date: f.date(order.shipping.receivedAt.slice(0, 10)) }) : t("admin.orders.sentOn", { date: f.date(order.shipping.sentAt.slice(0, 10)) })]);
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={f.pick(order.title)} back={{ href: "/admin/orders", label: t("admin.orders.title") }} subtitle={<bdi dir="ltr">{order.id}</bdi>}>
+      <PageHeader title={f.pick(order.title)} back={{ href: "/admin/orders", label: t("admin.orders.title") }} subtitle={<bdi dir="ltr">{orderRef(order)}</bdi>}>
         <StatusBadge order={orderBadgeStatus(order)} label={order.status === "delivered" ? READY_FOR_BRAND : undefined} />
       </PageHeader>
 
       <Card className="flex flex-wrap items-center justify-between gap-3 p-4 sm:px-5">
         <WaitingOnTag waiting={waiting} i18n={i18n} className="text-body" />
-        {canChange(order) && (
+        {canCancel(order) && (
           <div className="flex flex-wrap gap-2">
-            <ExtendDeadlineButton orderId={order.id} current={deadline} min={DEMO_TODAY} />
-            <CancelOrderButton orderId={order.id} amount={f.money(brandPaid(order))} />
+            {canMoveDeadline(order) && <ExtendDeadlineButton orderId={order.id} reference={orderRef(order)} current={deadline} min={day} />}
+            <CancelOrderButton orderId={order.id} reference={orderRef(order)} amount={f.money(brandPaid(order))} />
           </div>
         )}
       </Card>
@@ -128,14 +123,14 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/order
         <div className="flex flex-col gap-6">
           <Card className="flex flex-col gap-3 p-5">
             <Link href={`/admin/users/brands/${order.brandId}`} className="flex items-center gap-3 rounded-[var(--radius-md)] hover:underline">
-              <BrandLogo id={order.brandId} name={brandName} src={brand?.logo} size="md" />
+              <BrandLogo id={order.brandId} name={brandName} src={brand.logo} size="md" />
               <span className="min-w-0">
                 <span className="block text-small text-text-muted">{t("admin.who.brand")}</span>
                 <span className="block truncate font-medium">{brandName}</span>
               </span>
             </Link>
             <Link href={`/admin/users/creators/${order.creatorId}`} className="flex items-center gap-3 rounded-[var(--radius-md)] hover:underline">
-              <Avatar id={order.creatorId} name={creatorName} size="md" />
+              <Avatar id={order.creatorId} name={creatorName} src={creator.photo} size="md" />
               <span className="min-w-0">
                 <span className="block text-small text-text-muted">{t("admin.who.creator")}</span>
                 <span className="block truncate font-medium">{creatorName}</span>
@@ -164,11 +159,9 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/order
                 ? t("admin.orders.moneyRefunded", { amount: f.money(brandPaid(order)) })
                 : order.status !== "approved"
                   ? t("admin.orders.moneyHeld")
-                  : paidIn
-                    ? t("admin.orders.moneyPaid", { date: f.date(paidIn.paidAt.slice(0, 10)), ref: paidIn.bankRef })
-                    : tp("admin.orders.moneyOwed", Math.max(0, Math.round((Date.parse(DEMO_TODAY) - Date.parse(approved ?? DEMO_TODAY)) / 86_400_000)))}
+                  : tp("admin.orders.moneyOwed", Math.max(0, Math.round((Date.parse(day) - Date.parse(approved ?? day)) / 86_400_000)))}
             </p>
-            {order.status === "approved" && !paidIn && (
+            {order.status === "approved" && (
               <Link href="/admin/payouts" className="mt-2 inline-block text-small font-medium text-primary hover:underline">
                 {t("admin.overview.openPayouts")}
               </Link>
@@ -176,8 +169,6 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/order
           </Card>
         </div>
       </div>
-
-      <ActivityList actions={activityFor("order", order.id)} i18n={i18n} />
     </div>
   );
 }

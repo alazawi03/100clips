@@ -239,9 +239,9 @@ export const creators: Creator[] = [
   },
 ];
 
-/** The lowest price this creator charges for one clip, in BHD. */
-export function fromPrice(creator: Creator): number {
-  return Math.min(...creator.formats.map((f) => f.price));
+/** The lowest price, or undefined before the creator sets one (they show on Explore once approved). */
+export function fromPrice(creator: Creator): number | undefined {
+  return creator.formats.length ? Math.min(...creator.formats.map((f) => f.price)) : undefined;
 }
 
 /** Creators brands can find and book: live (approved by 100clips), not suspended, and in a market we run in. */

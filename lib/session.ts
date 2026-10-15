@@ -20,6 +20,8 @@ export const getMe = cache(() => apiOrNothing<Me>("/me"));
 export async function requireBrandAccount(): Promise<Me> {
   const me = await getMe();
   if (!me || me.account.role === "creator") redirect("/onboarding");
+  // Admins own no brand: lists, cart and checkout aren't theirs. They work in /admin.
+  if (me.account.role === "admin") redirect("/admin");
   return me;
 }
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Bell, CircleCheck, Clapperboard, Clock, Hourglass, Megaphone, PackageCheck, RefreshCw, UserX, type LucideIcon } from "lucide-react";
+import { Bell, CircleCheck, Clapperboard, Clock, CreditCard, Hourglass, Megaphone, PackageCheck, RefreshCw, UserX, type LucideIcon } from "lucide-react";
 import { markAllNotificationsRead } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Avatar } from "@/components/ui/Avatar";
@@ -22,6 +22,7 @@ const looks: Record<NotificationKind, { icon: LucideIcon; tone: StatusTone }> = 
   newVersion: { icon: RefreshCw, tone: "purple" },
   adCode: { icon: Megaphone, tone: "green" },
   late: { icon: Clock, tone: "amber" },
+  paymentFailed: { icon: CreditCard, tone: "red" },
 };
 
 const tones: Record<StatusTone, string> = {
@@ -105,7 +106,7 @@ function NotificationItem({ row, onClick }: { row: NotificationRow; onClick?: ()
         <span className={cn("grid size-11 place-items-center rounded-full", tones[tone])}>
           <Icon aria-hidden className="size-5" strokeWidth={1.75} />
         </span>
-        <Avatar id={row.creatorId} name={row.creatorName} size="2xs" className="absolute -bottom-1 -end-1 ring-2 ring-card" />
+        {row.creatorId && <Avatar id={row.creatorId} name={row.creatorName ?? ""} size="2xs" className="absolute -bottom-1 -end-1 ring-2 ring-card" />}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-small font-medium">{row.title}</span>

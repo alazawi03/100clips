@@ -7,7 +7,6 @@ import { decide as decideOnApi } from "@/lib/admin/applicationsApi";
 import { addPayout, addSupportMessage } from "@/lib/admin/data";
 import { getCreator } from "@/lib/data/creators";
 import { owedToCreators } from "@/lib/admin/money";
-import * as orders from "@/lib/admin/orders";
 import * as users from "@/lib/admin/users";
 import { CONTENT_RULES } from "@/lib/admin/rules";
 import type { SuspendedKind } from "@/lib/data/moderation";
@@ -17,6 +16,7 @@ import { problemReports, resolveProblemReport } from "@/lib/data/problems";
 import { markWithdrawalSent, rejectWithdrawal, withdrawals } from "@/lib/data/wallet";
 import { DEMO_TODAY } from "@/lib/data/account";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { today } from "@/lib/today";
 
 /* Admin actions. There are no logins yet: when there are, each one checks for the admin role first. */
 
@@ -82,20 +82,33 @@ export async function resetLogin(kind: SuspendedKind, id: string): Promise<Admin
 
 /* ---------- Orders ---------- */
 
+/** Cancels an order that won't finish; the API refunds the brand in full (fee included). */
 export async function cancelOrder(orderId: string, _prev: AdminFormState, form: FormData): Promise<AdminFormState> {
   const note = String(form.get("note") ?? "").trim().slice(0, 500);
   if (!note) return { errors: { note: "admin.orders.errors.noteRequired" } };
-  if (!orders.cancelAndRefund(orderId, note)) return { errors: { note: "admin.orders.errors.cantChange" } };
+  try {
+    await api(`/admin/orders/${orderId}/cancel`, { method: "POST", body: { note } });
+  } catch (e) {
+    console.error("Cancelling the order failed:", e instanceof ApiError ? `${e.status} ${e.message}` : e);
+    return { errors: { note: e instanceof ApiError && e.status === 409 ? "admin.orders.errors.cantChange" : "forms.errors.saveFailed" } };
+  }
   revalidatePath("/", "layout");
   return { done: true };
 }
 
-export async function extendDeadline(orderId: string, _prev: AdminFormState, form: FormData): Promise<AdminFormState> {
+/** Moves one order's deadline later, while the clip is still owed. */
+export async function extendDeadline(orderId: string, current: string | undefined, _prev: AdminFormState, form: FormData): Promise<AdminFormState> {
   const to = String(form.get("deadline") ?? "");
   const note = String(form.get("note") ?? "").trim().slice(0, 500);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(to)) return { errors: { deadline: "forms.errors.dateInvalid" } };
-  if (!orders.extendOrderDeadline(orderId, to, DEMO_TODAY, note)) return { errors: { deadline: "admin.orders.errors.deadlineLater" } };
-  revalidatePath("/admin", "layout");
+  if (to <= today() || (current && to <= current)) return { errors: { deadline: "admin.orders.errors.deadlineLater" } };
+  try {
+    await api(`/admin/orders/${orderId}/deadline`, { method: "PUT", body: { deadline: to, ...(note ? { note } : {}) } });
+  } catch (e) {
+    console.error("Moving the deadline failed:", e instanceof ApiError ? `${e.status} ${e.message}` : e);
+    return { errors: { deadline: e instanceof ApiError && e.status === 409 ? "admin.orders.errors.cantChange" : "forms.errors.saveFailed" } };
+  }
+  revalidatePath("/", "layout");
   return { done: true };
 }
 
