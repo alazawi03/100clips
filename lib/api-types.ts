@@ -1092,7 +1092,7 @@ export interface paths {
         put?: never;
         /**
          * Approve the clip (brand)
-         * @description Pays the creator. Stars and a comment are optional (a comment needs stars). Unreviewed clips are approved automatically after 7 days.
+         * @description Pays the creator. Stars and a comment are optional (a comment needs stars). Only the brand approves: clips are never approved automatically.
          */
         post: operations["OrdersController_approve"];
         delete?: never;
