@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, MessageCircle } from "lucide-react";
 import { ActivityList } from "@/components/admin/ActivityList";
 import { DecisionForm } from "@/components/admin/DecisionForm";
 import { APPLICATION_TONE } from "@/components/admin/tones";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
+import { LinkButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -32,6 +33,11 @@ export default async function AdminApplicationPage({ params, searchParams }: Pag
     <div className="flex flex-col gap-6">
       <PageHeader title={name} back={{ href: "/admin/approvals", label: t("admin.approvals.title") }} subtitle={t("admin.approvals.appliedOn", { date: f.date(a.appliedAt.slice(0, 10)) })}>
         <Badge tone={APPLICATION_TONE[a.status]}>{t(`admin.approvals.status.${a.status}`)}</Badge>
+        {/* Their chat with 100Clips Support (opened the first time). */}
+        <LinkButton href={`/admin/users/creators/${a.id}/support`} variant="secondary">
+          <MessageCircle aria-hidden />
+          {t("admin.support.contact")}
+        </LinkButton>
       </PageHeader>
 
       {decided && a.status !== "pending" && <Notice>{t(`admin.approvals.decided.${a.status}`, { name })}</Notice>}

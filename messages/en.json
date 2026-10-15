@@ -807,7 +807,8 @@
     "activeOrders": {
       "one": "1 active order",
       "other": "{count} active orders"
-    }
+    },
+    "seen": "Seen"
   },
   "productDrawer": {
     "showPhoto": "Show photo {n}",
@@ -1109,7 +1110,8 @@
       "orders": "Orders",
       "users": "Users",
       "reports": "Reports",
-      "payments": "Card payments"
+      "payments": "Card payments",
+      "support": "Support"
     },
     "ranges": {
       "30d": "Last 30 days",
@@ -1567,7 +1569,12 @@
       "writingAs": "You're writing as the official account. The creator sees it with a verified tick.",
       "placeholder": "Message as 100Clips Support",
       "send": "Send",
-      "empty": "No messages with {name} yet. What you send shows up in their Messages, pinned at the top."
+      "empty": "No messages with {name} yet. What you send shows up in their Messages, pinned at the top.",
+      "inboxTitle": "Support chats",
+      "inboxSubtitle": "Creators writing to 100Clips Support, the most recent first.",
+      "inboxEmpty": "No support chats yet.",
+      "fromCreator": "{name}: {text}",
+      "fromTeam": "You: {text}"
     },
     "withdrawals": {
       "title": "Withdrawals from brands",

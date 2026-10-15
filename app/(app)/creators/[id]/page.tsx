@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Clapperboard, ExternalLink, Star } from "lucide-react";
+import { ChevronRight, Clapperboard, ExternalLink, MessageCircle, Star } from "lucide-react";
+import { messageCreator } from "@/app/actions/messages";
 import { InviteToCampaignMenu } from "@/components/brand/campaigns/InviteMenus";
 import { OfferPicker } from "@/components/brand/cart/OfferPicker";
 import { SaveToListButton } from "@/components/brand/creators/SaveToListButton";
@@ -45,6 +46,8 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
   const line = ws.cart.find((l) => l.creatorId === creator.id);
   const inCart = line ? Object.fromEntries(line.items.map((i) => [i.format, i.quantity])) : undefined;
   const live = ws.campaigns.filter((c) => c.status === "in_progress").map((c) => ({ id: c.id, title: f.pick(c.title) }));
+  // A chat exists once they've accepted an order from one of the account's brands.
+  const chatted = ws.chats.some((c) => c.creatorId === creator.id);
   const portfolio = creator.portfolio ?? [];
   // The accounts the creator added in the app; older profiles fall back to one handle on each platform they sell.
   const handles: Partial<Record<Platform, string>> =
@@ -70,6 +73,19 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
           <div className="flex items-center justify-between gap-3">
             <h1 className="min-w-0 flex-1 text-h1 font-medium text-balance">{name}</h1>
             <div className="flex shrink-0 items-center gap-2">
+              {chatted && (
+                <Tooltip label={t("profile.message")}>
+                  <form action={messageCreator.bind(null, creator.id, undefined)}>
+                    <button
+                      type="submit"
+                      aria-label={t("profile.messageName", { name })}
+                      className="grid size-9 place-items-center rounded-full border border-border bg-card transition-colors duration-[120ms] hover:bg-surface"
+                    >
+                      <MessageCircle aria-hidden className="size-4" />
+                    </button>
+                  </form>
+                </Tooltip>
+              )}
               {live.length > 0 && (
                 <Tooltip label={t("invite.toCampaign")}>
                   <InviteToCampaignMenu variant="icon" label={t("invite.toCampaign")} creatorIds={[creator.id]} campaigns={live} />

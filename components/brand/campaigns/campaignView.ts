@@ -38,7 +38,7 @@ export type OrderCardView = {
   late: boolean;
   due?: string;
   clip?: Clip;
-  /** Chat isn't on the backend yet: no conversation for real orders. */
+  /** The chat with this creator for this brand: there's one once they've accepted an order. */
   conversationId?: string;
   unread: number;
   lastMessages: Array<{ from: "brand" | "creator"; text: string; at: string }>;
@@ -87,13 +87,14 @@ export function orderFlags(order: Order, campaign: Campaign | undefined, ws: Pic
   };
 }
 
-export function orderCardView(order: Order, campaign: Campaign, i18n: I18n, ws: Pick<Workspace, "product" | "creator" | "brand">): OrderCardView {
+export function orderCardView(order: Order, campaign: Campaign, i18n: I18n, ws: Pick<Workspace, "product" | "creator" | "brand" | "chatWith">): OrderCardView {
   const { t, f } = i18n;
   const { physical, returns } = productOf(campaign, ws);
   const creator = ws.creator(order.creatorId)!;
   const action = nextAction(order, { physical, returns });
   const day = today();
   const clip = clipOf(order, ws);
+  const chat = ws.chatWith(order.brandId, order.creatorId);
   return {
     id: order.id,
     creatorId: creator.id,
@@ -119,9 +120,9 @@ export function orderCardView(order: Order, campaign: Campaign, i18n: I18n, ws: 
     late: isLate(order, dueOf(order, campaign), day),
     due: dueOf(order, campaign),
     clip,
-    conversationId: undefined,
-    unread: 0,
-    lastMessages: [],
+    conversationId: chat?.id,
+    unread: chat?.unread ?? 0,
+    lastMessages: chat?.last && chat.last.from !== "admin" ? [{ from: chat.last.from, text: chat.last.text, at: chat.last.at }] : [],
     physical,
     returns,
     shipping: order.shipping,

@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Check, ChevronDown, Clapperboard, Clock, MapPin, MessageCircle, ScanSearch, Star, Truck } from "lucide-react";
 import { markOrderReturned, markOrderSent, rateOrder } from "@/app/actions/brand";
 import { messageCreator } from "@/app/actions/messages";
-import { CHAT_LIVE } from "@/lib/features";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { AdCode } from "@/components/brand/orders/AdCode";
 import { ClipVersions, OfferWaiting, OrderClosedNote } from "@/components/brand/orders/OrderOutcome";
@@ -61,7 +60,7 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
           {/* The status; the line under the bar only counts steps, so it isn't said twice. */}
           <StatusBadge order={orderBadgeStatus(order)} />
           {/* Room for the messages button, which sits on top of the header (a button can't hold a form). */}
-          {CHAT_LIVE && <span aria-hidden className="size-10 shrink-0" />}
+          {order.conversationId && <span aria-hidden className="size-10 shrink-0" />}
           <ChevronDown aria-hidden className={cn("size-5 shrink-0 text-text-muted transition-transform", open && "rotate-180")} />
         </span>
 
@@ -87,8 +86,8 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
         )}
       </button>
 
-      {/* Chat with this creator: opens the existing conversation, or starts one. */}
-      {CHAT_LIVE && <form action={messageCreator.bind(null, order.creatorId, order.brandId)} className="absolute end-12 top-4 sm:end-[52px] sm:top-5">
+      {/* Chat with this creator: opens once they've accepted an order from this brand. */}
+      {order.conversationId && <form action={messageCreator.bind(null, order.creatorId, order.brandId)} className="absolute end-12 top-4 sm:end-[52px] sm:top-5">
         <button
           type="submit"
           aria-label={order.unread > 0 ? `${t("campaignDetail.messages")} · ${tp("chat.unread", order.unread)}` : t("campaignDetail.messages")}

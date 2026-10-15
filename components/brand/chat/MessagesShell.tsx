@@ -8,7 +8,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/cn";
 
-export type ConversationSummary = { id: string; creatorId: string; name: string; preview: string; time: string; unread: number };
+export type ConversationSummary = { id: string; creatorId: string; photo?: string; name: string; preview: string; time: string; unread: number };
 
 /** Inbox beside the open conversation on desktop; one or the other on phones. */
 export function MessagesShell({ conversations, children }: { conversations: ConversationSummary[]; children: ReactNode }) {
@@ -23,31 +23,35 @@ export function MessagesShell({ conversations, children }: { conversations: Conv
           <p className="p-5 text-text-muted">{t("chat.empty")}</p>
         ) : (
           <ul className="divide-y divide-border">
-            {conversations.map((c) => (
+            {conversations.map((c) => {
+              // The open chat is being read: no badge, even before the list catches up.
+              const unread = active === c.id ? 0 : c.unread;
+              return (
               <li key={c.id}>
                 <Link
                   href={`/messages/${c.id}`}
                   aria-current={active === c.id ? "page" : undefined}
                   className={cn("flex items-center gap-3 px-4 py-3 transition-colors duration-[120ms]", active === c.id ? "bg-primary-soft" : "hover:bg-surface")}
                 >
-                  <Avatar id={c.creatorId} name={c.name} size="md" />
+                  <Avatar id={c.creatorId} name={c.name} src={c.photo} size="md" />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline justify-between gap-2">
-                      <span className={cn("truncate", c.unread ? "font-medium" : "")}>{c.name}</span>
+                      <span className={cn("truncate", unread ? "font-medium" : "")}>{c.name}</span>
                       <span className="shrink-0 text-caption text-text-muted">{c.time}</span>
                     </span>
                     <span className="flex items-center justify-between gap-2">
-                      <span className={cn("truncate text-small", c.unread ? "text-text" : "text-text-muted")}>{c.preview}</span>
-                      {c.unread > 0 && (
-                        <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-primary px-1 text-caption font-medium text-on-primary" aria-label={tp("chat.unread", c.unread)}>
-                          {c.unread}
+                      <span className={cn("truncate text-small", unread ? "text-text" : "text-text-muted")}>{c.preview}</span>
+                      {unread > 0 && (
+                        <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-primary px-1 text-caption font-medium text-on-primary" aria-label={tp("chat.unread", unread)}>
+                          {unread}
                         </span>
                       )}
                     </span>
                   </span>
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </Card>
