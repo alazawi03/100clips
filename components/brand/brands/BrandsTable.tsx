@@ -9,6 +9,7 @@ import { useI18n } from "@/components/i18n/I18nProvider";
 import { Badge } from "@/components/ui/Badge";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Card } from "@/components/ui/Card";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Drawer } from "@/components/ui/Drawer";
 import { Dropdown, menuItemClass } from "@/components/ui/Dropdown";
 import { cn } from "@/lib/cn";
@@ -39,17 +40,17 @@ export function BrandsTable({ brands, openId }: { brands: BrandRowView[]; openId
 
   return (
     <>
-      <ul className="flex flex-col gap-3">
-        {brands.map((brand) => (
-          <li key={brand.id}>
-            <BrandCard brand={brand} expanded={open.has(brand.id)} onToggle={() => toggle(brand.id)} onOpenProduct={setShownId} />
-          </li>
-        ))}
-      </ul>
+        <ul className="flex flex-col gap-3">
+          {brands.map((brand) => (
+            <li key={brand.id}>
+              <BrandCard brand={brand} expanded={open.has(brand.id)} onToggle={() => toggle(brand.id)} onOpenProduct={setShownId} />
+            </li>
+          ))}
+        </ul>
 
-      <Drawer open={!!shown} onClose={() => setShownId(undefined)} title={shown?.name ?? ""} footer={shown && <ProductDrawerFooter product={shown} />}>
-        {shown && <ProductDrawerContent product={shown} />}
-      </Drawer>
+        <Drawer open={!!shown} onClose={() => setShownId(undefined)} title={shown?.name ?? ""} footer={shown && <ProductDrawerFooter product={shown} />}>
+          {shown && <ProductDrawerContent product={shown} />}
+        </Drawer>
     </>
   );
 }
@@ -110,51 +111,63 @@ function BrandCard({ brand, expanded, onToggle, onOpenProduct }: { brand: BrandR
 /** The ⋯ menu: Edit, Duplicate, Delete.  */
 function ProductMenu({ product, onPending, className }: { product: ProductView; onPending: (action: () => void) => void; className?: string }) {
   const { t } = useI18n();
+  const [asking, setAsking] = useState(false);
   return (
-    <Dropdown
-      align="end"
-      triggerLabel={t("brandsPage.moreActions", { name: product.name })}
-      triggerClassName={cn("grid size-9 place-items-center rounded-full text-text-muted transition-colors hover:bg-border/60 hover:text-text", className)}
-      trigger={<MoreHorizontal aria-hidden className="size-5" />}
-      panelClassName="min-w-44"
-    >
-      {(close) => (
-        <ul>
-          <li>
-            <Link href={`/brands/products/${product.id}/edit`} className={menuItemClass}>
-              <Pencil aria-hidden className="size-4" />
-              {t("brandsPage.edit")}
-            </Link>
-          </li>
-          <li>
-            <button
-              type="button"
-              className={menuItemClass}
-              onClick={() => {
-                close();
-                onPending(() => duplicateProduct(product.id));
-              }}
-            >
-              <Copy aria-hidden className="size-4" />
-              {t("brandsPage.duplicate")}
-            </button>
-          </li>
-          <li>
-            <button
-              type="button"
-              className={cn(menuItemClass, "text-error")}
-              onClick={() => {
-                close();
-                if (window.confirm(t("brandsPage.deleteConfirm", { name: product.name }))) onPending(() => deleteProduct(product.id));
-              }}
-            >
-              <Trash2 aria-hidden className="size-4" />
-              {t("brandsPage.delete")}
-            </button>
-          </li>
-        </ul>
-      )}
-    </Dropdown>
+    <>
+      <Dropdown
+        align="end"
+        triggerLabel={t("brandsPage.moreActions", { name: product.name })}
+        triggerClassName={cn("grid size-9 place-items-center rounded-full text-text-muted transition-colors hover:bg-border/60 hover:text-text", className)}
+        trigger={<MoreHorizontal aria-hidden className="size-5" />}
+        panelClassName="min-w-44"
+      >
+        {(close) => (
+          <ul>
+            <li>
+              <Link href={`/brands/products/${product.id}/edit`} className={menuItemClass}>
+                <Pencil aria-hidden className="size-4" />
+                {t("brandsPage.edit")}
+              </Link>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={menuItemClass}
+                onClick={() => {
+                  close();
+                  onPending(() => duplicateProduct(product.id));
+                }}
+              >
+                <Copy aria-hidden className="size-4" />
+                {t("brandsPage.duplicate")}
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={cn(menuItemClass, "text-error")}
+                onClick={() => {
+                  close();
+                  setAsking(true);
+                }}
+              >
+                <Trash2 aria-hidden className="size-4" />
+                {t("brandsPage.delete")}
+              </button>
+            </li>
+          </ul>
+        )}
+      </Dropdown>
+      <ConfirmDialog
+        open={asking}
+        title={t("brandsPage.deleteConfirm.title", { name: product.name })}
+        body={t("brandsPage.deleteConfirm.body")}
+        confirmLabel={t("brandsPage.delete")}
+        icon={<Trash2 className="size-6" />}
+        onConfirm={() => onPending(() => deleteProduct(product.id))}
+        onClose={() => setAsking(false)}
+      />
+    </>
   );
 }
 

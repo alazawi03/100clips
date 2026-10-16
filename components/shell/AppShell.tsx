@@ -4,6 +4,9 @@ import { MessageCircle, ShoppingBag, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
 import { workspace } from "@/lib/data/live";
 import { unreadCount } from "@/lib/data/chatApi";
+import { filterCreators, parseFilters } from "@/lib/data/creatorFilters";
+import { fromPrice } from "@/lib/data/creators";
+import { priceForBrand } from "@/lib/fees";
 import { getTheme } from "@/lib/theme";
 import { getI18n } from "@/lib/i18n/server";
 import { displayName, getUser, requireBrandAccount } from "@/lib/session";
@@ -13,7 +16,7 @@ import { LanguageToggle } from "./LanguageToggle";
 import { NotificationBell } from "./NotificationBell";
 import { notificationRows } from "./notificationRows";
 import { HOME_HREF } from "./nav";
-import { TopSearch } from "./TopSearch";
+import { TopSearch, type SearchCreator } from "./TopSearch";
 import { BottomNav, SideNav } from "./SideNav";
 
 export async function AppShell({ children }: { children: ReactNode }) {
@@ -27,6 +30,16 @@ export async function AppShell({ children }: { children: ReactNode }) {
   const cartCount = ws.cart.length;
   const unread = await unreadCount();
   const balanceLabel = t("header.balanceShort", { amount: f.money(ws.balance) });
+  // Everyone the top-bar search can find, top rated first like Explore. Matched in the browser as you type.
+  const searchable: SearchCreator[] = filterCreators(ws.bookable, parseFilters({})).map((c) => ({
+    id: c.id,
+    name: f.pick(c.name),
+    handle: c.handle,
+    photo: c.photo,
+    detail: [f.pick(c.city), c.niches[0] && t(`niches.${c.niches[0]}`)].filter(Boolean).join(t("common.separator")),
+    price: t("common.fromPrice", { price: f.money(priceForBrand(fromPrice(c))) }),
+    keys: [c.name.ar, c.name.en.toLowerCase(), c.handle.toLowerCase()],
+  }));
 
   return (
     <div className="min-h-dvh">
@@ -39,7 +52,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
           </Link>
 
           <div className="flex flex-1 justify-center px-4 lg:px-8">
-            <TopSearch />
+            <TopSearch creators={searchable} />
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">

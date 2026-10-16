@@ -7,6 +7,7 @@ import { removeBankAccount, saveBankAccount } from "@/app/actions/wallet";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Field, Input } from "@/components/ui/Form";
 
 type Props = {
@@ -25,6 +26,7 @@ export function BankAccountCard({ bank, withdrawalWaiting }: Props) {
   const { t } = useI18n();
   const [editing, setEditing] = useState(!bank);
   const [removing, startRemoving] = useTransition();
+  const [asking, setAsking] = useState(false);
 
   return (
     <Card id="bank" className="flex scroll-mt-24 flex-col gap-4 p-5 md:p-6">
@@ -55,16 +57,22 @@ export function BankAccountCard({ bank, withdrawalWaiting }: Props) {
               variant="destructive"
               aria-busy={removing}
               disabled={removing}
-              onClick={() => {
-                if (!window.confirm(t(withdrawalWaiting ? "settings.bank.removeConfirmWaiting" : "settings.bank.removeConfirm"))) return;
-                startRemoving(() => removeBankAccount());
-              }}
+              onClick={() => setAsking(true)}
               className="h-9 md:h-9"
             >
               <Trash2 aria-hidden />
               {t("settings.bank.remove")}
             </Button>
           </span>
+          <ConfirmDialog
+            open={asking}
+            title={t("settings.bank.removeConfirm.title")}
+            body={t(withdrawalWaiting ? "settings.bank.removeConfirmWaiting" : "settings.bank.removeConfirm.body")}
+            confirmLabel={t("settings.bank.remove")}
+            icon={<Landmark className="size-6" />}
+            onConfirm={() => startRemoving(() => removeBankAccount())}
+            onClose={() => setAsking(false)}
+          />
         </div>
       ) : (
         <BankForm holder={bank?.holder} onCancel={bank ? () => setEditing(false) : undefined} onSaved={() => setEditing(false)} />

@@ -1,3 +1,4 @@
+import { lastMonths, type MonthValue } from "@/components/ui/MonthlyChart";
 import type { Workspace } from "@/lib/data/live";
 import type { Campaign, Order } from "@/lib/data/types";
 import { brandPaid } from "@/lib/fees";
@@ -95,4 +96,13 @@ export function results(orders: Order[], today: string): Results {
     spentThisMonth: paidIn(thisMonth),
     spentLastMonth: paidIn(previousMonth(thisMonth)),
   };
+}
+
+/**
+ * What the brand paid per calendar month for the last `count` months, oldest first: the same rule as
+ * spentThisMonth (service fee included; offers that came back to the balance don't count).
+ */
+export function spentByMonth(orders: Order[], today: string, count = 6): MonthValue[] {
+  const kept = orders.filter((o) => o.status !== "declined" && o.status !== "cancelled");
+  return lastMonths(today, count).map((month) => ({ month, value: kept.filter((o) => o.createdAt.startsWith(month)).reduce((sum, o) => sum + brandPaid(o), 0) }));
 }

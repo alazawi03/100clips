@@ -22,7 +22,10 @@
     "messages": "Messages ({count} unread)",
     "profile": "View profile",
     "demoData": "This page still shows demo data. It connects to real data soon.",
-    "search": "Search creators by name or handle"
+    "search": "Search creators by name or handle",
+    "searchResults": "Matching creators",
+    "searchSeeAll": "See all results for “{q}”",
+    "searchEmpty": "No creators match “{q}”"
   },
   "nav": {
     "label": "Main navigation",
@@ -63,6 +66,9 @@
     "step3Title": "Approve the clips",
     "step3Body": "Watch each clip, then approve it or ask for one revision.",
     "setupTitle": "Before you start",
+    "spendTitle": "Spending by month",
+    "spendHint": "The last 6 months, service fee included. Orders whose money came back don't count.",
+    "spendEmpty": "Nothing spent in the last 6 months.",
     "setupLogo": "Add a logo for {brand}",
     "setupProduct": "Add a first product for {brand}",
     "needsTitle": "Needs you",
@@ -873,7 +879,10 @@
     "moreActions": "More actions for {name}",
     "duplicate": "Duplicate",
     "delete": "Delete",
-    "deleteConfirm": "Delete {name}? This can't be undone.",
+    "deleteConfirm": {
+      "title": "Delete {name}?",
+      "body": "This can't be undone."
+    },
     "statCampaigns": {
       "zero": "0 campaigns",
       "one": "1 campaign",
@@ -1181,7 +1190,10 @@
     "untitled": "Untitled campaign",
     "continueDraft": "Continue",
     "deleteDraft": "Delete draft",
-    "deleteDraftConfirm": "Delete this draft? This can’t be undone.",
+    "deleteDraftConfirm": {
+      "title": "Delete this draft?",
+      "body": "This can’t be undone."
+    },
     "creatorsCount": {
       "zero": "No creators yet",
       "one": "1 creator",
@@ -1242,8 +1254,11 @@
       "hint": "Money you withdraw from your balance (refunds, unused top-ups) goes here. You can change or remove it any time; we check it again when sending each withdrawal.",
       "change": "Change",
       "remove": "Remove",
-      "removeConfirm": "Remove this bank account? You'll need to add one again before your next withdrawal.",
-      "removeConfirmWaiting": "You have a withdrawal on its way. Remove the bank account anyway? We can't send it until you add one again.",
+      "removeConfirm": {
+        "title": "Remove this bank account?",
+        "body": "You'll need to add one again before your next withdrawal."
+      },
+      "removeConfirmWaiting": "You have a withdrawal on its way. We can't send it until you add a bank account again.",
       "holder": "Account holder name",
       "holderHint": "Exactly as your bank has it.",
       "iban": "IBAN",

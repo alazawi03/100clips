@@ -6,10 +6,12 @@ import { ResultsRow } from "@/components/brand/home/ResultsRow";
 import { Welcome } from "@/components/brand/home/Welcome";
 import { BrandFilter } from "@/components/brand/BrandFilter";
 import { LinkButton } from "@/components/ui/Button";
+import { Card, SectionHeader } from "@/components/ui/Card";
+import { MonthlyChart } from "@/components/ui/MonthlyChart";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { brandFilterOf, hasManyBrands } from "@/lib/brandFilter";
 import { workspace } from "@/lib/data/live";
-import { needsYou, results } from "@/lib/dashboard";
+import { needsYou, results, spentByMonth } from "@/lib/dashboard";
 import { getI18n } from "@/lib/i18n/server";
 import { today } from "@/lib/today";
 
@@ -47,6 +49,19 @@ export default async function BrandHome({ searchParams }: PageProps<"/dashboard"
       ) : (
         <>
           <ResultsRow results={results(orders, day)} i18n={i18n} />
+          <section aria-labelledby="spend-title">
+            <SectionHeader id="spend-title" title={i18n.t("brandHome.spendTitle")} hint={i18n.t("brandHome.spendHint")} />
+            <Card className="p-5">
+              <MonthlyChart
+                data={spentByMonth(orders, day)}
+                caption={i18n.t("brandHome.spendTitle")}
+                locale={i18n.locale}
+                format={(n) => i18n.f.money(n)}
+                tick={(n) => i18n.f.compact(n)}
+                emptyText={i18n.t("brandHome.spendEmpty")}
+              />
+            </Card>
+          </section>
           <NeedsYou items={needsYou(orders, day, ws)} i18n={i18n} />
           <ReadyForReview orders={orders} i18n={i18n} />
           <ActiveCampaigns campaigns={campaigns} i18n={i18n} />
