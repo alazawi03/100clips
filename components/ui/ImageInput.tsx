@@ -79,7 +79,7 @@ export function ImageInput({ name, label, hint, defaultValue, shape, error }: Im
           className={cn(
             "relative grid shrink-0 cursor-pointer place-items-center overflow-hidden border border-dashed bg-surface text-text-muted transition-colors duration-[120ms] hover:border-primary hover:text-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary",
             shape === "square" ? "size-24 rounded-[var(--radius-lg)]" : "aspect-[3/1] w-full rounded-[var(--radius-lg)]",
-            dragging ? "border-primary bg-primary-soft text-primary" : shown ? "border-error" : "border-border",
+            dragging ? "border-primary bg-surface text-primary" : shown ? "border-error" : "border-border",
           )}
         >
           <span className="sr-only">{value ? t("images.replace") : t("images.upload")}</span>

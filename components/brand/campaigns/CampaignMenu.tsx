@@ -215,7 +215,7 @@ function ExtendForm({ campaignId, deadline, minDeadline, onDone }: Props & { onD
     <form id={formId} action={run} noValidate className="flex flex-col gap-5">
       <p className="text-small text-text-muted">{t("campaignDetail.extendHint")}</p>
       {deadline && <p className="font-medium">{t("campaignDetail.extendCurrent", { date: f.date(deadline) })}</p>}
-      <Field label={t("campaignDetail.extendNew")} htmlFor={`${formId}-date`} error={err}>
+      <Field label={t("campaignDetail.extendNew")} htmlFor={`${formId}-date`} error={err} required>
         <DateInput id={`${formId}-date`} name="deadline" min={minDeadline} defaultValue={state?.values.deadline} aria-invalid={!!err} aria-describedby={err ? `${formId}-date-error` : undefined} />
       </Field>
       <Footer formId={formId} label={t("campaignDetail.extendSave")} pending={pending} icon={<CalendarClock aria-hidden />} />

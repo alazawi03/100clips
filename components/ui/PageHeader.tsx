@@ -33,7 +33,7 @@ export function PageHeader({ title, subtitle, back, children }: PageHeaderProps)
 
 export function EmptyState({ title, hint, action }: { title: string; hint?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-[var(--radius-xl)] border border-dashed border-border px-6 py-12 text-center">
+    <div className="flex flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-dashed border-border px-6 py-12 text-center">
       <p className="text-h2 font-medium text-balance">{title}</p>
       {hint && <p className="max-w-md text-text-muted">{hint}</p>}
       {action && <div className="mt-3">{action}</div>}

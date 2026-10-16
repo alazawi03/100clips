@@ -16,12 +16,12 @@ import { Card } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/cn";
+import { conversations } from "@/lib/data/chatApi";
 import { clipOf, workspace } from "@/lib/data/live";
 import { reportOf } from "@/lib/data/problems";
 import { clipVersions, currentStep, nextAction, offerHoursLeft, revisionUsed, stepsFor, waitingFor } from "@/lib/orderFlow";
 import { ShipButton, ShipToLines, Stars } from "@/components/brand/campaigns/OrderCard";
 import { Button, LinkButton, buttonClass } from "@/components/ui/Button";
-import { CHAT_LIVE } from "@/lib/features";
 import { nowIso, today } from "@/lib/today";
 import { campaignProgress, isActiveOrder, orderBadgeStatus } from "@/lib/statuses";
 import { brandPaid, priceForBrand } from "@/lib/fees";
@@ -51,8 +51,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const watchable = clip && (order.status === "delivered" || order.status === "approved");
   const active = isActiveOrder(order);
   const report = reportOf(order.id);
-  // Chat isn't on the backend yet.
-  const unread = 0;
+  const unread = (await conversations()).find((c) => c.brandId === order.brandId && c.creatorId === order.creatorId)?.unread ?? 0;
   // Just approved: the celebration, bigger when this was the campaign's last clip.
   const justApproved = done === "approved" && order.status === "approved";
   const progress = justApproved && campaign ? campaignProgress(campaign, ws.orders) : undefined;
@@ -69,7 +68,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
         back={{ href: "/orders", label: t("ordersPage.title") }}
       >
         <StatusBadge order={orderBadgeStatus(order)} />
-        {CHAT_LIVE && <form action={messageCreator.bind(null, order.creatorId, order.brandId)}>
+        <form action={messageCreator.bind(null, order.creatorId, order.brandId)}>
           <button
             type="submit"
             aria-label={unread > 0 ? `${t("campaignDetail.messages")} · ${tp("chat.unread", unread)}` : t("campaignDetail.messages")}
@@ -77,12 +76,12 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
           >
             <MessageCircle aria-hidden className="size-[18px]" />
             {unread > 0 && (
-              <span aria-hidden className="absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-caption font-medium text-on-accent tabular-nums">
+              <span aria-hidden className="absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-caption font-medium text-on-brand tabular-nums">
                 {unread}
               </span>
             )}
           </button>
-        </form>}
+        </form>
         {campaign && (
           <LinkButton href={`/campaigns/${campaign.id}`} variant="secondary" className="h-9 md:h-9">
             <Megaphone aria-hidden />

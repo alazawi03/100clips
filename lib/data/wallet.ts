@@ -49,22 +49,3 @@ export function setBankAccount(bank: BankAccount) {
 export function removeBankAccount() {
   account.bankAccount = undefined;
 }
-
-/* ---------- 100clips' side (admin) ---------- */
-
-/** 100clips sent the transfer: to the bank account as it is right now. False if there's none any more. */
-export function markWithdrawalSent(id: string, bankRef: string): boolean {
-  const w = withdrawals.find((x) => x.id === id && x.status === "requested");
-  if (!w || !account.bankAccount) return false;
-  Object.assign(w, { status: "sent", sentAt: new Date().toISOString(), bankRef, iban: account.bankAccount.iban });
-  return true;
-}
-
-/** 100clips turned it down: the money goes back to the balance, with a note the brand sees. */
-export function rejectWithdrawal(id: string, note: string): boolean {
-  const w = withdrawals.find((x) => x.id === id && x.status === "requested");
-  if (!w) return false;
-  Object.assign(w, { status: "rejected", note });
-  account.balance = Math.round((account.balance + w.amount) * 1000) / 1000;
-  return true;
-}

@@ -55,6 +55,6 @@ export function updateProduct(id: string, input: Omit<Product, "id" | "brandId">
   if (!product) return undefined;
   Object.assign(product, input);
   if (input.description === undefined) delete product.description;
-  if (input.price === undefined) delete product.price;
+  if (input.pricing === undefined) delete product.pricing;
   return product;
 }

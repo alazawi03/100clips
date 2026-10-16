@@ -79,7 +79,7 @@ function WithdrawForm({ balance, bank, days, onClose }: Props & { onClose: () =>
 
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
-      <Field label={t("walletPage.withdraw.amount")} htmlFor="withdraw-amount" error={error} hint={t("walletPage.withdraw.available", { amount: f.money(balance) })}>
+      <Field label={t("walletPage.withdraw.amount")} htmlFor="withdraw-amount" error={error} required hint={t("walletPage.withdraw.available", { amount: f.money(balance) })}>
         <Input
           id="withdraw-amount"
           name="amount"

@@ -96,7 +96,7 @@ export function CartLineEditor({ creatorId, creatorName, photo, location, offers
                   type="button"
                   onClick={() => save(offer.format)}
                   aria-label={t("cart.switchTo", { format: label })}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-full border border-dashed border-border ps-2 pe-3 text-small transition-colors hover:border-primary hover:bg-primary-soft/60 hover:text-primary-on-soft"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full border border-dashed border-border ps-2 pe-3 text-small transition-colors hover:border-primary hover:bg-surface/60 hover:text-text"
                 >
                   <FormatLogo format={offer.format} className="size-3.5" />
                   {label}

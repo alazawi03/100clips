@@ -31,6 +31,7 @@ function ReportForm({ conversationId, onDone }: { conversationId: string; onDone
   const [reason, setReason] = useState<string>("");
   const [details, setDetails] = useState("");
   const [sent, setSent] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [pending, startTransition] = useTransition();
 
   if (sent) {
@@ -52,8 +53,9 @@ function ReportForm({ conversationId, onDone }: { conversationId: string; onDone
         e.preventDefault();
         if (!reason) return;
         startTransition(async () => {
-          await reportConversation(conversationId, reason, details);
-          setSent(true);
+          const ok = await reportConversation(conversationId, reason, details);
+          setFailed(!ok);
+          setSent(ok);
         });
       }}
       className="flex flex-col gap-3 p-2"
@@ -63,13 +65,18 @@ function ReportForm({ conversationId, onDone }: { conversationId: string; onDone
       </p>
       <div role="radiogroup" aria-labelledby={groupId} className="flex flex-col gap-1.5">
         {REPORT_REASONS.map((r) => (
-          <label key={r} className="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] border border-border px-3 py-2.5 text-small has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary">
+          <label key={r} className="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] border border-border px-3 py-2.5 text-small has-[:checked]:border-primary has-[:checked]:bg-surface has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary">
             <input type="radio" name="reason" value={r} checked={reason === r} onChange={() => setReason(r)} className="size-4 accent-[var(--primary)]" />
             {t(`chat.reportReasons.${r}`)}
           </label>
         ))}
       </div>
       <Textarea value={details} onChange={(e) => setDetails(e.target.value)} maxLength={500} aria-label={t("chat.reportDetails")} placeholder={t("chat.reportDetails")} className="min-h-16" />
+      {failed && (
+        <p role="alert" className="text-small text-error">
+          {t("chat.reportFailed")}
+        </p>
+      )}
       <Button type="submit" variant="primary" disabled={!reason} aria-busy={pending} className="w-full disabled:opacity-50">
         {t("chat.reportSend")}
       </Button>

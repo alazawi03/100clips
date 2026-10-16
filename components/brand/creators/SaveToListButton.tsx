@@ -34,7 +34,7 @@ export function SaveToListButton({ creatorId, name, lists, compact }: { creatorI
       triggerClassName={cn(
         "inline-flex items-center rounded-full border font-medium transition-colors duration-[120ms]",
         compact ? "size-9 justify-center" : "h-10 gap-2 px-4 text-small",
-        saved ? "border-primary-soft bg-primary-soft text-primary-on-soft" : "border-border bg-card text-text hover:bg-surface",
+        saved ? "border-brand-soft bg-brand-soft text-brand-on-soft" : "border-border bg-card text-text hover:bg-surface",
       )}
       trigger={
         <>

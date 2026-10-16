@@ -5,10 +5,10 @@ export type BadgeTone = "neutral" | "success" | "warning" | "error" | "brand";
 
 const tones: Record<BadgeTone, string> = {
   neutral: "bg-surface text-text-muted",
-  success: "bg-success-soft text-success",
-  warning: "bg-warning-soft text-warning",
+  success: "bg-success-soft text-success-on-soft",
+  warning: "bg-warning-soft text-warning-on-soft",
   error: "bg-error-soft text-error",
-  brand: "bg-primary-soft text-primary-on-soft",
+  brand: "bg-brand-soft text-brand-on-soft",
 };
 
 /** A neutral label pill. Statuses use <StatusBadge> (lib/statuses.ts) instead. */

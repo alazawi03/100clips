@@ -2,6 +2,7 @@ import { CAMPAIGN_STATUS, campaignProgress } from "@/lib/statuses";
 import type { Workspace } from "@/lib/data/live";
 import type { Product, ProductType } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
+import { describePrice } from "@/lib/pricing";
 
 /** Everything the product card and drawer show, already translated, so the client components stay plain. */
 export type ProductView = {
@@ -24,11 +25,11 @@ export type ProductView = {
   clipsLabel: string;
 };
 
-export function productView(product: Product, { t, tp, f }: I18n, { campaigns, orders }: Pick<Workspace, "campaigns" | "orders">): ProductView {
+export function productView(product: Product, i18n: I18n, { campaigns, orders }: Pick<Workspace, "campaigns" | "orders">): ProductView {
+  const { t, tp, f } = i18n;
   const d = product.details;
   const info: ProductView["info"] = [];
   if (d.type === "physical") {
-    if (d.value !== undefined) info.push({ label: t("productForm.value"), value: f.money(d.value) });
     if (d.size) info.push({ label: t("productForm.size"), value: d.size });
   } else if (d.type === "app") {
     if (d.platforms.length) info.push({ label: t("productForm.platforms"), value: d.platforms.map((p) => t(`productForm.appPlatforms.${p}`)).join(t("common.separator")) });
@@ -49,7 +50,7 @@ export function productView(product: Product, { t, tp, f }: I18n, { campaigns, o
     name: f.pick(product.name),
     type: d.type,
     typeLabel: t(`productForm.types.${d.type}`),
-    price: product.price !== undefined ? f.money(product.price) : undefined,
+    price: product.pricing && describePrice(product.pricing, product.currency, i18n, f),
     photos: product.photos,
     description: product.description ? f.pick(product.description) : undefined,
     link: d.type === "app" ? d.downloadLink : undefined,

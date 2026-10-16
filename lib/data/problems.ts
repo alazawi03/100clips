@@ -29,10 +29,3 @@ export function addProblemReport(input: { orderId: string; brandId: string; reas
   problemReports.unshift(report);
   return report;
 }
-
-export function resolveProblemReport(id: string, resolution: string): boolean {
-  const report = problemReports.find((r) => r.id === id && r.status === "open");
-  if (!report) return false;
-  Object.assign(report, { status: "resolved", resolution, resolvedAt: new Date().toISOString() });
-  return true;
-}

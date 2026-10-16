@@ -57,7 +57,7 @@ export function OfferPicker({ creatorId, creatorName, offers, inCart, variant = 
                 setChosen(selected ? undefined : offer.format);
                 setJustAdded(false);
               }}
-              className={cn("flex w-full items-center justify-between gap-3 px-4 py-3 text-start transition-colors duration-[120ms] hover:bg-surface/60 sm:px-5", selected && "bg-primary-soft/50")}
+              className={cn("flex w-full items-center justify-between gap-3 px-4 py-3 text-start transition-colors duration-[120ms] hover:bg-surface/60 sm:px-5", selected && "bg-surface/50")}
             >
               <span className="flex min-w-0 items-center gap-3">
                 <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface">

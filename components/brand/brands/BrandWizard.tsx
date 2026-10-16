@@ -12,7 +12,7 @@ import type { MessageKey } from "@/lib/i18n/messages";
 import { ProductFields, type ProductValues } from "@/components/brand/products/ProductForm";
 import { AboutFields, BasicsFields, ExtrasFields, type BrandValues } from "./BrandFields";
 
-const STEP_FIELDS = [["nameAr", "logo", "industry"], ["about", "website", "instagram", "tiktok"], ["countries"]];
+const STEP_FIELDS = [["nameAr", "logo", "industry"], ["about"], ["countries"]];
 /** Per-country fields (cr_bh, vat_bh, …) belong to the business details step. */
 const stepOfField = (field: string) => (/^(cr|vat)_/.test(field) ? 2 : STEP_FIELDS.findIndex((fields) => fields.includes(field)));
 const PRODUCT_STEP = STEP_FIELDS.length;
@@ -77,7 +77,7 @@ export function BrandWizard({ mode, then }: { mode: "onboarding" | "add"; /** Wh
               <BasicsFields v={v} err={err} />
             </div>
             <div hidden={step !== 1}>
-              <AboutFields v={v} err={err} />
+              <AboutFields v={v} err={err} links={false} />
             </div>
             <div hidden={step !== 2}>
               <ExtrasFields v={v} err={err} />

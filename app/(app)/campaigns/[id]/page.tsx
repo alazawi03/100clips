@@ -16,6 +16,7 @@ import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
+import { conversations } from "@/lib/data/chatApi";
 import { workspace, type Workspace } from "@/lib/data/live";
 import type { Campaign, Platform } from "@/lib/data/types";
 import { getI18n, type I18n } from "@/lib/i18n/server";
@@ -56,7 +57,11 @@ export default async function CampaignDetailPage({ params, searchParams }: PageP
   const { product } = productOf(campaign, ws);
   const productName = product ? f.pick(product.name) : "";
   const its = ws.orders.filter((o) => o.campaignId === campaign.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  const views = its.map((o) => orderCardView(o, campaign, i18n, ws));
+  const chats = await conversations();
+  const views = its.map((o) => ({
+    ...orderCardView(o, campaign, i18n, ws),
+    unread: chats.find((c) => c.brandId === o.brandId && c.creatorId === o.creatorId)?.unread ?? 0,
+  }));
   const progress = campaignProgress(campaign, ws.orders);
   const cancelled = campaign.status === "cancelled";
   // Edits only while no creator is held to the old details (every offer still waiting, or ended unanswered).

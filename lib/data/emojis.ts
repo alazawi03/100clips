@@ -1,5 +1,5 @@
 import type { Face } from "./creatorFilters";
-import type { Country, Gender, Industry, Niche } from "./types";
+import type { Country, Gender, Industry, Niche, VenueKind } from "./types";
 
 /** Flags shown next to country names. */
 export const countryFlag: Record<Country, string> = { bh: "🇧🇭", sa: "🇸🇦", ae: "🇦🇪", kw: "🇰🇼", qa: "🇶🇦", om: "🇴🇲" };
@@ -15,6 +15,16 @@ export const industryEmoji: Record<Industry, string> = {
   education: "🎓",
   home_living: "🛋️",
   other: "✨",
+};
+
+/** Before venue kinds in the product form. */
+export const venueEmoji: Record<VenueKind, string> = {
+  cafe: "☕",
+  restaurant: "🍽️",
+  salon: "💇",
+  gym: "🏋️",
+  clinic: "🩺",
+  other: "📍",
 };
 
 /** Before creator category names; the same emojis as the creator app (creator_app/lib/ui/niches.dart). */

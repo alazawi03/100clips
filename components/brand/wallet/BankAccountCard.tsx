@@ -86,10 +86,10 @@ function BankForm({ holder, onCancel, onSaved }: { holder?: string; onCancel?: (
   };
   return (
     <form action={action} noValidate className="flex max-w-xl flex-col gap-4">
-      <Field label={t("settings.bank.holder")} htmlFor="bank-holder" error={err("holder")} hint={t("settings.bank.holderHint")}>
+      <Field label={t("settings.bank.holder")} htmlFor="bank-holder" error={err("holder")} required hint={t("settings.bank.holderHint")}>
         <Input id="bank-holder" name="holder" autoComplete="name" maxLength={80} defaultValue={state?.values.holder ?? holder} aria-invalid={!!err("holder")} />
       </Field>
-      <Field label={t("settings.bank.iban")} htmlFor="bank-iban" error={err("iban")} hint={t("settings.bank.ibanHint")}>
+      <Field label={t("settings.bank.iban")} htmlFor="bank-iban" error={err("iban")} required hint={t("settings.bank.ibanHint")}>
         <Input id="bank-iban" name="iban" dir="ltr" autoComplete="off" spellCheck={false} maxLength={42} placeholder="BH67 BMAG 0000 1299 1234 56" defaultValue={state?.values.iban} aria-invalid={!!err("iban")} className="uppercase" />
       </Field>
       <div className="flex flex-wrap gap-2">

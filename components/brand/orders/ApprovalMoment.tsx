@@ -6,8 +6,8 @@ import { Card } from "@/components/ui/Card";
 /** Check path length, for the stroke-drawing animation (same technique as PaymentSuccess). */
 const CHECK = 36;
 
-/** Confetti colours: the brand gradient, the accent tint, warm gold and the ink colour. Tokens, so they follow the theme. */
-const COLORS = ["var(--gradient-start)", "var(--gradient-end)", "var(--accent-soft)", "var(--warning)", "var(--primary)"];
+/** Confetti colours: the pink signature, its soft tint, warm gold and the ink colour. Tokens, so they follow the theme. */
+const COLORS = ["var(--brand)", "var(--brand-soft)", "var(--warning)", "var(--primary)"];
 
 /** Fixed pseudo-random pieces, so server and client render the same burst. */
 function pieces(count: number) {
@@ -83,18 +83,12 @@ export function ApprovalMoment({
         </div>
 
         <svg viewBox="0 0 64 64" aria-hidden className="relative size-20 motion-safe:animate-[pop_480ms_cubic-bezier(0.34,1.56,0.64,1)_both]">
-          <defs>
-            <linearGradient id="approval-disc" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="var(--gradient-start)" />
-              <stop offset="1" stopColor="var(--gradient-end)" />
-            </linearGradient>
-          </defs>
-          <circle cx="32" cy="32" r="30" fill="url(#approval-disc)" />
+          <circle cx="32" cy="32" r="30" fill="var(--brand)" />
           {/* The logo's play triangle… */}
           <path
             d="M26 21 L26 43 L45 32 Z"
-            fill="white"
-            stroke="white"
+            fill="var(--on-brand)"
+            stroke="var(--on-brand)"
             strokeWidth="4"
             strokeLinejoin="round"
             className="origin-center opacity-0 motion-safe:animate-[tri-out_420ms_ease-in_220ms_both]"
@@ -103,7 +97,7 @@ export function ApprovalMoment({
           <path
             d="M21 33.5l7.5 7.5L44 25.5"
             fill="none"
-            stroke="white"
+            stroke="var(--on-brand)"
             strokeWidth="5"
             strokeLinecap="round"
             strokeLinejoin="round"

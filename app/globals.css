@@ -12,145 +12,114 @@
   }
 }
 
-/* 100clips design tokens. Values mirror theme.ts and DESIGN.ar.html. */
+/* Laqta design tokens (DESIGN.md: light mono + pink signature). Values mirror theme.ts. */
 
 :root {
-  /* Black and white throughout; pink (accent) only for the logo, main actions, counts and the new-clips ring. */
-  --primary: #0a0a0a;
-  --primary-hover: #262626;
-  --primary-soft: #f2f2f2;
-  --primary-on-soft: #0a0a0a;
+  /* Black does the work (actions, text); pink (brand) is the signature: selected chips, counts, "new", story rings. */
+  --primary: #111111;
+  --primary-hover: #2b2b2b;
   --on-primary: #ffffff;
-  --accent: #ff2e7e;
-  --accent-soft: #ffe4ee;
-  --on-accent: #ffffff;
+  --brand: #e11d74;
+  --brand-hover: #c4155f;
+  --brand-soft: #fde7f0;
+  --brand-on-soft: #a8104f;
+  --on-brand: #ffffff;
+  --link: #6d4aff;
+  --info-soft: #efeaff;
+  --info-on-soft: #4b2fc9;
+  --success-on-soft: #166534;
+  --warning-on-soft: #9a5b00;
   --background: #ffffff;
-  --canvas: #fafafa;
+  --canvas: #ffffff;
   --card: #ffffff;
-  --surface: #f4f4f4;
+  --surface: #f5f5f5;
   /* Secondary buttons: the surface tint in light mode, a step lighter than cards in dark mode so they stand out. */
-  --button-secondary: #f4f4f4;
-  --button-secondary-hover: #ebebeb;
-  --border: #ebebeb;
-  --text: #0a0a0a;
-  --text-muted: #737373;
-  --icon-inactive: #a3a3a3;
-  --success: #16a34a;
+  --button-secondary: #ffffff;
+  --button-secondary-hover: #f5f5f5;
+  --border: #e5e5e5;
+  --text: #111111;
+  --text-muted: #6b6b6b;
+  --icon-inactive: #8e8e8e;
+  --success: #15803d;
   --success-soft: #e7f6ec;
-  --error: #e5484d;
+  --error: #c42e33;
   --error-soft: #fdecec;
-  --warning: #f5a524;
+  --warning: #b45309;
   --warning-soft: #fef4e2;
-  --gradient-start: #ff6fa8;
-  --gradient-end: #ff2e7e;
   --overlay: rgb(0 0 0 / 0.4);
-  --scrim: rgb(0 0 0 / 0.4);
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.05);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.05), 0 12px 32px rgb(0 0 0 / 0.08);
-  /* Status badges (lib/statuses.ts): soft background, darker text of the same hue. */
-  --status-gray-bg: #f3f4f6;
-  --status-gray-text: #374151;
-  --status-amber-bg: #fffbeb;
-  --status-amber-text: #b45309;
-  --status-blue-bg: #eff6ff;
-  --status-blue-text: #1d4ed8;
-  --status-purple-bg: #f5f3ff;
-  --status-purple-text: #6d28d9;
-  --status-green-bg: #ecfdf5;
-  --status-green-text: #047857;
-  --status-red-bg: #fef2f2;
-  --status-red-text: #b91c1c;
+  --scrim: rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 8px 24px rgb(17 17 17 / 0.08);
 }
 
 /* Dark tokens: on when the user picks Dark, or follows a dark device while not having picked Light.
    The choice is a data-theme attribute on <html>, set from a cookie (see lib/theme.ts). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --primary: #fafafa;
+    --primary: #ffffff;
     --primary-hover: #e5e5e5;
-    --primary-soft: #333333;
-    --primary-on-soft: #fafafa;
-    --on-primary: #171717;
-    --accent: #ff4f95;
-    --accent-soft: #451a2e;
-    --on-accent: #ffffff;
-    --background: #171717;
-    --canvas: #171717;
-    --card: #212121;
-    --surface: #2a2a2a;
-    --button-secondary: #3a3a3a;
-    --button-secondary-hover: #474747;
-    --border: #383838;
-    --text: #fafafa;
+    --on-primary: #111111;
+    --brand: #ff4d94;
+    --brand-hover: #ff6ba6;
+    --brand-soft: #3a1426;
+    --brand-on-soft: #ff9ec4;
+    --on-brand: #ffffff;
+    --link: #a78bfa;
+    --info-soft: #2a2245;
+    --info-on-soft: #c9bcff;
+    --success-on-soft: #4ade80;
+    --warning-on-soft: #fbbf24;
+    --background: #111111;
+    --canvas: #111111;
+    --card: #111111;
+    --surface: #1f1f1f;
+    --button-secondary: #111111;
+    --button-secondary-hover: #1f1f1f;
+    --border: #2e2e2e;
+    --text: #ffffff;
     --text-muted: #a3a3a3;
-    --icon-inactive: #7a7a7a;
-    --success: #22c55e;
+    --icon-inactive: #6b6b6b;
+    --success: #4ade80;
     --success-soft: #14301f;
-    --error: #f2555a;
+    --error: #f87171;
     --error-soft: #3a1a1c;
-    --warning: #f7b547;
+    --warning: #fbbf24;
     --warning-soft: #3a2c12;
-    --gradient-start: #ff7ab0;
-    --gradient-end: #ff3d88;
-    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
-    --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.35);
-    --status-gray-bg: #2a2a2a;
-    --status-gray-text: #d1d5db;
-    --status-amber-bg: #3a2c12;
-    --status-amber-text: #fbbf24;
-    --status-blue-bg: #172554;
-    --status-blue-text: #93c5fd;
-    --status-purple-bg: #2e1065;
-    --status-purple-text: #c4b5fd;
-    --status-green-bg: #052e22;
-    --status-green-text: #6ee7b7;
-    --status-red-bg: #3b1212;
-    --status-red-text: #fca5a5;
+    --shadow-lift: 0 8px 24px rgb(0 0 0 / 0.4);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --primary: #fafafa;
+  --primary: #ffffff;
   --primary-hover: #e5e5e5;
-  --primary-soft: #333333;
-  --primary-on-soft: #fafafa;
-  --on-primary: #171717;
-  --accent: #ff4f95;
-  --accent-soft: #451a2e;
-  --on-accent: #ffffff;
-  --background: #171717;
-  --canvas: #171717;
-  --card: #212121;
-  --surface: #2a2a2a;
-  --button-secondary: #3a3a3a;
-  --button-secondary-hover: #474747;
-  --border: #383838;
-  --text: #fafafa;
+  --on-primary: #111111;
+  --brand: #ff4d94;
+  --brand-hover: #ff6ba6;
+  --brand-soft: #3a1426;
+  --brand-on-soft: #ff9ec4;
+  --on-brand: #ffffff;
+  --link: #a78bfa;
+  --info-soft: #2a2245;
+  --info-on-soft: #c9bcff;
+  --success-on-soft: #4ade80;
+  --warning-on-soft: #fbbf24;
+  --background: #111111;
+  --canvas: #111111;
+  --card: #111111;
+  --surface: #1f1f1f;
+  --button-secondary: #111111;
+  --button-secondary-hover: #1f1f1f;
+  --border: #2e2e2e;
+  --text: #ffffff;
   --text-muted: #a3a3a3;
-  --icon-inactive: #7a7a7a;
-  --success: #22c55e;
+  --icon-inactive: #6b6b6b;
+  --success: #4ade80;
   --success-soft: #14301f;
-  --error: #f2555a;
+  --error: #f87171;
   --error-soft: #3a1a1c;
-  --warning: #f7b547;
+  --warning: #fbbf24;
   --warning-soft: #3a2c12;
-  --gradient-start: #ff7ab0;
-  --gradient-end: #ff3d88;
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.25);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 12px 32px rgb(0 0 0 / 0.35);
-  --status-gray-bg: #2a2a2a;
-  --status-gray-text: #d1d5db;
-  --status-amber-bg: #3a2c12;
-  --status-amber-text: #fbbf24;
-  --status-blue-bg: #172554;
-  --status-blue-text: #93c5fd;
-  --status-purple-bg: #2e1065;
-  --status-purple-text: #c4b5fd;
-  --status-green-bg: #052e22;
-  --status-green-text: #6ee7b7;
-  --status-red-bg: #3b1212;
-  --status-red-text: #fca5a5;
+  --shadow-lift: 0 8px 24px rgb(0 0 0 / 0.4);
   color-scheme: dark;
 }
 
@@ -161,12 +130,17 @@
 @theme inline {
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
-  --color-primary-soft: var(--primary-soft);
-  --color-primary-on-soft: var(--primary-on-soft);
   --color-on-primary: var(--on-primary);
-  --color-accent: var(--accent);
-  --color-accent-soft: var(--accent-soft);
-  --color-on-accent: var(--on-accent);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-on-soft: var(--brand-on-soft);
+  --color-on-brand: var(--on-brand);
+  --color-link: var(--link);
+  --color-info-soft: var(--info-soft);
+  --color-info-on-soft: var(--info-on-soft);
+  --color-success-on-soft: var(--success-on-soft);
+  --color-warning-on-soft: var(--warning-on-soft);
   --color-background: var(--background);
   --color-canvas: var(--canvas);
   --color-card: var(--card);
@@ -183,31 +157,16 @@
   --color-error-soft: var(--error-soft);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
-  --color-status-gray-bg: var(--status-gray-bg);
-  --color-status-gray-text: var(--status-gray-text);
-  --color-status-amber-bg: var(--status-amber-bg);
-  --color-status-amber-text: var(--status-amber-text);
-  --color-status-blue-bg: var(--status-blue-bg);
-  --color-status-blue-text: var(--status-blue-text);
-  --color-status-purple-bg: var(--status-purple-bg);
-  --color-status-purple-text: var(--status-purple-text);
-  --color-status-green-bg: var(--status-green-bg);
-  --color-status-green-text: var(--status-green-text);
-  --color-status-red-bg: var(--status-red-bg);
-  --color-status-red-text: var(--status-red-text);
 
-  /* "Inter" by name, not var(--font-inter): next/font appends an Arial-based "Inter Fallback"
-     that has Arabic letters and would win over Thmanyah for Arabic text. */
-  --font-sans: "Inter", var(--font-thmanyah), system-ui, sans-serif;
-  --font-latin: "Inter", system-ui, sans-serif;
+  /* Laqta: Thmanyah Sans for both scripts (one family keeps mixed Arabic/Latin lines even), Readex Pro as the fallback. */
+  --font-sans: var(--font-thmanyah), var(--font-readex), "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-latin: var(--font-sans);
 
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 20px;
   --radius-full: 999px;
 
-  --shadow-soft: var(--shadow-soft);
   --shadow-lift: var(--shadow-lift);
 
   --text-display: 32px;
@@ -246,10 +205,6 @@ body {
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
-}
-
-.bg-brand-gradient {
-  background-image: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
 }
 
 .scrollbar-none {
@@ -336,4 +291,15 @@ body {
 [dir="rtl"] input[dir="ltr"],
 [dir="rtl"] textarea[dir="ltr"] {
   text-align: right;
+}
+
+/* Heading weights (DESIGN.md type scale: h1 Bold, h2/h3 SemiBold, which Thmanyah draws as Bold). English headings a touch tighter; never Arabic. */
+h1 {
+  font-weight: 700;
+}
+:is(h2, h3) {
+  font-weight: 600;
+}
+:root[lang="en"] :is(h1, h2, h3) {
+  letter-spacing: -0.02em;
 }

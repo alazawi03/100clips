@@ -32,8 +32,8 @@ export async function CampaignCard({ campaign, i18n, showBrand }: { campaign: Ca
 
   return (
     <div className="relative h-full">
-      <Link href={draft ? `/campaigns/new?draft=${campaign.id}` : `/campaigns/${campaign.id}`} className="group block h-full rounded-[var(--radius-xl)]">
-        <Card className="flex h-full flex-col gap-4 p-5 transition-shadow duration-200 group-hover:shadow-lift">
+      <Link href={draft ? `/campaigns/new?draft=${campaign.id}` : `/campaigns/${campaign.id}`} className="group block h-full rounded-[var(--radius-lg)]">
+        <Card className="flex h-full flex-col gap-4 p-5 transition-colors duration-200 group-hover:border-icon-inactive">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h3 className={cn("text-h3 font-medium", draft && "pe-10")}>{f.pick(campaign.title) || t("newCampaign.untitled")}</h3>

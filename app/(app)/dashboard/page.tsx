@@ -33,7 +33,7 @@ export default async function BrandHome({ searchParams }: PageProps<"/dashboard"
       {hasManyBrands(ws.brands) && <BrandFilter brands={ws.brands.map((b) => ({ id: b.id, name: i18n.f.pick(b.name), logo: b.logo }))} value={brandId} />}
 
       <PageHeader title={i18n.t("nav.dashboard")}>
-        {/* The welcome has its own way in; one gradient button per screen. */}
+        {/* The welcome has its own way in; one primary button per screen. */}
         {!fresh && (
           <LinkButton href="/explore" variant="hero">
             <Search aria-hidden />

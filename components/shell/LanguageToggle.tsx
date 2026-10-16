@@ -6,7 +6,8 @@ import { setLocale } from "@/app/actions/locale";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/cn";
 
-export function LanguageToggle() {
+/** Borderless like the other top-bar buttons. */
+export function LanguageToggle({ className }: { className?: string }) {
   const { locale, t } = useI18n();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -26,8 +27,9 @@ export function LanguageToggle() {
         })
       }
       className={cn(
-        "grid h-9 min-w-11 place-items-center rounded-full border border-border px-3 text-small font-medium transition-opacity hover:bg-surface",
+        "grid size-11 place-items-center rounded-full text-small font-medium transition-opacity hover:bg-surface",
         pending && "opacity-60",
+        className,
       )}
     >
       {t("header.languageShort")}

@@ -2,23 +2,21 @@ import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "hero" | "primary" | "secondary" | "ghost" | "destructive" | "danger" | "success";
+export type ButtonVariant = "hero" | "primary" | "secondary" | "ghost" | "destructive";
 
 const base =
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] font-medium transition-[background-color,transform] duration-[120ms] ease-out active:scale-[0.98] [&_svg]:size-5 [&_svg]:shrink-0";
 
 const variants: Record<ButtonVariant, string> = {
-  hero: "bg-brand-gradient text-on-accent",
+  /** The page's main action. In Laqta it's black like primary: pink buttons are for marketing only (DESIGN.md). */
+  hero: "bg-primary text-on-primary hover:bg-primary-hover",
   primary: "bg-primary text-on-primary hover:bg-primary-hover",
-  secondary: "bg-button-secondary text-text hover:bg-button-secondary-hover",
-  ghost: "text-primary hover:bg-primary-soft",
+  secondary: "border border-border bg-button-secondary text-text hover:bg-button-secondary-hover",
+  ghost: "text-text hover:bg-surface",
   destructive: "text-error hover:bg-error-soft",
-  /** Solid red, for confirming something that can't be undone. */
-  danger: "bg-error text-white hover:brightness-110",
-  success: "bg-success text-white hover:brightness-110",
 };
 
-/** 44px on mobile, 40px from the md breakpoint up (DESIGN.ar.html: Button). */
+/** 44px on mobile, 40px from the md breakpoint up (DESIGN.md: Button). */
 const size = "h-11 px-4 md:h-10";
 
 export function buttonClass(variant: ButtonVariant = "primary", className?: string) {

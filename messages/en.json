@@ -21,7 +21,8 @@
     "cart": "Cart ({count})",
     "messages": "Messages ({count} unread)",
     "profile": "View profile",
-    "demoData": "This page still shows demo data. It connects to real data soon."
+    "demoData": "This page still shows demo data. It connects to real data soon.",
+    "search": "Search creators by name or handle"
   },
   "nav": {
     "label": "Main navigation",
@@ -39,7 +40,11 @@
     "moreLabel": "More pages",
     "close": "Close",
     "messages": "Messages",
-    "lists": "Lists"
+    "lists": "Lists",
+    "creatorsShort": "Creators",
+    "groupDiscover": "Discover",
+    "groupManage": "Manage",
+    "unread": "{count} new"
   },
   "brandHome": {
     "readyTitle": "Ready for your review",
@@ -59,8 +64,6 @@
     "setupTitle": "Before you start",
     "setupLogo": "Add a logo for {brand}",
     "setupProduct": "Add a first product for {brand}",
-    "inspirationTitle": "Clips creators made on 100clips",
-    "inspirationHint": "Open a clip to see who made it.",
     "needsTitle": "Needs you",
     "needsDeclined": {
       "one": "{name} declined “{campaign}”",
@@ -130,8 +133,13 @@
       "imageType": "Choose a PNG, JPG or WebP image.",
       "imageTooBig": "That image is over 15 MB. Choose a smaller one.",
       "productNameRequired": "Add the product name.",
+      "concernQuestionRequired": "Write the question.",
+      "concernAnswerRequired": "Write the answer to this question.",
       "productTypeRequired": "Choose a product type.",
-      "priceInvalid": "Enter the price in BHD, like 4.500",
+      "priceInvalid": "Enter a price, like 4.500",
+      "priceRequired": "Enter the price",
+      "priceRangeInvalid": "Make it more than the lowest price",
+      "trialInvalid": "Enter 1 to 365 days",
       "aboutTooLong": "Keep it short, 300 characters at most.",
       "pickBrand": "Choose the brand this campaign is for.",
       "visitOrder": "The last visit date can't be before the first.",
@@ -145,7 +153,7 @@
       "fileTooBig": "That file is over 5 MB. Choose a smaller one.",
       "editLocked": "A creator has already accepted, so the details can't change now.",
       "deadlineLater": "Choose a date after the current deadline.",
-      "brandSuspended": "This brand is suspended by 100clips, so it can't pay for new work. Contact support.",
+      "brandSuspended": "This brand is suspended by laqta, so it can't pay for new work. Contact support.",
       "saveFailed": "Couldn't save. Try again.",
       "payFailed": "Couldn't complete the payment. Try again.",
       "creatorUnavailable": "One of these creators can't take new work right now. Remove them and try again.",
@@ -177,6 +185,9 @@
     "newCreator": "New",
     "clearOne": "Clear selection",
     "viewProfile": "View profile",
+    "noSample": "No video yet",
+    "previousSample": "Previous sample",
+    "nextSample": "Next sample",
     "face": "Face"
   },
   "profile": {
@@ -197,7 +208,8 @@
     "message": "Message",
     "messageName": "Message {name}",
     "portfolio": "Portfolio",
-    "noVideos": "No videos uploaded yet.",
+    "noVideos": "This creator hasn't uploaded videos yet",
+    "noVideosHint": "Samples of their work will show here once they upload them.",
     "bookingSoon": "Booking opens soon, with checkout. Prices include the service fee."
   },
   "campaignsPage": {
@@ -249,7 +261,7 @@
     "sentOn": "Sent {date}",
     "receivedOn": "Received {date}",
     "notReceived": "Not received yet",
-    "sendNote": "Note (optional)",
+    "sendNote": "Note",
     "sendNotePlaceholder": "Write how it's being delivered",
     "returnInfo": "The product comes back to you after filming. Collect it once you approve the clip.",
     "keepInfo": "It's a gift for the creator. Nothing to send back.",
@@ -315,7 +327,9 @@
   "ordersPage": {
     "title": "Orders",
     "filterLabel": "Filter orders by status",
-    "empty": "No orders with this status."
+    "empty": "No orders yet",
+    "emptyHint": "Orders show up here once you create a campaign and send a request to one or more creators.",
+    "emptyFiltered": "No orders with this status."
   },
   "orderDetail": {
     "clip": "Clip",
@@ -354,7 +368,7 @@
     "approveTitle": "Approve {name}’s clip?",
     "approveHint": "This releases the payment to {name}. Approving can’t be undone.",
     "rateLabel": "Rate {name}",
-    "reviewLabel": "Comment (optional)",
+    "reviewLabel": "Comment",
     "reviewPlaceholder": "Write what you liked about the clip",
     "approveConfirm": "Approve and release payment",
     "revisionsLeft": {
@@ -364,10 +378,10 @@
     },
     "problem": {
       "cardTitle": "Need help?",
-      "hint": "Something wrong with this order? 100clips support will look into it.",
+      "hint": "Something wrong with this order? laqta support will look into it.",
       "button": "Report a problem",
       "title": "Report a problem",
-      "intro": "Tell 100clips support what went wrong. It goes to our team, not to the creator.",
+      "intro": "Tell laqta support what went wrong. It goes to our team, not to the creator.",
       "reasonLabel": "What's the problem?",
       "reasons": {
         "notDelivered": "The clip hasn't arrived",
@@ -379,10 +393,10 @@
       },
       "detailsLabel": "What happened?",
       "detailsPlaceholder": "Dates, messages, anything that helps us understand",
-      "send": "Send to 100clips support",
-      "sent": "Sent to 100clips support",
+      "send": "Send to laqta support",
+      "sent": "Sent to laqta support",
       "sentHint": "We'll look into it and reply here on the order.",
-      "open": "Reported on {date} · 100clips support is looking into it",
+      "open": "Reported on {date} · laqta support is looking into it",
       "resolved": "Reported on {date} · Resolved",
       "errors": {
         "reason": "Pick what the problem is.",
@@ -405,6 +419,8 @@
     "netCharged": "Net charged",
     "netSpent": "Net spent",
     "transactions": "Transactions",
+    "emptyTitle": "No transactions yet",
+    "emptyHint": "Top-ups, payments, refunds and withdrawals show up here as they happen.",
     "typeRefund": "Refund",
     "refundLabel": "Refund · {title}",
     "refundWhy": {
@@ -511,7 +527,7 @@
     "productLabel": "Product",
     "briefLabel": "Clip brief",
     "briefPlaceholder": "Describe the clip",
-    "notes": "Note for each creator (optional)",
+    "notes": "Note for each creator",
     "notePlaceholder": "Write your note to the creator",
     "payment": "Payment",
     "useBalance": "Use my balance ({amount})",
@@ -522,7 +538,7 @@
     "cardExpiry": "Expiry",
     "cardExpiryPlaceholder": "MM/YY",
     "cardCvc": "Security code",
-    "demoCard": "Card payments aren't live yet: nothing is charged, and 100clips confirms the payment by hand.",
+    "demoCard": "Card payments aren't live yet: nothing is charged, and laqta confirms the payment by hand.",
     "pay": "Pay {amount}",
     "payBalance": "Pay from balance",
     "summary": "Order summary",
@@ -581,7 +597,7 @@
     "paying": "Processing payment…",
     "redirecting": "Taking you to your campaign…",
     "viewCampaign": "View campaign",
-    "moreDetails": "More details (optional)",
+    "moreDetails": "More details",
     "moreDetailsHint": "Shown with your request, to help creators get it right.",
     "keyMessage": "Key message",
     "keyMessageHint": "The one thing viewers should remember.",
@@ -595,7 +611,7 @@
     "removeReference": "Remove reference",
     "referencePlaceholder": "Paste a video link",
     "backToCart": "Cart",
-    "usageNote": "Clips are posted on the creator's own account and stay up. Taking one down needs 100clips' approval."
+    "usageNote": "Clips are posted on the creator's own account and stay up. Taking one down needs laqta's approval."
   },
   "brandForm": {
     "stepBasics": "Basics",
@@ -628,7 +644,6 @@
     "handlePlaceholder": "@handle",
     "crNumber": "Commercial registration number",
     "crPlaceholder": "Enter the CR number",
-    "optional": "optional",
     "next": "Next",
     "back": "Back",
     "create": "Create brand",
@@ -641,7 +656,17 @@
     "vatHint": "PDF or image, up to 5 MB.",
     "registrationIn": "Registration in {country}",
     "registrationsHint": "Pick the countries you work in, and we'll ask for each one's CR number and VAT certificate.",
-    "onlyCountryHint": "100clips works in {country} for now, so your registration there is all we ask for. More Gulf countries are coming."
+    "onlyCountryHint": "laqta is currently available in {country}.",
+    "notInCountry": {
+      "toggle": "I'm not in {country}",
+      "label": "Where are you?",
+      "placeholder": "Type your country",
+      "hint": "We'll take it into consideration and let you know when laqta reaches you.",
+      "send": "Send",
+      "thanks": "Got it, thanks. We'll take it into consideration and let you know when we reach your country.",
+      "unknown": "We didn't recognise that country. Pick its name from the list.",
+      "failed": "We couldn't send that right now. Try again."
+    }
   },
   "images": {
     "upload": "Upload image",
@@ -676,8 +701,71 @@
     "photosHint": "Up to 6 photos. The first one is the cover.",
     "description": "Description",
     "descriptionPlaceholder": "Describe the product",
-    "price": "Price (BHD)",
-    "pricePlaceholder": "Enter the price",
+    "pricing": {
+      "title": "Price",
+      "hint": "How customers pay. Creators use it to say the price right.",
+      "model": "How is it priced?",
+      "modelNone": "No price",
+      "models": {
+        "one_time": "One price",
+        "from": "Starting from",
+        "range": "Price range",
+        "subscription": "Subscription",
+        "free": "Free",
+        "per_unit": "Per person, session or night",
+        "hidden": "Don't mention a price"
+      },
+      "currency": "Currency",
+      "amount": "Price",
+      "fromAmount": "Starting price",
+      "minAmount": "Lowest price",
+      "maxAmount": "Highest price",
+      "period": "Paid every",
+      "periods": {
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
+      },
+      "trialDays": "Free trial in days",
+      "planAmount": "Paid plan price",
+      "planPeriod": "Paid plan billed",
+      "planOnce": "Once",
+      "unit": "Per",
+      "units": {
+        "person": "Person",
+        "session": "Session",
+        "hour": "Hour",
+        "night": "Night",
+        "visit": "Visit"
+      },
+      "hiddenHint": "Creators won't say a price in the video.",
+      "preview": "Creators will say: {price}",
+      "per": {
+        "week": "week",
+        "month": "month",
+        "year": "year"
+      },
+      "perUnit": {
+        "person": "person",
+        "session": "session",
+        "hour": "hour",
+        "night": "night",
+        "visit": "visit"
+      },
+      "say": {
+        "from": "from {amount}",
+        "range": "{amount}–{max}",
+        "perPeriod": "{amount} / {period}",
+        "trial": {
+          "one": "{price}, with a 1-day free trial",
+          "other": "{price}, with a {count}-day free trial"
+        },
+        "free": "Free",
+        "freePlan": "Free, paid plan {price}",
+        "perUnit": "{amount} per {unit}",
+        "hidden": "Not mentioned in videos"
+      }
+    },
     "benefits": "Key benefits",
     "benefitsHint": "Start with one and add up to 5 short points.",
     "benefitPlaceholder": "Write a selling point",
@@ -685,16 +773,14 @@
     "addBenefit": "Add another",
     "removeBenefit": "Remove benefit {n}",
     "concerns": "Customer concerns",
-    "concernsHint": "What do customers usually worry about or ask before buying? Answers are optional.",
+    "concernsHint": "What do customers usually worry about or ask before buying? Add each question with its answer.",
     "concernPlaceholder": "Write a question",
     "concernLabel": "Question {n}",
-    "answerPlaceholder": "Answer (optional)",
-    "answerLabel": "Answer to question {n}",
+    "answerPlaceholder": "Write the answer",
+    "answerLabel": "Answer",
     "addConcern": "Add question",
     "removeConcern": "Remove question {n}",
     "detailsTitle": "More details",
-    "value": "Item value (BHD)",
-    "valueHint": "The value of what we ship to the creator.",
     "size": "Size or weight",
     "sizePlaceholder": "Enter the size",
     "downloadLink": "Download link",
@@ -794,7 +880,7 @@
       "spam": "Spam or a scam",
       "other": "Something else"
     },
-    "reportDetails": "Add details (optional)",
+    "reportDetails": "Add details",
     "reportSend": "Send report",
     "reportSent": "Report sent",
     "reportSentHint": "Our team will review the conversation.",
@@ -802,7 +888,9 @@
     "activeOrders": {
       "one": "1 active order",
       "other": "{count} active orders"
-    }
+    },
+    "reportFailed": "Couldn't send the report. Try again.",
+    "sendFailed": "Couldn't send your message. Try again."
   },
   "productDrawer": {
     "showPhoto": "Show photo {n}",
@@ -920,7 +1008,7 @@
     "shipDialog": {
       "title": "Confirm you sent the product to {name}",
       "hint": "We'll let {name} know {product} is on its way. They confirm when it arrives.",
-      "note": "How it's being delivered (optional)",
+      "note": "How it's being delivered",
       "confirm": "Confirm sent"
     }
   },
@@ -1086,570 +1174,6 @@
     },
     "cardPending": "Waiting for the card payment"
   },
-  "admin": {
-    "title": "Admin",
-    "badge": "Admin",
-    "asOf": "As of {date}",
-    "nav": {
-      "label": "Admin",
-      "overview": "Overview",
-      "money": "Money",
-      "payouts": "Transfers",
-      "brandApp": "Open the brand app",
-      "approvals": "Approvals",
-      "orders": "Orders",
-      "users": "Users",
-      "reports": "Reports",
-      "payments": "Card payments"
-    },
-    "ranges": {
-      "30d": "Last 30 days",
-      "90d": "Last 90 days",
-      "year": "This year",
-      "all": "All time"
-    },
-    "breakdowns": {
-      "time": "Over time",
-      "brand": "Brand",
-      "creator": "Creator",
-      "platform": "Platform",
-      "niche": "Niche"
-    },
-    "stats": {
-      "owed": "Owed to creators",
-      "owedHint": {
-        "zero": "Nobody is waiting",
-        "one": "1 creator waiting for a transfer",
-        "other": "{count} creators waiting for a transfer"
-      },
-      "held": "Held for running orders",
-      "heldHint": {
-        "zero": "No orders running",
-        "one": "1 order · {fees} of it is fees",
-        "other": "{count} orders · {fees} of it is fees"
-      },
-      "revenue": "Revenue",
-      "revenue30": "Revenue, last 30 days",
-      "revenueHint": {
-        "zero": "No approved clips",
-        "one": "From 1 approved clip",
-        "other": "From {count} approved clips"
-      },
-      "paid": "Paid by brands",
-      "paid30": "Paid by brands, last 30 days",
-      "paidHint": "After refunds of {refunded}"
-    },
-    "overview": {
-      "title": "Overview",
-      "attention": "Needs attention",
-      "toTransfer": {
-        "one": "1 creator is owed {amount}",
-        "other": "{count} creators are owed {amount}"
-      },
-      "oldestWait": {
-        "zero": "Approved today",
-        "one": "The longest has waited 1 day",
-        "other": "The longest has waited {count} days"
-      },
-      "noBank": {
-        "one": "1 creator is owed money but has no bank account",
-        "other": "{count} creators are owed money but have no bank account"
-      },
-      "reports": {
-        "one": "1 chat report to review",
-        "other": "{count} chat reports to review"
-      },
-      "reportsSoon": "The reports page comes next.",
-      "openPayouts": "Open transfers",
-      "openMoney": "See money",
-      "view": "View",
-      "calm": "Nothing needs you right now.",
-      "approvals": {
-        "one": "1 creator waiting for approval",
-        "other": "{count} creators waiting for approval"
-      },
-      "openApprovals": "Review applications",
-      "openOrders": "Open orders",
-      "problems": {
-        "one": "1 report to look into",
-        "other": "{count} reports to look into"
-      },
-      "openReports": "Open reports",
-      "brandWithdrawals": {
-        "one": "1 brand withdrawal to send: {amount}",
-        "other": "{count} brand withdrawals to send: {amount} in total"
-      },
-      "oldestRequested": "Oldest requested {date}"
-    },
-    "stuck": {
-      "title": {
-        "one": "1 stuck order",
-        "other": "{count} stuck orders"
-      },
-      "hint": "Orders nobody has moved for 3 days or more.",
-      "reasons": {
-        "offerExpired": {
-          "one": "No answer for 1 day: refund due",
-          "other": "No answer for {count} days: refund due"
-        },
-        "reviewWaiting": {
-          "one": "Clip waiting for the brand for 1 day",
-          "other": "Clip waiting for the brand for {count} days"
-        },
-        "notReceived": {
-          "one": "Sent 1 day ago, not received",
-          "other": "Sent {count} days ago, not received"
-        },
-        "late": {
-          "one": "1 day past the deadline",
-          "other": "{count} days past the deadline"
-        }
-      }
-    },
-    "money": {
-      "title": "Money",
-      "subtitle": "{from} to {to}",
-      "rangeLabel": "Period",
-      "byLabel": "Break revenue down by",
-      "revenueTitle": "Revenue",
-      "revenueHint": "The 10% service fee on clips approved in this period.",
-      "chartLabel": "Revenue per period",
-      "weekOf": "Week of {date}",
-      "colWeek": "Week",
-      "colMonth": "Month",
-      "colClips": "Approved clips",
-      "colBrandPaid": "Brands paid",
-      "colCreatorPay": "Creators earned",
-      "colRevenue": "Revenue",
-      "colShare": "Share",
-      "noRevenue": "No approved clips in this period",
-      "ledgerTitle": "Transactions",
-      "ledgerHint": "Payments from brands, refunds to them, and transfers to creators.",
-      "ledgerEmpty": "No transactions in this period",
-      "export": "Export CSV"
-    },
-    "ledger": {
-      "payment": "Payment from {brand}",
-      "refund": "Refund to {brand}",
-      "payout": "Transfer to {name}",
-      "payoutDetail": "Ref {ref} · orders: {count}",
-      "types": {
-        "payment": "Payment",
-        "refund": "Refund",
-        "payout": "Transfer"
-      }
-    },
-    "payouts": {
-      "title": "Transfers to creators",
-      "subtitle": "Approved clips, paid to creators by bank transfer.",
-      "paidSoFar": "Transferred so far",
-      "transfers": {
-        "zero": "No transfers yet",
-        "one": "1 transfer",
-        "other": "{count} transfers"
-      },
-      "toTransfer": "To transfer",
-      "toTransferHint": "Longest wait first. Send the bank transfer, then mark it paid with its reference.",
-      "allPaid": "Everyone is paid",
-      "allPaidHint": "Creators show up here when a brand approves their clip.",
-      "noBank": "No bank account yet",
-      "waitingForBank": "Waiting for bank details",
-      "orders": {
-        "one": "1 approved clip",
-        "other": "{count} approved clips"
-      },
-      "waiting": {
-        "zero": "Approved today",
-        "one": "Waiting 1 day",
-        "other": "Waiting {count} days"
-      },
-      "markPaid": "Mark paid",
-      "drawerTitle": "Transfer to {name}",
-      "sendTo": "Send to",
-      "covers": "What it covers",
-      "approvedOn": "approved {date}",
-      "bankRef": "Bank reference",
-      "bankRefHint": "From your bank's transfer receipt.",
-      "confirm": "Mark {amount} as paid",
-      "doneTitle": "{amount} to {name} marked as paid (ref {ref})",
-      "doneHint": "It's in the history. Once the backend is live, the creator gets a \"withdrawal sent\" notification.",
-      "history": "Creator transfer history",
-      "noHistory": "No transfers yet",
-      "colDate": "Date",
-      "colCreator": "Creator",
-      "colIban": "IBAN",
-      "colRef": "Reference",
-      "colOrders": "Clips",
-      "colAmount": "Amount",
-      "errors": {
-        "refRequired": "Enter the bank reference.",
-        "nothingOwed": "This creator isn't owed anything now.",
-        "noBank": "This creator has no bank account yet.",
-        "changed": "Something changed since you opened this. Close it and try again."
-      },
-      "bankChanged": "Bank details changed {days} days ago. Confirm with the creator before you send money.",
-      "bankChangedShort": "Bank details changed {days} days ago"
-    },
-    "forms": {
-      "close": "Close"
-    },
-    "who": {
-      "creator": "Creator",
-      "brand": "Brand",
-      "admin": "100clips"
-    },
-    "waiting": {
-      "accept": "accept the offer",
-      "receive": "confirm the product arrived",
-      "film": "film and upload",
-      "revise": "upload the new version",
-      "ship": "send the product",
-      "review": "review the clip",
-      "collect": "collect the product back",
-      "refundExpired": "offer expired, refund the brand",
-      "transfer": "transfer the creator's pay",
-      "done": "Done",
-      "closed": "Closed, money back with the brand"
-    },
-    "events": {
-      "offered": "{brand} sent the offer",
-      "accepted": "{creator} accepted",
-      "declined": "{creator} declined",
-      "sent": "{brand} sent the product",
-      "received": "{creator} received the product",
-      "uploaded": "{creator} uploaded the clip",
-      "revisionRequested": "{brand} asked for a revision",
-      "approved": "{brand} approved the clip",
-      "released": "Payment released to {creator}",
-      "cancelled": "Order cancelled",
-      "returned": "{brand} collected the product",
-      "expired": "Offer expired with no answer, money back to {brand}"
-    },
-    "activity": {
-      "title": "Admin activity",
-      "hint": "Everything 100clips did here, with the note left at the time.",
-      "empty": "No admin actions yet.",
-      "payoutSent": "Transfer of {amount} marked as paid (ref {ref})",
-      "deadlineExtended": "Deadline moved to {date}",
-      "orderCancelled": "Cancelled, {amount} refunded to the brand's balance",
-      "creatorApproved": "Application approved: profile is live",
-      "changesRequested": "Changes requested on the application",
-      "creatorRejected": "Application rejected",
-      "suspended": "Suspended",
-      "unsuspended": "Suspension lifted",
-      "loginReset": "Login reset",
-      "withdrawalSent": "Brand withdrawal of {amount} sent (ref {ref})",
-      "withdrawalRejected": "Brand withdrawal of {amount} rejected, money back to the balance",
-      "problemResolved": "Problem report resolved"
-    },
-    "approvals": {
-      "title": "Creator approvals",
-      "subtitle": "New creators go live only after you check their profile and samples against the content rules.",
-      "tabsLabel": "Application status",
-      "status": {
-        "pending": "Waiting",
-        "changes_requested": "Changes requested",
-        "rejected": "Rejected",
-        "approved": "Approved"
-      },
-      "empty": {
-        "pending": "No applications waiting",
-        "changes_requested": "Nobody is fixing their application",
-        "rejected": "No rejected applications",
-        "approved": "No approved applications yet"
-      },
-      "samples": {
-        "one": "1 sample",
-        "other": "{count} samples"
-      },
-      "appliedOn": "Applied {date}",
-      "samplesTitle": "Sample videos",
-      "samplesHint": "Watch each one against the content rules before deciding.",
-      "niches": "Niches",
-      "prices": "Packages and prices",
-      "reviewTitle": "Your review",
-      "rulesTitle": "The samples follow the content rules",
-      "rules": {
-        "noMusic": "No music",
-        "appropriateClothes": "Appropriate clothes"
-      },
-      "decision": "Decision",
-      "decisions": {
-        "approve": "Approve",
-        "changes": "Request changes",
-        "reject": "Reject"
-      },
-      "note": "Note to the creator",
-      "noteOptional": "Note to the creator (optional)",
-      "notePlaceholder": "What to fix, or why",
-      "noteHint": "The creator sees this in the app.",
-      "submit": {
-        "none": "Choose a decision",
-        "approve": "Approve and go live",
-        "changes": "Send back for changes",
-        "reject": "Reject application"
-      },
-      "errors": {
-        "pickDecision": "Choose a decision.",
-        "checkRules": "Tick both content rules to approve, or request changes.",
-        "noteRequired": "Tell the creator what to change or why.",
-        "alreadyDecided": "This application was already decided."
-      },
-      "decided": {
-        "approved": "{name} is approved and live. Brands can find and invite them now.",
-        "changes_requested": "Sent back to {name} with your note.",
-        "rejected": "{name}'s application was rejected."
-      },
-      "lastDecision": "Decision",
-      "after": {
-        "approved": "The profile is live for brands.",
-        "changes_requested": "Waiting for the creator to update their profile or samples. It comes back here when they resubmit.",
-        "rejected": "The creator can apply again with new samples."
-      },
-      "openProfile": "Open their profile",
-      "intro": "Intro video",
-      "introHint": "They say their name and that they're available on 100clips. Private: only the 100clips team sees it."
-    },
-    "orders": {
-      "title": "Orders & campaigns",
-      "subtitle": "Every order on 100clips, and who it's waiting on.",
-      "search": "Search order, brand, creator or campaign",
-      "filtersLabel": "Show",
-      "filters": {
-        "all": "All",
-        "late": "Late",
-        "brandReview": "Waiting for brand review",
-        "stuck": "Stuck",
-        "running": "Running",
-        "done": "Approved",
-        "closed": "Declined or cancelled"
-      },
-      "empty": "No orders here",
-      "emptySearch": "Nothing matches “{q}”.",
-      "campaign": "campaign",
-      "due": "Due {date}",
-      "noDeadline": "No deadline",
-      "late": "late",
-      "lateBy": {
-        "one": "Late by 1 day",
-        "other": "Late by {count} days"
-      },
-      "details": "Details",
-      "format": "Format",
-      "created": "Created",
-      "deadline": "Deadline",
-      "extendedFrom": "moved by 100clips from {date}",
-      "source": "From",
-      "fromCampaign": "Campaign: {title}",
-      "directOffer": "Direct offer",
-      "revisionNote": "Revision note",
-      "shipping": "Product",
-      "sentOn": "Sent {date}, not received yet",
-      "received": "Received {date}",
-      "timeline": "Timeline",
-      "money": "Money",
-      "creatorPay": "Creator's pay",
-      "brandPaid": "Brand paid",
-      "moneyHeld": "Held until the brand approves the clip.",
-      "moneyRefunded": "{amount} went back to the brand's balance.",
-      "moneyPaid": "Transferred to the creator on {date} (ref {ref}).",
-      "moneyOwed": {
-        "zero": "Approved today. Waiting for the transfer to the creator.",
-        "one": "Approved 1 day ago. Waiting for the transfer to the creator.",
-        "other": "Approved {count} days ago. Waiting for the transfer to the creator."
-      },
-      "extend": "Extend deadline",
-      "extendTitle": "Extend the deadline of {id}",
-      "extendWhat": "Only this order's deadline moves. It can only move later.",
-      "newDeadline": "New deadline",
-      "noteOptional": "Note (optional)",
-      "extendConfirm": "Save new deadline",
-      "extendDone": "Deadline moved.",
-      "cancel": "Cancel and refund",
-      "cancelTitle": "Cancel {id}",
-      "cancelWhat": "The order stops and {amount} (with the service fee) goes back to the brand's balance. The creator isn't paid. This can't be undone.",
-      "reason": "Reason",
-      "reasonHint": "Kept in the activity log.",
-      "cancelConfirm": "Cancel and refund {amount}",
-      "cancelDone": "Cancelled. {amount} is back in the brand's balance.",
-      "errors": {
-        "noteRequired": "Write why you're cancelling.",
-        "cantChange": "This order can't be changed anymore.",
-        "deadlineLater": "Pick a date after today and after the current deadline."
-      }
-    },
-    "users": {
-      "title": "Users",
-      "subtitle": "Brands and creators on 100clips.",
-      "search": "Search name, handle, email or phone",
-      "tabsLabel": "User type",
-      "creators": "Creators",
-      "brands": "Brands",
-      "empty": "No one matches",
-      "live": "Live",
-      "active": "Active",
-      "suspendedBadge": "Suspended",
-      "earned": "Earned {amount}",
-      "spent": "Spent {amount}",
-      "ordersCount": {
-        "zero": "No orders",
-        "one": "1 order",
-        "other": "{count} orders"
-      },
-      "suspend": "Suspend",
-      "unsuspend": "Lift suspension",
-      "suspendTitle": "Suspend {name}",
-      "unsuspendTitle": "Lift {name}'s suspension",
-      "suspendWhat": {
-        "creator": "Brands can't find or invite them while suspended. Orders already running carry on.",
-        "brand": "They can't pay for new campaigns or invites while suspended. Orders already running carry on."
-      },
-      "unsuspendWhat": {
-        "creator": "They show up for brands again.",
-        "brand": "They can pay for new work again."
-      },
-      "reason": "Reason",
-      "reasonOptional": "Note (optional)",
-      "suspendConfirm": "Suspend",
-      "unsuspendConfirm": "Lift suspension",
-      "suspendedDone": "Suspended.",
-      "unsuspendedDone": "Suspension lifted.",
-      "suspendedSince": "Suspended since {date}",
-      "errors": {
-        "reasonRequired": "Write why, for the activity log."
-      },
-      "reset": "Reset login",
-      "resetTitle": "Reset login",
-      "resetWhat": {
-        "brand": "We email the owner a link to set a new password, and sign them out everywhere.",
-        "creator": "We sign them out on every phone. They log in again with a code sent to their number."
-      },
-      "resetConfirm": "Reset login",
-      "resetDone": {
-        "brand": "Password reset email sent.",
-        "creator": "Signed out everywhere."
-      },
-      "rating": "Rating",
-      "noRating": "No ratings yet",
-      "earnedTotal": "Earned in total",
-      "bankTitle": "Bank details",
-      "bankHint": "Every change is kept, newest first.",
-      "bankCurrent": "Current",
-      "bankOld": "Replaced",
-      "bankByCreator": "Set by the creator · {date}",
-      "bankByAdmin": "Corrected by 100clips · {date}",
-      "orderHistory": "Order history",
-      "noOrders": "No orders yet.",
-      "transfers": "Transfers",
-      "owner": "Account owner",
-      "balance": "Balance",
-      "spentTotal": "Spent on approved clips",
-      "website": "Website",
-      "registration": "Registration",
-      "noRegistration": "No countries added yet.",
-      "cr": "CR {number}",
-      "noCr": "No CR number",
-      "vat": "VAT certificate",
-      "noVat": "No VAT certificate"
-    },
-    "support": {
-      "contact": "Contact",
-      "title": "Chat with {name}",
-      "writingAs": "You're writing as the official account. The creator sees it with a verified tick.",
-      "placeholder": "Message as 100Clips Support",
-      "send": "Send",
-      "empty": "No messages with {name} yet. What you send shows up in their Messages, pinned at the top."
-    },
-    "withdrawals": {
-      "title": "Withdrawals from brands",
-      "hint": "Money brands asked to take out of their balance. It already left the balance; send it within 5–7 working days.",
-      "empty": "No withdrawals yet",
-      "requested": "Requested {date}",
-      "arrives": "Promised by {from} to {to}",
-      "sentOn": "Sent {date}",
-      "noBank": "No bank account on the account now. It can't be sent until they add one.",
-      "status": {
-        "requested": "Waiting",
-        "sent": "Sent",
-        "rejected": "Rejected"
-      },
-      "markSent": "Mark as sent",
-      "sendTitle": "Send {amount} to the brand",
-      "sendConfirm": "Mark {amount} as sent",
-      "sentDone": "{amount} marked as sent.",
-      "reject": "Reject",
-      "rejectTitle": "Reject the withdrawal of {amount}",
-      "rejectWhat": "{amount} goes back to the brand's balance. They see your note.",
-      "noteToBrand": "Note to the brand",
-      "rejectConfirm": "Reject and return to balance",
-      "rejectedDone": "Rejected. {amount} is back in the brand's balance.",
-      "errors": {
-        "noBank": "The account has no bank account now. Ask them to add one first.",
-        "noteRequired": "Tell the brand why."
-      }
-    },
-    "reports": {
-      "title": "Reports",
-      "subtitle": "Problems brands reported on orders, and chats flagged for review.",
-      "problemsTitle": "Problems on orders",
-      "problemsHint": "Look into it, then resolve with a reply. The brand sees it on the order.",
-      "tabsLabel": "Report status",
-      "status": {
-        "open": "Open",
-        "resolved": "Resolved"
-      },
-      "empty": {
-        "open": "No open reports",
-        "resolved": "No resolved reports yet"
-      },
-      "reasons": {
-        "notDelivered": "Clip not delivered",
-        "notAsAgreed": "Clip not as agreed",
-        "productIssue": "Problem with the product",
-        "creatorConduct": "Creator's behaviour",
-        "payment": "Payment problem",
-        "other": "Something else"
-      },
-      "openOrder": "Open the order: {title} ({id})",
-      "repliedOn": "Replied {date}:",
-      "onOrder": "Reported by the brand: {reason}",
-      "resolve": "Resolve",
-      "resolveTitle": "Resolve the report",
-      "reply": "Reply to the brand",
-      "replyHint": "What you found and what happens now. The brand sees it on the order.",
-      "resolveConfirm": "Resolve and send reply",
-      "resolvedDone": "Resolved. The brand sees your reply on the order.",
-      "errors": {
-        "replyRequired": "Write a reply for the brand.",
-        "alreadyResolved": "This report is already resolved."
-      },
-      "chatTitle": "Flagged chats",
-      "chatHint": "Brands flagged these conversations with a creator. The messages stay visible to both sides.",
-      "chatEmpty": "No flagged chats."
-    },
-    "waitlist": {
-      "title": "Countries waiting for launch",
-      "hint": "Creators outside Bahrain who asked to hear when we launch there. Each request is a vote for that country.",
-      "latest": "Latest request {date}",
-      "requests": {
-        "one": "1 request",
-        "other": "{count} requests"
-      }
-    },
-    "payments": {
-      "title": "Card payments",
-      "subtitle": "Until the card provider is connected, confirm each card payment here once the money is in. Confirming sends the offers, or adds the top-up to the balance.",
-      "empty": "No card payments waiting.",
-      "checkout": "Campaign · {campaign}",
-      "topUp": "Balance top-up",
-      "amounts": "{card} by card, of {total}",
-      "confirm": "Confirm",
-      "fail": "Mark failed",
-      "done": "Payment confirmed.",
-      "doneFailed": "Payment marked failed.",
-      "error": "Couldn't update the payment. Try again."
-    }
-  },
   "offer": {
     "waiting": "Waiting for {name} to accept",
     "hoursLeft": {
@@ -1752,6 +1276,6 @@
       "failed": "Something went wrong. Try again."
     },
     "creatorTitle": "This is a creator account",
-    "creatorBody": "This dashboard is for brands. Creators use the 100clips app. Log in with another email to manage a brand."
+    "creatorBody": "This dashboard is for brands. Creators use the laqta app. Log in with another email to manage a brand."
   }
 }

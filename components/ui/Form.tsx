@@ -5,11 +5,21 @@ import { cn } from "@/lib/cn";
 export const controlClass =
   "w-full rounded-[var(--radius-sm)] border border-transparent bg-surface px-3 text-text placeholder:text-text-muted focus:outline-2 focus:outline-offset-0 focus:outline-primary aria-[invalid=true]:border-error";
 
-export function Field({ label, htmlFor, error, hint, children }: { label: ReactNode; htmlFor: string; error?: string; hint?: ReactNode; children: ReactNode }) {
+/** The red star after a required field's label. Screen readers get aria-required on the control instead. */
+export function RequiredMark() {
+  return (
+    <span aria-hidden className="text-error">
+      *
+    </span>
+  );
+}
+
+export function Field({ label, htmlFor, error, hint, required, children }: { label: ReactNode; htmlFor: string; error?: string; hint?: ReactNode; required?: boolean; children: ReactNode }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      <label htmlFor={htmlFor} className="flex items-center gap-1.5 font-medium">
+      <label htmlFor={htmlFor} className="flex items-center gap-1 font-medium">
         {label}
+        {required && <RequiredMark />}
       </label>
       {children}
       {error ? <FieldError id={`${htmlFor}-error`}>{error}</FieldError> : hint ? <p className="text-small text-text-muted">{hint}</p> : null}

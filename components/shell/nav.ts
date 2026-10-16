@@ -1,4 +1,4 @@
-import { Bell, Bookmark, LayoutDashboard, Megaphone, Package, Settings, Store, Users, Wallet } from "lucide-react";
+import { Bell, Bookmark, LayoutDashboard, Megaphone, MessageCircle, Package, Settings, Store, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { MessageKey } from "@/lib/i18n/messages";
 
@@ -12,15 +12,22 @@ const campaigns: NavItem = { href: "/campaigns", label: "nav.campaigns", icon: M
 const orders: NavItem = { href: "/orders", label: "nav.orders", icon: Package };
 const brands: NavItem = { href: "/brands", label: "nav.brands", icon: Store };
 const balance: NavItem = { href: "/balance", label: "nav.balance", icon: Wallet };
+const messages: NavItem = { href: "/messages", label: "nav.messages", icon: MessageCircle };
 const notifications: NavItem = { href: "/notifications", label: "nav.notifications", icon: Bell };
 const lists: NavItem = { href: "/lists", label: "nav.lists", icon: Bookmark };
 const settings: NavItem = { href: "/settings", label: "nav.settings", icon: Settings };
 
-/** Desktop sidebar. */
-export const sidebarItems: NavItem[] = [dashboard, explore, lists, campaigns, orders, brands, balance];
+export type NavGroup = { label?: MessageKey; items: NavItem[] };
 
-/** Mobile tab bar, followed by a "More" tab that opens moreItems. */
-export const tabItems: NavItem[] = [{ ...dashboard, label: "nav.home" }, explore, campaigns, orders];
+/** Desktop sidebar. Balance isn't here: it's always on show in the top bar. */
+export const sidebarGroups: NavGroup[] = [
+  { items: [dashboard] },
+  { label: "nav.groupDiscover", items: [explore, lists] },
+  { label: "nav.groupManage", items: [campaigns, orders, brands, messages] },
+];
+
+/** Mobile tab bar, followed by a "More" tab that opens moreItems. Labels are short to fit five across. */
+export const tabItems: NavItem[] = [{ ...dashboard, label: "nav.home" }, { ...explore, label: "nav.creatorsShort" }, campaigns, orders];
 export const moreItems: NavItem[] = [brands, balance, lists, notifications, settings];
 
 /** Creator profiles belong to Explore. */

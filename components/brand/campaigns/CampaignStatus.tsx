@@ -23,7 +23,7 @@ export function CampaignStatus({ progress, showReview = true, className }: { pro
       {progress.active > 0 && progress.status !== "cancelled" && (
         <>
           <div className="h-1 w-full max-w-60 overflow-hidden rounded-full bg-surface" role="presentation">
-            <div className="h-full rounded-full bg-status-green-text" style={{ width: `${percent}%` }} />
+            <div className="h-full rounded-full bg-success" style={{ width: `${percent}%` }} />
           </div>
           <p className="text-small text-text-muted">{t("campaignStatus.approvedOf", { done: f.number(progress.approved), total: f.number(progress.active) })}</p>
         </>

@@ -44,6 +44,12 @@ export type Creator = {
   portfolio?: PortfolioClip[];
 };
 
+/**
+ * A creator shows to brands only with at least one active bundle: a format they film, priced above
+ * zero. The API enforces the same (bookable_creators); this keeps the dashboard to it too.
+ */
+export const hasActiveBundle = (c: Pick<Creator, "formats">) => c.formats.some((f) => f.price > 0);
+
 /** A sample video on a creator's profile. */
 export type PortfolioClip = { id: string; videoSrc: string };
 
@@ -340,9 +346,50 @@ export const SERVICE_DELIVERIES: ServiceDelivery[] = ["online", "at_home", "at_l
 export type VenueKind = "cafe" | "restaurant" | "salon" | "gym" | "clinic" | "other";
 export const VENUE_KINDS: VenueKind[] = ["cafe", "restaurant", "salon", "gym", "clinic", "other"];
 
+/** Gulf currencies first, then the ones brands abroad use most. Same list as the API's. */
+export type Currency = "BHD" | "SAR" | "AED" | "KWD" | "QAR" | "OMR" | "USD" | "EUR" | "GBP";
+export const CURRENCIES: Currency[] = ["BHD", "SAR", "AED", "KWD", "QAR", "OMR", "USD", "EUR", "GBP"];
+/** The flag of the country (or the EU) each currency belongs to, for the currency picker. */
+export const CURRENCY_FLAGS: Record<Currency, string> = {
+  BHD: "🇧🇭",
+  SAR: "🇸🇦",
+  AED: "🇦🇪",
+  KWD: "🇰🇼",
+  QAR: "🇶🇦",
+  OMR: "🇴🇲",
+  USD: "🇺🇸",
+  EUR: "🇪🇺",
+  GBP: "🇬🇧",
+};
+
+export type PriceModel = "one_time" | "from" | "range" | "subscription" | "free" | "per_unit" | "hidden";
+export type PricePeriod = "week" | "month" | "year";
+export const PRICE_PERIODS: PricePeriod[] = ["week", "month", "year"];
+export type PriceUnit = "person" | "session" | "hour" | "night" | "visit";
+export const PRICE_UNITS: PriceUnit[] = ["person", "session", "hour", "night", "visit"];
+
+/** How customers pay, so creators say it right. Amounts are in the product's currency. */
+export type Pricing =
+  | { model: "one_time" | "from"; amount: number }
+  | { model: "range"; amount: number; maxAmount: number }
+  | { model: "subscription"; amount: number; period: PricePeriod; trialDays?: number }
+  /** Free, with an optional paid plan (no period: a one-time upgrade). */
+  | { model: "free"; amount?: number; period?: PricePeriod }
+  | { model: "per_unit"; amount: number; unit: PriceUnit }
+  /** The brand doesn't want a price in the videos. */
+  | { model: "hidden" };
+
+/** The models that make sense for each type, most common first (the form offers only these). */
+export const PRICE_MODELS_BY_TYPE: Record<ProductType, PriceModel[]> = {
+  physical: ["one_time", "from", "range", "subscription", "hidden"],
+  app: ["free", "subscription", "one_time", "hidden"],
+  service: ["one_time", "from", "range", "per_unit", "subscription", "hidden"],
+  venue: ["per_unit", "from", "range", "subscription", "free", "hidden"],
+};
+
 /** Fields that only apply to one product type. */
 export type ProductDetails =
-  | { type: "physical"; /** Retail value of one unit, in BHD. */ value?: number; size?: string }
+  | { type: "physical"; size?: string }
   | { type: "app"; downloadLink?: string; platforms: AppPlatform[] }
   | { type: "service"; delivery: ServiceDelivery[] }
   | { type: "venue"; kind: VenueKind; location?: string; hours?: string; /** Google Maps link. */ mapUrl?: string };
@@ -355,8 +402,9 @@ export type Product = {
   name: Localized;
   photos: string[];
   description?: Localized;
-  /** In BHD. */
-  price?: number;
+  /** Of the pricing. */
+  currency: Currency;
+  pricing?: Pricing;
   /** 3–5 short bullets. */
   benefits: string[];
   /** What customers worry about or ask before buying, with optional answers. */

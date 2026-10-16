@@ -40,7 +40,7 @@ export function PaymentFields({ balance, useBalance, onUseBalance, byCard, err, 
           <div className="flex flex-col gap-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <Field label={t("checkout.cardNumber")} htmlFor="cardNumber" error={err("cardNumber")}>
+                <Field label={t("checkout.cardNumber")} htmlFor="cardNumber" error={err("cardNumber")} required>
                   <Input
                     id="cardNumber"
                     name="cardNumber"
@@ -54,7 +54,7 @@ export function PaymentFields({ balance, useBalance, onUseBalance, byCard, err, 
                   />
                 </Field>
               </div>
-              <Field label={t("checkout.cardExpiry")} htmlFor="cardExpiry" error={err("cardExpiry")}>
+              <Field label={t("checkout.cardExpiry")} htmlFor="cardExpiry" error={err("cardExpiry")} required>
                 <Input
                   id="cardExpiry"
                   name="cardExpiry"
@@ -72,7 +72,7 @@ export function PaymentFields({ balance, useBalance, onUseBalance, byCard, err, 
                   aria-describedby={described("cardExpiry")}
                 />
               </Field>
-              <Field label={t("checkout.cardCvc")} htmlFor="cardCvc" error={err("cardCvc")}>
+              <Field label={t("checkout.cardCvc")} htmlFor="cardCvc" error={err("cardCvc")} required>
                 <Input
                   id="cardCvc"
                   name="cardCvc"
@@ -86,7 +86,7 @@ export function PaymentFields({ balance, useBalance, onUseBalance, byCard, err, 
                 />
               </Field>
               <div className="sm:col-span-2">
-                <Field label={t("checkout.cardName")} htmlFor="cardName" error={err("cardName")}>
+                <Field label={t("checkout.cardName")} htmlFor="cardName" error={err("cardName")} required>
                   <Input id="cardName" name="cardName" autoComplete="cc-name" defaultValue={v("cardName")} aria-invalid={!!err("cardName")} aria-describedby={described("cardName")} />
                 </Field>
               </div>

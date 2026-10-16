@@ -14,23 +14,22 @@ import type { NotificationRow } from "./notificationRows";
 
 /** Each kind's icon and status colour: the same pairing the creator app uses for its notifications. */
 const looks: Record<NotificationKind, { icon: LucideIcon; tone: StatusTone }> = {
-  accepted: { icon: CircleCheck, tone: "blue" },
+  accepted: { icon: CircleCheck, tone: "green" },
   declined: { icon: UserX, tone: "red" },
   expired: { icon: Hourglass, tone: "gray" },
-  received: { icon: PackageCheck, tone: "blue" },
-  clipReady: { icon: Clapperboard, tone: "purple" },
-  newVersion: { icon: RefreshCw, tone: "purple" },
+  received: { icon: PackageCheck, tone: "gray" },
+  clipReady: { icon: Clapperboard, tone: "brand" },
+  newVersion: { icon: RefreshCw, tone: "brand" },
   adCode: { icon: Megaphone, tone: "green" },
   late: { icon: Clock, tone: "amber" },
 };
 
 const tones: Record<StatusTone, string> = {
-  gray: "bg-status-gray-bg text-status-gray-text",
-  amber: "bg-status-amber-bg text-status-amber-text",
-  blue: "bg-status-blue-bg text-status-blue-text",
-  purple: "bg-status-purple-bg text-status-purple-text",
-  green: "bg-status-green-bg text-status-green-text",
-  red: "bg-status-red-bg text-status-red-text",
+  gray: "bg-surface text-text-muted",
+  amber: "bg-warning-soft text-warning-on-soft",
+  green: "bg-success-soft text-success-on-soft",
+  red: "bg-error-soft text-error",
+  brand: "bg-brand-soft text-brand-on-soft",
 };
 
 /** The bell in the top bar: how many updates are new, and the latest ones in a panel. */
@@ -46,7 +45,7 @@ export function NotificationBell({ rows, unread }: { rows: NotificationRow[]; un
         <>
           <Bell aria-hidden className="size-5" strokeWidth={1.75} />
           {unread > 0 && (
-            <span aria-hidden className="absolute end-1 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-caption font-medium text-on-accent tabular-nums">
+            <span aria-hidden className="absolute end-1 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-caption font-medium text-on-brand tabular-nums">
               {unread}
             </span>
           )}
@@ -112,7 +111,7 @@ function NotificationItem({ row, onClick }: { row: NotificationRow; onClick?: ()
         <span className="line-clamp-2 text-small text-text-muted">{row.detail}</span>
         <span className="mt-0.5 text-caption text-text-muted">{row.time}</span>
       </span>
-      {row.unread && <span role="img" aria-label={t("notifications.unread")} className="mt-1.5 size-2 shrink-0 rounded-full bg-accent" />}
+      {row.unread && <span role="img" aria-label={t("notifications.unread")} className="mt-1.5 size-2 shrink-0 rounded-full bg-brand" />}
     </Link>
   );
 }

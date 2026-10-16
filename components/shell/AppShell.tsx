@@ -3,7 +3,7 @@ import Link from "next/link";
 import { MessageCircle, ShoppingBag, Wallet } from "lucide-react";
 import type { ReactNode } from "react";
 import { workspace } from "@/lib/data/live";
-import { unreadCount } from "@/lib/data/messages";
+import { unreadCount } from "@/lib/data/chatApi";
 import { getTheme } from "@/lib/theme";
 import { getI18n } from "@/lib/i18n/server";
 import { displayName, getUser, requireBrandAccount } from "@/lib/session";
@@ -13,6 +13,7 @@ import { LanguageToggle } from "./LanguageToggle";
 import { NotificationBell } from "./NotificationBell";
 import { notificationRows } from "./notificationRows";
 import { HOME_HREF } from "./nav";
+import { TopSearch } from "./TopSearch";
 import { BottomNav, SideNav } from "./SideNav";
 
 export async function AppShell({ children }: { children: ReactNode }) {
@@ -24,7 +25,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
   const ws = await workspace();
   const notifications = await notificationRows(i18n, 8);
   const cartCount = ws.cart.length;
-  const unread = unreadCount();
+  const unread = await unreadCount();
   const balanceLabel = t("header.balanceShort", { amount: f.money(ws.balance) });
 
   return (
@@ -33,11 +34,15 @@ export async function AppShell({ children }: { children: ReactNode }) {
         <div className="flex h-16 items-center gap-3 px-4 md:gap-4 md:px-6">
           <Link href={HOME_HREF} aria-label={t("header.home")} className="shrink-0 rounded-[var(--radius-sm)]">
             {/* The logo is a brand mark: never mirrored in RTL. */}
-            <Image src="/100clips-wordmark-on-light.svg" alt="" width={575} height={128} priority className="h-5 w-auto dark:hidden sm:h-6 md:h-7" />
-            <Image src="/100clips-wordmark-on-dark.svg" alt="" width={575} height={128} priority className="hidden h-5 w-auto dark:block sm:h-6 md:h-7" />
+            <Image src="/laqta-logo-black.svg" alt="" width={2205} height={960} priority className="h-5 w-auto dark:hidden sm:h-6 md:h-7" />
+            <Image src="/laqta-logo-white.svg" alt="" width={2205} height={960} priority className="hidden h-5 w-auto dark:block sm:h-6 md:h-7" />
           </Link>
 
-          <div className="ms-auto flex items-center gap-1 sm:gap-2">
+          <div className="flex flex-1 justify-center px-4 lg:px-8">
+            <TopSearch />
+          </div>
+
+          <div className="flex items-center gap-1 sm:gap-2">
             <Link
               href="/balance"
               aria-label={balanceLabel}
@@ -49,10 +54,11 @@ export async function AppShell({ children }: { children: ReactNode }) {
             <div className="hidden sm:block">
               <LanguageToggle />
             </div>
-            <Link href="/messages" aria-label={t("header.messages", { count: unread })} className="relative grid size-11 place-items-center rounded-full text-text hover:bg-surface">
+            {/* On desktop, Messages lives in the sidebar with its unread count. */}
+            <Link href="/messages" aria-label={t("header.messages", { count: unread })} className="relative grid size-11 place-items-center rounded-full text-text hover:bg-surface md:hidden">
               <MessageCircle aria-hidden className="size-5 rtl:-scale-x-100" strokeWidth={1.75} />
               {unread > 0 && (
-                <span aria-hidden className="absolute end-1 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-caption font-medium text-on-accent tabular-nums">
+                <span aria-hidden className="absolute end-1 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-caption font-medium text-on-brand tabular-nums">
                   {unread}
                 </span>
               )}
@@ -60,7 +66,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
             <Link href="/cart" aria-label={t("header.cart", { count: cartCount })} className="relative grid size-11 place-items-center rounded-full text-text hover:bg-surface">
               <ShoppingBag aria-hidden className="size-5" strokeWidth={1.75} />
               {cartCount > 0 && (
-                <span aria-hidden className="absolute end-1 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-caption font-medium text-on-accent tabular-nums">
+                <span aria-hidden className="absolute end-1 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-caption font-medium text-on-brand tabular-nums">
                   {cartCount}
                 </span>
               )}
@@ -74,7 +80,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <div className="flex">
-        <SideNav account={<AccountMenu
+        <SideNav unread={{ "/messages": unread }} account={<AccountMenu
               id={me.account.id}
               name={displayName(me, i18n.locale, user?.email)}
               email={user?.email ?? ""}
@@ -89,7 +95,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
 
-      <BottomNav balanceLabel={balanceLabel} />
+      <BottomNav balanceLabel={balanceLabel} unread={{ "/notifications": notifications.unread }} />
     </div>
   );
 }

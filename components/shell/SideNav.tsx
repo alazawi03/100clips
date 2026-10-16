@@ -3,40 +3,66 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
-import { LogOut, MoreHorizontal, X } from "lucide-react";
+import { LogOut, MoreHorizontal, Plus, X } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { useI18n } from "@/components/i18n/I18nProvider";
+import { buttonClass } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { LanguageToggle } from "./LanguageToggle";
-import { isActive, moreItems, sidebarItems, tabItems, type NavItem } from "./nav";
+import { isActive, moreItems, sidebarGroups, tabItems, type NavItem } from "./nav";
 
-/** Desktop sidebar. Sits on the inline start: right in Arabic, left in English. */
-export function SideNav({ account }: { account: ReactNode }) {
+/** Unread counts by nav href, e.g. { "/messages": 3 }. */
+type Unread = Partial<Record<string, number>>;
+
+/**
+ * Desktop sidebar. Sits on the inline start: right in Arabic, left in English.
+ * The main action (a new campaign) on top, then the pages in small labelled groups.
+ */
+export function SideNav({ account, unread = {} }: { account: ReactNode; unread?: Unread }) {
   const pathname = usePathname();
   const { t } = useI18n();
   return (
-    <nav aria-label={t("nav.label")} className="sticky top-16 z-30 hidden h-[calc(100dvh-4rem)] w-60 shrink-0 flex-col gap-1 border-e border-border bg-background p-4 md:flex">
-      {sidebarItems.map((item) => (
-        <SideLink key={item.href} item={item} active={isActive(item, pathname)} label={t(item.label)} />
+    <nav aria-label={t("nav.label")} className="sticky top-16 z-30 hidden h-[calc(100dvh-4rem)] w-60 shrink-0 flex-col gap-1 overflow-y-auto border-e border-border bg-background p-4 md:flex">
+      <Link href="/campaigns/new" className={buttonClass("primary", "mb-3 w-full")}>
+        <Plus aria-hidden />
+        {t("newCampaign.button")}
+      </Link>
+      {sidebarGroups.map((group, i) => (
+        <div key={i} role="group" aria-label={group.label && t(group.label)} className="flex flex-col gap-1">
+          {group.label && <p aria-hidden className="px-3 pb-1 pt-4 text-caption font-medium text-text-muted">{t(group.label)}</p>}
+          {group.items.map((item) => (
+            <SideLink key={item.href} item={item} active={isActive(item, pathname)} label={t(item.label)} count={unread[item.href]} />
+          ))}
+        </div>
       ))}
       <div className="mt-auto border-t border-border pt-3">{account}</div>
     </nav>
   );
 }
 
-function SideLink({ item, active, label }: { item: NavItem; active: boolean; label: string }) {
+function SideLink({ item, active, label, count = 0 }: { item: NavItem; active: boolean; label: string; count?: number }) {
+  const { t } = useI18n();
   const Icon = item.icon;
   return (
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex h-11 items-center gap-3 rounded-[var(--radius-md)] px-3 transition-colors duration-[120ms]",
-        active ? "bg-primary-soft font-medium text-primary-on-soft" : "text-text hover:bg-surface",
+        // DESIGN.md Sidebar: 40px rows (44 in the mobile sheet); active is the surface fill with a 3px pink bar on the inline-start edge.
+        "relative flex h-11 items-center gap-3 rounded-[var(--radius-md)] px-3 transition-colors duration-[120ms] md:h-10",
+        active
+          ? "bg-surface font-medium text-text before:absolute before:inset-y-2 before:start-0 before:w-[3px] before:rounded-full before:bg-brand"
+          : "text-text hover:bg-surface",
       )}
     >
-      <Icon aria-hidden className={cn("size-5", active ? "text-primary-on-soft" : "text-icon-inactive")} strokeWidth={1.75} />
-      {label}
+      <Icon aria-hidden className={cn("size-5", active ? "text-text" : "text-icon-inactive")} strokeWidth={1.75} />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {count > 0 && (
+        <span className="grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1.5 text-caption font-medium text-on-brand tabular-nums">
+          <span aria-hidden>{count}</span>
+          <span className="sr-only">{t("nav.unread", { count })}</span>
+        </span>
+      )}
     </Link>
   );
 }
@@ -44,11 +70,13 @@ function SideLink({ item, active, label }: { item: NavItem; active: boolean; lab
 const tabClass = "flex min-h-14 flex-col items-center justify-center gap-0.5 px-0.5 text-center text-caption leading-tight";
 
 /** Mobile tab bar: Home, Explore, Campaigns, Orders, More. More opens a sheet with the rest. */
-export function BottomNav({ balanceLabel }: { balanceLabel: string }) {
+export function BottomNav({ balanceLabel, unread = {} }: { balanceLabel: string; unread?: Unread }) {
   const pathname = usePathname();
   const { t } = useI18n();
   const sheet = useRef<HTMLDialogElement>(null);
   const moreActive = moreItems.some((item) => isActive(item, pathname));
+  // Something new behind More (e.g. notifications): a pink dot on the tab, like the creator app's Post button.
+  const moreUnread = moreItems.reduce((sum, item) => sum + (unread[item.href] ?? 0), 0);
 
   // Close the sheet after navigating.
   useEffect(() => {
@@ -77,8 +105,12 @@ export function BottomNav({ balanceLabel }: { balanceLabel: string }) {
           onClick={() => sheet.current?.showModal()}
           className={cn(tabClass, moreActive ? "font-medium text-text" : "text-icon-inactive")}
         >
-          <MoreHorizontal aria-hidden className="size-6" strokeWidth={1.75} />
+          <span className="relative">
+            <MoreHorizontal aria-hidden className="size-6" strokeWidth={1.75} />
+            {moreUnread > 0 && <span className="absolute -end-0.5 -top-0.5 size-2.5 rounded-full bg-brand ring-2 ring-background" />}
+          </span>
           <span>{t("nav.more")}</span>
+          {moreUnread > 0 && <span className="sr-only">{t("nav.unread", { count: moreUnread })}</span>}
         </button>
       </nav>
 
@@ -86,7 +118,7 @@ export function BottomNav({ balanceLabel }: { balanceLabel: string }) {
         ref={sheet}
         aria-label={t("nav.moreLabel")}
         onClick={(e) => e.target === sheet.current && sheet.current?.close()}
-        className="fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-none rounded-t-[var(--radius-xl)] bg-background p-0 text-text backdrop:bg-[var(--overlay)] md:hidden"
+        className="fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-none rounded-t-[var(--radius-lg)] bg-background p-0 text-text backdrop:bg-[var(--overlay)] md:hidden"
       >
         <div className="flex flex-col gap-1 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div className="mb-2 flex items-center justify-between">
@@ -96,7 +128,7 @@ export function BottomNav({ balanceLabel }: { balanceLabel: string }) {
             </button>
           </div>
           {moreItems.map((item) => (
-            <SideLink key={item.href} item={item} active={isActive(item, pathname)} label={t(item.label)} />
+            <SideLink key={item.href} item={item} active={isActive(item, pathname)} label={t(item.label)} count={unread[item.href]} />
           ))}
           <form action={signOut}>
             <button type="submit" className="flex h-11 w-full items-center gap-3 rounded-[var(--radius-md)] px-3 text-text hover:bg-surface">
@@ -106,7 +138,7 @@ export function BottomNav({ balanceLabel }: { balanceLabel: string }) {
           </form>
           <div className="mt-2 flex items-center justify-between gap-3 rounded-[var(--radius-md)] bg-surface px-3 py-2">
             <span className="text-small text-text-muted">{balanceLabel}</span>
-            <LanguageToggle />
+            <LanguageToggle className="hover:bg-border" />
           </div>
         </div>
       </dialog>

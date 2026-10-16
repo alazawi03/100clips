@@ -45,7 +45,8 @@ export default async function OrdersPage({ searchParams }: PageProps<"/orders">)
           </ul>
         </Card>
       ) : (
-        <EmptyState title={t("ordersPage.empty")} />
+        // No orders at all: say where they come from. Otherwise only this tab is empty.
+        orders.length === 0 ? <EmptyState title={t("ordersPage.empty")} hint={t("ordersPage.emptyHint")} /> : <EmptyState title={t("ordersPage.emptyFiltered")} />
       )}
     </div>
   );

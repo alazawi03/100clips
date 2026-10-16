@@ -44,10 +44,10 @@ export function NeedBrandDialog({ open, then, onClose }: { open: boolean; then: 
         dismiss();
       }}
       onClick={(e) => e.target === dialog.current && dismiss()}
-      className="m-auto w-[min(30rem,calc(100vw-2rem))] rounded-[var(--radius-xl)] border border-border bg-card p-0 text-text shadow-lift backdrop:bg-[var(--overlay)]"
+      className="m-auto w-[min(30rem,calc(100vw-2rem))] rounded-[var(--radius-lg)] border border-border bg-card p-0 text-text backdrop:bg-[var(--overlay)]"
     >
       <div className="flex flex-col gap-5 p-5 sm:p-6">
-        <span aria-hidden className="grid size-12 place-items-center rounded-full bg-primary-soft text-primary-on-soft">
+        <span aria-hidden className="grid size-12 place-items-center rounded-full bg-surface text-text">
           <Store className="size-6" />
         </span>
         <div className="flex flex-col gap-1.5">

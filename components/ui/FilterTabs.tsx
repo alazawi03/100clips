@@ -16,7 +16,7 @@ export function FilterTabs({ tabs, label }: { tabs: FilterTab[]; label: string }
               aria-current={tab.active ? "page" : undefined}
               className={cn(
                 "inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-full border px-4 text-small transition-colors duration-[120ms]",
-                tab.active ? "border-primary-soft bg-primary-soft font-medium text-primary-on-soft" : "border-border bg-card text-text-muted hover:text-text",
+                tab.active ? "border-brand-soft bg-brand-soft font-medium text-brand-on-soft" : "border-border bg-card text-text-muted hover:text-text",
               )}
             >
               {tab.label}

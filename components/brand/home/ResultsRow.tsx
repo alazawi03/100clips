@@ -61,7 +61,7 @@ function Stat({ icon: Icon, label, value, hint, href, linkLabel }: { icon: Lucid
   return (
     <li>
       {href ? (
-        <Link href={href} aria-label={linkLabel ? `${label}: ${value}. ${linkLabel}` : undefined} className="block h-full rounded-[var(--radius-xl)] transition-transform duration-200 hover:-translate-y-0.5">
+        <Link href={href} aria-label={linkLabel ? `${label}: ${value}. ${linkLabel}` : undefined} className="block h-full rounded-[var(--radius-lg)] transition-transform duration-200 hover:-translate-y-0.5">
           {body}
         </Link>
       ) : (

@@ -79,7 +79,7 @@ export function PhotosInput({ name, label, hint, defaultValue = [] }: { name: st
               }}
               className={cn(
                 "grid aspect-square cursor-pointer place-items-center rounded-[var(--radius-md)] border border-dashed bg-surface text-text-muted transition-colors duration-[120ms] hover:border-primary hover:text-primary focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary",
-                dragging ? "border-primary bg-primary-soft text-primary" : "border-border",
+                dragging ? "border-primary bg-surface text-primary" : "border-border",
               )}
             >
               {busy ? <Loader2 aria-label={t("images.processing")} className="size-6 animate-spin" /> : <ImagePlus aria-hidden className="size-6" strokeWidth={1.5} />}

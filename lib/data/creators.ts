@@ -1,6 +1,6 @@
 import { isActiveMarket } from "./markets";
 import { isSuspended } from "./moderation";
-import type { Creator } from "./types";
+import { hasActiveBundle, type Creator } from "./types";
 
 export const creators: Creator[] = [
   {
@@ -244,14 +244,14 @@ export function fromPrice(creator: Creator): number {
   return Math.min(...creator.formats.map((f) => f.price));
 }
 
-/** Creators brands can find and book: live (approved by 100clips), not suspended, and in a market we run in. */
+/** Creators brands can find and book: live (approved by 100clips), not suspended, in a market we run in, with a bundle. */
 export function bookableCreators(): Creator[] {
-  return creators.filter((c) => !isSuspended("creator", c.id) && isActiveMarket(c.country));
+  return creators.filter((c) => !isSuspended("creator", c.id) && isActiveMarket(c.country) && hasActiveBundle(c));
 }
 
 export const isBookable = (id: string) => {
   const c = getCreator(id);
-  return !!c && !isSuspended("creator", id) && isActiveMarket(c.country);
+  return !!c && !isSuspended("creator", id) && isActiveMarket(c.country) && hasActiveBundle(c);
 };
 
 export function getCreator(id: string): Creator | undefined {

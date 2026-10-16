@@ -1,19 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useSelectedLayoutSegment } from "next/navigation";
-import type { ReactNode } from "react";
+import { useRouter, useSelectedLayoutSegment } from "next/navigation";
+import { useEffect, type ReactNode } from "react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/cn";
 
-export type ConversationSummary = { id: string; creatorId: string; name: string; preview: string; time: string; unread: number };
+export type ConversationSummary = { id: string; creatorId: string; name: string; photo?: string; preview: string; time: string; unread: number };
+
+/** How often the inbox and the open chat load again while the tab is in view, for the creator's replies. */
+const REFRESH_MS = 15_000;
 
 /** Inbox beside the open conversation on desktop; one or the other on phones. */
 export function MessagesShell({ conversations, children }: { conversations: ConversationSummary[]; children: ReactNode }) {
   const { t, tp } = useI18n();
   const active = useSelectedLayoutSegment();
+  const router = useRouter();
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [router]);
 
   return (
     <div data-hug className="grid gap-4 md:grid-cols-[320px_minmax(0,1fr)] md:items-start">
@@ -23,14 +34,14 @@ export function MessagesShell({ conversations, children }: { conversations: Conv
           <p className="p-5 text-text-muted">{t("chat.empty")}</p>
         ) : (
           <ul className="divide-y divide-border">
-            {conversations.map((c) => (
+            {conversations.map((c) => ({ ...c, unread: c.id === active ? 0 : c.unread })).map((c) => (
               <li key={c.id}>
                 <Link
                   href={`/messages/${c.id}`}
                   aria-current={active === c.id ? "page" : undefined}
-                  className={cn("flex items-center gap-3 px-4 py-3 transition-colors duration-[120ms]", active === c.id ? "bg-primary-soft" : "hover:bg-surface")}
+                  className={cn("flex items-center gap-3 px-4 py-3 transition-colors duration-[120ms]", active === c.id ? "bg-surface" : "hover:bg-surface")}
                 >
-                  <Avatar id={c.creatorId} name={c.name} size="md" />
+                  <Avatar id={c.creatorId} name={c.name} src={c.photo} size="md" />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline justify-between gap-2">
                       <span className={cn("truncate", c.unread ? "font-medium" : "")}>{c.name}</span>

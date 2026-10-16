@@ -53,7 +53,7 @@ export function OfferWaiting({
         ref={dialog}
         aria-labelledby={titleId}
         onClick={(e) => e.target === dialog.current && !pending && dialog.current?.close()}
-        className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-[var(--radius-xl)] border border-border bg-card p-0 text-text shadow-lift backdrop:bg-[var(--overlay)]"
+        className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-[var(--radius-lg)] border border-border bg-card p-0 text-text backdrop:bg-[var(--overlay)]"
       >
         <div className="flex flex-col gap-5 p-5 sm:p-6">
           <div className="flex items-start gap-3">
@@ -76,7 +76,7 @@ export function OfferWaiting({
               {t("offer.withdrawDialog.keep")}
             </Button>
             <Button
-              variant="danger"
+              variant="destructive"
               aria-busy={pending}
               disabled={pending}
               onClick={() =>
@@ -155,7 +155,7 @@ export function ClipVersions({ versions, title, className }: { versions: ClipVer
               onClick={() => setShown(i)}
               className={cn(
                 "flex h-8 items-center gap-1.5 rounded-full border px-3 text-small transition-colors",
-                i === shown ? "border-primary bg-primary-soft font-medium text-primary-on-soft" : "border-border text-text-muted hover:bg-surface hover:text-text",
+                i === shown ? "border-brand-soft bg-brand-soft font-medium text-brand-on-soft" : "border-border text-text-muted hover:bg-surface hover:text-text",
               )}
             >
               {t("versions.tab", { n: i + 1 })}

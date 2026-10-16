@@ -173,6 +173,7 @@ function AgainDetails({
         <Field
           label={t("checkout.titleLabel")}
           htmlFor="again-title"
+          required
           error={err("title")}
         >
           <Input
@@ -185,6 +186,7 @@ function AgainDetails({
         <Field
           label={t("checkout.briefLabel")}
           htmlFor="again-brief"
+          required
           error={err("brief")}
         >
           <Textarea

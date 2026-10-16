@@ -7,7 +7,7 @@ import { reportProblem } from "@/app/actions/wallet";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
-import { Field, FieldError, Textarea } from "@/components/ui/Form";
+import { Field, FieldError, RequiredMark, Textarea } from "@/components/ui/Form";
 import { PROBLEM_REASONS } from "@/lib/data/types";
 
 /** "Report a problem" on an order: a reason and what happened, sent to 100clips support. */
@@ -54,13 +54,14 @@ function ProblemForm({ orderId, onClose }: { orderId: string; onClose: () => voi
     <form action={action} noValidate className="flex flex-col gap-5">
       <p className="text-small text-text-muted">{t("orderDetail.problem.intro")}</p>
       <fieldset className="flex flex-col gap-2" aria-describedby={err("reason") ? `${groupId}-error` : undefined}>
-        <legend id={groupId} className="mb-2 font-medium">
+        <legend id={groupId} className="mb-2 flex items-center gap-1 font-medium">
           {t("orderDetail.problem.reasonLabel")}
+          <RequiredMark />
         </legend>
         {PROBLEM_REASONS.map((r) => (
           <label
             key={r}
-            className="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] border border-border px-3 py-2.5 text-small has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
+            className="flex cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] border border-border px-3 py-2.5 text-small has-[:checked]:border-primary has-[:checked]:bg-surface has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
           >
             <input type="radio" name="reason" value={r} defaultChecked={state?.values.reason === r} className="size-4 accent-[var(--primary)]" />
             {t(`orderDetail.problem.reasons.${r}`)}
@@ -68,7 +69,7 @@ function ProblemForm({ orderId, onClose }: { orderId: string; onClose: () => voi
         ))}
         {err("reason") && <FieldError id={`${groupId}-error`}>{err("reason")}</FieldError>}
       </fieldset>
-      <Field label={t("orderDetail.problem.detailsLabel")} htmlFor={`${groupId}-details`} error={err("details")}>
+      <Field label={t("orderDetail.problem.detailsLabel")} htmlFor={`${groupId}-details`} error={err("details")} required>
         <Textarea
           id={`${groupId}-details`}
           name="details"

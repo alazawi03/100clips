@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 export function Card({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("rounded-[var(--radius-xl)] border border-border bg-card shadow-soft", className)} {...props} />;
+  return <div className={cn("rounded-[var(--radius-md)] border border-border bg-card", className)} {...props} />;
 }
 
 type SectionHeaderProps = {
@@ -25,7 +25,7 @@ export function SectionHeader({ title, hint, action, id, children }: SectionHead
       </div>
       {children}
       {action && (
-        <Link href={action.href} className="shrink-0 rounded-[var(--radius-sm)] px-2 py-1 text-small font-medium text-primary hover:bg-primary-soft">
+        <Link href={action.href} className="shrink-0 rounded-[var(--radius-sm)] px-2 py-1 text-small font-medium text-primary hover:bg-surface">
           {action.label}
         </Link>
       )}

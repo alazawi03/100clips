@@ -196,7 +196,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                           type="button"
                           aria-pressed={on}
                           onClick={() => (setNiches(n.id ? (on ? niches.filter((x) => x !== n.id) : [...niches, n.id]) : []), resetMore())}
-                          className={cn("inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-small transition-colors", on ? "border-primary bg-primary-soft font-medium text-primary-on-soft" : "border-border text-text-muted hover:bg-surface")}
+                          className={cn("inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-small transition-colors", on ? "border-brand-soft bg-brand-soft font-medium text-brand-on-soft" : "border-border text-text-muted hover:bg-surface")}
                         >
                           {n.id && <span aria-hidden>{nicheEmoji[n.id]}</span>}
                           {n.label}
@@ -213,7 +213,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                           type="button"
                           aria-pressed={on}
                           onClick={() => (setPlatforms(on ? platforms.filter((x) => x !== p) : [...platforms, p]), resetMore())}
-                          className={cn("inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-small transition-colors", on ? "border-primary bg-primary-soft font-medium text-primary-on-soft" : "border-border text-text-muted hover:bg-surface")}
+                          className={cn("inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-small transition-colors", on ? "border-brand-soft bg-brand-soft font-medium text-brand-on-soft" : "border-border text-text-muted hover:bg-surface")}
                         >
                           <PlatformLogo platform={p} className="size-3.5" />
                           {t(`platforms.${p}`)}
@@ -228,7 +228,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                           type="button"
                           aria-pressed={on}
                           onClick={() => (setFaces(on ? faces.filter((x) => x !== v) : [...faces, v]), resetMore())}
-                          className={cn("inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-small transition-colors", on ? "border-primary bg-primary-soft font-medium text-primary-on-soft" : "border-border text-text-muted hover:bg-surface")}
+                          className={cn("inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-small transition-colors", on ? "border-brand-soft bg-brand-soft font-medium text-brand-on-soft" : "border-border text-text-muted hover:bg-surface")}
                         >
                           <span aria-hidden>{faceEmoji[v]}</span>
                           {t(`faces.${v}`)}
@@ -272,7 +272,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                   <button
                     type="button"
                     onClick={() => (setQuery(""), setNiches([]), setPlatforms([]), setFaces([]))}
-                    className="rounded-[var(--radius-sm)] px-2 py-1 font-medium text-primary hover:bg-primary-soft"
+                    className="rounded-[var(--radius-sm)] px-2 py-1 font-medium text-primary hover:bg-surface"
                   >
                     {t("explore.clear")}
                   </button>
@@ -300,7 +300,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                         onClick={() => (added ? remove(c.id) : add([c.id]))}
                         className={cn(
                           "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-small font-medium transition-colors",
-                          added ? "bg-primary-soft text-primary-on-soft" : "border border-border hover:bg-surface",
+                          added ? "bg-brand-soft text-brand-on-soft" : "border border-border hover:bg-surface",
                         )}
                       >
                         {added ? <Check aria-hidden className="size-4" strokeWidth={2.5} /> : <Plus aria-hidden className="size-4" />}

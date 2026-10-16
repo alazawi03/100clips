@@ -44,7 +44,7 @@ export function LogisticsFields({ products, v, err }: Props) {
         const Icon = icon[p.type];
         const name = (key: string) => field(p.id, key);
         return (
-          <fieldset key={p.id} className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-soft">
+          <fieldset key={p.id} className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card">
             <legend className="sr-only">{p.name}</legend>
             <div aria-hidden className="flex items-center gap-3 border-b border-border bg-surface px-4 py-3">
               <span className="relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-[var(--radius-md)] border border-border bg-surface">
@@ -54,7 +54,7 @@ export function LogisticsFields({ products, v, err }: Props) {
                 <span className="block truncate font-medium">{p.name}</span>
                 <span className="block truncate text-small text-text-muted">{p.typeLabel}</span>
               </span>
-              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-soft text-primary-on-soft">
+              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface text-text">
                 <Icon className="size-4" strokeWidth={1.75} />
               </span>
             </div>
@@ -66,7 +66,7 @@ export function LogisticsFields({ products, v, err }: Props) {
                     {(["keep", "return"] as const).map((option) => (
                       <label
                         key={option}
-                        className="flex cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-border p-3 has-[:checked]:border-primary has-[:checked]:bg-primary-soft/40"
+                        className="flex cursor-pointer items-start gap-3 rounded-[var(--radius-md)] border border-border p-3 has-[:checked]:border-primary has-[:checked]:bg-surface/40"
                       >
                         <input
                           type="radio"
@@ -102,11 +102,11 @@ export function LogisticsFields({ products, v, err }: Props) {
                       aria-describedby={described(name("link"))}
                     />
                   </Field>
-                  <Field label={`${t("checkout.logistics.promoCode")} (${t("brandForm.optional")})`} htmlFor={name("promo")}>
+                  <Field label={t("checkout.logistics.promoCode")} htmlFor={name("promo")}>
                     <Input id={name("promo")} name={name("promo")} dir="ltr" autoCapitalize="characters" placeholder={t("checkout.logistics.promoPlaceholder")} defaultValue={v(name("promo"))} />
                   </Field>
                   <div className="sm:col-span-2">
-                    <Field label={`${t("checkout.logistics.testAccount")} (${t("brandForm.optional")})`} htmlFor={name("account")} hint={t("checkout.logistics.testAccountHint")}>
+                    <Field label={t("checkout.logistics.testAccount")} htmlFor={name("account")} hint={t("checkout.logistics.testAccountHint")}>
                       <Textarea id={name("account")} name={name("account")} dir="ltr" className="min-h-16" placeholder={t("checkout.logistics.testAccountPlaceholder")} defaultValue={v(name("account"))} />
                     </Field>
                   </div>
@@ -121,10 +121,10 @@ export function LogisticsFields({ products, v, err }: Props) {
                       {t("productDrawer.openMap")}
                     </a>
                   )}
-                  <Field label={`${t("checkout.logistics.visitFrom")} (${t("brandForm.optional")})`} htmlFor={name("from")} error={err(name("from"))}>
+                  <Field label={t("checkout.logistics.visitFrom")} htmlFor={name("from")} error={err(name("from"))}>
                     <DateInput id={name("from")} name={name("from")} defaultValue={v(name("from"))} aria-invalid={!!err(name("from"))} aria-describedby={described(name("from"))} />
                   </Field>
-                  <Field label={`${t("checkout.logistics.visitTo")} (${t("brandForm.optional")})`} htmlFor={name("to")} error={err(name("to"))}>
+                  <Field label={t("checkout.logistics.visitTo")} htmlFor={name("to")} error={err(name("to"))}>
                     <DateInput id={name("to")} name={name("to")} defaultValue={v(name("to"))} aria-invalid={!!err(name("to"))} aria-describedby={described(name("to"))} />
                   </Field>
                   <div className="sm:col-span-2">

@@ -9,14 +9,23 @@ import { isActiveMarket } from "@/lib/data/markets";
 import {
   APP_PLATFORMS,
   COUNTRIES,
+  CURRENCIES,
   INDUSTRIES,
+  PRICE_MODELS_BY_TYPE,
+  PRICE_PERIODS,
+  PRICE_UNITS,
   PRODUCT_TYPES,
   SERVICE_DELIVERIES,
   VENUE_KINDS,
   type AppPlatform,
   type Brand,
   type Country,
+  type Currency,
   type Industry,
+  type PriceModel,
+  type PricePeriod,
+  type PriceUnit,
+  type Pricing,
   type Product,
   type ProductDetails,
   type ProductType,
@@ -203,30 +212,74 @@ async function saveRegistration(brandId: string, form: FormData, brand: Omit<Bra
   await store.setRegistration(brandId, crNumber, vatPath);
 }
 
+/** An amount typed in the form: undefined when empty, NaN when it isn't a price. */
+function amountOf(form: FormData, name: string): number | undefined {
+  const value = text(form, name);
+  if (!value) return undefined;
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount >= 0 ? amount : NaN;
+}
+
+/** The price fields for the chosen model (only the models the type offers); errors under the fields' names. */
+function parsePricing(form: FormData, type: ProductType, errors: NonNullable<BrandFormState>["errors"]): Pricing | undefined {
+  const model = oneOf<PriceModel>(text(form, "priceModel"), PRICE_MODELS_BY_TYPE[type]);
+  if (!model) return undefined;
+  if (model === "hidden") return { model };
+  const amount = amountOf(form, "price");
+  const period = oneOf<PricePeriod>(text(form, "pricePeriod"), PRICE_PERIODS) ?? "month";
+  // A free product's paid plan is optional; every other model needs its price.
+  if (amount === undefined && model !== "free") errors.price = "forms.errors.priceRequired";
+  else if (Number.isNaN(amount)) errors.price = "forms.errors.priceInvalid";
+  if (model === "free") {
+    if (amount === undefined || Number.isNaN(amount)) return { model };
+    const planPeriod = oneOf<PricePeriod>(text(form, "pricePeriod"), PRICE_PERIODS);
+    return planPeriod ? { model, amount, period: planPeriod } : { model, amount };
+  }
+  if (amount === undefined || Number.isNaN(amount)) return undefined;
+  if (model === "range") {
+    const maxAmount = amountOf(form, "priceMax");
+    if (maxAmount === undefined) errors.priceMax = "forms.errors.priceRequired";
+    else if (Number.isNaN(maxAmount)) errors.priceMax = "forms.errors.priceInvalid";
+    else if (maxAmount <= amount) errors.priceMax = "forms.errors.priceRangeInvalid";
+    return maxAmount !== undefined && maxAmount > amount ? { model, amount, maxAmount } : undefined;
+  }
+  if (model === "subscription") {
+    const trialText = text(form, "trialDays");
+    const trialDays = trialText ? Number(trialText) : undefined;
+    if (trialDays !== undefined && !(Number.isInteger(trialDays) && trialDays >= 1 && trialDays <= 365)) errors.trialDays = "forms.errors.trialInvalid";
+    return trialDays ? { model, amount, period, trialDays } : { model, amount, period };
+  }
+  if (model === "per_unit") return { model, amount, unit: oneOf<PriceUnit>(text(form, "priceUnit"), PRICE_UNITS) ?? "person" };
+  return { model, amount };
+}
+
 function parseProduct(form: FormData): { product?: Omit<Product, "id" | "brandId">; errors: NonNullable<BrandFormState>["errors"] } {
   const errors: NonNullable<BrandFormState>["errors"] = {};
   const type = oneOf<ProductType>(text(form, "type"), PRODUCT_TYPES);
   const name = text(form, "name");
   const photos = all(form, "photo").filter(isImage).slice(0, 6);
   const description = text(form, "description");
-  const priceText = text(form, "price");
-  const price = priceText ? Number(priceText) : undefined;
+  const currency = oneOf<Currency>(text(form, "currency"), CURRENCIES) ?? "BHD";
   const benefits = all(form, "benefit").filter(Boolean).slice(0, 5);
+  // Every question needs its answer; a row left completely empty is dropped.
+  const questions = all(form, "concernQ");
   const answers = all(form, "concernA");
-  const concerns = all(form, "concernQ")
-    .map((question, i) => ({ question, answer: answers[i] || undefined }))
-    .filter((c) => c.question);
+  const concerns: Product["concerns"] = [];
+  questions.forEach((question, i) => {
+    const answer = answers[i] ?? "";
+    if (!question && !answer) return;
+    if (!question) errors[`concernQ-${i}`] = "forms.errors.concernQuestionRequired";
+    if (!answer) errors[`concernA-${i}`] = "forms.errors.concernAnswerRequired";
+    concerns.push({ question, answer });
+  });
 
   if (!type) errors.type = "forms.errors.productTypeRequired";
   if (!name) errors.name = "forms.errors.productNameRequired";
-  if (price !== undefined && !(Number.isFinite(price) && price >= 0)) errors.price = "forms.errors.priceInvalid";
+  const pricing = type ? parsePricing(form, type, errors) : undefined;
 
   let details: ProductDetails | undefined;
   if (type === "physical") {
-    const valueText = text(form, "value");
-    const value = valueText ? Number(valueText) : undefined;
-    if (value !== undefined && !(Number.isFinite(value) && value >= 0)) errors.value = "forms.errors.priceInvalid";
-    details = { type, value, size: text(form, "size") || undefined };
+    details = { type, size: text(form, "size") || undefined };
   } else if (type === "app") {
     const downloadLink = withScheme(text(form, "downloadLink"));
     if (downloadLink && !isUrl(downloadLink)) errors.downloadLink = "forms.errors.urlInvalid";
@@ -246,7 +299,8 @@ function parseProduct(form: FormData): { product?: Omit<Product, "id" | "brandId
       name: same(name),
       photos,
       description: description ? same(description) : undefined,
-      price,
+      currency,
+      pricing,
       benefits,
       concerns,
       details,

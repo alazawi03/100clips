@@ -28,7 +28,7 @@ export async function ActiveCampaigns({ campaigns, i18n }: { campaigns: Campaign
             <Link
               key={campaign.id}
               href={`/campaigns/${campaign.id}`}
-              className="flex flex-col gap-3 p-5 transition-colors duration-[120ms] first:rounded-t-[var(--radius-xl)] last:rounded-b-[var(--radius-xl)] hover:bg-surface/60"
+              className="flex flex-col gap-3 p-5 transition-colors duration-[120ms] first:rounded-t-[var(--radius-lg)] last:rounded-b-[var(--radius-lg)] hover:bg-surface/60"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">

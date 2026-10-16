@@ -30,7 +30,7 @@ export function ReviewActions({ orderId, creatorName, revisionsLeft }: Props) {
   if (revising) {
     return (
       <form action={sendRevision} noValidate className="flex flex-col gap-3">
-        <Field label={t("orderDetail.revisionLabel")} htmlFor="note" error={error}>
+        <Field label={t("orderDetail.revisionLabel")} htmlFor="note" error={error} required>
           <Textarea id="note" name="note" defaultValue={state?.values.note} autoFocus placeholder={t("orderDetail.revisionPlaceholder")} aria-invalid={!!error} aria-describedby={error ? "note-error" : undefined} />
         </Field>
         <div className="flex flex-wrap justify-end gap-2">
@@ -48,7 +48,7 @@ export function ReviewActions({ orderId, creatorName, revisionsLeft }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-col gap-2 sm:flex-row">
-        <Button variant="success" className="flex-1" onClick={() => dialog.current?.showModal()}>
+        <Button variant="primary" className="flex-1" onClick={() => dialog.current?.showModal()}>
           <Check aria-hidden />
           {t("orderDetail.approve")}
         </Button>
@@ -64,7 +64,7 @@ export function ReviewActions({ orderId, creatorName, revisionsLeft }: Props) {
         ref={dialog}
         aria-labelledby={`approve-${orderId}`}
         onClick={(e) => e.target === dialog.current && dialog.current?.close()}
-        className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-[var(--radius-xl)] border border-border bg-card p-0 text-text shadow-lift backdrop:bg-[var(--overlay)]"
+        className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-[var(--radius-lg)] border border-border bg-card p-0 text-text backdrop:bg-[var(--overlay)]"
       >
         <form action={approveOrder.bind(null, orderId)} className="flex flex-col gap-5 p-5 sm:p-6">
           <div className="flex flex-col gap-1">
@@ -102,7 +102,7 @@ export function ReviewActions({ orderId, creatorName, revisionsLeft }: Props) {
             <Button variant="ghost" onClick={() => dialog.current?.close()}>
               {t("common.cancel")}
             </Button>
-            <Button type="submit" variant="success">
+            <Button type="submit" variant="primary">
               <Check aria-hidden />
               {t("orderDetail.approveConfirm")}
             </Button>

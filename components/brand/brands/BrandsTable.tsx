@@ -60,7 +60,7 @@ function BrandCard({ brand, expanded, onToggle, onOpenProduct }: { brand: BrandR
   const { t } = useI18n();
   const panelId = `products-${brand.id}`;
   return (
-    <Card className={cn("overflow-hidden transition-shadow", ease, expanded && "shadow-lift")}>
+    <Card className={cn("overflow-hidden transition-colors", ease, expanded && "border-icon-inactive")}>
       <div className="flex items-center gap-1 p-2">
         <button
           type="button"
@@ -194,7 +194,7 @@ function ProductList({ brandId, products, onOpen }: { brandId: string; products:
         </li>
       ))}
       <li>
-        <Link href={`/brands/products/new?brand=${brandId}`} className="flex items-center gap-3 px-4 py-3 font-medium text-primary transition-colors hover:bg-primary-soft/60">
+        <Link href={`/brands/products/new?brand=${brandId}`} className="flex items-center gap-3 px-4 py-3 font-medium text-primary transition-colors hover:bg-surface/60">
           <span className="grid size-11 shrink-0 place-items-center rounded-[var(--radius-md)] border border-dashed border-primary/40">
             <Plus aria-hidden className="size-5" />
           </span>

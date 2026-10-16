@@ -5,7 +5,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { Check, ChevronDown, Clapperboard, Clock, MapPin, MessageCircle, ScanSearch, Star, Truck } from "lucide-react";
 import { markOrderReturned, markOrderSent, rateOrder } from "@/app/actions/brand";
 import { messageCreator } from "@/app/actions/messages";
-import { CHAT_LIVE } from "@/lib/features";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { AdCode } from "@/components/brand/orders/AdCode";
 import { ClipVersions, OfferWaiting, OrderClosedNote } from "@/components/brand/orders/OrderOutcome";
@@ -61,7 +60,7 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
           {/* The status; the line under the bar only counts steps, so it isn't said twice. */}
           <StatusBadge order={orderBadgeStatus(order)} />
           {/* Room for the messages button, which sits on top of the header (a button can't hold a form). */}
-          {CHAT_LIVE && <span aria-hidden className="size-10 shrink-0" />}
+          <span aria-hidden className="size-10 shrink-0" />
           <ChevronDown aria-hidden className={cn("size-5 shrink-0 text-text-muted transition-transform", open && "rotate-180")} />
         </span>
 
@@ -88,7 +87,7 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
       </button>
 
       {/* Chat with this creator: opens the existing conversation, or starts one. */}
-      {CHAT_LIVE && <form action={messageCreator.bind(null, order.creatorId, order.brandId)} className="absolute end-12 top-4 sm:end-[52px] sm:top-5">
+      <form action={messageCreator.bind(null, order.creatorId, order.brandId)} className="absolute end-12 top-4 sm:end-[52px] sm:top-5">
         <button
           type="submit"
           aria-label={order.unread > 0 ? `${t("campaignDetail.messages")} · ${tp("chat.unread", order.unread)}` : t("campaignDetail.messages")}
@@ -96,12 +95,12 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
         >
           <MessageCircle aria-hidden className="size-[18px]" />
           {order.unread > 0 && (
-            <span aria-hidden className="absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-caption font-medium text-on-accent tabular-nums">
+            <span aria-hidden className="absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand px-1 text-caption font-medium text-on-brand tabular-nums">
               {order.unread}
             </span>
           )}
         </button>
-      </form>}
+      </form>
 
       {/* The next step stays visible whether the card is open or not. */}
       {order.action && <OrderAction order={order} productName={productName} />}
@@ -180,7 +179,7 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
                 <div className="relative w-full max-w-[200px] shrink-0">
                   <ClipPoster clip={order.clip} views={f.compact(order.clip.views)} duration={f.duration(order.clip.durationSec)} compact className="opacity-50" />
                   <span className="absolute inset-0 grid place-items-center">
-                    <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-small font-medium shadow-soft">
+                    <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-small font-medium">
                       <ScanSearch aria-hidden className="size-4" />
                       {t("brandHome.revisionRequested")}
                     </span>
@@ -338,7 +337,7 @@ export function ShipButton({ orderId, name, productName }: { orderId: string; na
         ref={dialog}
         aria-labelledby={titleId}
         onClick={(e) => e.target === dialog.current && dialog.current?.close()}
-        className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-[var(--radius-xl)] border border-border bg-card p-0 text-text shadow-lift backdrop:bg-[var(--overlay)]"
+        className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-[var(--radius-lg)] border border-border bg-card p-0 text-text backdrop:bg-[var(--overlay)]"
       >
         <form
           action={(data) =>

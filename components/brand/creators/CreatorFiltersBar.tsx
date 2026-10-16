@@ -80,7 +80,7 @@ export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("explore.search")}
           aria-label={t("explore.search")}
-          className="h-11 w-full rounded-full border border-border bg-card ps-10 pe-4 shadow-soft placeholder:text-text-muted focus:outline-2 focus:outline-offset-0 focus:outline-primary"
+          className="h-11 w-full rounded-full border border-border bg-card ps-10 pe-4 placeholder:text-text-muted focus:outline-2 focus:outline-offset-0 focus:outline-primary"
         />
       </div>
 
@@ -102,7 +102,7 @@ export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
               setQuery("");
               startTransition(() => router.replace(pathname, { scroll: false }));
             }}
-            className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-3 text-small font-medium text-primary hover:bg-primary-soft"
+            className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full px-3 text-small font-medium text-primary hover:bg-surface"
           >
             <X aria-hidden className="size-4" />
             {t("explore.clear")}

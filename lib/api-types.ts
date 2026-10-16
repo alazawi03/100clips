@@ -621,6 +621,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/waitlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Waitlist by country
+         * @description Admins only. Requests from countries we aren't in yet (the creator app and brands' "I'm not in Bahrain"), most wanted first.
+         */
+        get: operations["AdminController_waitlist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/creators/{id}/decision": {
         parameters: {
             query?: never;
@@ -1307,6 +1327,882 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My chats
+         * @description As the creator or a brand owner: both sides, the latest message and the unread count. Latest message first.
+         */
+        get: operations["ConversationsController_mine"];
+        put?: never;
+        /**
+         * Open a chat
+         * @description One per brand and creator: gives the one there is, or starts it. Brand owners message creators they could book or have worked with; creators, brands that sent them an offer.
+         */
+        post: operations["ConversationsController_open"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A chat's messages
+         * @description The latest ones, oldest first. Admins can read a chat once it's reported.
+         */
+        get: operations["ConversationsController_messages"];
+        put?: never;
+        /**
+         * Send a message
+         * @description As the caller's side of the chat; also marks it read.
+         */
+        post: operations["ConversationsController_send"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a chat read
+         * @description The other side's messages so far stop counting as unread.
+         */
+        post: operations["ConversationsController_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{id}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report a chat
+         * @description The creator in it or the brand's owner. The admin reviews it; the messages stay visible to both sides.
+         */
+        post: operations["ReportsController_report"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Reports (admin)
+         * @description Chats reported and problems on orders, with the brand and creator. Open ones oldest first, resolved ones newest first.
+         */
+        get: operations["ReportsController_all"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/reports/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resolve a report (admin)
+         * @description With a reply the reporter sees.
+         */
+        post: operations["ReportsController_resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/bank-account": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My bank account
+         * @description Creators and brand accounts: where 100clips sends their money.
+         */
+        get: operations["BankAccountsController_mine"];
+        /**
+         * Add or change my bank account
+         * @description The old one stays as history (the admin sees changes). Saving the same details again changes nothing.
+         */
+        put: operations["BankAccountsController_save"];
+        post?: never;
+        /**
+         * Remove my bank account
+         * @description Kept as history.
+         */
+        delete: operations["BankAccountsController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/creators/{id}/bank-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A creator's bank details, with every change
+         * @description Admins only. Newest first; the first is current unless it has replaced_at.
+         */
+        get: operations["PayoutsController_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/payouts/owed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Owed to creators
+         * @description Admins only. Creators with approved orders not paid out yet, longest waiting first, with their bank details.
+         */
+        get: operations["PayoutsController_owed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Transfers sent to creators
+         * @description Admins only. Newest first.
+         */
+        get: operations["PayoutsController_payouts"];
+        put?: never;
+        /**
+         * Mark a creator paid
+         * @description Admins only. The bank transfer was sent: records it for exactly these orders, to the creator's current bank account, and takes it from their balance.
+         */
+        post: operations["PayoutsController_markPaid"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Platform settings
+         * @description The fee and the order timings, for the apps to show.
+         */
+        get: operations["SettingsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Change platform settings
+         * @description Owner admins only. Applies to checkouts and offers from now on; orders already made keep theirs.
+         */
+        patch: operations["SettingsController_update"];
+        trace?: never;
+    };
+    "/admin/admins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The laqta team
+         * @description Admins only. Every admin with their level; removed ones last.
+         */
+        get: operations["AdminsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/admins/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove an admin's access
+         * @description Owners only; not yourself.
+         */
+        delete: operations["AdminsController_remove"];
+        options?: never;
+        head?: never;
+        /**
+         * Change an admin's level
+         * @description Owners only. The team always keeps one owner.
+         */
+        patch: operations["AdminsController_change"];
+        trace?: never;
+    };
+    "/admin/invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Admin invites
+         * @description Owners only. Newest first.
+         */
+        get: operations["AdminsController_invites"];
+        put?: never;
+        /**
+         * Invite an admin
+         * @description Owners only. They sign in to the admin portal with this email and accept.
+         */
+        post: operations["AdminsController_invite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/invites/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Take back an invite
+         * @description Owners only.
+         */
+        delete: operations["AdminsController_revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/admin-invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Accept an admin invite
+         * @description Signed in with the invited email and no account yet: becomes an admin at the invited level.
+         */
+        post: operations["AdminsController_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/withdrawals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My withdrawals
+         * @description Brand accounts. Newest first.
+         */
+        get: operations["WithdrawalsController_mine"];
+        put?: never;
+        /**
+         * Withdraw from my balance
+         * @description Brand accounts with a bank account. It leaves the balance now; laqta sends the transfer by hand.
+         */
+        post: operations["WithdrawalsController_request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/withdrawals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Brand withdrawals (admin)
+         * @description Finance admins. Waiting ones oldest first, with where to send them now.
+         */
+        get: operations["WithdrawalsController_all"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/withdrawals/{id}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a withdrawal sent
+         * @description Finance admins. To the brand's bank account as it is now.
+         */
+        post: operations["WithdrawalsController_send"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/withdrawals/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Turn down a withdrawal
+         * @description Finance admins. The money goes back to the balance; the brand sees the note.
+         */
+        post: operations["WithdrawalsController_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/accounts/{id}/suspensions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * An account's suspensions
+         * @description Admins only. Newest first; one without lifted_at is in force.
+         */
+        get: operations["ModerationController_suspensions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/accounts/{id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Suspend a creator or brand account
+         * @description Admins only. Creators disappear from Explore; brands can't pay for new work. Running orders go on.
+         */
+        post: operations["ModerationController_suspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/accounts/{id}/unsuspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Lift a suspension
+         * @description Admins only.
+         */
+        post: operations["ModerationController_unsuspend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/accounts/{id}/login-help": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Help someone sign in
+         * @description Admins only. Where they sign in (logged); the portal sends brand owners a reset link.
+         */
+        post: operations["ModerationController_loginHelp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/creators/{id}/portfolio/{sampleId}/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Take down a sample
+         * @description Admins only. Off the creator's profile, and the file is deleted.
+         */
+        post: operations["ModerationController_removeSample"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/accounts/{id}/erase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Erase an account on request
+         * @description Owners only. Personal data out; money records, orders and delivered clips stay. Needs a settled balance and no running work. Remove their sign-in in Supabase Auth afterwards.
+         */
+        post: operations["ModerationController_erase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/support": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Support chats
+         * @description Admins only. Creators' chats with the team; unread ones first.
+         */
+        get: operations["SupportController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/support/{creatorId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A support chat's messages
+         * @description Admins only. The latest 200, oldest first; empty before anyone wrote.
+         */
+        get: operations["SupportController_messages"];
+        put?: never;
+        /**
+         * Write to a creator as laqta Support
+         * @description Admins only. Opens their support chat if it's the first message.
+         */
+        post: operations["SupportController_send"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/support/{creatorId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a support chat read
+         * @description Admins only. For the whole team.
+         */
+        post: operations["SupportController_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/creators": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Creators (admin)
+         * @description Admins only. Newest first, with their numbers; up to 500.
+         */
+        get: operations["DirectoryController_creators"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/creators/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One creator (admin)
+         * @description Admins only. Profile, money, bank history, suspensions and their latest orders.
+         */
+        get: operations["DirectoryController_creator"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/brand-accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Brand accounts (admin)
+         * @description Admins only. Newest first, with their brands and money; up to 500.
+         */
+        get: operations["DirectoryController_brandAccounts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/brand-accounts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One brand account (admin)
+         * @description Admins only. Brands with registrations, money, withdrawals, payments and their latest orders.
+         */
+        get: operations["DirectoryController_brandAccount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/orders/attention": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Orders that need someone to look
+         * @description Admins only. Reported, deadline passed, unreviewed for 3 days, offer expiring within a day.
+         */
+        get: operations["DirectoryController_attention"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find orders (admin)
+         * @description Admins only. Newest first, by status or by number, campaign, brand or creator.
+         */
+        get: operations["DirectoryController_orders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One order in short (admin)
+         * @description Admins only. With the brand's account; GET /orders/{id} has the full order.
+         */
+        get: operations["DirectoryController_order"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/money/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * laqta's money for a period
+         * @description Finance admins. Fees and pay on approved clips, money in and out, and what's held or owed now.
+         */
+        get: operations["MoneyController_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/money/ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Every ledger line
+         * @description Finance admins. Newest first, for a period; by type or account.
+         */
+        get: operations["MoneyController_ledger"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/adjustments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Balance adjustments
+         * @description Finance admins. Newest first, with who made each.
+         */
+        get: operations["MoneyController_adjustments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/accounts/{id}/adjustments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Adjust a balance
+         * @description Finance admins. A creator's or brand account's balance, up or down (never below zero), with a note.
+         */
+        post: operations["MoneyController_adjust"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The admin log
+         * @description Admins only. Who did what to whom, newest first.
+         */
+        get: operations["MoneyController_activity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1322,10 +2218,20 @@ export interface components {
              */
             country: string;
             /**
-             * @description A phone number or an email
+             * @description Phone number with its dial code
              * @example +966501234567
              */
-            contact: string;
+            phone?: string;
+            /**
+             * @description Email
+             * @example reem@example.com
+             */
+            email?: string;
+            /**
+             * @description A phone number or an email, when there's one box for both
+             * @example +966501234567
+             */
+            contact?: string;
         };
         ErrorResponse: {
             /** @example 400 */
@@ -1345,6 +2251,8 @@ export interface components {
         };
         /** @enum {string} */
         Role: "creator" | "brand" | "admin";
+        /** @enum {string} */
+        AdminLevel: "owner" | "finance" | "support";
         Account: {
             /** Format: uuid */
             id: string;
@@ -1356,6 +2264,12 @@ export interface components {
             notifications_seen_at: string;
             /** Format: date-time */
             created_at: string;
+            admin_level: components["schemas"]["AdminLevel"] | null;
+            /**
+             * Format: date-time
+             * @description Set when laqta erased the account's personal data on request
+             */
+            erased_at: string | null;
         };
         /** @enum {string} */
         CreatorStatus: "incomplete" | "pending" | "changes_requested" | "rejected" | "approved";
@@ -1457,6 +2371,11 @@ export interface components {
              */
             price: number;
         };
+        PortfolioVideo: {
+            /** Format: uuid */
+            id: string;
+            video_path: string;
+        };
         ExploreCreator: {
             /** Format: uuid */
             id: string;
@@ -1479,6 +2398,8 @@ export interface components {
             from_price: number | null;
             /** @description Each format they offer, at the creator's price (before the fee) */
             formats: components["schemas"]["FormatPriceDto"][];
+            /** @description Up to 3 sample videos the creator picked, oldest first */
+            portfolio: components["schemas"]["PortfolioVideo"][];
         };
         PublicCreator: {
             /** Format: uuid */
@@ -1512,11 +2433,6 @@ export interface components {
         Social: {
             platform: components["schemas"]["SocialPlatform"];
             username: string;
-        };
-        PortfolioVideo: {
-            /** Format: uuid */
-            id: string;
-            video_path: string;
         };
         Rating: {
             rating: number;
@@ -1633,6 +2549,37 @@ export interface components {
         };
         /** @enum {string} */
         ProductType: "physical" | "app" | "service" | "venue";
+        /** @enum {string} */
+        Currency: "BHD" | "SAR" | "AED" | "KWD" | "QAR" | "OMR" | "USD" | "EUR" | "GBP";
+        /**
+         * @description one_time {amount}, from {amount}, range {amount, maxAmount}, subscription {amount, period, trialDays?}, free {amount?, period?}, per_unit {amount, unit}, hidden {}
+         * @enum {string}
+         */
+        PriceModel: "one_time" | "from" | "range" | "subscription" | "free" | "per_unit" | "hidden";
+        /**
+         * @description How often a subscription (or a free product's paid plan) is paid
+         * @enum {string}
+         */
+        PricePeriod: "week" | "month" | "year";
+        /**
+         * @description What one per_unit price buys
+         * @enum {string}
+         */
+        PriceUnit: "person" | "session" | "hour" | "night" | "visit";
+        Pricing: {
+            /** @description one_time {amount}, from {amount}, range {amount, maxAmount}, subscription {amount, period, trialDays?}, free {amount?, period?}, per_unit {amount, unit}, hidden {} */
+            model: components["schemas"]["PriceModel"];
+            /** @description The price, the lowest of a range, or a free product's paid plan */
+            amount?: number;
+            /** @description The highest of a range */
+            maxAmount?: number;
+            /** @description How often a subscription (or a free product's paid plan) is paid */
+            period?: components["schemas"]["PricePeriod"];
+            /** @description What one per_unit price buys */
+            unit?: components["schemas"]["PriceUnit"];
+            /** @description A subscription's free trial */
+            trialDays?: number;
+        };
         ConcernDto: {
             /** @example Is it too strong? */
             question: string;
@@ -1648,8 +2595,8 @@ export interface components {
             /** @description Paths in the public storage bucket, first is the cover */
             photos: string[];
             description: string | null;
-            /** @description BHD */
-            price: number | null;
+            currency: components["schemas"]["Currency"];
+            pricing: components["schemas"]["Pricing"] | null;
             benefits: string[];
             concerns: components["schemas"]["ConcernDto"][];
             /** @description Fields for the product type: physical {value, size}, app {downloadLink, platforms}, service {delivery}, venue {kind, location, hours, mapUrl} */
@@ -1669,8 +2616,13 @@ export interface components {
             /** @description Paths in the public storage bucket, first is the cover */
             photos?: string[];
             description?: string;
-            /** @description What customers pay, in BHD. Venues have none. */
-            price?: number;
+            /**
+             * @description Of the pricing and of a physical product's unit value
+             * @default BHD
+             */
+            currency: components["schemas"]["Currency"];
+            /** @description How customers pay. Null when not given. */
+            pricing?: components["schemas"]["Pricing"] | null;
             /** @description Short selling points */
             benefits?: string[];
             /** @description What customers ask before buying */
@@ -1687,8 +2639,13 @@ export interface components {
             /** @description Paths in the public storage bucket, first is the cover */
             photos?: string[];
             description?: string;
-            /** @description What customers pay, in BHD. Venues have none. */
-            price?: number;
+            /**
+             * @description Of the pricing and of a physical product's unit value
+             * @default BHD
+             */
+            currency: components["schemas"]["Currency"];
+            /** @description How customers pay. Null when not given. */
+            pricing?: components["schemas"]["Pricing"] | null;
             /** @description Short selling points */
             benefits?: string[];
             /** @description What customers ask before buying */
@@ -2042,6 +2999,23 @@ export interface components {
             /** @description Every submission, oldest first; the last is the current one */
             applications: components["schemas"]["Application"][];
         };
+        WaitlistCountry: {
+            /**
+             * @description ISO country code
+             * @example SA
+             */
+            country: string;
+            /**
+             * @description Requests from this country
+             * @example 12
+             */
+            count: number;
+            /**
+             * Format: date-time
+             * @description The newest request
+             */
+            latest: string;
+        };
         DecideCreatorDto: {
             /** @enum {string} */
             decision: "approved" | "changes_requested" | "rejected";
@@ -2114,6 +3088,8 @@ export interface components {
             note?: string;
             /** @description The creator's price, fixed at checkout (BHD, before the fee) */
             price: number;
+            /** @description laqta's fee on this pick, fixed at checkout (BHD) */
+            fee: number;
         };
         /** @enum {string} */
         PaymentStatus: "pending" | "paid" | "failed";
@@ -2478,6 +3454,846 @@ export interface components {
              * @description Saved into the new list straight away
              */
             creator_id?: string;
+        };
+        ChatBrand: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            logo_path: string | null;
+            industry: components["schemas"]["Industry"];
+        };
+        ChatCreator: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            handle: string;
+            photo_path: string | null;
+        };
+        /** @enum {string} */
+        MessageSender: "brand" | "creator" | "admin";
+        ChatMessage: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            conversation_id: string;
+            sender: components["schemas"]["MessageSender"];
+            /** Format: uuid */
+            sender_id: string;
+            body: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        Conversation: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * Format: uuid
+             * @description Null for the creator's support chat with the 100clips team
+             */
+            brand_id: string | null;
+            /** Format: uuid */
+            creator_id: string;
+            /**
+             * Format: uuid
+             * @description The order that opened it
+             */
+            order_id: string | null;
+            /** Format: date-time */
+            created_at: string;
+            brand: components["schemas"]["ChatBrand"] | null;
+            creator: components["schemas"]["ChatCreator"];
+            last_message: components["schemas"]["ChatMessage"] | null;
+            /** @description Messages from the other side since the caller last read the chat */
+            unread: number;
+        };
+        OpenConversationDto: {
+            /** Format: uuid */
+            brand_id: string;
+            /**
+             * Format: uuid
+             * @description The creator to message; brand owners only
+             */
+            creator_id?: string;
+        };
+        SendMessageDto: {
+            /** @example Can I film at the branch on Saturday morning? */
+            body: string;
+        };
+        /** @enum {string} */
+        ChatReportReason: "off_platform" | "abuse" | "spam" | "other";
+        ReportChatDto: {
+            reason: components["schemas"]["ChatReportReason"];
+            /** @description What happened, in the reporter's words */
+            details?: string;
+        };
+        /** @enum {string} */
+        Reporter: "brand" | "creator";
+        /** @enum {string} */
+        ReportReason: "off_platform" | "abuse" | "spam" | "not_delivered" | "not_as_agreed" | "product_issue" | "creator_conduct" | "brand_conduct" | "payment" | "other";
+        /** @enum {string} */
+        ReportStatus: "open" | "resolved";
+        Report: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * Format: uuid
+             * @description Set for a chat report
+             */
+            conversation_id: string | null;
+            /**
+             * Format: uuid
+             * @description Set for a problem on an order
+             */
+            order_id: string | null;
+            reporter: components["schemas"]["Reporter"];
+            /** Format: uuid */
+            reported_by: string;
+            reason: components["schemas"]["ReportReason"];
+            details: string | null;
+            status: components["schemas"]["ReportStatus"];
+            /** @description The admin's reply */
+            resolution: string | null;
+            /** Format: uuid */
+            resolved_by: string | null;
+            /** Format: date-time */
+            resolved_at: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        ReportBrand: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            logo_path: string | null;
+        };
+        ReportCreator: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            handle: string;
+            photo_path: string | null;
+        };
+        AdminReport: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * Format: uuid
+             * @description Set for a chat report
+             */
+            conversation_id: string | null;
+            /**
+             * Format: uuid
+             * @description Set for a problem on an order
+             */
+            order_id: string | null;
+            reporter: components["schemas"]["Reporter"];
+            /** Format: uuid */
+            reported_by: string;
+            reason: components["schemas"]["ReportReason"];
+            details: string | null;
+            status: components["schemas"]["ReportStatus"];
+            /** @description The admin's reply */
+            resolution: string | null;
+            /** Format: uuid */
+            resolved_by: string | null;
+            /** Format: date-time */
+            resolved_at: string | null;
+            /** Format: date-time */
+            created_at: string;
+            brand: components["schemas"]["ReportBrand"];
+            creator: components["schemas"]["ReportCreator"];
+        };
+        ResolveReportDto: {
+            /** @example We spoke to the creator; it won't happen again. */
+            resolution: string;
+        };
+        /**
+         * @description Who saved this version
+         * @enum {string}
+         */
+        BankAccountSetBy: "creator" | "brand" | "admin";
+        BankAccount: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Exactly as the bank has it
+             * @example Dana Al Sayed
+             */
+            holder_name: string;
+            /**
+             * @description Upper case, no spaces
+             * @example BH67BMAG00001299123456
+             */
+            iban: string;
+            /** @description Who saved this version */
+            set_by: components["schemas"]["BankAccountSetBy"];
+            /**
+             * Format: date-time
+             * @description When this version was saved
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description When a newer one replaced it (or it was removed); null for the current one
+             */
+            replaced_at: string | null;
+        };
+        SaveBankAccountDto: {
+            /**
+             * @description Exactly as the bank has it
+             * @example Dana Al Sayed
+             */
+            holder_name: string;
+            /**
+             * @description A GCC IBAN; spaces and dashes are fine
+             * @example BH67 BMAG 0000 1299 1234 56
+             */
+            iban: string;
+        };
+        OwedOrder: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Shown as "ord-1043"
+             * @example 1043
+             */
+            number: number;
+            /** @description The creator's pay in BHD */
+            amount: number;
+            /** Format: date-time */
+            approved_at: string;
+            /** @description The campaign's title */
+            campaign_title: string | null;
+        };
+        OwedCreator: {
+            /** Format: uuid */
+            creator_id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            handle: string;
+            photo_path: string | null;
+            /** @description BHD owed: the orders' total */
+            amount: number;
+            /**
+             * Format: date-time
+             * @description The longest-waiting order's approval
+             */
+            oldest_approved_at: string;
+            /** @description Oldest approval first */
+            orders: components["schemas"]["OwedOrder"][];
+            /** @description Every version, newest first; empty if they never added one. The first is current unless it has replaced_at. */
+            bank_accounts: components["schemas"]["BankAccount"][];
+        };
+        Payout: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            creator_id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            /** @description BHD sent */
+            amount: number;
+            /** Format: date-time */
+            sent_at: string;
+            /** @description The bank's reference for the transfer */
+            bank_ref: string;
+            /** @description Where it went, as it was then */
+            iban: string;
+            holder_name: string;
+            order_ids: string[];
+        };
+        MarkPaidDto: {
+            /** Format: uuid */
+            creator_id: string;
+            /** @description Exactly the orders the admin was shown; all approved, unpaid and this creator's */
+            order_ids: string[];
+            /**
+             * @description The bank's reference for the transfer
+             * @example TRF-88412
+             */
+            bank_ref: string;
+        };
+        Settings: {
+            /**
+             * @description laqta's fee on top of the creator's price (0.1 = 10%)
+             * @example 0.1
+             */
+            fee_rate: number;
+            /**
+             * @description Hours a creator has to answer an offer before it expires
+             * @example 96
+             */
+            offer_hours: number;
+            /**
+             * @description Days after delivery when an unreviewed clip is approved
+             * @example 7
+             */
+            auto_approve_days: number;
+            /** Format: date-time */
+            updated_at: string;
+            /**
+             * Format: uuid
+             * @description The admin who last changed them
+             */
+            updated_by: string | null;
+        };
+        UpdateSettingsDto: {
+            /**
+             * @description 0.1 = 10%
+             * @example 0.1
+             */
+            fee_rate?: number;
+            /** @example 96 */
+            offer_hours?: number;
+            /** @example 7 */
+            auto_approve_days?: number;
+        };
+        Admin: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            email: string | null;
+            level: components["schemas"]["AdminLevel"];
+            /** @description Access removed: they can't use the portal any more */
+            removed: boolean;
+            /** Format: date-time */
+            created_at: string;
+        };
+        ChangeAdminDto: {
+            level: components["schemas"]["AdminLevel"];
+        };
+        AdminInvite: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            level: components["schemas"]["AdminLevel"];
+            /** Format: uuid */
+            invited_by: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            accepted_at: string | null;
+            /**
+             * Format: uuid
+             * @description The admin account it became
+             */
+            accepted_by: string | null;
+            /** Format: date-time */
+            revoked_at: string | null;
+        };
+        InviteAdminDto: {
+            /**
+             * @description They sign in to the portal with this email to accept
+             * @example sara@laqta.co
+             */
+            email: string;
+            level: components["schemas"]["AdminLevel"];
+        };
+        AdminNameDto: {
+            /**
+             * @description How the team sees them (accepting an invite)
+             * @example Sara
+             */
+            name?: string;
+        };
+        /** @enum {string} */
+        TransferStatus: "requested" | "sent" | "rejected";
+        Withdrawal: {
+            /** Format: uuid */
+            id: string;
+            /** @description BHD */
+            amount: number;
+            status: components["schemas"]["TransferStatus"];
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: date-time */
+            sent_at: string | null;
+            /** @description The bank's reference, once sent */
+            bank_ref: string | null;
+            /** @description Where it went, once sent */
+            iban: string | null;
+            holder_name: string | null;
+            /** @description Why laqta turned it down (shown to the brand) */
+            reject_note: string | null;
+        };
+        RequestWithdrawalDto: {
+            /**
+             * @description BHD, at most the balance
+             * @example 50
+             */
+            amount: number;
+        };
+        WithdrawalAccount: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            /** @description The account's brands, English name first */
+            brands: string[];
+            /** @description BHD left in the balance now */
+            balance: number;
+        };
+        AdminWithdrawal: {
+            /** Format: uuid */
+            id: string;
+            /** @description BHD */
+            amount: number;
+            status: components["schemas"]["TransferStatus"];
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: date-time */
+            sent_at: string | null;
+            /** @description The bank's reference, once sent */
+            bank_ref: string | null;
+            /** @description Where it went, once sent */
+            iban: string | null;
+            holder_name: string | null;
+            /** @description Why laqta turned it down (shown to the brand) */
+            reject_note: string | null;
+            account: components["schemas"]["WithdrawalAccount"];
+            /** @description The account's current bank account (it may have changed since the request) */
+            bank: components["schemas"]["BankAccount"] | null;
+        };
+        SendWithdrawalDto: {
+            /** @example BMAG-88412 */
+            bank_ref: string;
+        };
+        RejectWithdrawalDto: {
+            /** @example The account name doesn't match the brand's registration. */
+            note: string;
+        };
+        Suspension: {
+            /** Format: uuid */
+            id: string;
+            reason: string;
+            /** Format: uuid */
+            suspended_by: string;
+            /** Format: date-time */
+            suspended_at: string;
+            /** Format: uuid */
+            lifted_by: string | null;
+            /** Format: date-time */
+            lifted_at: string | null;
+        };
+        SuspendDto: {
+            /** @example Asked brands to pay outside laqta. */
+            reason: string;
+        };
+        NoteDto: {
+            /** @example Spoke to them; it won't happen again. */
+            note?: string;
+        };
+        LoginContact: {
+            role: components["schemas"]["Role"];
+            /** @description Brand owners and admins sign in with it (a reset link goes here) */
+            email: string | null;
+            /** @description Creators sign in with a code texted here */
+            phone: string | null;
+        };
+        RemoveSampleDto: {
+            /** @example Shows another brand's logo. */
+            reason: string;
+        };
+        EraseDto: {
+            /** @description The account's id again, so nobody erases the wrong one by accident */
+            confirm_id: string;
+            /** @example Asked by email on 16 Oct 2026. */
+            reason: string;
+        };
+        SupportChat: {
+            /** Format: uuid */
+            conversation_id: string;
+            /** Format: uuid */
+            creator_id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            handle: string;
+            photo_path: string | null;
+            last_message: components["schemas"]["ChatMessage"] | null;
+            /** @description The creator's messages since the team last read the chat */
+            unread: number;
+            /** Format: date-time */
+            created_at: string;
+        };
+        SupportMessageDto: {
+            /** @example Hi Sara, your payout went out today. */
+            body: string;
+        };
+        CreatorRow: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            handle: string;
+            photo_path: string | null;
+            status: components["schemas"]["CreatorStatus"];
+            country: string;
+            phone: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** @description Every order, any status */
+            orders: number;
+            approved: number;
+            /** @description BHD earned on approved orders */
+            earned: number;
+            /** @description BHD sent to their bank */
+            paid_out: number;
+            /** @description BHD in their balance now */
+            balance: number;
+            /** @description Average stars from brands */
+            rating: number | null;
+            suspended: boolean;
+            erased: boolean;
+            has_bank: boolean;
+        };
+        Format: {
+            format: components["schemas"]["ContentFormat"];
+            price: number;
+        };
+        DirectoryOrder: {
+            /** Format: uuid */
+            id: string;
+            /** @description Shown as "ord-1043" */
+            number: number;
+            status: components["schemas"]["OrderStatus"];
+            format: components["schemas"]["ContentFormat"];
+            /** @description The creator's pay (BHD) */
+            amount: number;
+            /** @description laqta's fee (BHD) */
+            fee: number | null;
+            campaign_title: string | null;
+            /** Format: uuid */
+            brand_id: string;
+            /**
+             * Format: uuid
+             * @description The brand's account (its owner)
+             */
+            brand_account_id: string;
+            brand_name_ar: string | null;
+            brand_name_en: string | null;
+            /** Format: uuid */
+            creator_id: string;
+            creator_name_ar: string | null;
+            creator_name_en: string | null;
+            /** Format: date */
+            deadline: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            approved_at: string | null;
+        };
+        PayoutLine: {
+            /** Format: uuid */
+            id: string;
+            amount: number;
+            /** Format: date-time */
+            sent_at: string;
+            bank_ref: string;
+            iban: string;
+        };
+        CreatorDetail: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            handle: string;
+            photo_path: string | null;
+            status: components["schemas"]["CreatorStatus"];
+            country: string;
+            phone: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** @description Every order, any status */
+            orders: number;
+            approved: number;
+            /** @description BHD earned on approved orders */
+            earned: number;
+            /** @description BHD sent to their bank */
+            paid_out: number;
+            /** @description BHD in their balance now */
+            balance: number;
+            /** @description Average stars from brands */
+            rating: number | null;
+            suspended: boolean;
+            erased: boolean;
+            has_bank: boolean;
+            city: string | null;
+            bio: string | null;
+            /** @enum {string|null} */
+            gender: "female" | "male" | null;
+            niches: string[];
+            /** Format: date-time */
+            approved_at: string | null;
+            email: string | null;
+            formats: components["schemas"]["Format"][];
+            socials: components["schemas"]["Social"][];
+            portfolio: components["schemas"]["Sample"][];
+            /** @description The latest 50 */
+            recent_orders: components["schemas"]["DirectoryOrder"][];
+            /** @description Newest first */
+            bank_accounts: components["schemas"]["BankAccount"][];
+            /** @description Newest first */
+            suspensions: components["schemas"]["Suspension"][];
+            /** @description Newest first */
+            payouts: components["schemas"]["PayoutLine"][];
+        };
+        BrandLite: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            logo_path: string | null;
+            industry: components["schemas"]["Industry"];
+        };
+        BrandAccountRow: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            email: string | null;
+            phone: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** @description BHD in the balance now */
+            balance: number;
+            /** @description BHD charged for orders, less refunds */
+            spent: number;
+            orders: number;
+            suspended: boolean;
+            erased: boolean;
+            has_bank: boolean;
+            brands: components["schemas"]["BrandLite"][];
+        };
+        BrandWithRegistration: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            logo_path: string | null;
+            industry: components["schemas"]["Industry"];
+            website: string | null;
+            instagram: string | null;
+            tiktok: string | null;
+            /** @description Commercial registration number */
+            cr_number: string | null;
+            /** @description Private file (private-docs) */
+            vat_certificate_path: string | null;
+            products: number;
+            campaigns: number;
+            /** Format: date-time */
+            created_at: string;
+        };
+        PaymentLine: {
+            /** Format: uuid */
+            id: string;
+            kind: components["schemas"]["PaymentKind"];
+            total: number;
+            by_card: number;
+            status: components["schemas"]["PaymentStatus"];
+            /** Format: date-time */
+            created_at: string;
+        };
+        BrandAccountDetail: {
+            /** Format: uuid */
+            id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            email: string | null;
+            phone: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** @description BHD in the balance now */
+            balance: number;
+            /** @description BHD charged for orders, less refunds */
+            spent: number;
+            orders: number;
+            suspended: boolean;
+            erased: boolean;
+            has_bank: boolean;
+            brands: components["schemas"]["BrandWithRegistration"][];
+            /** @description The latest 50 */
+            recent_orders: components["schemas"]["DirectoryOrder"][];
+            /** @description Newest first */
+            withdrawals: components["schemas"]["Withdrawal"][];
+            /** @description The latest 50 */
+            payments: components["schemas"]["PaymentLine"][];
+            /** @description Newest first */
+            bank_accounts: components["schemas"]["BankAccount"][];
+            /** @description Newest first */
+            suspensions: components["schemas"]["Suspension"][];
+        };
+        /** @enum {string} */
+        AttentionReason: "deadline_passed" | "review_waiting" | "offer_expiring" | "reported";
+        AttentionOrder: {
+            /** Format: uuid */
+            id: string;
+            /** @description Shown as "ord-1043" */
+            number: number;
+            status: components["schemas"]["OrderStatus"];
+            format: components["schemas"]["ContentFormat"];
+            /** @description The creator's pay (BHD) */
+            amount: number;
+            /** @description laqta's fee (BHD) */
+            fee: number | null;
+            campaign_title: string | null;
+            /** Format: uuid */
+            brand_id: string;
+            /**
+             * Format: uuid
+             * @description The brand's account (its owner)
+             */
+            brand_account_id: string;
+            brand_name_ar: string | null;
+            brand_name_en: string | null;
+            /** Format: uuid */
+            creator_id: string;
+            creator_name_ar: string | null;
+            creator_name_en: string | null;
+            /** Format: date */
+            deadline: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            approved_at: string | null;
+            reason: components["schemas"]["AttentionReason"];
+            /** Format: date-time */
+            since: string;
+        };
+        MonthLine: {
+            /** @example 2026-10 */
+            month: string;
+            /** @description laqta's fees on clips approved that month */
+            revenue: number;
+            creator_pay: number;
+            clips: number;
+        };
+        BrandLine: {
+            /** Format: uuid */
+            brand_id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            revenue: number;
+            brand_paid: number;
+            clips: number;
+        };
+        MoneySummary: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            /** @description laqta's fees on clips approved in the period */
+            revenue: number;
+            /** @description Creators' pay on those clips */
+            creator_pay: number;
+            /** @description What brands paid for them (pay plus fee) */
+            brand_paid: number;
+            clips: number;
+            /** @description Money brands put in: top-ups and card payments */
+            money_in: number;
+            /** @description Refunds back to brands' balances */
+            refunds: number;
+            /** @description Sent to creators' banks */
+            payouts_sent: number;
+            /** @description Sent to brands' banks */
+            withdrawals_sent: number;
+            /** @description Adjustments, net */
+            adjustments: number;
+            /** @description Now: paid for orders that aren't finished (pay plus fee) */
+            held_now: number;
+            /** @description Now: approved clips not paid out yet */
+            owed_now: number;
+            /** @description Now: all brand accounts' balances */
+            brand_balances_now: number;
+            /** @description Now: withdrawals waiting to be sent */
+            withdrawals_waiting: number;
+            months: components["schemas"]["MonthLine"][];
+            /** @description The 10 brands with the most fees in the period */
+            top_brands: components["schemas"]["BrandLine"][];
+        };
+        Object: Record<string, never>;
+        LedgerLine: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            created_at: string;
+            type: components["schemas"]["LedgerType"];
+            /** @description BHD: positive adds to the balance */
+            amount: number;
+            note: string | null;
+            /** Format: uuid */
+            account_id: string;
+            role: components["schemas"]["Role"];
+            /** @description The creator's or account's name */
+            name_ar: string | null;
+            name_en: string | null;
+            order_number: number | null;
+            /** Format: uuid */
+            order_id: string | null;
+            /** Format: uuid */
+            payment_id: string | null;
+            /** Format: uuid */
+            transfer_id: string | null;
+        };
+        Adjustment: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            created_at: string;
+            type: components["schemas"]["LedgerType"];
+            /** @description BHD: positive adds to the balance */
+            amount: number;
+            note: string | null;
+            /** Format: uuid */
+            account_id: string;
+            role: components["schemas"]["Role"];
+            /** @description The creator's or account's name */
+            name_ar: string | null;
+            name_en: string | null;
+            order_number: number | null;
+            /** Format: uuid */
+            order_id: string | null;
+            /** Format: uuid */
+            payment_id: string | null;
+            /** Format: uuid */
+            transfer_id: string | null;
+            /** Format: uuid */
+            admin_id: string | null;
+            admin_name_ar: string | null;
+            admin_name_en: string | null;
+        };
+        AdjustmentDto: {
+            /**
+             * @description BHD: positive adds to the balance, negative takes from it (never below zero)
+             * @example 5
+             */
+            amount: number;
+            /** @example Goodwill credit: the product arrived late. */
+            note: string;
+        };
+        /** @enum {string} */
+        AdminAction: "creator_approved" | "changes_requested" | "creator_rejected" | "suspended" | "unsuspended" | "login_reset" | "deadline_extended" | "order_cancelled" | "payout_sent" | "withdrawal_sent" | "withdrawal_rejected" | "report_resolved" | "balance_adjusted" | "settings_changed" | "admin_invited" | "admin_changed" | "account_erased" | "sample_removed" | "support_message";
+        ActivityEntry: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            at: string;
+            action: components["schemas"]["AdminAction"];
+            target_kind: string;
+            /** Format: uuid */
+            target_id: string;
+            /** @description A name for the target: the creator, account, brand, or the order's number */
+            target_name: string | null;
+            note: string | null;
+            detail: string | null;
+            /** Format: uuid */
+            admin_id: string;
+            admin_name_ar: string | null;
+            admin_name_en: string | null;
         };
     };
     responses: never;
@@ -4457,6 +6273,43 @@ export interface operations {
             };
             /** @description Not found, or not yours */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminController_waitlist: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WaitlistCountry"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6556,6 +8409,2726 @@ export interface operations {
             };
             /** @description Not found, or not yours */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ConversationsController_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ConversationsController_open: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenConversationDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversation"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ConversationsController_messages: {
+        parameters: {
+            query?: {
+                limit?: number;
+                /** @description Only messages sent before this (to load earlier ones) */
+                before?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ConversationsController_send: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ConversationsController_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Read */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ReportsController_report: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportChatDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ReportsController_all: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+                status?: components["schemas"]["ReportStatus"];
+                /** @description Chats reported, or problems on an order */
+                kind?: "chat" | "order";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminReport"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ReportsController_resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveReportDto"];
+            };
+        };
+        responses: {
+            /** @description Resolved */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    BankAccountsController_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BankAccount"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    BankAccountsController_save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveBankAccountDto"];
+            };
+        };
+        responses: {
+            /** @description The current one */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BankAccount"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    BankAccountsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PayoutsController_history: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BankAccount"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PayoutsController_owed: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwedCreator"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PayoutsController_payouts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payout"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PayoutsController_markPaid: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkPaidDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payout"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    SettingsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Settings"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    SettingsController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Settings"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminsController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Admin"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminsController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminsController_change: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeAdminDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Admin"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminsController_invites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminInvite"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminsController_invite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteAdminDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminInvite"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminsController_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminsController_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminNameDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    WithdrawalsController_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Withdrawal"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    WithdrawalsController_request: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestWithdrawalDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Withdrawal"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    WithdrawalsController_all: {
+        parameters: {
+            query?: {
+                status?: "requested" | "sent" | "rejected";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminWithdrawal"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    WithdrawalsController_send: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendWithdrawalDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminWithdrawal"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    WithdrawalsController_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectWithdrawalDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminWithdrawal"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ModerationController_suspensions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Suspension"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ModerationController_suspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuspendDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Suspension"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ModerationController_unsuspend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteDto"];
+            };
+        };
+        responses: {
+            /** @description Lifted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ModerationController_loginHelp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginContact"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ModerationController_removeSample: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                sampleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemoveSampleDto"];
+            };
+        };
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ModerationController_erase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EraseDto"];
+            };
+        };
+        responses: {
+            /** @description Erased */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    SupportController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportChat"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    SupportController_messages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                creatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    SupportController_send: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                creatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SupportMessageDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    SupportController_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                creatorId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Read */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    DirectoryController_creators: {
+        parameters: {
+            query?: {
+                /** @description Name, handle, phone or email (part of it) */
+                search?: string;
+                /** @description Only suspended (or erased) accounts */
+                only?: "suspended" | "erased";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatorRow"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    DirectoryController_creator: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatorDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    DirectoryController_brandAccounts: {
+        parameters: {
+            query?: {
+                /** @description Name, handle, phone or email (part of it) */
+                search?: string;
+                /** @description Only suspended (or erased) accounts */
+                only?: "suspended" | "erased";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BrandAccountRow"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    DirectoryController_brandAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BrandAccountDetail"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    DirectoryController_attention: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttentionOrder"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    DirectoryController_orders: {
+        parameters: {
+            query?: {
+                /** @description An order number ("ord-1043" or 1043), or part of a campaign, brand or creator name */
+                search?: string;
+                status?: components["schemas"]["OrderStatus"];
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DirectoryOrder"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    DirectoryController_order: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DirectoryOrder"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MoneyController_summary: {
+        parameters: {
+            query?: {
+                /** @description First day (Bahrain time). Default: 29 days before `to` */
+                from?: string;
+                /** @description Last day, included. Default: today */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MoneySummary"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MoneyController_ledger: {
+        parameters: {
+            query?: {
+                /** @description First day (Bahrain time). Default: 29 days before `to` */
+                from?: string;
+                /** @description Last day, included. Default: today */
+                to?: string;
+                type?: components["schemas"]["LedgerType"];
+                /** @description One account's entries */
+                account_id?: string;
+                limit?: components["schemas"]["Object"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LedgerLine"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MoneyController_adjustments: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Adjustment"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MoneyController_adjust: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdjustmentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Adjustment"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MoneyController_activity: {
+        parameters: {
+            query?: {
+                /** @description What one person or order went through */
+                target_id?: string;
+                /** @description What one admin did */
+                admin_id?: string;
+                /** @description Older than this (to load more) */
+                before?: string;
+                limit?: components["schemas"]["Object"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityEntry"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

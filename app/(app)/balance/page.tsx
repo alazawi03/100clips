@@ -3,7 +3,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, SectionHeader } from "@/components/ui/Card";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { api } from "@/lib/api";
 import type { components } from "@/lib/api-types";
 import { cn } from "@/lib/cn";
@@ -104,36 +104,40 @@ export default async function WalletPage() {
 
       <section aria-labelledby="transactions-title">
         <SectionHeader id="transactions-title" title={t("walletPage.transactions")} />
-        <Card>
-          <ul className="divide-y divide-border">
-            {entries.map((entry) => {
-              const Icon = typeIcon[entry.type];
-              const creator = entry.creatorId ? ws.creator(entry.creatorId) : undefined;
-              return (
-                <li key={`${entry.type}-${entry.id}`} className="flex items-center gap-4 p-4 sm:px-5">
-                  {creator ? (
-                    <Avatar id={creator.id} name={f.pick(creator.name)} src={creator.photo} size="md" />
-                  ) : (
-                    <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-soft text-primary-on-soft">
-                      <Icon aria-hidden className="size-5" strokeWidth={1.75} />
-                    </span>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{entry.label}</p>
-                    <p className="truncate text-small text-text-muted">
-                      {f.date(entry.date)}
-                      {entry.detail && ` · ${entry.detail}`}
-                    </p>
-                  </div>
-                  <Badge tone={entry.badge.tone} className="hidden sm:inline-flex">
-                    {entry.badge.label}
-                  </Badge>
-                  <span className={cn("min-w-24 text-end font-medium tabular-nums", entry.amount > 0 && "text-success")}>{f.signedMoney(entry.amount)}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </Card>
+        {entries.length === 0 ? (
+          <EmptyState title={t("walletPage.emptyTitle")} hint={t("walletPage.emptyHint")} />
+        ) : (
+          <Card>
+            <ul className="divide-y divide-border">
+              {entries.map((entry) => {
+                const Icon = typeIcon[entry.type];
+                const creator = entry.creatorId ? ws.creator(entry.creatorId) : undefined;
+                return (
+                  <li key={`${entry.type}-${entry.id}`} className="flex items-center gap-4 p-4 sm:px-5">
+                    {creator ? (
+                      <Avatar id={creator.id} name={f.pick(creator.name)} src={creator.photo} size="md" />
+                    ) : (
+                      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface text-text">
+                        <Icon aria-hidden className="size-5" strokeWidth={1.75} />
+                      </span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{entry.label}</p>
+                      <p className="truncate text-small text-text-muted">
+                        {f.date(entry.date)}
+                        {entry.detail && ` · ${entry.detail}`}
+                      </p>
+                    </div>
+                    <Badge tone={entry.badge.tone} className="hidden sm:inline-flex">
+                      {entry.badge.label}
+                    </Badge>
+                    <span className={cn("min-w-24 text-end font-medium tabular-nums", entry.amount > 0 && "text-success")}>{f.signedMoney(entry.amount)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+        )}
       </section>
     </div>
   );

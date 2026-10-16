@@ -18,7 +18,7 @@ function FormError({ state }: { state: AuthFormState }) {
 function EmailField({ state, autoFocus }: { state: AuthFormState; autoFocus?: boolean }) {
   const { t } = useI18n();
   return (
-    <Field label={t("auth.email")} htmlFor="email">
+    <Field label={t("auth.email")} htmlFor="email" required>
       <Input id="email" name="email" type="email" autoComplete="email" dir="ltr" required autoFocus={autoFocus} defaultValue={state?.values?.email} />
     </Field>
   );
@@ -27,7 +27,7 @@ function EmailField({ state, autoFocus }: { state: AuthFormState; autoFocus?: bo
 function PasswordField({ autoComplete, label }: { autoComplete: "current-password" | "new-password"; label?: string }) {
   const { t } = useI18n();
   return (
-    <Field label={label ?? t("auth.password")} htmlFor="password" hint={autoComplete === "new-password" ? t("auth.passwordHint") : undefined}>
+    <Field label={label ?? t("auth.password")} htmlFor="password" required hint={autoComplete === "new-password" ? t("auth.passwordHint") : undefined}>
       <Input id="password" name="password" type="password" autoComplete={autoComplete} dir="ltr" required minLength={autoComplete === "new-password" ? 8 : undefined} />
     </Field>
   );
@@ -118,7 +118,7 @@ export function SignupForm() {
       <GoogleButton next="/onboarding" />
       <Or />
       <form action={action} className="flex flex-col gap-4">
-        <Field label={t("auth.name")} htmlFor="name">
+        <Field label={t("auth.name")} htmlFor="name" required>
           <Input id="name" name="name" autoComplete="name" required autoFocus defaultValue={state?.values?.name} />
         </Field>
         <EmailField state={state} />

@@ -27,7 +27,7 @@ export function FilterMenu({ label, icon, options, selected, onChange }: Props) 
       triggerLabel={picked.length ? `${label}: ${picked.map((o) => o.label).join(t("common.separator"))}` : label}
       triggerClassName={cn(
         "inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border ps-3 pe-2.5 text-small transition-colors duration-[120ms]",
-        picked.length ? "border-primary-soft bg-primary-soft font-medium text-primary-on-soft" : "border-border bg-card text-text hover:bg-surface",
+        picked.length ? "border-brand-soft bg-brand-soft font-medium text-brand-on-soft" : "border-border bg-card text-text hover:bg-surface",
       )}
       trigger={
         <>
@@ -67,7 +67,7 @@ export function FilterMenu({ label, icon, options, selected, onChange }: Props) 
           {selected.length > 0 && (
             <>
               <div className="my-1 border-t border-border" />
-              <button type="button" onClick={() => onChange([])} className="rounded-[var(--radius-md)] px-3 py-2 text-start text-small font-medium text-primary hover:bg-primary-soft">
+              <button type="button" onClick={() => onChange([])} className="rounded-[var(--radius-md)] px-3 py-2 text-start text-small font-medium text-primary hover:bg-surface">
                 {t("explore.clearOne")}
               </button>
             </>

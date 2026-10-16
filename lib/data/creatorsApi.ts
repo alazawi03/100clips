@@ -1,7 +1,7 @@
 import { api, apiOrNothing } from "@/lib/api";
 import type { components } from "@/lib/api-types";
 import { publicUrl } from "./storage";
-import type { Creator, Localized, Review } from "./types";
+import { hasActiveBundle, type Creator, type Localized, type Review } from "./types";
 
 /**
  * Creators from the API, in the dashboard's shapes (types.ts): Explore's cards and a profile with
@@ -33,7 +33,8 @@ export async function exploreCreators(): Promise<Creator[]> {
     photo: publicUrl(r.photo_path),
     country: r.country,
     showsFace: r.shows_face ?? undefined,
-  }));
+    portfolio: r.portfolio.map((s) => ({ id: s.id, videoSrc: publicUrl(s.video_path)! })),
+  })).filter(hasActiveBundle);
 }
 
 /** One creator's profile and reviews, or undefined if the brand can't see them. */

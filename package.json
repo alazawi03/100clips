@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "api:types": "openapi-typescript ../100clips-backend/openapi.json -o lib/api-types.ts"
+    "api:types": "openapi-typescript ../backend/openapi.json -o lib/api-types.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

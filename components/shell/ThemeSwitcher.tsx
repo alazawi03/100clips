@@ -41,7 +41,7 @@ export function ThemeSwitcher({ initial }: { initial: ThemeChoice }) {
             onClick={() => pick(value)}
             className={cn(
               "flex h-9 items-center justify-center gap-1.5 rounded-[var(--radius-sm)] text-small font-medium transition-colors",
-              theme === value ? "bg-card text-text shadow-soft" : "text-text-muted hover:text-text",
+              theme === value ? "bg-card text-text" : "text-text-muted hover:text-text",
             )}
           >
             <Icon aria-hidden className="size-4" strokeWidth={1.75} />

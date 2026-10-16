@@ -2,7 +2,7 @@ import { cache } from "react";
 import { api, apiOrNothing } from "@/lib/api";
 import type { components } from "@/lib/api-types";
 import { publicUrl, storeImage } from "./storage";
-import type { Brand, Localized, Product, ProductDetails } from "./types";
+import type { Brand, Currency, Localized, Pricing, Product, ProductDetails } from "./types";
 
 /**
  * The signed-in owner's brands and products, from the API, in the dashboard's shapes (types.ts).
@@ -45,7 +45,8 @@ function toProduct(row: ProductRow): Product {
     name: localized(row.name, row.name),
     photos: row.photos.map((p) => publicUrl(p)!),
     description: row.description ? localized(row.description, row.description) : undefined,
-    price: row.price ?? undefined,
+    currency: row.currency as Currency,
+    pricing: (row.pricing as Pricing | null) ?? undefined,
     benefits: row.benefits,
     concerns: row.concerns.map((c) => ({ question: c.question, answer: c.answer || undefined })),
     details: { type: row.type, ...row.details } as ProductDetails,
@@ -114,7 +115,8 @@ async function productBody(product: Omit<Product, "id" | "brandId">) {
     name: product.name.ar || product.name.en,
     description: product.description?.ar || product.description?.en || null,
     photos,
-    price: product.price ?? null,
+    currency: product.currency,
+    pricing: product.pricing ?? null,
     benefits: product.benefits,
     concerns: product.concerns.map((c) => (c.answer ? c : { question: c.question })),
     // Empty optional fields are left out: the API checks each one it gets.

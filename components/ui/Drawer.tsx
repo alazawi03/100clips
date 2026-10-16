@@ -34,7 +34,7 @@ export function Drawer({ open, onClose, title, footer, children }: { open: boole
       aria-label={title}
       onClose={onClose}
       onClick={(e) => e.target === dialog.current && onClose()}
-      className="fixed inset-y-0 m-0 ms-auto me-0 h-dvh max-h-none w-full max-w-none bg-background p-0 text-text shadow-lift backdrop:bg-[var(--overlay)] sm:max-w-[520px] sm:border-s sm:border-border"
+      className="fixed inset-y-0 m-0 ms-auto me-0 h-dvh max-h-none w-full max-w-none bg-background p-0 text-text backdrop:bg-[var(--overlay)] sm:max-w-[520px] sm:border-s sm:border-border"
     >
       {open && (
         <div className="flex h-full flex-col">

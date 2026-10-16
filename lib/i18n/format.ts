@@ -19,9 +19,27 @@ export function createFormatters(locale: Locale) {
   const clock = new Intl.DateTimeFormat(tag(locale), { hour: "numeric", minute: "2-digit", timeZone: "Asia/Bahrain" });
   const dateTime = new Intl.DateTimeFormat(tag(locale), { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Bahrain" });
 
+  // Other currencies (a product's price): whole amounts without decimals, the rest with the currency's own digits.
+  const byCurrency = new Map<string, { whole: Intl.NumberFormat; exact: Intl.NumberFormat }>();
+  const inCurrency = (currency: string) => {
+    let formats = byCurrency.get(currency);
+    if (!formats) {
+      formats = {
+        whole: new Intl.NumberFormat(tag(locale), { style: "currency", currency, maximumFractionDigits: 0 }),
+        exact: new Intl.NumberFormat(tag(locale), { style: "currency", currency }),
+      };
+      byCurrency.set(currency, formats);
+    }
+    return formats;
+  };
+
   return {
-    /** Amount in BHD. */
-    money: (amount: number) => (Number.isInteger(amount) ? wholeMoney : money).format(amount),
+    /** Amount in BHD, or in another currency when given. */
+    money: (amount: number, currency = "BHD") => {
+      if (currency === "BHD") return (Number.isInteger(amount) ? wholeMoney : money).format(amount);
+      const { whole, exact } = inCurrency(currency);
+      return (Number.isInteger(amount) ? whole : exact).format(amount);
+    },
     /** Amount in BHD with a + or − sign placed the way the locale expects. */
     signedMoney: (amount: number) => (Number.isInteger(amount) ? signedWhole : signed).format(amount),
     number: (value: number) => number.format(value),

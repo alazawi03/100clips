@@ -17,7 +17,7 @@ import { Drawer } from "@/components/ui/Drawer";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { Card } from "@/components/ui/Card";
 import { DateInput } from "@/components/ui/DateInput";
-import { Field, FieldError, Input, Textarea } from "@/components/ui/Form";
+import { Field, FieldError, Input, RequiredMark, Textarea } from "@/components/ui/Form";
 import { Stepper } from "@/components/ui/Stepper";
 import { cn } from "@/lib/cn";
 import { VIDEO_STYLES, type ProductType, type VideoStyle } from "@/lib/data/types";
@@ -357,12 +357,15 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
                 <div className="flex flex-col gap-6">
                   {brands.length > 1 && (
                     <fieldset className="flex flex-col gap-2" aria-describedby={described("brandId")}>
-                      <legend className="mb-2 font-medium">{t("checkout.brandLabel")}</legend>
+                      <legend className="mb-2 flex items-center gap-1 font-medium">
+                        {t("checkout.brandLabel")}
+                        <RequiredMark />
+                      </legend>
                       <div className="flex flex-wrap gap-2">
                         {brands.map((b) => (
                           <label
                             key={b.id}
-                            className="flex h-12 cursor-pointer items-center gap-2 rounded-full border border-border ps-1.5 pe-4 transition-colors hover:bg-surface/60 has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:checked]:text-primary-on-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
+                            className="flex h-12 cursor-pointer items-center gap-2 rounded-full border border-border ps-1.5 pe-4 transition-colors hover:bg-surface/60 has-[:checked]:border-brand-soft has-[:checked]:bg-brand-soft has-[:checked]:text-brand-on-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
                           >
                             <input
                               type="radio"
@@ -387,7 +390,10 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
 
                   {brand && (
                     <fieldset role="radiogroup" className="flex flex-col gap-2" aria-describedby={described("productId")}>
-                      <legend className="mb-2 font-medium">{t("checkout.productLabel")}</legend>
+                      <legend className="mb-2 flex items-center gap-1 font-medium">
+                        {t("checkout.productLabel")}
+                        <RequiredMark />
+                      </legend>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {brand.products.map((p) => {
                           const on = p.id === productId;
@@ -396,7 +402,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
                               key={p.id}
                               className={cn(
                                 "flex cursor-pointer items-center gap-3 rounded-[var(--radius-lg)] border p-3 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary",
-                                on ? "border-primary bg-primary-soft/40" : "border-border hover:bg-surface/60",
+                                on ? "border-primary bg-surface/40" : "border-border hover:bg-surface/60",
                               )}
                             >
                               <input type="radio" name="productPick" value={p.id} checked={on} onChange={() => pickProduct(p.id)} className="sr-only" />
@@ -424,9 +430,9 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
                         <button
                           type="button"
                           onClick={() => setAdding(true)}
-                          className="flex min-h-[74px] items-center gap-3 rounded-[var(--radius-lg)] border border-dashed border-primary/40 p-3 font-medium text-primary transition-colors hover:bg-primary-soft/60"
+                          className="flex min-h-[74px] items-center gap-3 rounded-[var(--radius-lg)] border border-dashed border-primary/40 p-3 font-medium text-primary transition-colors hover:bg-surface/60"
                         >
-                          <span className="grid size-12 shrink-0 place-items-center rounded-[var(--radius-md)] bg-primary-soft">
+                          <span className="grid size-12 shrink-0 place-items-center rounded-[var(--radius-md)] bg-surface">
                             <Plus aria-hidden className="size-5" />
                           </span>
                           {t("checkout.addProduct")}
@@ -456,6 +462,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
                   <fieldset className="flex flex-col gap-2" aria-describedby={described("videoStyle")}>
                     <legend className="mb-2 flex items-center gap-1.5 font-medium">
                       {t("checkout.videoStyle")}
+                      <RequiredMark />
                       <Dropdown
                         openOnHover
                         panelClassName="w-80"
@@ -490,7 +497,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
                         return (
                           <label
                             key={style}
-                            className="flex cursor-pointer flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-border px-3 py-4 text-center text-small font-medium transition-colors hover:bg-surface/60 has-[:checked]:border-primary has-[:checked]:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
+                            className="flex cursor-pointer flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-border px-3 py-4 text-center text-small font-medium transition-colors hover:bg-surface/60 has-[:checked]:border-primary has-[:checked]:bg-surface has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary"
                           >
                             <input type="radio" name="videoStyle" value={style} defaultChecked={v("videoStyle") === style} className="sr-only" />
                             <Icon aria-hidden className="size-6" strokeWidth={1.75} />
@@ -501,13 +508,13 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
                     </div>
                     {err("videoStyle") && <FieldError id="videoStyle-error">{err("videoStyle")}</FieldError>}
                   </fieldset>
-                  <Field label={t("checkout.titleLabel")} htmlFor="title" error={err("title")}>
+                  <Field label={t("checkout.titleLabel")} htmlFor="title" error={err("title")} required>
                     <Input id="title" name="title" defaultValue={v("title")} placeholder={t("checkout.titlePlaceholder")} aria-invalid={!!err("title")} aria-describedby={described("title")} />
                   </Field>
-                  <Field label={t("checkout.briefLabel")} htmlFor="brief" error={err("brief")}>
+                  <Field label={t("checkout.briefLabel")} htmlFor="brief" error={err("brief")} required>
                     <Textarea id="brief" name="brief" defaultValue={v("brief")} placeholder={t("checkout.briefPlaceholder")} aria-invalid={!!err("brief")} aria-describedby={described("brief")} />
                   </Field>
-                  <Field label={`${t("checkout.deadline")} (${t("brandForm.optional")})`} htmlFor="deadline" error={err("deadline")} hint={t("checkout.deadlineHint")}>
+                  <Field label={t("checkout.deadline")} htmlFor="deadline" error={err("deadline")} hint={t("checkout.deadlineHint")}>
                     <DateInput id="deadline" name="deadline" min={minDeadline} defaultValue={v("deadline")} aria-invalid={!!err("deadline")} aria-describedby={described("deadline")} className="sm:max-w-72" />
                   </Field>
                   {/* What creators see with the request; optional, so folded away. Closed fields still submit. */}

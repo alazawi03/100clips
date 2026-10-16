@@ -7,29 +7,31 @@ import { ReportButton } from "@/components/brand/chat/ReportButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/cn";
-import { DEMO_TODAY } from "@/lib/data/account";
-import { getCreator } from "@/lib/data/creators";
-import { getConversation, markRead } from "@/lib/data/messages";
-import { getOrder, orders } from "@/lib/data/orders";
+import { getConversation, markRead, messagesOf } from "@/lib/data/chatApi";
+import { workspace } from "@/lib/data/live";
 import { isActiveOrder } from "@/lib/statuses";
 import { getI18n } from "@/lib/i18n/server";
+import { today } from "@/lib/today";
 
 export default async function ConversationPage({ params, searchParams }: PageProps<"/messages/[id]">) {
   const { id } = await params;
   const query = await searchParams;
-  const conversation = getConversation(id);
-  if (!conversation) notFound();
-  markRead(conversation.id);
-  const i18n = await getI18n();
+  const conversation = await getConversation(id);
+  const messages = conversation && (await messagesOf(conversation.id));
+  if (!conversation || !messages) notFound();
+  // Opening it reads everything so far (the inbox hides this chat's badge meanwhile).
+  if (conversation.unread > 0) await markRead(conversation.id);
+  const [i18n, ws] = await Promise.all([getI18n(), workspace()]);
   const { t, f } = i18n;
-  const creator = getCreator(conversation.creatorId)!;
-  // Work still going on with this creator (anything not approved yet), newest first.
-  const active = orders
-    .filter((o) => o.creatorId === conversation.creatorId && isActiveOrder(o) && o.status !== "approved")
+  const day = today();
+  const creator = { id: conversation.creatorId, ...conversation.creator };
+  // Work still going on with this creator for this brand (anything not approved yet), newest first.
+  const active = ws.orders
+    .filter((o) => o.creatorId === creator.id && o.brandId === conversation.brandId && isActiveOrder(o) && o.status !== "approved")
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const name = f.pick(creator.name);
   // From "Ask for an ad code" on a clip: the request is ready in the box, to edit or send.
-  const draftOrder = query.draft === "adCode" && typeof query.order === "string" ? getOrder(query.order) : undefined;
+  const draftOrder = query.draft === "adCode" && typeof query.order === "string" ? ws.order(query.order) : undefined;
   const draft = draftOrder && draftOrder.creatorId === creator.id ? t("adCode.requestMessage", { name, title: f.pick(draftOrder.title) }) : undefined;
 
   return (
@@ -39,7 +41,7 @@ export default async function ConversationPage({ params, searchParams }: PagePro
           <ChevronRight aria-hidden className="size-5 rotate-180 rtl:rotate-0" />
         </Link>
         <Link href={`/creators/${creator.id}`} className="flex min-w-0 flex-1 items-center gap-3 rounded-[var(--radius-md)]">
-          <Avatar id={creator.id} name={name} size="md" />
+          <Avatar id={creator.id} name={name} src={creator.photo} size="md" />
           <span className="min-w-0">
             <span className="block truncate font-medium">{name}</span>
             <bdi dir="ltr" className="block truncate text-small text-text-muted">
@@ -53,13 +55,13 @@ export default async function ConversationPage({ params, searchParams }: PagePro
 
       {/* Newest at the bottom: column-reverse keeps the view pinned there. */}
       <ol className="flex flex-1 flex-col-reverse gap-2 overflow-y-auto p-4">
-        {[...conversation.messages].reverse().map((message) => {
+        {[...messages].reverse().map((message) => {
           const mine = message.from === "brand";
           return (
             <li key={message.id} className={cn("flex max-w-[80%] flex-col gap-1", mine ? "self-end items-end" : "self-start items-start")}>
               <p className={cn("whitespace-pre-wrap break-words rounded-[var(--radius-lg)] px-4 py-2", mine ? "bg-primary text-on-primary" : "bg-surface text-text")}>{message.text}</p>
               <span className="flex items-center gap-1 px-1 text-caption text-text-muted">
-                {f.messageTime(message.at, DEMO_TODAY)}
+                {f.messageTime(message.at, day)}
               </span>
             </li>
           );

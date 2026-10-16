@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Clapperboard, ExternalLink, Star } from "lucide-react";
+import { ChevronRight, Clapperboard, ExternalLink, MessageCircle, Star } from "lucide-react";
+import { messageCreator } from "@/app/actions/messages";
 import { InviteToCampaignMenu } from "@/components/brand/campaigns/InviteMenus";
 import { OfferPicker } from "@/components/brand/cart/OfferPicker";
 import { SaveToListButton } from "@/components/brand/creators/SaveToListButton";
@@ -13,7 +14,7 @@ import { creatorProfile } from "@/lib/data/creatorsApi";
 import { allLists } from "@/lib/data/lists";
 import { workspace } from "@/lib/data/live";
 import { isActiveMarket } from "@/lib/data/markets";
-import { platformOf, type Platform } from "@/lib/data/types";
+import { hasActiveBundle, platformOf, type Platform } from "@/lib/data/types";
 import { getI18n } from "@/lib/i18n/server";
 
 /** Profile URL per platform, from the creator's own handle there. */
@@ -41,6 +42,8 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
   const i18n = await getI18n();
   const { t, f } = i18n;
   const [ws, lists] = await Promise.all([workspace(), allLists()]);
+  // No active bundle: hidden from brands, unless this brand already worked with them (their orders link here).
+  if (!hasActiveBundle(creator) && !ws.orders.some((o) => o.creatorId === creator.id)) notFound();
   const name = f.pick(creator.name);
   const line = ws.cart.find((l) => l.creatorId === creator.id);
   const inCart = line ? Object.fromEntries(line.items.map((i) => [i.format, i.quantity])) : undefined;
@@ -75,6 +78,17 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
                   <InviteToCampaignMenu variant="icon" label={t("invite.toCampaign")} creatorIds={[creator.id]} campaigns={live} />
                 </Tooltip>
               )}
+              <Tooltip label={t("profile.message")}>
+                <form action={messageCreator.bind(null, creator.id, undefined)}>
+                  <button
+                    type="submit"
+                    aria-label={t("profile.messageName", { name })}
+                    className="grid size-9 place-items-center rounded-full border border-border bg-card transition-colors duration-[120ms] hover:bg-surface"
+                  >
+                    <MessageCircle aria-hidden className="size-4" />
+                  </button>
+                </form>
+              </Tooltip>
               <Tooltip label={t("lists.save")}>
                 <SaveToListButton
                   compact
@@ -155,10 +169,21 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
             ))}
           </ul>
         ) : (
-          <Card className="flex items-center gap-3 p-5 text-text-muted">
-            <Clapperboard aria-hidden className="size-5 shrink-0" />
-            {t("profile.noVideos")}
-          </Card>
+          // Empty slots the size of the three samples, so the page keeps its shape until they upload.
+          <div className="relative">
+            <ul aria-hidden className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {[0, 1, 2].map((n) => (
+                <li key={n} className={cn("aspect-[9/16] rounded-[var(--radius-lg)] border border-dashed border-border bg-surface/60", n === 2 && "hidden sm:block")} />
+              ))}
+            </ul>
+            <div className="absolute inset-0 grid place-items-center p-4">
+              <div className="flex max-w-xs flex-col items-center gap-2 rounded-[var(--radius-lg)] bg-card px-5 py-4 text-center shadow-sm">
+                <Clapperboard aria-hidden className="size-6 text-text-muted" strokeWidth={1.75} />
+                <p className="font-medium">{t("profile.noVideos")}</p>
+                <p className="text-small text-text-muted">{t("profile.noVideosHint")}</p>
+              </div>
+            </div>
+          </div>
         )}
       </section>
 

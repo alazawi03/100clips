@@ -6,7 +6,7 @@ import type { Campaign, Localized, Order, OrderStatus } from "@/lib/data/types";
  * Shown with <StatusBadge>. Colours are tokens (app/globals.css), so they follow the theme.
  */
 
-export type StatusTone = "gray" | "amber" | "blue" | "purple" | "green" | "red";
+export type StatusTone = "gray" | "amber" | "green" | "red" | "brand";
 export type StatusDef = { label: Localized; tone: StatusTone };
 
 /* ---------- Creator order ---------- */
@@ -17,9 +17,9 @@ export const ORDER_STATUS: Record<OrderBadgeStatus, StatusDef> = {
   // Offer sent, waiting for the creator to accept.
   pending: { label: { en: "Pending", ar: "بانتظار القبول" }, tone: "amber" },
   // Accepted, product received, filming.
-  in_progress: { label: { en: "In progress", ar: "قيد التنفيذ" }, tone: "blue" },
+  in_progress: { label: { en: "In progress", ar: "قيد التنفيذ" }, tone: "green" },
   // The clip is in and the brand reviews it. (No 100clips check in the MVP.)
-  ready: { label: { en: "Ready for review", ar: "جاهز لمراجعتك" }, tone: "purple" },
+  ready: { label: { en: "Ready for review", ar: "جاهز لمراجعتك" }, tone: "amber" },
   revision: { label: { en: "Revision requested", ar: "مطلوب تعديل" }, tone: "amber" },
   approved: { label: { en: "Approved", ar: "معتمد" }, tone: "green" },
   declined: { label: { en: "Declined", ar: "مرفوض" }, tone: "red" },
@@ -41,12 +41,6 @@ export function orderBadgeStatus(order: Pick<Order, "status" | "revisionRequeste
   }
 }
 
-/**
- * "ready" as anyone other than the brand reads it (the admin panel): the clip waits for the brand, not
- * for 100clips. There is no 100clips review in the MVP. Same words as the creator app.
- */
-export const READY_FOR_BRAND: Localized = { en: "Waiting for the brand", ar: "بانتظار مراجعة العلامة" };
-
 /** The badge for a stored order status, e.g. a filter tab ("delivered" reads "Ready for review"). */
 export const statusOfOrderStatus = (status: OrderStatus): OrderBadgeStatus => orderBadgeStatus({ status });
 
@@ -62,9 +56,9 @@ export const CAMPAIGN_STATUSES: CampaignBadgeStatus[] = ["draft", "pending", "in
 export const CAMPAIGN_STATUS: Record<CampaignBadgeStatus, StatusDef> = {
   draft: { label: { en: "Draft", ar: "مسودة" }, tone: "gray" },
   pending: { label: { en: "Pending", ar: "بانتظار القبول" }, tone: "amber" },
-  in_progress: { label: { en: "In progress", ar: "قيد التنفيذ" }, tone: "blue" },
-  completed: { label: { en: "Completed", ar: "مكتمل" }, tone: "green" },
-  cancelled: { label: { en: "Cancelled", ar: "ملغي" }, tone: "red" },
+  in_progress: { label: { en: "In progress", ar: "قيد التنفيذ" }, tone: "green" },
+  completed: { label: { en: "Completed", ar: "مكتمل" }, tone: "brand" },
+  cancelled: { label: { en: "Cancelled", ar: "ملغي" }, tone: "gray" },
 };
 
 export type CampaignProgress = {
