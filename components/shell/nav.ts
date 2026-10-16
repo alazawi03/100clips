@@ -1,4 +1,4 @@
-import { Bell, Bookmark, LayoutDashboard, Megaphone, MessageCircle, Package, Settings, Store, Users, Wallet } from "lucide-react";
+import { Bell, Bookmark, LayoutDashboard, Megaphone, MessageCircle, Package, Settings, Store, Truck, Users, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { MessageKey } from "@/lib/i18n/messages";
 
@@ -10,6 +10,7 @@ const dashboard: NavItem = { href: "/dashboard", label: "nav.dashboard", icon: L
 const explore: NavItem = { href: "/explore", label: "nav.explore", icon: Users };
 const campaigns: NavItem = { href: "/campaigns", label: "nav.campaigns", icon: Megaphone };
 const orders: NavItem = { href: "/orders", label: "nav.orders", icon: Package };
+const shipping: NavItem = { href: "/shipping", label: "nav.shipping", icon: Truck };
 const brands: NavItem = { href: "/brands", label: "nav.brands", icon: Store };
 const balance: NavItem = { href: "/balance", label: "nav.balance", icon: Wallet };
 const messages: NavItem = { href: "/messages", label: "nav.messages", icon: MessageCircle };
@@ -23,12 +24,12 @@ export type NavGroup = { label?: MessageKey; items: NavItem[] };
 export const sidebarGroups: NavGroup[] = [
   { items: [dashboard] },
   { label: "nav.groupDiscover", items: [explore, lists] },
-  { label: "nav.groupManage", items: [campaigns, orders, brands, messages] },
+  { label: "nav.groupManage", items: [campaigns, orders, shipping, brands, messages] },
 ];
 
 /** Mobile tab bar, followed by a "More" tab that opens moreItems. Labels are short to fit five across. */
 export const tabItems: NavItem[] = [{ ...dashboard, label: "nav.home" }, { ...explore, label: "nav.creatorsShort" }, campaigns, orders];
-export const moreItems: NavItem[] = [brands, balance, lists, notifications, settings];
+export const moreItems: NavItem[] = [shipping, brands, balance, lists, notifications, settings];
 
 /** Creator profiles belong to Explore. */
 const aliases: Record<string, string> = { "/creators": "/explore" };

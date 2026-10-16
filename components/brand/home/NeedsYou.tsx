@@ -41,7 +41,9 @@ export async function NeedsYou({ items, i18n }: { items: Attention[]; i18n: I18n
                 />
               );
             }
-            const href = item.kind === "review" && count > 1 ? "/orders?status=delivered" : `/orders/${first.id}`;
+            // Products to send or pick up all wait on the Shipping page, with the address and the button.
+            const href =
+              item.kind === "ship" ? "/shipping?tab=send" : item.kind === "collect" ? "/shipping?tab=with" : count > 1 ? "/orders?status=delivered" : `/orders/${first.id}`;
             return (
               <ActionCallout
                 key={item.kind}

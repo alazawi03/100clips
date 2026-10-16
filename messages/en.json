@@ -30,6 +30,7 @@
     "explore": "Content creators",
     "campaigns": "Campaigns",
     "orders": "Orders",
+    "shipping": "Shipping",
     "brands": "Brands & products",
     "balance": "Balance",
     "more": "More",
@@ -263,9 +264,9 @@
     "notReceived": "Not received yet",
     "sendNote": "Note",
     "sendNotePlaceholder": "Write how it's being delivered",
-    "returnInfo": "The product comes back to you after filming. Collect it once you approve the clip.",
+    "returnInfo": "The product comes back to you after filming. Pick it up once you approve the clip.",
     "keepInfo": "It's a gift for the creator. Nothing to send back.",
-    "returnedOn": "Collected {date}",
+    "returnedOn": "Picked up {date}",
     "clip": "Clip",
     "noClip": "No clip yet",
     "openOrder": "Open order",
@@ -330,6 +331,32 @@
     "empty": "No orders yet",
     "emptyHint": "Orders show up here once you create a campaign and send a request to one or more creators.",
     "emptyFiltered": "No orders with this status."
+  },
+  "shippingPage": {
+    "title": "Shipping",
+    "subtitle": "Products you send to creators, and the ones that come back to you.",
+    "filterLabel": "Filter products by where they are",
+    "tabs": {
+      "send": "To send",
+      "way": "On the way",
+      "with": "With creators",
+      "done": "Picked up"
+    },
+    "empty": {
+      "send": "Nothing to send right now.",
+      "way": "Nothing on the way.",
+      "with": "No products waiting to come back.",
+      "done": "No pickups yet."
+    },
+    "emptyAll": "No products to ship yet",
+    "emptyAllHint": "Orders with a physical product show up here once the creator accepts.",
+    "sentDays": {
+      "zero": "Sent today",
+      "one": "Sent 1 day ago",
+      "other": "Sent {count} days ago"
+    },
+    "pickupAfterApproval": "Pick it up once you approve the clip",
+    "note": "Note: {note}"
   },
   "orderDetail": {
     "clip": "Clip",
@@ -944,12 +971,12 @@
     "action": {
       "review": "{name}'s clip is ready",
       "ship": "Ship {product} to {name}",
-      "collect": "Collect {product} from {name}"
+      "collect": "Pick up {product} from {name}"
     },
     "button": {
       "review": "Review now",
       "ship": "Mark as sent",
-      "collect": "Mark as returned"
+      "collect": "Mark as picked up"
     },
     "waiting": {
       "accept": "Waiting for {name} to accept",
@@ -971,7 +998,7 @@
       "approved": "You approved {name}'s clip",
       "released": "Payment released to {name}",
       "cancelled": "Offer to {name} cancelled",
-      "returned": "Product collected from {name}",
+      "returned": "Product picked up from {name}",
       "declined": "{name} declined the offer",
       "expired": "Offer to {name} expired with no answer"
     },
@@ -996,14 +1023,14 @@
       },
       "collect": {
         "zero": "",
-        "one": "1 product to collect",
-        "other": "{count} products to collect"
+        "one": "1 product to pick up",
+        "other": "{count} products to pick up"
       }
     },
     "groupButton": {
       "review": "Review now",
       "ship": "Send now",
-      "collect": "Collect now"
+      "collect": "Pick up now"
     },
     "shipDialog": {
       "title": "Confirm you sent the product to {name}",
