@@ -17,8 +17,8 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
   const [brands, ws] = await Promise.all([myBrands(), workspace()]);
   const doneProduct = typeof query.product === "string" ? await getProduct(query.product) : undefined;
   const doneBrand = typeof query.brand === "string" ? brands.find((b) => b.id === query.brand) : undefined;
-  // Open the brand the user just worked on.
-  const openId = doneProduct?.brandId ?? doneBrand?.id;
+  // A product linked from elsewhere (e.g. Shipping): open its drawer.
+  const showId = typeof query.show === "string" ? query.show : undefined;
 
   const rows = await Promise.all(
     brands.map(async (brand) => {
@@ -33,6 +33,9 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
       };
     }),
   );
+
+  // Open the brand the user just worked on, or the one with the linked product.
+  const openId = doneProduct?.brandId ?? doneBrand?.id ?? rows.find((b) => b.products.some((p) => p.id === showId))?.id;
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,7 +56,7 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
             {t("brandsPage.addBrand")}
           </LinkButton>
         </SectionHeader>
-        <BrandsTable brands={rows} openId={openId} />
+        <BrandsTable brands={rows} openId={openId} showId={showId} />
       </section>
     </div>
   );

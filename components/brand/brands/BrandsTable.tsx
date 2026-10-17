@@ -25,10 +25,10 @@ export type BrandRowView = {
   products: ProductView[];
 };
 
-/** Brands as a stack of accordion cards. Each card slides open into a list of its products. */
-export function BrandsTable({ brands, openId }: { brands: BrandRowView[]; openId?: string }) {
+/** Brands as a stack of accordion cards. Each card slides open into a list of its products. `showId`: a product to open on arrival. */
+export function BrandsTable({ brands, openId, showId }: { brands: BrandRowView[]; openId?: string; showId?: string }) {
   const [open, setOpen] = useState<Set<string>>(() => new Set(openId ? [openId] : brands.length === 1 ? [brands[0].id] : []));
-  const [shownId, setShownId] = useState<string>();
+  const [shownId, setShownId] = useState<string | undefined>(showId);
   const shown = brands.flatMap((b) => b.products).find((p) => p.id === shownId);
 
   const toggle = (id: string) =>

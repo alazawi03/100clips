@@ -255,7 +255,7 @@ function OrderAction({ order, productName }: { order: OrderCardView; productName
   );
 }
 
-/** Where the creator asked for the product: the address they chose when accepting, with their phone. */
+/** Where the creator asked for the product: the location they sent when accepting, with their phone. No name: it's just a pin. */
 export function ShipToLines({ to, className }: { to: ShipTo; className?: string }) {
   const { t } = useI18n();
   const map = to.latitude !== undefined && to.longitude !== undefined ? `https://www.google.com/maps?q=${to.latitude},${to.longitude}` : undefined;
@@ -263,9 +263,12 @@ export function ShipToLines({ to, className }: { to: ShipTo; className?: string 
     <div className={cn("flex flex-col gap-0.5 text-small", className)}>
       <span className="flex items-center gap-1.5 font-medium">
         <MapPin aria-hidden className="size-4 shrink-0 text-text-muted" />
-        {t("campaignDetail.shipTo")} · {to.label ?? t(`campaignDetail.addressTypes.${to.type}`)}
+        {t("campaignDetail.shipTo")}
       </span>
-      <span dir="auto" className="whitespace-pre-line">{to.address}</span>
+      {/* The address keeps its own direction (bdi) but lines up with the page, so an English address sits on the right in Arabic. */}
+      <span className="whitespace-pre-line">
+        <bdi dir="auto">{to.address}</bdi>
+      </span>
       {to.phone && (
         <span className="text-text-muted">
           {t("campaignDetail.shipToPhone", { phone: "" })}
