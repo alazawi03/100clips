@@ -58,8 +58,9 @@ export function filterCreators(all: Creator[], f: CreatorFilters): Creator[] {
   });
   const by: Record<Sort, (a: Creator, b: Creator) => number> = {
     rating: (a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.completedOrders - a.completedOrders,
-    priceLow: (a, b) => fromPrice(a) - fromPrice(b),
-    priceHigh: (a, b) => fromPrice(b) - fromPrice(a),
+    // No price yet: last either way.
+    priceLow: (a, b) => (fromPrice(a) ?? Infinity) - (fromPrice(b) ?? Infinity),
+    priceHigh: (a, b) => (fromPrice(b) ?? -Infinity) - (fromPrice(a) ?? -Infinity),
     orders: (a, b) => b.completedOrders - a.completedOrders,
   };
   return result.sort(by[f.sort]);

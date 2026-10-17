@@ -1,7 +1,7 @@
-import { ArrowDownLeft, ArrowUpRight, CreditCard, Hourglass, Plus, Undo2 } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, CreditCard, Hourglass, Undo2 } from "lucide-react";
+import { TopUpButton } from "@/components/brand/balance/TopUpButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { api } from "@/lib/api";
@@ -22,17 +22,18 @@ type Payment = components["schemas"]["Payment"];
  * ended without work (declined, expired, withdrawn). Money out: held for running orders, paid for
  * approved ones. (Withdrawals to the bank come with the wallet slice.)
  */
-type EntryType = "topUp" | "card" | "hold" | "payment" | "refund";
+type EntryType = "topUp" | "card" | "hold" | "payment" | "refund" | "failed";
 type Entry = { id: string; date: string; label: string; detail?: string; type: EntryType; amount: number; creatorId?: string; badge: { tone: BadgeTone; label: string } };
 
-const typeIcon = { topUp: ArrowDownLeft, card: CreditCard, hold: Hourglass, payment: ArrowUpRight, refund: Undo2 };
+const typeIcon = { topUp: ArrowDownLeft, card: CreditCard, hold: Hourglass, payment: ArrowUpRight, refund: Undo2, failed: CreditCard };
 
 export default async function WalletPage() {
   const { t, f } = await getI18n();
-  const [ws, ledger, pending] = await Promise.all([
+  const [ws, ledger, pending, failed] = await Promise.all([
     workspace(),
     api<LedgerEntry[]>("/me/ledger?limit=200"),
     api<Payment[]>("/me/payments?status=pending"),
+    api<Payment[]>("/me/payments?status=failed&limit=50"),
   ]);
   const { orders } = ws;
   const held = orders.filter((o) => o.status === "pending" || o.status === "in_progress" || o.status === "delivered").reduce((sum, o) => sum + brandPaid(o), 0);
@@ -41,6 +42,8 @@ export default async function WalletPage() {
   const netCharged = moneyIn.reduce((sum, e) => sum + e.amount, 0);
   // Card payments not confirmed yet: nothing has moved, so they're a note rather than a line.
   const waitingByCard = pending.reduce((sum, p) => sum + p.by_card, 0);
+  // The balance part of those checkouts: held (already off the available balance) until the card is paid.
+  const heldForCard = pending.reduce((sum, p) => sum + p.from_balance, 0);
 
   const orderEntry = (o: Order): Entry => {
     const creator = ws.creator(o.creatorId)!;
@@ -67,6 +70,19 @@ export default async function WalletPage() {
       badge: { tone: "brand", label: t("walletPage.typeTopUp") },
     })),
     ...orders.map(orderEntry),
+    // The card was refused: shown so the brand knows, but no money moved.
+    ...failed.map((p): Entry => {
+      const campaign = ws.campaign(p.campaign_id ?? undefined);
+      return {
+        id: p.id,
+        date: dayOf(p.failed_at ?? p.created_at),
+        label: p.kind === "top_up" ? t("walletPage.topUpLabel") : t("walletPage.cardPaymentLabel"),
+        detail: campaign ? f.pick(campaign.title) || t("newCampaign.untitled") : undefined,
+        type: "failed",
+        amount: p.by_card,
+        badge: { tone: "error", label: t("walletPage.typeFailed") },
+      };
+    }),
   ].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
@@ -78,11 +94,9 @@ export default async function WalletPage() {
           <span className="text-small text-text-muted">{t("walletPage.available")}</span>
           <span className="text-display font-medium tabular-nums">{f.money(ws.balance)}</span>
           {waitingByCard > 0 && <p className="text-small text-text-muted">{t("walletPage.cardPending", { amount: f.money(waitingByCard) })}</p>}
+          {heldForCard > 0 && <p className="text-small text-text-muted">{t("walletPage.heldForCard", { amount: f.money(heldForCard) })}</p>}
           <div className="mt-auto flex flex-col gap-2">
-            <Button variant="primary" className="w-full">
-              <Plus aria-hidden />
-              {t("walletPage.topUp")}
-            </Button>
+            <TopUpButton />
           </div>
         </Card>
         <Card className="flex flex-col gap-2 p-5">
@@ -131,7 +145,11 @@ export default async function WalletPage() {
                     <Badge tone={entry.badge.tone} className="hidden sm:inline-flex">
                       {entry.badge.label}
                     </Badge>
-                    <span className={cn("min-w-24 text-end font-medium tabular-nums", entry.amount > 0 && "text-success")}>{f.signedMoney(entry.amount)}</span>
+                    {entry.type === "failed" ? (
+                      <span className="min-w-24 text-end font-medium tabular-nums text-text-muted line-through">{f.money(entry.amount)}</span>
+                    ) : (
+                      <span className={cn("min-w-24 text-end font-medium tabular-nums", entry.amount > 0 && "text-success")}>{f.signedMoney(entry.amount)}</span>
+                    )}
                   </li>
                 );
               })}

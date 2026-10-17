@@ -8,11 +8,14 @@ import { eventsOf, isLate } from "@/lib/orderFlow";
  * Things the brand did itself (sending offers, approving, shipping) aren't notifications.
  */
 
-export type NotificationKind = "accepted" | "declined" | "expired" | "received" | "clipReady" | "newVersion" | "adCode" | "late";
+/** What happened on an order. */
+export type OrderNotificationKind = "accepted" | "declined" | "expired" | "received" | "clipReady" | "newVersion" | "adCode" | "late";
+/** Plus a card payment of the brand's that didn't go through. */
+export type NotificationKind = OrderNotificationKind | "paymentFailed";
 
 export type BrandNotification = {
   key: string;
-  kind: NotificationKind;
+  kind: OrderNotificationKind;
   /** ISO date or date-time. */
   at: string;
   orderId: string;
@@ -25,7 +28,7 @@ export function brandNotifications(orders: Order[], today: string, ws: Pick<Work
     const events = [...eventsOf(order)].reverse(); // oldest first, to tell a first upload from a new version
     let uploads = 0;
     for (const [i, e] of events.entries()) {
-      const kind: NotificationKind | undefined =
+      const kind: OrderNotificationKind | undefined =
         e.type === "accepted"
           ? "accepted"
           : e.type === "declined"

@@ -162,6 +162,7 @@
       "deadlineLater": "Choose a date after the current deadline.",
       "brandSuspended": "This brand is suspended by laqta, so it can't pay for new work. Contact support.",
       "saveFailed": "Couldn't save. Try again.",
+      "topUpAmount": "Enter an amount from 1 to 10,000 BHD.",
       "payFailed": "Couldn't complete the payment. Try again.",
       "creatorUnavailable": "One of these creators can't take new work right now. Remove them and try again.",
       "alreadyOffered": "One of these creators already has an offer on this campaign."
@@ -441,7 +442,10 @@
   "walletPage": {
     "available": "Available balance",
     "topUp": "Top up wallet",
+    "topUpAmount": "Amount (BHD)",
+    "topUpPay": "Pay {amount}",
     "typeTopUp": "Top-up",
+    "typeFailed": "Failed",
     "typeHold": "Held",
     "typePayment": "Paid",
     "topUpLabel": "Wallet top-up by card",
@@ -492,6 +496,7 @@
       }
     },
     "cardPending": "{amount} by card, waiting for confirmation",
+    "heldForCard": "{amount} of your balance is held for that payment. It's charged once the card is confirmed, or freed if it fails.",
     "cardPaymentLabel": "Paid by card"
   },
   "industries": {
@@ -1168,6 +1173,11 @@
         "male": "No answer from {name}: the offer expired",
         "female": "No answer from {name}: the offer expired"
       }
+    },
+    "paymentFailed": {
+      "title": "Your card payment didn't go through",
+      "topUp": "Top-up of {amount} · nothing was charged",
+      "checkout": "{campaign} · {amount} · the offers weren't sent"
     },
     "details": {
       "declined": "{campaign} · {amount} is back in your balance",

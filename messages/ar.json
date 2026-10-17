@@ -171,6 +171,7 @@
       "deadlineLater": "اختر تاريخ بعد موعد التسليم الحالي.",
       "brandSuspended": "هذي العلامة موقوفة من لقطة وما تقدر تدفع لشغل جديد. تواصل مع الدعم.",
       "saveFailed": "ما قدرنا نحفظ. حاول مرة ثانية.",
+      "topUpAmount": "اكتب مبلغ من 1 إلى 10,000 د.ب.",
       "payFailed": "ما قدرنا نكمل الدفع. حاول مرة ثانية.",
       "creatorUnavailable": "أحد صنّاع المحتوى ما يقدر ياخذ شغل جديد الحين. شيله وحاول مرة ثانية.",
       "alreadyOffered": "أحد صنّاع المحتوى عنده عرض على هذي الحملة من قبل."
@@ -468,7 +469,10 @@
   "walletPage": {
     "available": "الرصيد المتاح",
     "topUp": "اشحن المحفظة",
+    "topUpAmount": "المبلغ (د.ب.)",
+    "topUpPay": "ادفع {amount}",
     "typeTopUp": "شحن",
+    "typeFailed": "فشل",
     "typeHold": "محجوز",
     "typePayment": "مدفوع",
     "topUpLabel": "شحن المحفظة من البطاقة",
@@ -519,6 +523,7 @@
       }
     },
     "cardPending": "{amount} بالبطاقة، بانتظار التأكيد",
+    "heldForCard": "{amount} من رصيدك محجوز لهذا الدفع. ينخصم إذا تأكد الدفع بالبطاقة، ويرجع لك إذا فشل.",
     "cardPaymentLabel": "دفع بالبطاقة"
   },
   "industries": {
@@ -1239,6 +1244,11 @@
         "male": "ما رد {name} وانتهى العرض",
         "female": "ما ردت {name} وانتهى العرض"
       }
+    },
+    "paymentFailed": {
+      "title": "ما تم الدفع بالبطاقة",
+      "topUp": "شحن {amount} · ما انخصم شي",
+      "checkout": "{campaign} · {amount} · ما انرسلت العروض"
     },
     "details": {
       "declined": "{campaign} · رجع {amount} لرصيدك",

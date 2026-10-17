@@ -143,6 +143,29 @@ function checkCard(form: FormData, byCard: number, errors: NonNullable<FormState
   if (!/^\d{3,4}$/.test(text(form, "cardCvc"))) errors.cardCvc = "forms.errors.cardCvc";
 }
 
+/**
+ * Tops up the balance by card. The payment waits for the card provider (an admin confirms it until
+ * there is one); the balance grows then.
+ */
+export async function topUpBalance(_prev: FormState, form: FormData): Promise<FormState> {
+  const values = Object.fromEntries(Object.entries(submitted(form)).filter(([k]) => !k.startsWith("card")));
+  const raw = text(form, "amount").replace(/,/g, "");
+  const amount = Number(raw);
+  const errors: NonNullable<FormState>["errors"] = {};
+  if (!/^\d+(\.\d{1,3})?$/.test(raw) || amount < 1 || amount > 10_000) errors.amount = "forms.errors.topUpAmount";
+  checkCard(form, 1, errors);
+  if (Object.keys(errors).length) return { errors, values };
+  try {
+    await api("/me/top-ups", { method: "POST", body: { amount } });
+  } catch (e) {
+    logFailure("Top-up", e);
+    const suspended = e instanceof ApiError && /suspended/i.test(e.message);
+    return { errors: { pay: suspended ? "forms.errors.brandSuspended" : "forms.errors.payFailed" }, values };
+  }
+  revalidatePath("/", "layout");
+  return { errors: {}, values: {} };
+}
+
 /** What the brand pays now: creators' prices plus the fee; the balance first when chosen, the rest by card. */
 function byCardFor(ws: Workspace, toPay: number, useBalance: boolean) {
   return toPay - (useBalance ? Math.min(Math.max(ws.balance, 0), toPay) : 0);

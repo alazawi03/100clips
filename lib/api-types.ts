@@ -3115,6 +3115,11 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             paid_at: string | null;
+            /**
+             * Format: date-time
+             * @description When the card payment failed
+             */
+            failed_at: string | null;
         };
         TopUpDto: {
             /**
@@ -3124,8 +3129,10 @@ export interface components {
             amount: number;
         };
         Balance: {
-            /** @description BHD available to spend (or withdraw) */
+            /** @description BHD available to spend (or withdraw): held amounts are already taken off */
             balance: number;
+            /** @description BHD held for checkouts waiting for the card: charged when the card is paid, freed if it fails */
+            held: number;
         };
         /** @enum {string} */
         LedgerType: "top_up" | "card_payment" | "charge" | "refund" | "earning" | "payout" | "withdrawal" | "withdrawal_returned" | "adjustment";
@@ -3173,6 +3180,11 @@ export interface components {
             created_at: string;
             /** Format: date-time */
             paid_at: string | null;
+            /**
+             * Format: date-time
+             * @description When the card payment failed
+             */
+            failed_at: string | null;
             account: components["schemas"]["PaymentAccount"];
             /** @description The campaign's title (checkouts) */
             campaign_title: string | null;

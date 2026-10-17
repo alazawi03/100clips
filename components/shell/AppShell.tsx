@@ -37,7 +37,8 @@ export async function AppShell({ children }: { children: ReactNode }) {
     handle: c.handle,
     photo: c.photo,
     detail: [f.pick(c.city), c.niches[0] && t(`niches.${c.niches[0]}`)].filter(Boolean).join(t("common.separator")),
-    price: t("common.fromPrice", { price: f.money(priceForBrand(fromPrice(c))) }),
+    // No price yet: nothing shown, rather than "from Infinity".
+    price: fromPrice(c) === undefined ? "" : t("common.fromPrice", { price: f.money(priceForBrand(fromPrice(c)!)) }),
     keys: [c.name.ar, c.name.en.toLowerCase(), c.handle.toLowerCase()],
   }));
 
