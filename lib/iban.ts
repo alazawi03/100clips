@@ -30,6 +30,27 @@ export function checkIban(input: string, countries: readonly string[] = Object.k
 /** "BH67 BMAG 0000 1299 1234 56": groups of four, as banks print it. */
 export const groupIban = (input: string) => normalizeIban(input).replace(/(.{4})(?=.)/g, "$1 ");
 
+/** The longest IBAN any country has. */
+export const MAX_IBAN_LENGTH = 34;
+
+/**
+ * The IBAN box as it's typed or pasted: upper case, letters and digits only (at most
+ * MAX_IBAN_LENGTH), in groups of four. The cursor stays after the same letter or digit it followed.
+ * The same as the creator app's groupIbanTyping.
+ */
+export function groupIbanTyping(input: string, cursor: number): [text: string, cursor: number] {
+  let kept = "";
+  let before = 0; // letters and digits before the cursor
+  for (let i = 0; i < input.length && kept.length < MAX_IBAN_LENGTH; i++) {
+    const ch = input[i].toUpperCase();
+    if (!/[A-Z0-9]/.test(ch)) continue;
+    kept += ch;
+    if (i < cursor) before++;
+  }
+  // Each full group of four before the cursor adds a space, except one ending right at it.
+  return [groupIban(kept), before === 0 ? 0 : before + Math.floor((before - 1) / 4)];
+}
+
 /** "BH67 •••• 3456": enough to recognise it, not enough to copy it. */
 export function maskIban(input: string): string {
   const iban = normalizeIban(input);

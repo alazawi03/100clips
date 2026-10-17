@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { Landmark, Pencil, Trash2 } from "lucide-react";
 import type { FormState } from "@/app/actions/brand";
 import { removeBankAccount, saveBankAccount } from "@/app/actions/wallet";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Field, Input } from "@/components/ui/Form";
+import { groupIban, groupIbanTyping, MAX_IBAN_LENGTH, normalizeIban } from "@/lib/iban";
 
 type Props = {
   /** The saved account: holder, and the IBAN grouped and masked for showing. */
@@ -98,7 +99,7 @@ function BankForm({ holder, onCancel, onSaved }: { holder?: string; onCancel?: (
         <Input id="bank-holder" name="holder" autoComplete="name" maxLength={80} defaultValue={state?.values.holder ?? holder} aria-invalid={!!err("holder")} />
       </Field>
       <Field label={t("settings.bank.iban")} htmlFor="bank-iban" error={err("iban")} required hint={t("settings.bank.ibanHint")}>
-        <Input id="bank-iban" name="iban" dir="ltr" autoComplete="off" spellCheck={false} maxLength={42} placeholder="BH67 BMAG 0000 1299 1234 56" defaultValue={state?.values.iban} aria-invalid={!!err("iban")} className="uppercase" />
+        <IbanInput id="bank-iban" name="iban" defaultValue={state?.values.iban} aria-invalid={!!err("iban")} />
       </Field>
       <div className="flex flex-wrap gap-2">
         <Button type="submit" variant="primary" aria-busy={pending} disabled={pending}>
@@ -111,5 +112,41 @@ function BankForm({ holder, onCancel, onSaved }: { holder?: string; onCancel?: (
         )}
       </div>
     </form>
+  );
+}
+
+/** The IBAN box: grouped in fours as it's typed or pasted, as banks print it, with the cursor kept in place. */
+function IbanInput({ defaultValue, ...props }: { id: string; name: string; defaultValue?: string; "aria-invalid"?: boolean }) {
+  const initial = groupIban(defaultValue ?? "");
+  const last = useRef(initial);
+  const format = (box: HTMLInputElement) => {
+    let text = box.value;
+    let cursor = box.selectionStart ?? text.length;
+    // Backspace on the space between two groups: delete the character before it instead.
+    if (text.length < last.current.length && cursor > 0 && normalizeIban(text) === normalizeIban(last.current)) {
+      text = text.slice(0, cursor - 1) + text.slice(cursor);
+      cursor--;
+    }
+    const [grouped, at] = groupIbanTyping(text, cursor);
+    box.value = grouped;
+    box.setSelectionRange(at, at);
+    last.current = grouped;
+  };
+  return (
+    <Input
+      {...props}
+      dir="ltr"
+      autoComplete="off"
+      autoCorrect="off"
+      autoCapitalize="characters"
+      spellCheck={false}
+      maxLength={MAX_IBAN_LENGTH + 8}
+      placeholder="BH67 BMAG 0000 1299 1234 56"
+      defaultValue={initial}
+      // While a phone keyboard is still composing a word, wait until it's done.
+      onChange={(e) => !(e.nativeEvent as InputEvent).isComposing && format(e.currentTarget)}
+      onCompositionEnd={(e) => format(e.currentTarget)}
+      className="uppercase tabular-nums"
+    />
   );
 }
