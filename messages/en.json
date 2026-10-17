@@ -905,7 +905,12 @@
   },
   "chat": {
     "title": "Messages",
-    "empty": "No conversations yet. A chat opens as soon as a creator accepts your order.",
+    "empty": "No conversations yet. Message a creator from their profile, or a chat opens when a creator accepts your order.",
+    "newHint": "Say hello to {name}. The chat starts with your first message.",
+    "newOfferHint": "Agree on the details here, then send an offer so the payment is protected.",
+    "writeAs": "Write as",
+    "pickBrand": "Choose which brand is writing.",
+    "startSuspended": "Your account is suspended, so you can't start new chats. Contact support.",
     "pick": "Choose a conversation",
     "placeholder": "Write a message",
     "send": "Send",

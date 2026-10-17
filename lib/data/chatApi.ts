@@ -72,7 +72,7 @@ export async function sendMessage(id: string, text: string): Promise<void> {
   await api(`/conversations/${id}/messages`, { method: "POST", body: { body: text } });
 }
 
-/** The chat between a brand and a creator, started if there isn't one yet. */
-export async function openConversation(brandId: string, creatorId: string): Promise<string> {
-  return (await api<ConversationRow>("/conversations", { method: "POST", body: { brand_id: brandId, creator_id: creatorId } })).id;
+/** Sends `text` to a creator as a brand: in their chat, or as the first message of a new one. The chat's id. */
+export async function startConversation(brandId: string, creatorId: string, text: string): Promise<string> {
+  return (await api<ConversationRow>("/conversations", { method: "POST", body: { brand_id: brandId, creator_id: creatorId, body: text } })).id;
 }

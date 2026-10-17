@@ -2,20 +2,25 @@
 
 import { SendHorizontal } from "lucide-react";
 import { useActionState, useRef } from "react";
-import { sendChatMessage } from "@/app/actions/messages";
+import { sendChatMessage, type SendState } from "@/app/actions/messages";
 import { useI18n } from "@/components/i18n/I18nProvider";
 
+type Props =
+  | { conversationId: string; send?: never; defaultText?: string }
+  /** A first message: `send` starts the chat with it (see startChat). */
+  | { conversationId?: never; send: (prev: SendState, form: FormData) => Promise<SendState>; defaultText?: string };
+
 /** Enter sends, Shift+Enter adds a line. React clears the box after the action; if sending fails, the text comes back. */
-export function Composer({ conversationId, defaultText }: { conversationId: string; defaultText?: string }) {
+export function Composer({ conversationId, send, defaultText }: Props) {
   const { t } = useI18n();
   const form = useRef<HTMLFormElement>(null);
-  const [state, action, pending] = useActionState(sendChatMessage.bind(null, conversationId), undefined);
+  const [state, action, pending] = useActionState(send ?? sendChatMessage.bind(null, conversationId!), undefined);
   const text = state?.text ?? defaultText;
   return (
     <form ref={form} action={action} className="flex flex-col gap-1 border-t border-border p-3">
       {state?.failed && (
         <p role="alert" className="px-2 text-small text-error">
-          {t("chat.sendFailed")}
+          {t(state.suspended ? "chat.startSuspended" : "chat.sendFailed")}
         </p>
       )}
       <div className="flex items-end gap-2">

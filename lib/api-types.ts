@@ -1342,7 +1342,7 @@ export interface paths {
         put?: never;
         /**
          * Open a chat
-         * @description One per brand and creator: gives the one there is, or starts it. Brand owners message creators they could book or have worked with; creators, brands that sent them an offer.
+         * @description One per brand and creator: gives the one there is, or starts it, and sends `body` in it if given. Brand owners message creators they could book or have worked with, and start a new chat with its first message (`body` required; not while the account is suspended); creators, brands that sent them an offer.
          */
         post: operations["ConversationsController_open"];
         delete?: never;
@@ -3548,6 +3548,11 @@ export interface components {
              * @description The creator to message; brand owners only
              */
             creator_id?: string;
+            /**
+             * @description A message to send in it. Required for a brand's first message to a creator: the chat starts with it
+             * @example Hi! We'd love a reel of our new blend. Are you free next week?
+             */
+            body?: string;
         };
         SendMessageDto: {
             /** @example Can I film at the branch on Saturday morning? */
