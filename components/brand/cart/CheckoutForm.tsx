@@ -75,7 +75,7 @@ const styleIcon: Record<VideoStyle, LucideIcon> = { ad: Megaphone, review: Star,
 
 /** Which step holds a field, so a server error can send you back to it. */
 const baseStepOf = (name: string) =>
-  name.startsWith("card") || name === "pay" ? 2 : name.startsWith("reference-") || ["title", "brief", "videoStyle", "deadline", "keyMessage", "mustInclude", "avoid"].includes(name) ? 1 : 0;
+  name.startsWith("card") || name === "pay" ? 2 : name.startsWith("reference-") || ["title", "brief", "videoStyle", "deadline", "uploadDate", "keyMessage", "mustInclude", "avoid"].includes(name) ? 1 : 0;
 
 /** What DateInput sends for a full, real date. */
 const isIsoDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -262,6 +262,12 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
       if (!get("videoStyle")) found.videoStyle = "forms.errors.pickVideoStyle";
       if (get("deadline") && !isIsoDate(get("deadline"))) found.deadline = "forms.errors.dateInvalid";
       else if (get("deadline") && get("deadline") < minDeadline) found.deadline = "forms.errors.deadlineFuture";
+      // Optional; after the deadline when there is one, else after today.
+      const upload = get("uploadDate");
+      const deadline = isIsoDate(get("deadline")) ? get("deadline") : "";
+      if (upload && !isIsoDate(upload)) found.uploadDate = "forms.errors.dateInvalid";
+      else if (upload && deadline && upload <= deadline) found.uploadDate = "forms.errors.uploadAfterDeadline";
+      else if (upload && !deadline && upload < minDeadline) found.uploadDate = "forms.errors.deadlineFuture";
       data.getAll("reference").forEach((r, i) => {
         if (String(r).trim() && !isUrl(String(r).trim())) found[`reference-${i}`] = "forms.errors.urlInvalid";
       });
@@ -516,6 +522,10 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
                   </Field>
                   <Field label={t("checkout.deadline")} htmlFor="deadline" error={err("deadline")} hint={t("checkout.deadlineHint")}>
                     <DateInput id="deadline" name="deadline" min={minDeadline} defaultValue={v("deadline")} aria-invalid={!!err("deadline")} aria-describedby={described("deadline")} className="sm:max-w-72" />
+                  </Field>
+                  {/* Kept with the draft only for now: the API has no field for it yet, so it isn't sent at checkout. */}
+                  <Field label={t("checkout.uploadDate")} htmlFor="uploadDate" error={err("uploadDate")} hint={t("checkout.uploadDateHint")}>
+                    <DateInput id="uploadDate" name="uploadDate" min={minDeadline} defaultValue={v("uploadDate")} aria-invalid={!!err("uploadDate")} aria-describedby={described("uploadDate")} className="sm:max-w-72" />
                   </Field>
                   {/* What creators see with the request; optional, so folded away. Closed fields still submit. */}
                   <details open={hasMore || undefined} className="group/more rounded-[var(--radius-lg)] border border-border">

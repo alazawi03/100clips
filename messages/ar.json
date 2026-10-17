@@ -162,6 +162,7 @@
       "mapUrlInvalid": "الصق رابط من خرائط Google، مثل https://maps.app.goo.gl/…",
       "pickVideoStyle": "اختر أسلوب الفيديو.",
       "deadlineFuture": "اختر تاريخ بعد اليوم.",
+      "uploadAfterDeadline": "اختر تاريخ بعد موعد التسليم.",
       "dateInvalid": "اكتب التاريخ بصيغة يوم/شهر/سنة.",
       "dateTooEarly": "اختر {date} أو بعده.",
       "pickCreators": "اختر صانع محتوى واحد على الأقل.",
@@ -648,6 +649,8 @@
     },
     "deadline": "موعد التسليم",
     "deadlineHint": "آخر موعد يسلّم فيه صنّاع المحتوى المقاطع.",
+    "uploadDate": "تاريخ النشر",
+    "uploadDateHint": "اختياري. اليوم اللي ينشر فيه صنّاع المحتوى المقطع، بعد موعد التسليم.",
     "videoStyleGuideLabel": "عن أساليب الفيديو",
     "videoStyleGuideTitle": "أي أسلوب يناسبك؟",
     "videoStyleHints": {
