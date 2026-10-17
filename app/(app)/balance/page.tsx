@@ -42,6 +42,8 @@ export default async function WalletPage() {
   const netCharged = moneyIn.reduce((sum, e) => sum + e.amount, 0);
   // Card payments not confirmed yet: nothing has moved, so they're a note rather than a line.
   const waitingByCard = pending.reduce((sum, p) => sum + p.by_card, 0);
+  // The balance part of those checkouts: held (already off the available balance) until the card is paid.
+  const heldForCard = pending.reduce((sum, p) => sum + p.from_balance, 0);
 
   const orderEntry = (o: Order): Entry => {
     const creator = ws.creator(o.creatorId)!;
@@ -92,6 +94,7 @@ export default async function WalletPage() {
           <span className="text-small text-text-muted">{t("walletPage.available")}</span>
           <span className="text-display font-medium tabular-nums">{f.money(ws.balance)}</span>
           {waitingByCard > 0 && <p className="text-small text-text-muted">{t("walletPage.cardPending", { amount: f.money(waitingByCard) })}</p>}
+          {heldForCard > 0 && <p className="text-small text-text-muted">{t("walletPage.heldForCard", { amount: f.money(heldForCard) })}</p>}
           <div className="mt-auto flex flex-col gap-2">
             <TopUpButton />
           </div>

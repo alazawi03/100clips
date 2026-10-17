@@ -38,7 +38,7 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
   const profile = await creatorProfile(id);
   // Brands only see creators where 100clips runs; the rest are on the waitlist.
   if (!profile || !isActiveMarket(profile.creator.country)) notFound();
-  const { creator, reviews, clips } = profile;
+  const { creator, reviews } = profile;
   const i18n = await getI18n();
   const { t, f } = i18n;
   const [ws, lists] = await Promise.all([workspace(), allLists()]);
@@ -177,32 +177,6 @@ export default async function CreatorProfilePage({ params }: PageProps<"/creator
           </Card>
         )}
       </section>
-
-      {/* Clips made for brands on 100clips, approved and shown publicly. */}
-      {clips.length > 0 && (
-        <section aria-labelledby="brand-clips-title">
-          <SectionHeader id="brand-clips-title" title={t("profile.brandClips")} />
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            {clips.map((clip) => {
-              const brand = t("profile.forBrand", { brand: f.pick(clip.brand) });
-              return (
-                <li key={clip.id} className="flex flex-col gap-2">
-                  <video
-                    dir="ltr"
-                    src={clip.videoSrc}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    aria-label={t("profile.play", { title: brand })}
-                    className="aspect-[9/16] w-full rounded-[var(--radius-lg)] bg-black object-cover"
-                  />
-                  <span className="truncate text-small text-text-muted">{brand}</span>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
 
       <section aria-labelledby="reviews-title">
         <SectionHeader id="reviews-title" title={t("profile.reviews")} />

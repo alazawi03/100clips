@@ -2294,8 +2294,10 @@ export interface components {
             amount: number;
         };
         Balance: {
-            /** @description BHD available to spend (or withdraw) */
+            /** @description BHD available to spend (or withdraw): held amounts are already taken off */
             balance: number;
+            /** @description BHD held for checkouts waiting for the card: charged when the card is paid, freed if it fails */
+            held: number;
         };
         /** @enum {string} */
         LedgerType: "top_up" | "card_payment" | "charge" | "refund" | "earning" | "payout" | "withdrawal" | "withdrawal_returned" | "adjustment";

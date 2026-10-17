@@ -198,7 +198,6 @@
     "message": "Message",
     "messageName": "Message {name}",
     "portfolio": "Portfolio",
-    "brandClips": "Made on 100clips",
     "noVideos": "No videos uploaded yet.",
     "bookingSoon": "Booking opens soon, with checkout. Prices include the service fee."
   },
@@ -448,6 +447,7 @@
       }
     },
     "cardPending": "{amount} by card, waiting for confirmation",
+    "heldForCard": "{amount} of your balance is held for that payment. It's charged once the card is confirmed, or freed if it fails.",
     "cardPaymentLabel": "Paid by card"
   },
   "industries": {
