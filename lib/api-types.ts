@@ -1415,6 +1415,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/orders/{id}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report a problem on an order
+         * @description The order's creator or the brand's owner, for the admin to look into; the order carries on. One open report per side; the reporter sees it, and the admin's reply, in the order's reports.
+         */
+        post: operations["ReportsController_reportOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/reports": {
         parameters: {
             query?: never;
@@ -3294,6 +3314,26 @@ export interface components {
             /** Format: date-time */
             at: string;
         };
+        /** @enum {string} */
+        Reporter: "brand" | "creator";
+        /** @enum {string} */
+        ReportReason: "off_platform" | "abuse" | "spam" | "not_delivered" | "not_as_agreed" | "product_issue" | "creator_conduct" | "brand_conduct" | "payment" | "other";
+        /** @enum {string} */
+        ReportStatus: "open" | "resolved";
+        OrderReport: {
+            /** Format: uuid */
+            id: string;
+            reporter: components["schemas"]["Reporter"];
+            reason: components["schemas"]["ReportReason"];
+            details: string | null;
+            status: components["schemas"]["ReportStatus"];
+            /** @description The admin's reply */
+            resolution: string | null;
+            /** Format: date-time */
+            resolved_at: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
         Order: {
             /** Format: uuid */
             id: string;
@@ -3368,6 +3408,8 @@ export interface components {
             clips: components["schemas"]["OrderClip"][];
             /** @description The order's history, oldest first */
             events: components["schemas"]["OrderEvent"][];
+            /** @description Problems reported on it by the caller's side (admins: both sides), oldest first */
+            reports: components["schemas"]["OrderReport"][];
         };
         AcceptOfferDto: {
             /**
@@ -3565,12 +3607,6 @@ export interface components {
             /** @description What happened, in the reporter's words */
             details?: string;
         };
-        /** @enum {string} */
-        Reporter: "brand" | "creator";
-        /** @enum {string} */
-        ReportReason: "off_platform" | "abuse" | "spam" | "not_delivered" | "not_as_agreed" | "product_issue" | "creator_conduct" | "brand_conduct" | "payment" | "other";
-        /** @enum {string} */
-        ReportStatus: "open" | "resolved";
         Report: {
             /** Format: uuid */
             id: string;
@@ -3598,6 +3634,17 @@ export interface components {
             resolved_at: string | null;
             /** Format: date-time */
             created_at: string;
+        };
+        /**
+         * @description Brands: any but brand_conduct. Creators: not_as_agreed, product_issue, brand_conduct, payment or other.
+         * @enum {string}
+         */
+        OrderReportReason: "not_delivered" | "not_as_agreed" | "product_issue" | "creator_conduct" | "brand_conduct" | "payment" | "other";
+        ReportOrderDto: {
+            /** @description Brands: any but brand_conduct. Creators: not_as_agreed, product_issue, brand_conduct, payment or other. */
+            reason: components["schemas"]["OrderReportReason"];
+            /** @description What happened, in the reporter's words */
+            details?: string;
         };
         ReportBrand: {
             /** Format: uuid */
@@ -8748,6 +8795,67 @@ export interface operations {
             };
             /** @description Not allowed */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ReportsController_reportOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportOrderDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Report"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

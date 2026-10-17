@@ -235,6 +235,8 @@ export type Order = {
   rating?: number;
   /** The brand's comment when approving. */
   review?: string;
+  /** The brand's latest "Report a problem" on it, with laqta support's reply once resolved. */
+  problem?: ProblemReport;
 };
 
 export type OrderItem = { format: ContentFormat; quantity: number; /** In BHD, per clip. */ price: number };
@@ -300,10 +302,8 @@ export const PROBLEM_REASONS: ProblemReason[] = ["notDelivered", "notAsAgreed", 
 /** A "Report a problem" from the brand on an order, for the admin to look into. */
 export type ProblemReport = {
   id: string;
-  orderId: string;
-  brandId: string;
   reason: ProblemReason;
-  details: string;
+  details?: string;
   /** ISO date-time. */
   at: string;
   status: "open" | "resolved";

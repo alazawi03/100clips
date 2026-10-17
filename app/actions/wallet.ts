@@ -3,12 +3,11 @@
 import { revalidatePath } from "next/cache";
 import type { FormState } from "@/app/actions/brand";
 import { api, ApiError } from "@/lib/api";
-import { workspace } from "@/lib/data/live";
-import { addProblemReport } from "@/lib/data/problems";
 import { PROBLEM_REASONS, type ProblemReason } from "@/lib/data/types";
 import { MIN_WITHDRAWAL } from "@/lib/data/wallet";
 import { checkIban, normalizeIban } from "@/lib/iban";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { API_PROBLEM_REASON } from "@/lib/reportReasons";
 
 /* Money out of the balance (withdrawals, the bank account they go to) and "Report a problem" on an order. */
 
@@ -69,17 +68,24 @@ export async function removeBankAccount() {
   revalidatePath("/", "layout");
 }
 
-/** "Report a problem" on an order: a reason and what happened, for 100clips support. */
-export async function reportProblem(orderId: string, _prev: FormState, form: FormData): Promise<FormState> {
-  const order = (await workspace()).order(orderId);
+/** Sent, or `already`: the brand's earlier report on the order is still open, so nothing new was saved. */
+export type ProblemState = (NonNullable<FormState> & { already?: boolean }) | null;
+
+/** "Report a problem" on an order: a reason and what happened, for laqta support. */
+export async function reportProblem(orderId: string, _prev: ProblemState, form: FormData): Promise<ProblemState> {
   const reason = text(form, "reason");
   const details = text(form, "details").slice(0, 1000);
   const errors: NonNullable<FormState>["errors"] = {};
   if (!PROBLEM_REASONS.includes(reason as ProblemReason)) errors.reason = "orderDetail.problem.errors.reason";
   if (!details) errors.details = "orderDetail.problem.errors.details";
-  if (!order) errors.form = "orderDetail.problem.errors.alreadyOpen";
   if (Object.keys(errors).length > 0) return { errors, values: { reason, details } };
-  if (!addProblemReport({ orderId, brandId: order!.brandId, reason: reason as ProblemReason, details })) return { errors: { form: "orderDetail.problem.errors.alreadyOpen" }, values: { reason, details } };
+  try {
+    await api(`/orders/${orderId}/reports`, { method: "POST", body: { reason: API_PROBLEM_REASON[reason as ProblemReason], details } });
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 409) return { errors: {}, values: {}, already: true };
+    logFailure("Reporting a problem", e);
+    return { errors: { form: "orderDetail.problem.errors.failed" }, values: { reason, details } };
+  }
   revalidatePath(`/orders/${orderId}`);
   return { errors: {}, values: {} };
 }

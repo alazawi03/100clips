@@ -2,6 +2,7 @@ import { cache } from "react";
 import { api } from "@/lib/api";
 import type { components } from "@/lib/api-types";
 import { serviceFee, withFee } from "@/lib/fees";
+import { problemReasonFromApi } from "@/lib/reportReasons";
 import { isActiveOrder } from "@/lib/statuses";
 import { dayOf } from "@/lib/today";
 import { myBrands, productsOf } from "./brandsApi";
@@ -154,6 +155,8 @@ function toOrder(row: OrderRow): Order {
       ? { sentAt: row.sent_at ?? undefined, note: row.ship_note ?? undefined, receivedAt: row.received_at ?? undefined, returnedAt: row.returned_at ?? undefined }
       : undefined;
   const ship = row.ship_to;
+  // Admins see both sides' reports; the dashboard shows the brand's latest.
+  const problem = row.reports.filter((r) => r.reporter === "brand").at(-1);
   return {
     id: row.id,
     number: row.number,
@@ -187,6 +190,15 @@ function toOrder(row: OrderRow): Order {
     events,
     rating: row.rating ?? undefined,
     review: row.review ?? undefined,
+    problem: problem && {
+      id: problem.id,
+      reason: problemReasonFromApi(problem.reason),
+      details: problem.details ?? undefined,
+      at: problem.created_at,
+      status: problem.status,
+      resolution: problem.resolution ?? undefined,
+      resolvedAt: problem.resolved_at ?? undefined,
+    },
   };
 }
 

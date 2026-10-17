@@ -18,11 +18,10 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/cn";
 import { conversations } from "@/lib/data/chatApi";
 import { clipOf, workspace } from "@/lib/data/live";
-import { reportOf } from "@/lib/data/problems";
 import { clipVersions, currentStep, nextAction, offerHoursLeft, revisionUsed, stepsFor, waitingFor } from "@/lib/orderFlow";
 import { ShipButton, ShipToLines, Stars } from "@/components/brand/campaigns/OrderCard";
 import { Button, LinkButton, buttonClass } from "@/components/ui/Button";
-import { nowIso, today } from "@/lib/today";
+import { dayOf, nowIso, today } from "@/lib/today";
 import { campaignProgress, isActiveOrder, orderBadgeStatus } from "@/lib/statuses";
 import { brandPaid, priceForBrand } from "@/lib/fees";
 import { getI18n } from "@/lib/i18n/server";
@@ -50,7 +49,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const action = nextAction(order, { physical, returns });
   const watchable = clip && (order.status === "delivered" || order.status === "approved");
   const active = isActiveOrder(order);
-  const report = reportOf(order.id);
+  const report = order.problem;
   const unread = (await conversations()).find((c) => c.brandId === order.brandId && c.creatorId === order.creatorId)?.unread ?? 0;
   // Just approved: the celebration, bigger when this was the campaign's last clip.
   const justApproved = done === "approved" && order.status === "approved";
@@ -309,25 +308,26 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
             </dl>
           </Card>
 
-          {/* 100clips support: a report already sent and its answer, or a way to send one. */}
+          {/* laqta support: the brand's latest report and its answer, or a way to send one. */}
           <Card className="flex flex-col gap-2 p-5">
             <h2 className="font-medium">{t("orderDetail.problem.cardTitle")}</h2>
             {report && (
               <div className="flex flex-col gap-1 text-small">
                 <p className="flex items-center gap-1.5">
                   <Flag aria-hidden className="size-4 shrink-0 text-text-muted" />
-                  {t(report.status === "open" ? "orderDetail.problem.open" : "orderDetail.problem.resolved", { date: f.date(report.at.slice(0, 10)) })}
+                  {t(report.status === "open" ? "orderDetail.problem.open" : "orderDetail.problem.resolved", { date: f.date(dayOf(report.at)) })}
                 </p>
                 <p className="text-text-muted">{t(`orderDetail.problem.reasons.${report.reason}`)}</p>
-                {report.resolution && <p className="rounded-[var(--radius-md)] bg-surface p-3">{report.resolution}</p>}
+                {report.resolution && (
+                  <div className="rounded-[var(--radius-md)] bg-surface p-3">
+                    <p className="text-caption text-text-muted">{t("orderDetail.problem.reply")}</p>
+                    <p>{report.resolution}</p>
+                  </div>
+                )}
               </div>
             )}
-            {report?.status !== "open" && (
-              <>
-                {!report && <p className="text-small text-text-muted">{t("orderDetail.problem.hint")}</p>}
-                <ReportProblem orderId={order.id} />
-              </>
-            )}
+            {!report && <p className="text-small text-text-muted">{t("orderDetail.problem.hint")}</p>}
+            <ReportProblem orderId={order.id} canReport={report?.status !== "open"} />
           </Card>
 
           <Card className="p-5">

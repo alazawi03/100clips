@@ -436,8 +436,11 @@
       "errors": {
         "reason": "Pick what the problem is.",
         "details": "Tell us what happened.",
-        "alreadyOpen": "There's already an open report on this order."
-      }
+        "failed": "Couldn't send the report. Try again."
+      },
+      "already": "You already reported a problem on this order",
+      "alreadyHint": "laqta support is looking into it. You can report again once they've replied.",
+      "reply": "laqta support's reply"
     }
   },
   "walletPage": {
