@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import type { FormState } from "@/app/actions/brand";
+import { api, ApiError } from "@/lib/api";
 import { workspace } from "@/lib/data/live";
-import { ACTIVE_MARKETS } from "@/lib/data/markets";
 import { addProblemReport } from "@/lib/data/problems";
 import { PROBLEM_REASONS, type ProblemReason } from "@/lib/data/types";
-import * as wallet from "@/lib/data/wallet";
+import { MIN_WITHDRAWAL } from "@/lib/data/wallet";
 import { checkIban, normalizeIban } from "@/lib/iban";
 import type { MessageKey } from "@/lib/i18n/messages";
 
@@ -14,12 +14,23 @@ import type { MessageKey } from "@/lib/i18n/messages";
 
 const text = (form: FormData, name: string) => String(form.get(name) ?? "").trim();
 
+const logFailure = (what: string, e: unknown) => console.error(`${what} failed:`, e instanceof ApiError ? `${e.status} ${e.message}` : e);
+
 /** "Withdraw": the amount leaves the balance now; 100clips sends it to the bank in 5–7 working days. */
 export async function requestWithdrawal(_prev: FormState, form: FormData): Promise<FormState> {
   const raw = text(form, "amount");
   const amount = Math.round(Number(raw) * 1000) / 1000;
-  const { problem } = wallet.requestWithdrawal(raw && Number.isFinite(amount) ? amount : NaN);
-  if (problem) return { errors: { amount: `walletPage.withdraw.errors.${problem}` }, values: { amount: raw } };
+  const values = { amount: raw };
+  if (!raw || !Number.isFinite(amount) || amount < MIN_WITHDRAWAL) return { errors: { amount: "walletPage.withdraw.errors.tooSmall" }, values };
+  try {
+    await api("/me/withdrawals", { method: "POST", body: { amount } });
+  } catch (e) {
+    // The API's checks, in the page's words: no bank account, or more than the balance can spend.
+    if (e instanceof ApiError && /bank account/i.test(e.message)) return { errors: { amount: "walletPage.withdraw.errors.noBank" }, values };
+    if (e instanceof ApiError && /balance/i.test(e.message)) return { errors: { amount: "walletPage.withdraw.errors.tooMuch" }, values };
+    logFailure("Requesting a withdrawal", e);
+    return { errors: { amount: "forms.errors.saveFailed" }, values };
+  }
   revalidatePath("/", "layout");
   return { errors: {}, values: {} };
 }
@@ -32,23 +43,29 @@ const IBAN_ERRORS: Record<NonNullable<ReturnType<typeof checkIban>>, MessageKey>
   checksum: "settings.bank.errors.ibanChecksum",
 };
 
-/** Adds or replaces the bank account withdrawals go to. Checked like the creator app's (length per country, mod 97). */
+/** Adds or replaces the bank account withdrawals go to. Checked like the creator app's (length per country, mod 97); the API checks again. */
 export async function saveBankAccount(_prev: FormState, form: FormData): Promise<FormState> {
   const holder = text(form, "holder").slice(0, 80);
   const iban = normalizeIban(text(form, "iban"));
   const errors: NonNullable<FormState>["errors"] = {};
   if (!holder) errors.holder = "settings.bank.errors.holderRequired";
-  // Bank accounts in the active markets only (Bahrain for the MVP).
-  const problem = checkIban(iban, ACTIVE_MARKETS);
+  // A bank account in any Gulf country.
+  const problem = checkIban(iban);
   if (problem) errors.iban = IBAN_ERRORS[problem];
-  if (Object.keys(errors).length > 0) return { errors, values: { holder, iban: text(form, "iban") } };
-  wallet.setBankAccount({ holder, iban });
+  const values = { holder, iban: text(form, "iban") };
+  if (Object.keys(errors).length > 0) return { errors, values };
+  try {
+    await api("/me/bank-account", { method: "PUT", body: { holder_name: holder, iban } });
+  } catch (e) {
+    logFailure("Saving the bank account", e);
+    return { errors: { iban: e instanceof ApiError && e.status === 400 ? "settings.bank.errors.ibanChecksum" : "forms.errors.saveFailed" }, values };
+  }
   revalidatePath("/", "layout");
   return { errors: {}, values: {} };
 }
 
 export async function removeBankAccount() {
-  wallet.removeBankAccount();
+  await api("/me/bank-account", { method: "DELETE" });
   revalidatePath("/", "layout");
 }
 

@@ -1187,6 +1187,14 @@
       "newVersion": "{campaign} · after your revision",
       "late": "{campaign} · was due {date}",
       "expired": "{campaign} · {amount} is back in your balance"
+    },
+    "withdrawalSent": {
+      "title": "Your withdrawal was sent",
+      "detail": "{amount} to {iban}"
+    },
+    "withdrawalRejected": {
+      "title": "Your withdrawal wasn't sent",
+      "detail": "{amount} is back in your balance · {note}"
     }
   },
   "debug": {
@@ -1275,13 +1283,13 @@
       "holder": "Account holder name",
       "holderHint": "Exactly as your bank has it.",
       "iban": "IBAN",
-      "ibanHint": "A bank account in Bahrain (the IBAN starts with BH).",
+      "ibanHint": "A bank account in a Gulf country: Bahrain, Saudi Arabia, the UAE, Kuwait, Qatar or Oman.",
       "save": "Save bank account",
       "errors": {
         "holderRequired": "Enter the account holder's name.",
         "ibanRequired": "Enter your IBAN.",
         "ibanCharacters": "An IBAN has only letters and numbers.",
-        "ibanCountry": "Use a Bahraini IBAN (it starts with BH). Other Gulf countries are coming.",
+        "ibanCountry": "It must be a GCC IBAN: starting with BH, SA, AE, KW, QA or OM.",
         "ibanLength": "This IBAN is too short or too long for its country.",
         "ibanChecksum": "This IBAN doesn't look right. Check it for typos."
       }

@@ -1483,6 +1483,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My payouts
+         * @description Creators. Each bank transfer from laqta and the orders it paid for, newest first.
+         */
+        get: operations["MyPayoutsController_mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/creators/{id}/bank-accounts": {
         parameters: {
             query?: never;
@@ -3666,6 +3686,24 @@ export interface components {
              */
             iban: string;
         };
+        Payout: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            creator_id: string;
+            name_ar: string | null;
+            name_en: string | null;
+            /** @description BHD sent */
+            amount: number;
+            /** Format: date-time */
+            sent_at: string;
+            /** @description The bank's reference for the transfer */
+            bank_ref: string;
+            /** @description Where it went, as it was then */
+            iban: string;
+            holder_name: string;
+            order_ids: string[];
+        };
         OwedOrder: {
             /** Format: uuid */
             id: string;
@@ -3699,24 +3737,6 @@ export interface components {
             orders: components["schemas"]["OwedOrder"][];
             /** @description Every version, newest first; empty if they never added one. The first is current unless it has replaced_at. */
             bank_accounts: components["schemas"]["BankAccount"][];
-        };
-        Payout: {
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            creator_id: string;
-            name_ar: string | null;
-            name_en: string | null;
-            /** @description BHD sent */
-            amount: number;
-            /** Format: date-time */
-            sent_at: string;
-            /** @description The bank's reference for the transfer */
-            bank_ref: string;
-            /** @description Where it went, as it was then */
-            iban: string;
-            holder_name: string;
-            order_ids: string[];
         };
         MarkPaidDto: {
             /** Format: uuid */
@@ -3832,6 +3852,11 @@ export interface components {
             holder_name: string | null;
             /** @description Why laqta turned it down (shown to the brand) */
             reject_note: string | null;
+            /**
+             * Format: date-time
+             * @description When laqta turned it down, and the money came back to the balance
+             */
+            rejected_at: string | null;
         };
         RequestWithdrawalDto: {
             /**
@@ -3867,6 +3892,11 @@ export interface components {
             holder_name: string | null;
             /** @description Why laqta turned it down (shown to the brand) */
             reject_note: string | null;
+            /**
+             * Format: date-time
+             * @description When laqta turned it down, and the money came back to the balance
+             */
+            rejected_at: string | null;
             account: components["schemas"]["WithdrawalAccount"];
             /** @description The account's current bank account (it may have changed since the request) */
             bank: components["schemas"]["BankAccount"] | null;
@@ -8992,6 +9022,34 @@ export interface operations {
             };
             /** @description Not found, or not yours */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MyPayoutsController_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payout"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1258,6 +1258,14 @@
       "newVersion": "{campaign} · بعد طلب التعديل",
       "late": "{campaign} · كان موعده {date}",
       "expired": "{campaign} · رجع {amount} لرصيدك"
+    },
+    "withdrawalSent": {
+      "title": "تم تحويل السحب لحسابك",
+      "detail": "{amount} إلى {iban}"
+    },
+    "withdrawalRejected": {
+      "title": "ما تم تحويل السحب",
+      "detail": "رجع {amount} لرصيدك · {note}"
     }
   },
   "debug": {
@@ -1352,13 +1360,13 @@
       "holder": "اسم صاحب الحساب",
       "holderHint": "مثل ما هو مسجّل في البنك بالضبط.",
       "iban": "رقم الآيبان (IBAN)",
-      "ibanHint": "حساب بنكي في البحرين (الآيبان يبدأ بـ BH).",
+      "ibanHint": "حساب بنكي في دولة خليجية: البحرين، السعودية، الإمارات، الكويت، قطر أو عُمان.",
       "save": "حفظ الحساب البنكي",
       "errors": {
         "holderRequired": "اكتب اسم صاحب الحساب.",
         "ibanRequired": "اكتب رقم الآيبان.",
         "ibanCharacters": "الآيبان فيه حروف وأرقام بس.",
-        "ibanCountry": "استخدم آيبان بحريني (يبدأ بـ BH). دول الخليج الثانية جاية.",
+        "ibanCountry": "لازم يكون آيبان خليجي: يبدأ بـ BH أو SA أو AE أو KW أو QA أو OM.",
         "ibanLength": "طول الآيبان مو صحيح لهالدولة.",
         "ibanChecksum": "الآيبان مو صحيح. تأكد من الأرقام."
       }

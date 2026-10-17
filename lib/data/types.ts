@@ -262,11 +262,9 @@ export type Account = {
   phone: string;
   /** Shared by every brand on the account, in BHD. */
   balance: number;
-  /** Where withdrawals from the balance go. Optional, and can be removed at any time. */
-  bankAccount?: BankAccount;
 };
 
-/** Same shape and checks as the creator app's bank account (lib/iban.ts). */
+/** Where withdrawals from the balance go (GET /me/bank-account). Optional, and can be removed at any time. Same checks as the creator app's (lib/iban.ts). */
 export type BankAccount = {
   /** Exactly as the bank has it. */
   holder: string;
@@ -291,6 +289,8 @@ export type Withdrawal = {
   iban?: string;
   /** Why it was rejected, shown to the brand. */
   note?: string;
+  /** When it was rejected (and the money came back). ISO date-time. */
+  rejectedAt?: string;
 };
 
 /** What went wrong on an order, as the brand reports it to 100clips support. */

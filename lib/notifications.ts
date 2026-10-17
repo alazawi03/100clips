@@ -10,8 +10,8 @@ import { eventsOf, isLate } from "@/lib/orderFlow";
 
 /** What happened on an order. */
 export type OrderNotificationKind = "accepted" | "declined" | "expired" | "received" | "clipReady" | "newVersion" | "adCode" | "late";
-/** Plus a card payment of the brand's that didn't go through. */
-export type NotificationKind = OrderNotificationKind | "paymentFailed";
+/** Plus the brand's own money: a card payment that didn't go through, a withdrawal sent or rejected. */
+export type NotificationKind = OrderNotificationKind | "paymentFailed" | "withdrawalSent" | "withdrawalRejected";
 
 export type BrandNotification = {
   key: string;

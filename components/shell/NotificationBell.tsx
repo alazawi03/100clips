@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Bell, CircleCheck, Clapperboard, Clock, CreditCard, Hourglass, Megaphone, PackageCheck, RefreshCw, UserX, type LucideIcon } from "lucide-react";
+import { Bell, CircleCheck, Clapperboard, Clock, CreditCard, Hourglass, Landmark, Megaphone, PackageCheck, RefreshCw, Undo2, UserX, type LucideIcon } from "lucide-react";
 import { markAllNotificationsRead } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Avatar } from "@/components/ui/Avatar";
@@ -23,6 +23,8 @@ const looks: Record<NotificationKind, { icon: LucideIcon; tone: StatusTone }> = 
   adCode: { icon: Megaphone, tone: "green" },
   late: { icon: Clock, tone: "amber" },
   paymentFailed: { icon: CreditCard, tone: "red" },
+  withdrawalSent: { icon: Landmark, tone: "green" },
+  withdrawalRejected: { icon: Undo2, tone: "red" },
 };
 
 const tones: Record<StatusTone, string> = {

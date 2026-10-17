@@ -11,7 +11,6 @@ export const account: Account = {
   email: "mona@example.com",
   phone: "+973 3300 0000",
   balance: 40,
-  bankAccount: { holder: "MONA AL KAABI", iban: "BH67BMAG00001299123456" },
 };
 
 export const brands: Brand[] = [

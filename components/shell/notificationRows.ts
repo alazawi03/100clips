@@ -1,6 +1,8 @@
 import { api } from "@/lib/api";
 import type { components } from "@/lib/api-types";
 import { workspace } from "@/lib/data/live";
+import { myWithdrawals } from "@/lib/data/wallet";
+import { maskIban } from "@/lib/iban";
 import type { I18n } from "@/lib/i18n/server";
 import { brandNotifications, isUnread, type NotificationKind } from "@/lib/notifications";
 import { brandPaid } from "@/lib/fees";
@@ -37,7 +39,12 @@ function sectionOf(at: string, day: string): NotificationSection {
 
 /** The brand's notifications as rows, newest first (all of them, or the latest `limit`). */
 export async function notificationRows({ t, f }: I18n, limit?: number): Promise<{ rows: NotificationRow[]; unread: number }> {
-  const [ws, me, failed] = await Promise.all([workspace(), getMe(), api<Payment[]>("/me/payments?status=failed&limit=50").catch(() => [])]);
+  const [ws, me, failed, withdrawals] = await Promise.all([
+    workspace(),
+    getMe(),
+    api<Payment[]>("/me/payments?status=failed&limit=50").catch(() => []),
+    myWithdrawals().catch(() => []),
+  ]);
   const day = today();
   // "Mark all as read" sets this; a new account has seen nothing yet.
   const seenAt = me?.account.notifications_seen_at ?? "";
@@ -64,6 +71,26 @@ export async function notificationRows({ t, f }: I18n, limit?: number): Promise<
         at,
       };
     });
+  // A withdrawal 100clips sent to the bank, or turned down (the money came back).
+  const withdrawalNotes = withdrawals.flatMap((w): (NotificationRow & { at: string })[] => {
+    const at = w.status === "sent" ? w.sentAt : w.status === "rejected" ? w.rejectedAt : undefined;
+    if (!at) return [];
+    const amount = f.money(w.amount);
+    const sent = w.status === "sent";
+    return [{
+      key: `withdrawal-${w.id}`,
+      kind: sent ? "withdrawalSent" : "withdrawalRejected",
+      title: t(sent ? "notifications.withdrawalSent.title" : "notifications.withdrawalRejected.title"),
+      detail: sent
+        ? t("notifications.withdrawalSent.detail", { amount, iban: maskIban(w.iban ?? "") })
+        : t("notifications.withdrawalRejected.detail", { amount, note: w.note ?? "" }),
+      time: f.messageTime(at, day),
+      section: sectionOf(at, day),
+      href: "/balance",
+      unread: at > seenAt,
+      at,
+    }];
+  });
   const orderRows = orderNotes.map((n): NotificationRow & { at: string } => {
     const creator = ws.creator(n.creatorId)!;
     const order = ws.order(n.orderId)!;
@@ -94,7 +121,8 @@ export async function notificationRows({ t, f }: I18n, limit?: number): Promise<
       at: n.at,
     };
   });
-  const all = [...orderRows, ...paymentNotes].sort((a, b) => b.at.localeCompare(a.at));
+  const all = [...orderRows, ...paymentNotes, ...withdrawalNotes].sort((a, b) => b.at.localeCompare(a.at));
   const rows: NotificationRow[] = all.slice(0, limit ?? all.length);
-  return { rows, unread: orderNotes.filter((n) => isUnread(n, seenAt)).length + paymentNotes.filter((n) => n.unread).length };
+  const unreadOwn = [...paymentNotes, ...withdrawalNotes].filter((n) => n.unread).length;
+  return { rows, unread: orderNotes.filter((n) => isUnread(n, seenAt)).length + unreadOwn };
 }
