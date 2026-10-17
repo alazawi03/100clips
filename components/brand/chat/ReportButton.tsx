@@ -30,16 +30,17 @@ function ReportForm({ conversationId, onDone }: { conversationId: string; onDone
   const groupId = useId();
   const [reason, setReason] = useState<string>("");
   const [details, setDetails] = useState("");
-  const [sent, setSent] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [result, setResult] = useState<"sent" | "already" | "failed">();
   const [pending, startTransition] = useTransition();
 
-  if (sent) {
+  if (result === "sent" || result === "already") {
+    // Reporting again while the first report is open saves nothing new: say so instead of "sent".
+    const already = result === "already";
     return (
       <div className="flex flex-col items-center gap-3 p-4 text-center">
         <CircleCheck aria-hidden className="size-8 text-success" />
-        <p className="font-medium">{t("chat.reportSent")}</p>
-        <p className="text-small text-text-muted">{t("chat.reportSentHint")}</p>
+        <p className="font-medium">{t(already ? "chat.reportAlready" : "chat.reportSent")}</p>
+        <p className="text-small text-text-muted">{t(already ? "chat.reportAlreadyHint" : "chat.reportSentHint")}</p>
         <Button variant="secondary" onClick={onDone} className="w-full">
           {t("chat.reportClose")}
         </Button>
@@ -53,9 +54,7 @@ function ReportForm({ conversationId, onDone }: { conversationId: string; onDone
         e.preventDefault();
         if (!reason) return;
         startTransition(async () => {
-          const ok = await reportConversation(conversationId, reason, details);
-          setFailed(!ok);
-          setSent(ok);
+          setResult(await reportConversation(conversationId, reason, details));
         });
       }}
       className="flex flex-col gap-3 p-2"
@@ -72,7 +71,7 @@ function ReportForm({ conversationId, onDone }: { conversationId: string; onDone
         ))}
       </div>
       <Textarea value={details} onChange={(e) => setDetails(e.target.value)} maxLength={500} aria-label={t("chat.reportDetails")} placeholder={t("chat.reportDetails")} className="min-h-16" />
-      {failed && (
+      {result === "failed" && (
         <p role="alert" className="text-small text-error">
           {t("chat.reportFailed")}
         </p>

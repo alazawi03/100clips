@@ -50,19 +50,19 @@ export async function requestAdCode(orderId: string) {
 
 /**
  * "Report" in a chat: saved through the API for the admin to review. Messages stay visible to both
- * sides. Reporting again while the first is open counts as sent. False if it couldn't be saved.
+ * sides. "already" while this side's earlier report is still open (nothing new is saved).
  */
-export async function reportConversation(conversationId: string, reason: string, details: string): Promise<boolean> {
-  if (!(REPORT_REASONS as readonly string[]).includes(reason)) return false;
+export async function reportConversation(conversationId: string, reason: string, details: string): Promise<"sent" | "already" | "failed"> {
+  if (!(REPORT_REASONS as readonly string[]).includes(reason)) return "failed";
   try {
     await api(`/conversations/${conversationId}/reports`, {
       method: "POST",
       body: { reason: API_REPORT_REASON[reason as ReportReason], details: details.trim().slice(0, 500) || undefined },
     });
-    return true;
+    return "sent";
   } catch (e) {
-    if (e instanceof ApiError && e.status === 409) return true;
+    if (e instanceof ApiError && e.status === 409) return "already";
     console.error("Reporting a chat failed:", e instanceof ApiError ? `${e.status} ${e.message}` : e);
-    return false;
+    return "failed";
   }
 }

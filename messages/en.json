@@ -928,6 +928,8 @@
     "reportSend": "Send report",
     "reportSent": "Report sent",
     "reportSentHint": "Our team will review the conversation.",
+    "reportAlready": "You already reported this chat",
+    "reportAlreadyHint": "Our team is reviewing it. You can report it again once they've closed it.",
     "reportClose": "Done",
     "activeOrders": {
       "one": "1 active order",

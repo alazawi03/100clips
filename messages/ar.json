@@ -975,6 +975,8 @@
     "reportSend": "أرسل البلاغ",
     "reportSent": "وصل البلاغ",
     "reportSentHint": "فريقنا بيراجع المحادثة.",
+    "reportAlready": "سبق وبلّغت عن هذي المحادثة",
+    "reportAlreadyHint": "فريقنا يراجعها الحين. تقدر تبلّغ مرة ثانية بعد ما يقفلون البلاغ.",
     "reportClose": "تم",
     "activeOrders": {
       "one": "طلب جاري",
