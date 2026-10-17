@@ -191,7 +191,7 @@ export type StuckOrder = { order: Order; reason: StuckReason; days: number };
 
 /**
  * Orders nobody is moving: an offer past its 72 hours (the brand should get a refund), a clip the brand
- * hasn't reviewed, a product sent but not received, or a clip past the campaign's deadline.
+ * hasn't reviewed, a product sent but not received, or a clip 3+ days past the campaign's deadline.
  */
 export function stuckOrders(today: string): StuckOrder[] {
   const since = (o: Order, type: string) => {
@@ -204,7 +204,7 @@ export function stuckOrders(today: string): StuckOrder[] {
     if (isOfferExpired(o, DEMO_NOW)) stuck.push({ order: o, reason: "offerExpired", days: since(o, "offered") });
     else if (o.status === "delivered" && since(o, "uploaded") >= STUCK_DAYS) stuck.push({ order: o, reason: "reviewWaiting", days: since(o, "uploaded") });
     else if (o.status === "in_progress" && o.shipping?.sentAt && !o.shipping.receivedAt && since(o, "sent") >= STUCK_DAYS) stuck.push({ order: o, reason: "notReceived", days: since(o, "sent") });
-    else if ((o.status === "pending" || o.status === "in_progress") && deadline && today > deadline) stuck.push({ order: o, reason: "late", days: -daysUntil(deadline, today) });
+    else if ((o.status === "pending" || o.status === "in_progress") && deadline && -daysUntil(deadline, today) >= STUCK_DAYS) stuck.push({ order: o, reason: "late", days: -daysUntil(deadline, today) });
   }
   return stuck.sort((a, b) => b.days - a.days);
 }
