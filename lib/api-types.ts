@@ -1112,7 +1112,7 @@ export interface paths {
         put?: never;
         /**
          * Approve the clip (brand)
-         * @description Pays the creator. Stars and a comment are optional (a comment needs stars). Unreviewed clips are approved automatically after 7 days.
+         * @description Pays the creator. Stars and a comment are optional (a comment needs stars). Only the brand approves: clips are never approved automatically.
          */
         post: operations["OrdersController_approve"];
         delete?: never;
@@ -3765,11 +3765,6 @@ export interface components {
              * @example 96
              */
             offer_hours: number;
-            /**
-             * @description Days after delivery when an unreviewed clip is approved
-             * @example 7
-             */
-            auto_approve_days: number;
             /** Format: date-time */
             updated_at: string;
             /**
@@ -3786,8 +3781,6 @@ export interface components {
             fee_rate?: number;
             /** @example 96 */
             offer_hours?: number;
-            /** @example 7 */
-            auto_approve_days?: number;
         };
         Admin: {
             /** Format: uuid */
