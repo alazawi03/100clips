@@ -235,6 +235,13 @@ export async function checkout(_prev: CheckoutState, form: FormData): Promise<Ch
   const deadline = text(form, "deadline");
   if (deadline && !isIsoDate(deadline)) errors.deadline = "forms.errors.dateInvalid";
   else if (deadline && deadline <= today()) errors.deadline = "forms.errors.deadlineFuture";
+  // Optional upload date: after the deadline when there is one, else after today. Checked here like the
+  // form does, but not sent: the API has no field for it yet.
+  const uploadDate = text(form, "uploadDate");
+  const validDeadline = isIsoDate(deadline) ? deadline : "";
+  if (uploadDate && !isIsoDate(uploadDate)) errors.uploadDate = "forms.errors.dateInvalid";
+  else if (uploadDate && validDeadline && uploadDate <= validDeadline) errors.uploadDate = "forms.errors.uploadAfterDeadline";
+  else if (uploadDate && !validDeadline && uploadDate <= today()) errors.uploadDate = "forms.errors.deadlineFuture";
   // More details (all optional): references must be links.
   const { details, values } = parseDetails(form, errors);
   checkCard(form, byCardFor(ws, toPay, useBalance), errors);

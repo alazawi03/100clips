@@ -153,6 +153,7 @@
       "mapUrlInvalid": "Paste a Google Maps link, e.g. https://maps.app.goo.gl/…",
       "pickVideoStyle": "Choose a video style.",
       "deadlineFuture": "Choose a date after today.",
+      "uploadAfterDeadline": "Choose a date after the delivery deadline.",
       "dateInvalid": "Enter the date as DD/MM/YYYY.",
       "dateTooEarly": "Choose {date} or later.",
       "pickCreators": "Choose at least one creator.",
@@ -620,6 +621,8 @@
     },
     "deadline": "Delivery deadline",
     "deadlineHint": "The date creators should deliver the clips by.",
+    "uploadDate": "Upload date",
+    "uploadDateHint": "Optional. The day creators should post the clip, after the delivery deadline.",
     "videoStyleGuideLabel": "About video styles",
     "videoStyleGuideTitle": "Which style fits?",
     "videoStyleHints": {
