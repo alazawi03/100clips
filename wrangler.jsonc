@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "laqta-app",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-25",
+  // nodejs_compat: Supabase SSR + server actions run on the Node.js runtime.
+  // global_fetch_strictly_public: outbound fetch() to our own hostnames (the
+  // 100clips-backend API) goes back out over the internet instead of looping
+  // inside the Worker — required by OpenNext.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    // Non-secret: just hostnames. API_URL and NEXT_PUBLIC_* also get baked in
+    // at build time (see .github/workflows/deploy.yml) since Next.js server
+    // actions re-read process.env at runtime too — both places need them.
+    "API_URL": "https://api.golaqta.com"
+    // ADMIN_APP_URL intentionally left unset: laqta-admin isn't deployed yet.
+    // Falls back to the http://localhost:3001 default in lib/session.ts until
+    // that repo gets its own domain (same deferred status as app.golaqta.com
+    // was before this deploy).
+  }
+}

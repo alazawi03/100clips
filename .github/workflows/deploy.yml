@@ -1,0 +1,41 @@
+name: Deploy Brand Dashboard
+
+# Manual, like masroof_landing's and laqta-landing's pipelines — no
+# auto-deploy on push, so a broken push to main never goes live by itself.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      # cloudflare-env.d.ts is gitignored (generated per-checkout, not
+      # committed) — without it, any Cloudflare binding type used in app code
+      # won't exist and the build's typecheck fails.
+      - run: npm run cf-typegen
+
+      # NEXT_PUBLIC_* vars are inlined into the client bundle at build time,
+      # so they must be set here, not just as a wrangler.jsonc runtime var.
+      # Both are the publishable Supabase values from .env.example — safe in
+      # the browser, not secrets.
+      #
+      # npm run deploy = opennextjs-cloudflare build && opennextjs-cloudflare
+      # deploy, which runs `next build --webpack` (see package.json) — the
+      # exact flag the OpenNext adapter requires.
+      - name: Build and deploy
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://kwxoplenxwciacyfbqeo.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_t6xi2A_7L7Fj2mjPyyizWA_MeJBPZfO
+          NEXT_PUBLIC_MEDIA_URL: https://pub-9ae1553bbe764b56a16f62e8af9f37c1.r2.dev
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 26d1ee2d0099e308d8321a257e966308
+        run: npm run deploy
