@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import { sendPasswordReset, signIn, signUp, updatePassword, type AuthFormState } from "@/app/actions/auth";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
@@ -128,6 +128,7 @@ export function SignupForm() {
           {t("auth.signupButton")}
         </Button>
       </form>
+      <Agreement />
       <p className="text-small text-text-muted">
         {t("auth.haveAccount")}{" "}
         <Link href="/login" className="font-medium text-primary hover:underline">
@@ -135,6 +136,20 @@ export function SignupForm() {
         </Link>
       </p>
     </div>
+  );
+}
+
+/** "By creating an account, you agree to the Terms of use and the Privacy policy", with both as links. */
+function Agreement() {
+  const { t } = useI18n();
+  const links: Record<string, ReactNode> = {
+    "{terms}": <Link key="terms" href="/terms" className="font-medium text-primary hover:underline">{t("legal.terms")}</Link>,
+    "{privacy}": <Link key="privacy" href="/privacy" className="font-medium text-primary hover:underline">{t("legal.privacy")}</Link>,
+  };
+  return (
+    <p className="text-small text-text-muted">
+      {t("auth.agree").split(/(\{terms\}|\{privacy\})/).map((part) => links[part] ?? part)}
+    </p>
   );
 }
 
