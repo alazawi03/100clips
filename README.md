@@ -31,6 +31,6 @@ Open http://localhost:3000. The home page redirects to `/dashboard`.
 
 - `app/(app)/` — dashboard screens (explore, campaigns, orders, brands, balance, messages)
 - `app/actions/` — server actions behind the forms
-- `lib/data/` — types, sample data and the in-memory store
+- `lib/data/` — types, and the API calls in the dashboard's shapes (`live.ts`, `*Api.ts`)
 - `lib/i18n/` — Arabic and English text (Arabic and RTL first)
 - `DESIGN.ar.md` — the design system (Arabic)

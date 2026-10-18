@@ -1206,11 +1206,6 @@
       "detail": "{amount} is back in your balance · {note}"
     }
   },
-  "debug": {
-    "account": "Debug · account",
-    "demoData": "Demo data",
-    "newAccount": "New account"
-  },
   "newCampaign": {
     "button": "New campaign",
     "title": "New campaign",

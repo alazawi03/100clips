@@ -4,10 +4,7 @@ import type { components } from "@/lib/api-types";
 import { publicUrl, storeImage } from "./storage";
 import type { Brand, Currency, Localized, Pricing, Product, ProductDetails } from "./types";
 
-/**
- * The signed-in owner's brands and products, from the API, in the dashboard's shapes (types.ts).
- * Pages and forms use these instead of the demo store.
- */
+/** The signed-in owner's brands and products, from the API, in the dashboard's shapes (types.ts). */
 
 type BrandRow = components["schemas"]["Brand"];
 type ProductRow = components["schemas"]["Product"];

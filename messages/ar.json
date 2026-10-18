@@ -1277,11 +1277,6 @@
       "detail": "رجع {amount} لرصيدك · {note}"
     }
   },
-  "debug": {
-    "account": "للتجربة · الحساب",
-    "demoData": "بيانات تجريبية",
-    "newAccount": "حساب جديد"
-  },
   "newCampaign": {
     "button": "حملة جديدة",
     "title": "حملة جديدة",

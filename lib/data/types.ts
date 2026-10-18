@@ -50,6 +50,11 @@ export type Creator = {
  */
 export const hasActiveBundle = (c: Pick<Creator, "formats">) => c.formats.some((f) => f.price > 0);
 
+/** The lowest price, or undefined before the creator sets one (they show on Explore once approved). */
+export function fromPrice(creator: Pick<Creator, "formats">): number | undefined {
+  return creator.formats.length ? Math.min(...creator.formats.map((f) => f.price)) : undefined;
+}
+
 /** A sample video on a creator's profile. */
 export type PortfolioClip = { id: string; videoSrc: string };
 
@@ -197,8 +202,6 @@ export type Order = {
   campaignId?: string;
   creatorId: string;
   title: Localized;
-  /** What the brand asked for. Campaign orders use the campaign brief. */
-  brief?: Localized;
   /** Optional note from the brand to this creator. */
   note?: string;
   items: OrderItem[];
@@ -206,7 +209,7 @@ export type Order = {
   clips: number;
   /** What the creator is paid, in BHD (their price). */
   amount: number;
-  /** 100clips' service fee the brand paid on top, in BHD (lib/fees.ts). Missing on older demo orders. */
+  /** 100clips' service fee the brand paid on top, in BHD (lib/fees.ts). Missing when none was stored (lib/fees.ts works it out). */
   fee?: number;
   status: OrderStatus;
   revisionRequested?: boolean;
@@ -222,8 +225,8 @@ export type Order = {
   /** Spark Ads (TikTok) or Partnership Ads (Instagram) code the creator added with the clip, optional. */
   adCode?: AdCode;
   shipping?: OrderShipping;
-  /** Activity history; demo orders without one get it derived from their status (lib/orderFlow.ts). */
-  events?: OrderEvent[];
+  /** Activity history, from the API. */
+  events: OrderEvent[];
   /** Where to send a physical product, once the creator accepted. */
   shipTo?: ShipTo;
   /** This order's due date: the campaign's, unless 100clips moved it for this creator. */

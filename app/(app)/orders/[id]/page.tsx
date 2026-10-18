@@ -38,7 +38,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const name = f.pick(creator.name);
   const campaign = ws.campaign(order.campaignId);
   const clip = clipOf(order, ws);
-  const brief = order.brief ?? campaign?.brief;
+  const brief = campaign?.brief;
   // Steps and next action follow the same rules as the campaign page.
   const product = ws.product(campaign?.productIds?.[0]);
   const physical = product?.details.type === "physical";

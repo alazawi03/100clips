@@ -1,5 +1,4 @@
-import { fromPrice } from "./creators";
-import { platformOf, type Creator, type Gender, type Niche, type Platform } from "./types";
+import { fromPrice, platformOf, type Creator, type Gender, type Niche, type Platform } from "./types";
 
 export const NICHES: Niche[] = ["general", "food", "beauty", "fashion", "family", "fitness", "travel", "tech", "gaming"];
 export const GENDERS: Gender[] = ["male", "female"];

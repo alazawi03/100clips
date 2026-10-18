@@ -74,17 +74,11 @@ export function isLate(order: Order, deadline: string | undefined, today: string
 export const OFFER_HOURS = 96;
 const HOUR = 3_600_000;
 
-/** When the offer runs out, in ms. Demo orders carry only a date: they count from midday Bahrain time. */
-export function offerExpiresAt(order: Pick<Order, "createdAt">): number {
-  const sent = order.createdAt.length > 10 ? order.createdAt : `${order.createdAt}T12:00:00+03:00`;
-  return Date.parse(sent) + OFFER_HOURS * HOUR;
-}
+/** When the offer runs out, in ms. */
+const offerExpiresAt = (order: Pick<Order, "createdAt">) => Date.parse(order.createdAt) + OFFER_HOURS * HOUR;
 
 /** Whole hours left to accept (rounded up, 0 once it has run out). */
 export const offerHoursLeft = (order: Pick<Order, "createdAt">, now: string) => Math.max(0, Math.ceil((offerExpiresAt(order) - Date.parse(now)) / HOUR));
-
-/** Still waiting for the creator, and past the window. */
-export const isOfferExpired = (order: Pick<Order, "status" | "createdAt">, now: string) => order.status === "pending" && Date.parse(now) >= offerExpiresAt(order);
 
 /** Show the countdown as urgent from this many hours left. */
 export const OFFER_URGENT_HOURS = 24;
@@ -119,35 +113,7 @@ export function daysUntil(date: string, today: string): number {
   return Math.round((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
 }
 
-const addDays = (iso: string, days: number) => {
-  const d = new Date(`${iso.slice(0, 10)}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-};
-
-/**
- * The order's history, newest first. Demo orders made before the activity log existed get a
- * plausible history derived from their status and dates.
- */
+/** The order's history, newest first. */
 export function eventsOf(order: Order): OrderEvent[] {
-  if (order.events) return [...order.events].sort((a, b) => b.at.localeCompare(a.at));
-  const at = order.createdAt;
-  const derived: Array<[OrderEventType, string] | false> = [
-    ["offered", at],
-    order.status === "cancelled" && ["cancelled", addDays(at, 1)],
-    order.status === "declined" && order.declineReason === "expired" && ["expired", new Date(offerExpiresAt(order)).toISOString()],
-    order.status === "declined" && order.declineReason !== "expired" && ["declined", addDays(at, 1)],
-    order.status !== "pending" && order.status !== "cancelled" && order.status !== "declined" && ["accepted", addDays(at, 1)],
-    !!order.shipping?.sentAt && ["sent", order.shipping.sentAt],
-    !!order.shipping?.receivedAt && ["received", order.shipping.receivedAt],
-    (order.status === "delivered" || order.status === "approved" || order.revisionRequested === true) && ["uploaded", addDays(at, 5)],
-    order.revisionRequested === true && ["revisionRequested", addDays(at, 6)],
-    order.status === "approved" && ["approved", addDays(at, 8)],
-    order.status === "approved" && ["released", addDays(at, 8)],
-    !!order.shipping?.returnedAt && ["returned", order.shipping.returnedAt],
-  ];
-  return derived
-    .filter((e): e is [OrderEventType, string] => !!e)
-    .map(([type, when]) => ({ type, at: when }))
-    .sort((a, b) => b.at.localeCompare(a.at));
+  return [...order.events].sort((a, b) => b.at.localeCompare(a.at));
 }

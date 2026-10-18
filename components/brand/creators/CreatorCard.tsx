@@ -9,10 +9,9 @@ import { Badge } from "@/components/ui/Badge";
 import { buttonClass } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
-import { fromPrice } from "@/lib/data/creators";
 import { allLists } from "@/lib/data/lists";
 import { workspace } from "@/lib/data/live";
-import { platformOf, type Creator } from "@/lib/data/types";
+import { fromPrice, platformOf, type Creator } from "@/lib/data/types";
 import type { I18n } from "@/lib/i18n/server";
 import { priceForBrand } from "@/lib/fees";
 

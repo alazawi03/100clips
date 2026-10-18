@@ -2,7 +2,8 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "laqta-app",
   "main": ".open-next/worker.js",
-  "compatibility_date": "2025-03-25",
+  // The newest date the installed wrangler's workerd (1.20261012) accepts.
+  "compatibility_date": "2026-10-12",
   // nodejs_compat: Supabase SSR + server actions run on the Node.js runtime.
   // global_fetch_strictly_public: outbound fetch() to our own hostnames (the
   // 100clips-backend API) goes back out over the internet instead of looping
@@ -12,6 +13,8 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Keeps the Worker's logs, server errors included, in Cloudflare (Workers & Pages > laqta-app > Logs).
+  "observability": { "enabled": true },
   "vars": {
     // Non-secret: just hostnames. API_URL and NEXT_PUBLIC_* also get baked in
     // at build time (see .github/workflows/deploy.yml) since Next.js server

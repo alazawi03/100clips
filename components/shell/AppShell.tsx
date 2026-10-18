@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { workspace } from "@/lib/data/live";
 import { unreadCount } from "@/lib/data/chatApi";
 import { filterCreators, parseFilters } from "@/lib/data/creatorFilters";
-import { fromPrice } from "@/lib/data/creators";
+import { fromPrice } from "@/lib/data/types";
 import { priceForBrand } from "@/lib/fees";
 import { getTheme } from "@/lib/theme";
 import { getI18n } from "@/lib/i18n/server";
