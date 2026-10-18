@@ -19,10 +19,8 @@
     // Non-secret: just hostnames. API_URL and NEXT_PUBLIC_* also get baked in
     // at build time (see .github/workflows/deploy.yml) since Next.js server
     // actions re-read process.env at runtime too — both places need them.
-    "API_URL": "https://api.golaqta.com"
-    // ADMIN_APP_URL intentionally left unset: laqta-admin isn't deployed yet.
-    // Falls back to the http://localhost:3001 default in lib/session.ts until
-    // that repo gets its own domain (same deferred status as app.golaqta.com
-    // was before this deploy).
+    "API_URL": "https://api.golaqta.com",
+    // Where admins who sign in here are sent (lib/session.ts): the laqta-admin Worker.
+    "ADMIN_APP_URL": "https://admin.golaqta.com"
   }
 }
