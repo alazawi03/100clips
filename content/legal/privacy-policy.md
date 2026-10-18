@@ -58,9 +58,11 @@ We don't sell your data and the app shows no ads.
 **Payments**
 - Your balance top-ups and checkouts: the amounts, how much you paid from your balance and by card,
   and whether each payment went through.
-- No card payment provider is connected yet: the laqta team confirms card payments. The card form
-  only checks that the details are written correctly; we don't store your card number, expiry date
-  or security code, or send them anywhere.
+- Card payments (debit and credit cards, BenefitPay, Apple Pay and Google Pay) are made on the secure
+  payment page of our payment gateway, Gate-E. We never see, receive or store your card number, expiry
+  date or security code. We send Gate-E the amount, our payment reference, a short description (for
+  example "Balance top-up") and your account name and email (for its receipt). Gate-E tells us whether
+  the payment went through, the amount and its transaction reference, which we keep with your payment.
 - Your bank account (account holder name and IBAN) to send you withdrawals, and a record of your
   balance, payments, refunds and withdrawals.
 
@@ -105,7 +107,8 @@ We don't sell your data and the app shows no ads.
 - **Service providers** who run parts of laqta for us, under contract and only for that purpose:
   Supabase (database and sign-in, hosted in the European Union), Cloudflare R2 (file storage), our
   SMS provider (to send creators' sign-in codes), Firebase Cloud Messaging by Google (notifications
-  in the creator app), and, once we connect one, a card payment provider (none yet).
+  in the creator app), and Gate-E, our payment gateway in Bahrain, with the banks and payment networks
+  behind it (such as BenefitPay, Visa, Mastercard, Apple Pay and Google Pay) to take card payments.
 - **Authorities**, when the law requires it.
 
 ## How long we keep it
@@ -191,8 +194,10 @@ important changes.
 
 **المدفوعات**
 - شحن رصيدك والدفع للطلبات: المبالغ، وكم دفعت من رصيدك وكم بالبطاقة، وهل تم كل دفع.
-- ما فيه مزود دفع بالبطاقة مرتبط للحين: فريق لقطة يأكد الدفع بالبطاقة. ونموذج البطاقة يتأكد بس إن البيانات مكتوبة
-  صح، وما نحفظ رقم بطاقتك ولا تاريخ انتهائها ولا رمز الأمان، ولا نرسلها لأي جهة.
+- الدفع بالبطاقة (بطاقات الخصم والائتمان، وBenefitPay، وApple Pay وGoogle Pay) يتم في صفحة الدفع الآمنة لبوابة
+  الدفع اللي نستخدمها، Gate-E. ما نشوف رقم بطاقتك ولا تاريخ انتهائها ولا رمز الأمان، ولا يوصلنا، ولا نحفظه. نرسل
+  لـGate-E المبلغ، ورقم الدفع عندنا، ووصف قصير (مثل "شحن الرصيد")، واسم حسابك وإيميلك (لإيصال الدفع). وGate-E
+  تبلغنا هل تم الدفع، والمبلغ، ورقم العملية عندها، ونحفظها مع سجل الدفع.
 - حسابك البنكي (اسم صاحب الحساب والآيبان) عشان نحوّل لك المبالغ اللي تسحبها، وسجل رصيدك ومدفوعاتك والمبالغ اللي
   رجعت لك وسحوباتك.
 
@@ -232,8 +237,8 @@ important changes.
 **للجميع**
 - **مزودو الخدمات** اللي يشغّلون أجزاء من لقطة لنا، بعقد ولهذا الغرض فقط: Supabase (قاعدة البيانات وتسجيل الدخول،
   مستضافة في الاتحاد الأوروبي)، وCloudflare R2 (تخزين الملفات)، ومزود الرسائل النصية (لرموز دخول صنّاع المحتوى)،
-  وFirebase Cloud Messaging من Google (الإشعارات في تطبيق صنّاع المحتوى)، ومزود دفع بالبطاقة لما نربطه (ما فيه واحد
-  للحين).
+  وFirebase Cloud Messaging من Google (الإشعارات في تطبيق صنّاع المحتوى)، وبوابة الدفع Gate-E في البحرين مع البنوك
+  وشبكات الدفع اللي وراها (مثل BenefitPay وVisa وMastercard وApple Pay وGoogle Pay) لاستلام الدفع بالبطاقة.
 - **الجهات الرسمية**، إذا طلب القانون ذلك.
 
 ## كم نحتفظ فيها

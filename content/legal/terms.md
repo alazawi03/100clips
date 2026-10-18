@@ -59,11 +59,13 @@ more time.
 - laqta's service fee is added on top of the creator's price: **10%** unless we change it. You always
   see the fee before you pay, and a change never applies to orders already paid. Creators get their
   **full price**: the fee isn't taken from it.
-- Brands pay **up front**, when the offers are sent: from their laqta balance, by card, or both. Until a
-  card payment provider is connected, the laqta team confirms card payments, and the offers go out once
-  a payment is confirmed.
+- Brands pay **up front**, when the offers are sent: from their laqta balance, by card, or both. Card
+  payments (cards, BenefitPay, Apple Pay and Google Pay) are made on the secure page of our payment
+  gateway, Gate-E, and count once Gate-E confirms them: the offers go out then. A payment that fails or
+  isn't finished charges nothing, and any part of your balance held for it is released.
 - **Money back:** if the creator declines, the offer expires, the brand withdraws it, or the order is
-  cancelled, everything paid for that order goes back to the brand's balance.
+  cancelled, everything paid for that order goes back to the brand's balance, not to the card. The
+  balance can be withdrawn to the brand's bank (below).
 
 ## Balance and withdrawals (brands)
 
@@ -199,10 +201,11 @@ most problems are solved by talking.
 - الأسعار بالدينار البحريني. وكل صانع محتوى يحدد أسعاره بنفسه.
 - رسوم خدمة لقطة تنضاف فوق سعر صانع المحتوى: **10%** إلا إذا غيّرناها. وتشوف الرسوم دايمًا قبل ما تدفع، وأي تغيير
   ما يطبّق على طلبات مدفوعة. وصانع المحتوى ياخذ **سعره كامل**: الرسوم ما تنخصم منه.
-- العلامة تدفع **مقدّمًا** لما تنرسل العروض: من رصيدها في لقطة، أو بالبطاقة، أو بالاثنين. ولين ما يرتبط مزود دفع
-  بالبطاقة، فريق لقطة يأكد الدفع بالبطاقة، وتنرسل العروض أول ما يتأكد الدفع.
+- العلامة تدفع **مقدّمًا** لما تنرسل العروض: من رصيدها في لقطة، أو بالبطاقة، أو بالاثنين. الدفع بالبطاقة (البطاقات،
+  وBenefitPay، وApple Pay وGoogle Pay) يتم في الصفحة الآمنة لبوابة الدفع Gate-E، ويُحسب أول ما تأكده Gate-E، وتنرسل
+  العروض وقتها. والدفع اللي يفشل أو ما يكتمل ما ينخصم منه شي، وأي جزء من الرصيد انحجز له يرجع.
 - **رجوع الفلوس:** إذا رفض صانع المحتوى، أو انتهى العرض، أو سحبته العلامة، أو انلغى الطلب، كل اللي انّدفع على هذا
-  الطلب يرجع لرصيد العلامة.
+  الطلب يرجع لرصيد العلامة، مو للبطاقة. والرصيد تقدر تسحبه لحسابك البنكي (شوف تحت).
 
 ## الرصيد والسحب (العلامات التجارية)
 
