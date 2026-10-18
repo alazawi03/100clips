@@ -16,7 +16,7 @@ These terms are the agreement between you and Union for Trade W.L.L. ("laqta", "
 laqta, you agree to them. Please read them with our Privacy Policy: /privacy.
 
 **Who we are:** Union for Trade W.L.L., commercial registration no. [CR number], Manama, Kingdom of Bahrain.
-**Contact:** hello@masroof.money
+**Contact:** hello@golaqta.com
 
 ## What laqta does
 
@@ -165,7 +165,7 @@ most problems are solved by talking.
 وتطبيق **لقطة** لصنّاع المحتوى. لما تسوي حساب أو تستخدم لقطة، فأنت توافق عليها. اقرأها مع سياسة الخصوصية: /privacy.
 
 **من نحن:** Union for Trade W.L.L.، سجل تجاري رقم [رقم السجل التجاري]، المنامة، مملكة البحرين.
-**للتواصل:** hello@masroof.money
+**للتواصل:** hello@golaqta.com
 
 ## وش تسوي لقطة
 

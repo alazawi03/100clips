@@ -8,10 +8,10 @@ const text = `<!-- Shown at /delete-account. The same text as 100clips-creators/
 
 To delete your laqta account and its data, ask us:
 
-- **Creators (the laqta app):** email **hello@masroof.money** from the email on your account, or send
+- **Creators (the laqta app):** email **hello@golaqta.com** from the email on your account, or send
   a WhatsApp/SMS from the phone number you sign in with to **+973 6660 4882**. Write: "Please delete
   my laqta account" and your username.
-- **Brands (the laqta website):** email **hello@masroof.money** from the email you sign in with, or
+- **Brands (the laqta website):** email **hello@golaqta.com** from the email you sign in with, or
   send a WhatsApp to **+973 6660 4882**. Write: "Please delete my laqta account" and your account's
   email.
 
@@ -41,9 +41,9 @@ first so we can send it before deleting.
 
 عشان تحذف حسابك في لقطة وبياناته، اطلب منا:
 
-- **صنّاع المحتوى (تطبيق لقطة):** راسل **hello@masroof.money** من البريد المسجّل في حسابك، أو أرسل رسالة واتساب/نصية
+- **صنّاع المحتوى (تطبيق لقطة):** راسل **hello@golaqta.com** من البريد المسجّل في حسابك، أو أرسل رسالة واتساب/نصية
   من رقم جوالك اللي تدخل فيه إلى **+973 6660 4882**. واكتب: "أبي أحذف حسابي في لقطة" واسم المستخدم.
-- **العلامات التجارية (موقع لقطة):** راسل **hello@masroof.money** من البريد اللي تدخل فيه، أو أرسل رسالة واتساب إلى
+- **العلامات التجارية (موقع لقطة):** راسل **hello@golaqta.com** من البريد اللي تدخل فيه، أو أرسل رسالة واتساب إلى
   **+973 6660 4882**. واكتب: "أبي أحذف حسابي في لقطة" وبريد حسابك.
 
 نتأكد إنك صاحب الحساب ونحذفه خلال **30 يوم**، ونرد عليك لما يخلص.

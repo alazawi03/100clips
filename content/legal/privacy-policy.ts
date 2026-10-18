@@ -12,7 +12,7 @@ for brands, why, who sees it, and your choices. It follows Bahrain's Personal Da
 (Law No. 30 of 2018).
 
 **Who we are:** Union for Trade W.L.L., Manama, Kingdom of Bahrain.
-**Contact:** hello@masroof.money
+**Contact:** hello@golaqta.com
 
 ## What we collect from creators
 
@@ -124,7 +124,7 @@ records), which we keep only for as long as the law requires.
 
 You can see and change most of your data in the app or on the website. You can also ask us to give
 you a copy of your data, correct it, stop using it for a purpose, or delete your account, by writing
-to hello@masroof.money from the phone number or email on your account. See also:
+to hello@golaqta.com from the phone number or email on your account. See also:
 /delete-account.
 
 ## Security
@@ -153,7 +153,7 @@ important changes.
 حماية البيانات الشخصية في مملكة البحرين (القانون رقم 30 لسنة 2018).
 
 **من نحن:** Union for Trade W.L.L.، المنامة، مملكة البحرين.
-**للتواصل:** hello@masroof.money
+**للتواصل:** hello@golaqta.com
 
 ## وش نجمع من صنّاع المحتوى
 
@@ -252,7 +252,7 @@ important changes.
 ## حقوقك
 
 تقدر تشوف أغلب بياناتك وتعدّلها من التطبيق أو الموقع. وتقدر تطلب نسخة من بياناتك، أو تصحيحها، أو إيقاف استخدامها
-لغرض معيّن، أو حذف حسابك، بمراسلة hello@masroof.money من رقم الجوال أو البريد المسجّل في حسابك. وشوف كمان:
+لغرض معيّن، أو حذف حسابك، بمراسلة hello@golaqta.com من رقم الجوال أو البريد المسجّل في حسابك. وشوف كمان:
 /delete-account.
 
 ## الأمان
