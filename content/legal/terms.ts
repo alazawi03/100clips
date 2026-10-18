@@ -1,4 +1,7 @@
-<!--
+// The Terms of use's text, in the format components/legal/LegalDocument.tsx reads: English,
+// then a line with "---", then Arabic. Edit the words here. It's a module rather than a .md file so it's
+// bundled with the app: the live site runs on Cloudflare Workers, which can't read files at request time.
+const text = `<!--
   DRAFT, for a lawyer to review before it's final. Shown at /terms, one page for brands and creators (the landing
   page and the creator app link here). Still open, in [square brackets]: the effective date, the CR number, and the
   limits of liability. It follows how laqta works today (offer hours, fee, one revision, payout times): when one of
@@ -277,3 +280,6 @@ most problems are solved by talking.
 
 هذي الشروط تخضع لقوانين مملكة البحرين، والنزاعات تروح لمحاكم مملكة البحرين. وقبل كذا، تواصل معنا: أغلب المشاكل تنحل
 بالكلام.
+`;
+
+export default text;

@@ -1,18 +1,16 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { Fragment, type ReactNode } from "react";
 import type { Locale } from "@/lib/i18n/config";
 
 /**
- * The legal pages' text (content/legal/*.md): English, then "---", then Arabic. Only what those files
+ * The legal pages' text (content/legal/*.ts): English, then "---", then Arabic. Only what those texts
  * use: # and ## headings, paragraphs, - / • bullets, numbered steps, **bold**, and links.
  */
 
 type Block = { kind: "h1" | "h2" | "p"; lines: string[] } | { kind: "ul" | "ol"; items: string[] };
 
-/** The half of the file in this language. */
-export function legalText(file: string, locale: Locale): string {
-  const raw = readFileSync(join(process.cwd(), "content", "legal", file), "utf8").replace(/\r\n/g, "\n").replace(/<!--[\s\S]*?-->\n?/, "");
+/** The half of a legal text in this language. */
+export function legalText(doc: string, locale: Locale): string {
+  const raw = doc.replace(/\r\n/g, "\n").replace(/<!--[\s\S]*?-->\n?/, "");
   const [en, ar] = raw.split(/\n---\n/);
   return (locale === "ar" ? ar : en) ?? en;
 }

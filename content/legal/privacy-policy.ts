@@ -1,4 +1,7 @@
-<!-- Shown at /privacy. The same text as 100clips-creators/docs/play-store/privacy-policy.md (Play Store links): change both. -->
+// The Privacy policy's text, in the format components/legal/LegalDocument.tsx reads: English,
+// then a line with "---", then Arabic. Edit the words here. It's a module rather than a .md file so it's
+// bundled with the app: the live site runs on Cloudflare Workers, which can't read files at request time.
+const text = `<!-- Shown at /privacy. The same text as 100clips-creators/docs/play-store/privacy-policy.md (Play Store links): change both. -->
 # laqta Privacy Policy
 
 **Last updated:** October 18, 2026
@@ -264,3 +267,6 @@ important changes.
 ## التغييرات
 
 بنحدّث هذي الصفحة لما تتغير السياسة، ونبلّغك في التطبيق أو الموقع بالتغييرات المهمة.
+`;
+
+export default text;

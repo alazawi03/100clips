@@ -1,4 +1,7 @@
-<!-- Shown at /delete-account. The same text as 100clips-creators/docs/play-store/delete-account.md (Play Store links): change both. What's deleted follows the API's erase (100clips-backend, src/moderation): change both together. -->
+// The Delete account page's text, in the format components/legal/LegalDocument.tsx reads: English,
+// then a line with "---", then Arabic. Edit the words here. It's a module rather than a .md file so it's
+// bundled with the app: the live site runs on Cloudflare Workers, which can't read files at request time.
+const text = `<!-- Shown at /delete-account. The same text as 100clips-creators/docs/play-store/delete-account.md (Play Store links): change both. What's deleted follows the API's erase (100clips-backend, src/moderation): change both together. -->
 # Delete your laqta account
 
 **Last updated:** October 18, 2026
@@ -57,3 +60,6 @@ first so we can send it before deleting.
 ومنتجها. والتقييمات ممكن تبقى بدون اسمك.
 
 الطلبات الجارية تخلص أو تنلغى قبل الحذف. وإذا عندك فلوس ما وصلتك، أضف حسابك البنكي أول عشان نحوّلها قبل الحذف.
+`;
+
+export default text;
