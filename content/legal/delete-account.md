@@ -1,11 +1,11 @@
 <!-- Shown at /delete-account. The same text as 100clips-creators/docs/play-store/delete-account.md (Play Store links): change both. -->
-# Delete your 100clips account
+# Delete your laqta account
 
-To delete your **100clips Creator** account and its data:
+To delete your account in the **laqta** app and its data:
 
 1. Email **hello@masroof.money** from the email on your account, or send a WhatsApp/SMS from the phone
    number you sign in with to **+973 6660 4882**.
-2. Write: "Please delete my 100clips account" and your username.
+2. Write: "Please delete my laqta account" and your username.
 3. We confirm it's you and delete the account within **30 days**. We'll reply when it's done.
 
 **What's deleted:** your profile, photo, sample and intro videos, social accounts, prices, saved
@@ -19,13 +19,13 @@ If you have money waiting, add a bank account first so we can send it before del
 
 ---
 
-# حذف حسابك في 100clips
+# حذف حسابك في لقطة
 
-عشان تحذف حسابك في **100clips Creator** وبياناته:
+عشان تحذف حسابك في تطبيق **لقطة** وبياناته:
 
 1. راسل **hello@masroof.money** من البريد المسجّل في حسابك، أو أرسل رسالة واتساب/نصية من رقم جوالك اللي تدخل فيه إلى
    **+973 6660 4882**.
-2. اكتب: "أبي أحذف حسابي في 100clips" واسم المستخدم.
+2. اكتب: "أبي أحذف حسابي في لقطة" واسم المستخدم.
 3. نتأكد إنك صاحب الحساب ونحذفه خلال **30 يوم**، ونرد عليك لما يخلص.
 
 **وش ينحذف:** ملفك، وصورتك، وفيديوهات العينات والتعريف، وحساباتك في التواصل، وأسعارك، وعناوينك المحفوظة، وبياناتك

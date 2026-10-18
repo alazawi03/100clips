@@ -19,7 +19,7 @@ export function legalText(file: string, locale: Locale): string {
 
 /** The first heading, for the page title. */
 export function legalTitle(text: string): string {
-  return /^# (.+)$/m.exec(text)?.[1] ?? "100clips";
+  return /^# (.+)$/m.exec(text)?.[1] ?? "laqta";
 }
 
 function parse(text: string): Block[] {
@@ -50,9 +50,14 @@ function parse(text: string): Block[] {
   return blocks.filter((b) => ("lines" in b ? b.lines.length > 0 : b.items.length > 0));
 }
 
-/** **bold**, links (https://… or /path), emails. */
+/**
+ * **bold**, links (https://… or /path), emails. A /path is a word of its own ("Privacy Policy: /privacy."),
+ * so the "/or" in "and/or" stays text.
+ */
 function inline(text: string): ReactNode[] {
-  return text.split(/(\*\*[^*]+\*\*|https?:\/\/[^\s)]+[^\s).,]|\/[a-z-]+(?=[.\s]|$)|[\w.+-]+@[\w-]+\.[\w.]+[a-z])/g).map((part, i) => {
+  return text.split(/(\*\*[^*]+\*\*|https?:\/\/[^\s)]+[^\s).,]|(?<!\S)\/[a-z-]+(?=[.,\s]|$)|[\w.+-]+@[\w-]+\.[\w.]+[a-z])/g).map((part, i) => {
+    // split() puts the matches at the odd places; the text between them is never a link.
+    if (i % 2 === 0) return part;
     if (part.startsWith("**")) return <strong key={i}>{inline(part.slice(2, -2))}</strong>;
     if (/^(https?:\/\/|\/[a-z])/.test(part)) {
       return (

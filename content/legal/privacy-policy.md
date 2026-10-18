@@ -1,11 +1,11 @@
 <!-- Shown at /privacy. The same text as 100clips-creators/docs/play-store/privacy-policy.md (Play Store links): change both. -->
-# 100clips Privacy Policy
+# laqta Privacy Policy
 
 **Last updated:** October 14, 2026
 
-100clips ("we", "us") connects content creators with brands that pay them to make short videos. This
-policy explains what we collect in the **100clips Creator** app and the **100clips** website for
-brands, why, who sees it, and your choices. It follows Bahrain's Personal Data Protection Law
+laqta ("we", "us") connects content creators with brands that pay them to make short videos. This
+policy explains what we collect in the **laqta** app for content creators and the **laqta** website
+for brands, why, who sees it, and your choices. It follows Bahrain's Personal Data Protection Law
 (Law No. 30 of 2018).
 
 **Who we are:** Union for Trade W.L.L., Manama, Kingdom of Bahrain.
@@ -23,7 +23,7 @@ brands, why, who sees it, and your choices. It follows Bahrain's Personal Data P
 **When you work with brands**
 - Delivery addresses you save, and, if you choose, a pin on the map (your device's location, only
   when you tap "use my current location").
-- Messages you exchange with brands and with 100clips Support.
+- Messages you exchange with brands and with laqta Support.
 - The videos you deliver, ad codes, and the ratings and reviews brands leave.
 - Your bank account (account holder name and IBAN) to send you your earnings, and a record of your
   earnings and payouts.
@@ -49,14 +49,14 @@ We don't sell your data and the app shows no ads.
 
 ## Who sees your data
 
-- **Brands on 100clips** see your public profile: name, username, city, bio, niches, photo, sample
+- **Brands on laqta** see your public profile: name, username, city, bio, niches, photo, sample
   videos, prices, social accounts, rating and reviews.
 - **The brand whose offer you accept** also gets a copy of the delivery address you choose and your
   phone number (for products sent to you), your messages with them, and the videos you deliver.
   Approved videos may be shown on your profile to other brands if that brand allows it.
-- **Your intro video, bank details and saved addresses** are private: only you and the 100clips team
+- **Your intro video, bank details and saved addresses** are private: only you and the laqta team
   can see them (addresses go to a brand only as described above).
-- **Service providers** who run parts of 100clips for us, under contract and only for that purpose:
+- **Service providers** who run parts of laqta for us, under contract and only for that purpose:
   Supabase (database, file storage and sign-in, hosted in the European Union), our SMS provider (to
   send sign-in codes) and our payment provider.
 - **Authorities**, when the law requires it.
@@ -78,11 +78,11 @@ from the phone number or email on your account. See also:
 
 Data travels encrypted (HTTPS). Access is limited by account: you see your own private data, brands
 see only what is described above, and private files (such as your intro video) are only reachable
-by you and the 100clips team.
+by you and the laqta team.
 
 ## Age
 
-100clips is for people aged 18 and over.
+laqta is for people aged 18 and over.
 
 ## Changes
 
@@ -90,12 +90,12 @@ We'll update this page when the policy changes and tell you in the app about imp
 
 ---
 
-# سياسة الخصوصية في 100clips
+# سياسة الخصوصية في لقطة
 
 **آخر تحديث:** 14 أكتوبر 2026
 
-100clips ("نحن") منصة تربط صنّاع المحتوى بالعلامات التجارية اللي تدفع لهم مقابل فيديوهات قصيرة. هذي السياسة توضح
-وش نجمع في تطبيق **100clips Creator** وموقع **100clips** للعلامات التجارية، وليش، ومن يشوفه، وخياراتك. وتتبع قانون
+لقطة ("نحن") منصة تربط صنّاع المحتوى بالعلامات التجارية اللي تدفع لهم مقابل فيديوهات قصيرة. هذي السياسة توضح
+وش نجمع في تطبيق **لقطة** لصنّاع المحتوى وموقع **لقطة** للعلامات التجارية، وليش، ومن يشوفه، وخياراتك. وتتبع قانون
 حماية البيانات الشخصية في مملكة البحرين (القانون رقم 30 لسنة 2018).
 
 **من نحن:** Union for Trade W.L.L.، المنامة، مملكة البحرين.
@@ -112,7 +112,7 @@ We'll update this page when the policy changes and tell you in the app about imp
 
 **لما تشتغل مع العلامات التجارية**
 - عناوين التوصيل اللي تحفظها، وإذا حبيت، نقطة على الخريطة (موقع جهازك، فقط لما تضغط "استخدم موقعي الحالي").
-- رسائلك مع العلامات التجارية ومع دعم 100clips.
+- رسائلك مع العلامات التجارية ومع دعم لقطة.
 - الفيديوهات اللي تسلّمها، وأكواد الإعلانات، والتقييمات والمراجعات اللي تكتبها العلامات التجارية.
 - حسابك البنكي (اسم صاحب الحساب والآيبان) عشان نحوّل لك أرباحك، وسجل أرباحك وتحويلاتك.
 
@@ -135,14 +135,14 @@ We'll update this page when the policy changes and tell you in the app about imp
 
 ## من يشوف بياناتك
 
-- **العلامات التجارية في 100clips** تشوف ملفك العام: الاسم، واسم المستخدم، والمدينة، والنبذة، والمجالات، والصورة،
+- **العلامات التجارية في لقطة** تشوف ملفك العام: الاسم، واسم المستخدم، والمدينة، والنبذة، والمجالات، والصورة،
   وفيديوهات العينات، والأسعار، وحساباتك في التواصل، والتقييم والمراجعات.
 - **العلامة اللي تقبل عرضها** تحصل كمان على نسخة من عنوان التوصيل اللي تختاره ورقم جوالك (للمنتجات اللي تنرسل
   لك)، ورسائلك معها، والفيديوهات اللي تسلّمها. الفيديوهات المعتمدة ممكن تظهر في ملفك للعلامات الثانية إذا سمحت
   العلامة بذلك.
-- **فيديو التعريف وبياناتك البنكية وعناوينك المحفوظة** خاصة: ما يشوفها غيرك وفريق 100clips (والعناوين توصل للعلامة
+- **فيديو التعريف وبياناتك البنكية وعناوينك المحفوظة** خاصة: ما يشوفها غيرك وفريق لقطة (والعناوين توصل للعلامة
   فقط مثل ما وضحنا فوق).
-- **مزودو الخدمات** اللي يشغّلون أجزاء من 100clips لنا، بعقد ولهذا الغرض فقط: Supabase (قاعدة البيانات وتخزين
+- **مزودو الخدمات** اللي يشغّلون أجزاء من لقطة لنا، بعقد ولهذا الغرض فقط: Supabase (قاعدة البيانات وتخزين
   الملفات وتسجيل الدخول، مستضافة في الاتحاد الأوروبي)، ومزود الرسائل النصية (لرموز الدخول)، ومزود الدفع.
 - **الجهات الرسمية**، إذا طلب القانون ذلك.
 
@@ -160,11 +160,11 @@ We'll update this page when the policy changes and tell you in the app about imp
 ## الأمان
 
 البيانات تنتقل مشفّرة (HTTPS). والوصول محدود حسب الحساب: تشوف بياناتك الخاصة، والعلامات التجارية تشوف بس اللي
-وضحناه، والملفات الخاصة (مثل فيديو التعريف) ما يوصل لها غيرك وفريق 100clips.
+وضحناه، والملفات الخاصة (مثل فيديو التعريف) ما يوصل لها غيرك وفريق لقطة.
 
 ## العمر
 
-100clips لمن عمرهم 18 سنة وفوق.
+لقطة لمن عمرهم 18 سنة وفوق.
 
 ## التغييرات
 
