@@ -9,14 +9,11 @@ This repo is the **brand dashboard** (web). The admin portal (`../admin-page`), 
 On the backend (`lib/api.ts` calls the API as the signed-in user): sign-in (Supabase Auth: email and
 password, or Google), brands and products, Explore and creator profiles, the cart and saved lists,
 campaigns (drafts, checkout, invite, run again, edit details, extend deadline), orders (ship, review,
-revision, approve, rate, collect), notifications, and the balance and its history. `lib/data/live.ts` loads the account's data once per request in the
+revision, approve, rate, collect), notifications, messages (chat), problem reports on orders, the balance and its history, and the bank account and withdrawals (Settings). `lib/data/live.ts` loads the account's data once per request in the
 dashboard's shapes (`lib/data/types.ts`). Files are in Cloudflare R2.
 
 Card payments aren't live yet: the card form is a mock, and a payment with a card part waits until an
 admin confirms it (`POST /admin/payments/{id}/confirm`, standing in for the card provider). Then the offers go out.
-
-Still sample data (`lib/data/`, in memory until the dev server restarts), with a "demo data" banner:
-messages (chat), the bank account and withdrawals (settings), and problem reports.
 
 ## Run it
 

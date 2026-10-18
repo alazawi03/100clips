@@ -3,7 +3,6 @@ import { markOrderReturned } from "@/app/actions/brand";
 import { BrandFilter } from "@/components/brand/BrandFilter";
 import { productOf } from "@/components/brand/campaigns/campaignView";
 import { ShipButton, ShipToLines } from "@/components/brand/campaigns/OrderCard";
-import { DemoNote } from "@/components/shell/DemoBanner";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -12,15 +11,14 @@ import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { ActionTag } from "@/components/ui/StatusBadge";
 import { brandFilterOf, hasManyBrands, href } from "@/lib/brandFilter";
 import { workspace } from "@/lib/data/live";
-import { demoShipments } from "@/lib/data/shippingDemo";
 import type { Order } from "@/lib/data/types";
 import { getI18n, type I18n } from "@/lib/i18n/server";
 import { actionWaitingDays, daysUntil } from "@/lib/orderFlow";
 import { compareInStage, SHIPPING_STAGES, shippingStage, type ShippingStage } from "@/lib/shipping";
 import { today } from "@/lib/today";
 
-/** One product on the page, with the names it shows. `demo`: a sample, so it links nowhere and its buttons do nothing. */
-type Row = { order: Order; name: string; photo?: string; productId?: string; productName: string; demo?: boolean };
+/** One product on the page, with the names it shows. */
+type Row = { order: Order; name: string; photo?: string; productId?: string; productName: string };
 
 /** Every physical product the brand sends to creators, by where it is now. */
 export default async function ShippingPage({ searchParams }: PageProps<"/shipping">) {
@@ -48,14 +46,6 @@ export default async function ShippingPage({ searchParams }: PageProps<"/shippin
       });
     }
   }
-  // Nothing to ship yet: show sample products so the page can be seen working.
-  const demo = SHIPPING_STAGES.every((s) => byStage.get(s)!.length === 0);
-  if (demo) {
-    for (const s of demoShipments(today())) {
-      const stage = shippingStage(s.order, { physical: true, returns: s.returns });
-      if (stage) byStage.get(stage)!.push({ order: s.order, name: f.pick(s.creator), productName: f.pick(s.product), demo: true });
-    }
-  }
   const total = SHIPPING_STAGES.reduce((n, s) => n + byStage.get(s)!.length, 0);
 
   // Open on the tab that was asked for, else the first one with something in it.
@@ -75,7 +65,6 @@ export default async function ShippingPage({ searchParams }: PageProps<"/shippin
       <PageHeader title={t("shippingPage.title")} subtitle={t("shippingPage.subtitle")}>
         {hasManyBrands(ws.brands) && <BrandFilter brands={ws.brands.map((b) => ({ id: b.id, name: f.pick(b.name), logo: b.logo }))} value={brandId} />}
       </PageHeader>
-      {demo && <DemoNote>{t("header.demoData")}</DemoNote>}
       {total === 0 ? (
         <EmptyState title={t("shippingPage.emptyAll")} hint={t("shippingPage.emptyAllHint")} />
       ) : (
@@ -101,7 +90,7 @@ export default async function ShippingPage({ searchParams }: PageProps<"/shippin
 /** One product: who has it, which campaign, where it stands, and the brand's button when there is one. */
 function ShippingRow({ row, stage, i18n }: { row: Row; stage: ShippingStage; i18n: I18n }) {
   const { t, tp, f } = i18n;
-  const { order, name, productId, productName, demo } = row;
+  const { order, name, productId, productName } = row;
   const s = order.shipping;
   const day = (iso: string) => f.date(iso.slice(0, 10));
 
@@ -109,13 +98,7 @@ function ShippingRow({ row, stage, i18n }: { row: Row; stage: ShippingStage; i18
   let action: React.ReactNode = null;
   if (stage === "send") {
     status = <ActionTag>{tp("flow.waitingDays", actionWaitingDays(order, "ship", today()))}</ActionTag>;
-    action = demo ? (
-      <Button variant="primary" disabled className="h-9 shrink-0 md:h-9">
-        {t("flow.button.ship")}
-      </Button>
-    ) : (
-      <ShipButton orderId={order.id} name={name} productName={productName} />
-    );
+    action = <ShipButton orderId={order.id} name={name} productName={productName} />;
   } else if (stage === "way") {
     status = (
       <span className="text-small text-text-muted">
@@ -128,8 +111,8 @@ function ShippingRow({ row, stage, i18n }: { row: Row; stage: ShippingStage; i18
     status = <span className="text-small text-text-muted">{t("campaignDetail.receivedOn", { date: day(s!.receivedAt!) })}</span>;
     action =
       order.status === "approved" ? (
-        <form action={demo ? undefined : markOrderReturned.bind(null, order.id)}>
-          <Button type="submit" variant="primary" disabled={demo} className="h-9 md:h-9">
+        <form action={markOrderReturned.bind(null, order.id)}>
+          <Button type="submit" variant="primary" className="h-9 md:h-9">
             {t("flow.button.collect")}
           </Button>
         </form>
@@ -148,9 +131,9 @@ function ShippingRow({ row, stage, i18n }: { row: Row; stage: ShippingStage; i18
           <p className="truncate font-medium">{name}</p>
           {/* The campaign opens this creator's order in it; the product opens the product. */}
           <p className="truncate text-small text-text-muted">
-            {demo ? f.pick(order.title) : <Link href={`/orders/${order.id}`} className="font-medium text-text hover:underline">{f.pick(order.title)}</Link>}
+            <Link href={`/orders/${order.id}`} className="font-medium text-text hover:underline">{f.pick(order.title)}</Link>
             {t("common.separator")}
-            {demo || !productId ? productName : <Link href={`/brands?show=${productId}`} className="text-text hover:underline">{productName}</Link>}
+            {!productId ? productName : <Link href={`/brands?show=${productId}`} className="text-text hover:underline">{productName}</Link>}
           </p>
         </div>
         <div className="flex w-full flex-wrap items-center justify-between gap-3 ps-14 sm:w-auto sm:justify-end sm:ps-0">

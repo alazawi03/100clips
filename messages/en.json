@@ -21,7 +21,6 @@
     "cart": "Cart ({count})",
     "messages": "Messages ({count} unread)",
     "profile": "View profile",
-    "demoData": "This page still shows demo data. It connects to real data soon.",
     "search": "Search creators by name or handle",
     "searchResults": "Matching creators",
     "searchSeeAll": "See all results for “{q}”",

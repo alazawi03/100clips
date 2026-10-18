@@ -11,7 +11,6 @@ import { getTheme } from "@/lib/theme";
 import { getI18n } from "@/lib/i18n/server";
 import { displayName, getUser, requireBrandAccount } from "@/lib/session";
 import { AccountMenu } from "./AccountMenu";
-import { DemoBanner } from "./DemoBanner";
 import { LanguageToggle } from "./LanguageToggle";
 import { NotificationBell } from "./NotificationBell";
 import { notificationRows } from "./notificationRows";
@@ -103,7 +102,6 @@ export async function AppShell({ children }: { children: ReactNode }) {
         {/* Pages marked data-hug (messages) sit right beside the sidebar instead of centred. */}
         <main className="min-w-0 flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-12 md:pt-8 md:has-[[data-hug]]:ps-4">
           <div className="mx-auto w-full max-w-[1200px] has-[[data-hug]]:mx-0">
-            <DemoBanner />
             {children}
           </div>
         </main>
