@@ -38,7 +38,7 @@ export async function api<T = unknown>(path: string, init: { method?: string; bo
     throw new Error(`The 100clips API isn't reachable at ${API_URL} (run "npm run dev" in 100clips-backend, or check API_URL in .env.local).`, { cause: e });
   }
   if (res.status === 204) return undefined as T;
-  const json = await res.json().catch(() => ({}));
+  const json = (await res.json().catch(() => ({}))) as { message?: string | string[] };
   if (!res.ok) {
     const messages = Array.isArray(json.message) ? json.message : [json.message ?? res.statusText];
     throw new ApiError(res.status, messages.join(". "), messages);
