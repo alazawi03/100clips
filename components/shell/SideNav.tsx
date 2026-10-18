@@ -22,20 +22,24 @@ export function SideNav({ account, unread = {} }: { account: ReactNode; unread?:
   const pathname = usePathname();
   const { t } = useI18n();
   return (
-    <nav aria-label={t("nav.label")} className="sticky top-16 z-30 hidden h-[calc(100dvh-4rem)] w-60 shrink-0 flex-col gap-1 overflow-y-auto border-e border-border bg-background p-4 md:flex">
-      <Link href="/campaigns/new" className={buttonClass("primary", "mb-3 w-full")}>
-        <Plus aria-hidden />
-        {t("newCampaign.button")}
-      </Link>
-      {sidebarGroups.map((group, i) => (
-        <div key={i} role="group" aria-label={group.label && t(group.label)} className="flex flex-col gap-1">
-          {group.label && <p aria-hidden className="px-3 pb-1 pt-4 text-caption font-medium text-text-muted">{t(group.label)}</p>}
-          {group.items.map((item) => (
-            <SideLink key={item.href} item={item} active={isActive(item, pathname)} label={t(item.label)} count={unread[item.href]} />
-          ))}
-        </div>
-      ))}
-      <div className="mt-auto border-t border-border pt-3">{account}</div>
+    <nav aria-label={t("nav.label")} className="sticky top-16 z-30 hidden h-[calc(100dvh-4rem)] w-60 shrink-0 flex-col border-e border-border bg-background p-4 md:flex">
+      {/* Only the pages scroll (on short screens). The account menu stays outside: a scrolling box clips sideways too,
+          and its panel is wider than the sidebar. */}
+      <div className="-mx-4 -mt-4 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-4 pb-1 pt-4">
+        <Link href="/campaigns/new" className={buttonClass("primary", "mb-3 w-full")}>
+          <Plus aria-hidden />
+          {t("newCampaign.button")}
+        </Link>
+        {sidebarGroups.map((group, i) => (
+          <div key={i} role="group" aria-label={group.label && t(group.label)} className="flex flex-col gap-1">
+            {group.label && <p aria-hidden className="px-3 pb-1 pt-4 text-caption font-medium text-text-muted">{t(group.label)}</p>}
+            {group.items.map((item) => (
+              <SideLink key={item.href} item={item} active={isActive(item, pathname)} label={t(item.label)} count={unread[item.href]} />
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-1 border-t border-border pt-3">{account}</div>
     </nav>
   );
 }
