@@ -46,6 +46,7 @@ export function AgainForm({
   defaults,
   minDeadline,
   balance,
+  cardOnline,
 }: {
   action: (prev: CheckoutState, form: FormData) => Promise<CheckoutState>;
   lists: Array<{ id: string; name: string; creators: InviteCreator[] }>;
@@ -54,6 +55,7 @@ export function AgainForm({
   defaults: AgainDefaults;
   minDeadline: string;
   balance: number;
+  cardOnline: boolean;
 }) {
   return (
     <InviteForm
@@ -64,6 +66,7 @@ export function AgainForm({
       tickList
       defaultFormats={defaultFormats}
       balance={balance}
+      cardOnline={cardOnline}
       details={(form) => (
         <AgainDetails defaults={defaults} minDeadline={minDeadline} {...form} />
       )}

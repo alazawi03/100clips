@@ -7,9 +7,10 @@ import type { components } from "@/lib/api-types";
 import { myBrands } from "@/lib/data/brandsApi";
 import { setCheckoutStart } from "@/lib/data/checkoutStart";
 import * as lists from "@/lib/data/lists";
-import { priceLines, workspace, type PricedLine, type Workspace } from "@/lib/data/live";
+import { priceLines, workspace, type PricedLine } from "@/lib/data/live";
 import { VIDEO_STYLES, type Campaign, type ContentFormat, type Localized, type Product, type VideoStyle } from "@/lib/data/types";
 import type { MessageKey } from "@/lib/i18n/messages";
+import { getLocale } from "@/lib/i18n/server";
 import { today } from "@/lib/today";
 
 /**
@@ -128,62 +129,67 @@ export type CheckoutState =
       paid?: {
         campaignId: string;
         creators: Array<{ id: string; name: Localized }>;
-        /** Part was paid by card and waits for the payment to be confirmed: the offers go out then. */
+        /** Part is paid by card and waits for it: the offers go out then. */
         pending?: boolean;
+        /** Gate-E's page for the card part: the brand goes there straight away. */
+        payUrl?: string;
       };
     })
   | null;
 
-/** Mock card form: checks the shape only, and only when something is left to pay by card. */
-function checkCard(form: FormData, byCard: number, errors: NonNullable<FormState>["errors"]) {
-  if (byCard <= 0) return;
-  if (!text(form, "cardName")) errors.cardName = "forms.errors.cardName";
-  if (!/^\d{16}$/.test(text(form, "cardNumber").replace(/\s/g, ""))) errors.cardNumber = "forms.errors.cardNumber";
-  if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(text(form, "cardExpiry"))) errors.cardExpiry = "forms.errors.cardExpiry";
-  if (!/^\d{3,4}$/.test(text(form, "cardCvc"))) errors.cardCvc = "forms.errors.cardCvc";
+/** The top-up's result: like a form's, plus Gate-E's page when the card is paid there. */
+export type TopUpState = (NonNullable<FormState> & { payUrl?: string }) | null;
+
+/** "Card payments aren't available right now" (Gate-E couldn't make the page) or another refusal, for the pay step. */
+function payErrorKey(error: unknown): MessageKey {
+  const message = error instanceof ApiError ? error.message : "";
+  if (/suspended/i.test(message)) return "forms.errors.brandSuspended";
+  if (error instanceof ApiError && error.status === 503) return "forms.errors.cardUnavailable";
+  return "forms.errors.payFailed";
 }
 
 /**
- * Tops up the balance by card. The payment waits for the card provider (an admin confirms it until
- * there is one); the balance grows then.
+ * Tops up the balance by card: on Gate-E's page when it's set up (the brand goes there next),
+ * otherwise laqta sends a payment link and confirms it by hand. The balance grows once it's paid.
  */
-export async function topUpBalance(_prev: FormState, form: FormData): Promise<FormState> {
-  const values = Object.fromEntries(Object.entries(submitted(form)).filter(([k]) => !k.startsWith("card")));
+export async function topUpBalance(_prev: TopUpState, form: FormData): Promise<TopUpState> {
+  const values = submitted(form);
   const raw = text(form, "amount").replace(/,/g, "");
   const amount = Number(raw);
   const errors: NonNullable<FormState>["errors"] = {};
   if (!/^\d+(\.\d{1,3})?$/.test(raw) || amount < 1 || amount > 10_000) errors.amount = "forms.errors.topUpAmount";
-  checkCard(form, 1, errors);
   if (Object.keys(errors).length) return { errors, values };
+  let payment: Payment;
   try {
-    await api("/me/top-ups", { method: "POST", body: { amount } });
+    payment = await api<Payment>("/me/top-ups", { method: "POST", body: { amount, language: await getLocale() } });
   } catch (e) {
     logFailure("Top-up", e);
-    const suspended = e instanceof ApiError && /suspended/i.test(e.message);
-    return { errors: { pay: suspended ? "forms.errors.brandSuspended" : "forms.errors.payFailed" }, values };
+    return { errors: { pay: payErrorKey(e) }, values };
   }
   revalidatePath("/", "layout");
-  return { errors: {}, values: {} };
+  return { errors: {}, values: {}, ...(payment.pay_url ? { payUrl: payment.pay_url } : {}) };
 }
 
-/** What the brand pays now: creators' prices plus the fee; the balance first when chosen, the rest by card. */
-function byCardFor(ws: Workspace, toPay: number, useBalance: boolean) {
-  return toPay - (useBalance ? Math.min(Math.max(ws.balance, 0), toPay) : 0);
+/** What the payment page shows and keeps checking. */
+export type PaymentView = Pick<Payment, "id" | "kind" | "status" | "campaign_id" | "by_card" | "picks" | "provider" | "pay_url">;
+
+/** Back from Gate-E's page (or waiting on it): asks the API, which asks Gate-E. */
+export async function checkPayment(id: string): Promise<PaymentView> {
+  const { kind, status, campaign_id, by_card, picks, provider, pay_url } = await api<Payment>(`/payments/${id}/check`, { method: "POST" });
+  return { id, kind, status, campaign_id, by_card, picks, provider, pay_url };
 }
 
 /** The API refused the payment: a message in the brand's language on the payment step (or the deadline). */
 function payFailed(error: unknown, values: Record<string, string>): CheckoutState {
   logFailure("Payment", error);
   const message = error instanceof ApiError ? error.message : "";
-  const [field, key]: [string, MessageKey] = /suspended/i.test(message)
-    ? ["pay", "forms.errors.brandSuspended"]
-    : /not available|doesn't offer/i.test(message)
-      ? ["pay", "forms.errors.creatorUnavailable"]
-      : /already has an offer/i.test(message)
-        ? ["pay", "forms.errors.alreadyOffered"]
-        : /deadline has passed/i.test(message)
-          ? ["deadline", "forms.errors.deadlineFuture"]
-          : ["pay", "forms.errors.payFailed"];
+  const [field, key]: [string, MessageKey] = /not available|doesn't offer/i.test(message)
+    ? ["pay", "forms.errors.creatorUnavailable"]
+    : /already has an offer/i.test(message)
+      ? ["pay", "forms.errors.alreadyOffered"]
+      : /deadline has passed/i.test(message)
+        ? ["deadline", "forms.errors.deadlineFuture"]
+        : ["pay", payErrorKey(error)];
   return { errors: { [field]: key }, values };
 }
 
@@ -194,6 +200,8 @@ async function pay(campaignId: string, lines: PricedLine[], notes: Record<string
     body: {
       picks: lines.map((l) => ({ creator_id: l.creator.id, format: l.items[0].format, ...(notes[l.creator.id] ? { note: notes[l.creator.id].slice(0, 500) } : {}) })),
       use_balance: useBalance,
+      // Gate-E's page opens in the brand's language.
+      language: await getLocale(),
     },
   });
 }
@@ -201,7 +209,12 @@ async function pay(campaignId: string, lines: PricedLine[], notes: Record<string
 const paidState = (campaignId: string, lines: PricedLine[], payment: Payment): CheckoutState => ({
   errors: {},
   values: {},
-  paid: { campaignId, creators: lines.map((l) => ({ id: l.creator.id, name: l.creator.name })), pending: payment.status === "pending" },
+  paid: {
+    campaignId,
+    creators: lines.map((l) => ({ id: l.creator.id, name: l.creator.name })),
+    pending: payment.status === "pending",
+    ...(payment.pay_url ? { payUrl: payment.pay_url } : {}),
+  },
 });
 
 export async function checkout(_prev: CheckoutState, form: FormData): Promise<CheckoutState> {
@@ -213,7 +226,7 @@ export async function checkout(_prev: CheckoutState, form: FormData): Promise<Ch
   const errors: NonNullable<FormState>["errors"] = {};
   const brand = ws.brand(text(form, "brandId"));
   // What the brand pays: creators' prices plus the service fee.
-  const { lines, toPay } = priceLines(ws, picks);
+  const { lines } = priceLines(ws, picks);
   if (fromPicker && lines.length === 0) errors.pick = "forms.errors.pickCreators";
   const title = text(form, "title").slice(0, 120);
   const brief = text(form, "brief").slice(0, 2000);
@@ -244,7 +257,6 @@ export async function checkout(_prev: CheckoutState, form: FormData): Promise<Ch
   else if (uploadDate && !validDeadline && uploadDate <= today()) errors.uploadDate = "forms.errors.deadlineFuture";
   // More details (all optional): references must be links.
   const { details, values } = parseDetails(form, errors);
-  checkCard(form, byCardFor(ws, toPay, useBalance), errors);
   if (Object.keys(errors).length > 0) return { errors, values };
 
   const notes = Object.fromEntries(lines.map((l) => [l.creator.id, text(form, `note-${l.creator.id}`)]));
@@ -394,7 +406,7 @@ export async function extendDeadline(campaignId: string, _prev: FormState, form:
 export async function payCampaignAgain(campaignId: string, _prev: CheckoutState, form: FormData): Promise<CheckoutState> {
   const ws = await workspace();
   const errors: NonNullable<FormState>["errors"] = {};
-  const { lines, toPay } = priceLines(ws, parsePicks(form));
+  const { lines } = priceLines(ws, parsePicks(form));
   const title = text(form, "title").slice(0, 120);
   const brief = text(form, "brief").slice(0, 2000);
   const deadline = text(form, "deadline");
@@ -405,7 +417,6 @@ export async function payCampaignAgain(campaignId: string, _prev: CheckoutState,
   if (deadline && !isIsoDate(deadline)) errors.deadline = "forms.errors.dateInvalid";
   else if (deadline && deadline <= today()) errors.deadline = "forms.errors.deadlineFuture";
   const { details, values } = parseDetails(form, errors);
-  checkCard(form, byCardFor(ws, toPay, useBalance), errors);
   if (Object.keys(errors).length > 0) return { errors, values };
 
   let copyId: string | undefined;
@@ -438,12 +449,12 @@ export async function payCampaignAgain(campaignId: string, _prev: CheckoutState,
 }
 
 /**
- * New campaign saves itself as a draft while it's filled in: the form as it is (never card details) and
+ * New campaign saves itself as a draft while it's filled in: the form as it is and
  * the chosen creators, in the campaign's `draft`. Returns the draft's id, so the page keeps updating the
  * same one. A draft belongs to one brand: choosing another brand starts a new draft.
  */
 export async function autosaveCampaignDraft(form: FormData): Promise<{ id: string }> {
-  const values = Object.fromEntries(Object.entries(submitted(form)).filter(([k]) => !k.startsWith("card") && !["pick", "mode", "draftId", "reference"].includes(k)));
+  const values = Object.fromEntries(Object.entries(submitted(form)).filter(([k]) => !["pick", "mode", "draftId", "reference"].includes(k)));
   values.references = form.getAll("reference").map(String).filter(Boolean).join("\n");
   const draft = { values, picks: parsePicks(form), savedAt: new Date().toISOString() };
   const draftId = text(form, "draftId");
@@ -502,10 +513,9 @@ function parsePicks(form: FormData) {
 export async function inviteToCampaign(campaignId: string, _prev: CheckoutState, form: FormData): Promise<CheckoutState> {
   const ws = await workspace();
   const errors: NonNullable<FormState>["errors"] = {};
-  const { lines, toPay } = priceLines(ws, parsePicks(form));
+  const { lines } = priceLines(ws, parsePicks(form));
   const useBalance = form.get("useBalance") === "on";
   if (lines.length === 0) errors.pick = "forms.errors.pickCreators";
-  checkCard(form, byCardFor(ws, toPay, useBalance), errors);
   if (Object.keys(errors).length > 0) return { errors, values: submitted(form) };
   try {
     const payment = await pay(campaignId, lines, {}, useBalance);

@@ -3,7 +3,7 @@ import { NeedBrandOnArrival } from "@/components/brand/campaigns/NeedBrandDialog
 import { CheckoutForm } from "@/components/brand/cart/CheckoutForm";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getCheckoutStart } from "@/lib/data/checkoutStart";
-import { priceCart, workspace } from "@/lib/data/live";
+import { cardOnline, priceCart, workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 import { nextDay, today } from "@/lib/today";
 import { checkoutBrands } from "@/components/brand/cart/checkoutBrands";
@@ -11,7 +11,7 @@ import { checkoutBrands } from "@/components/brand/cart/checkoutBrands";
 export default async function CheckoutPage() {
   const i18n = await getI18n();
   const { t, f } = i18n;
-  const ws = await workspace();
+  const [ws, online] = await Promise.all([workspace(), cardOnline()]);
   const { lines, total } = priceCart(ws);
   if (lines.length === 0) redirect("/cart");
 
@@ -43,6 +43,7 @@ export default async function CheckoutPage() {
         minDeadline={nextDay(today())}
         total={total}
         balance={ws.balance}
+        cardOnline={online}
       />
     </div>
   );

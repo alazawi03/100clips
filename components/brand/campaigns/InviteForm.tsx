@@ -14,6 +14,7 @@ import { cn } from "@/lib/cn";
 import { priceForBrand, withFee } from "@/lib/fees";
 import { createFormatters } from "@/lib/i18n/format";
 import { useCreatorPicker, type PickerOptions } from "./CreatorPicker";
+import { CardRedirect } from "@/components/brand/payments/CardRedirect";
 import { PaymentSuccess } from "./PaymentSuccess";
 
 export type { InviteCreator } from "./CreatorPicker";
@@ -24,6 +25,8 @@ type Props = PickerOptions & {
   /** Extra fields before payment, given the form's errors and submitted values. */
   details?: (form: { err: (name: string) => string | undefined; v: (name: string) => string | undefined }) => ReactNode;
   balance: number;
+  /** Card parts are paid on Gate-E's page (true), or laqta sends a payment link. */
+  cardOnline: boolean;
 };
 
 const REDIRECT_MS = 3000;
@@ -32,7 +35,7 @@ const REDIRECT_MS = 3000;
  * Pick who to invite (the shared creator picker), choose each creator's platform (exactly one: one
  * video, one order), and pay up front. Then the success screen, then the campaign.
  */
-export function InviteForm({ action: pay, details, balance, ...pickerOptions }: Props) {
+export function InviteForm({ action: pay, details, balance, cardOnline, ...pickerOptions }: Props) {
   const { t, tp, locale } = useI18n();
   const f = createFormatters(locale);
   const [state, action, pending] = useActionState<CheckoutState, FormData>(pay, null);
@@ -53,11 +56,14 @@ export function InviteForm({ action: pay, details, balance, ...pickerOptions }: 
   const paid = state?.paid;
 
   useEffect(() => {
-    if (!paid) return;
+    // With Gate-E, CardRedirect opens its page instead.
+    if (!paid || paid.payUrl) return;
     window.scrollTo({ top: 0 });
     const timer = setTimeout(() => window.location.replace(paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`), REDIRECT_MS);
     return () => clearTimeout(timer);
   }, [paid]);
+
+  if (paid?.payUrl) return <CardRedirect url={paid.payUrl} />;
 
   if (paid) {
     return (
@@ -92,7 +98,7 @@ export function InviteForm({ action: pay, details, balance, ...pickerOptions }: 
 
         <Card inert={pending} className="flex flex-col gap-5 p-5 md:p-6">
           <h2 className="text-h2 font-medium">{t("checkout.payment")}</h2>
-          <PaymentFields balance={balance} useBalance={useBalance} onUseBalance={setUseBalance} byCard={byCard} err={err} v={(name) => state?.values[name]} />
+          <PaymentFields balance={balance} useBalance={useBalance} onUseBalance={setUseBalance} byCard={byCard} cardOnline={cardOnline} err={err} />
         </Card>
       </div>
 

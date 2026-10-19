@@ -712,7 +712,7 @@ export interface paths {
         put?: never;
         /**
          * Pay for offers
-         * @description A draft becomes live, or a live campaign invites more creators. The balance is used first; if a card part is left the payment waits for the card (status pending), otherwise the offers go out at once (status paid). One video per creator per campaign.
+         * @description A draft becomes live, or a live campaign invites more creators. The balance is used first; if a card part is left the payment waits for the card (status pending): with Gate-E set up, send the brand to pay_url; without, an admin confirms it. Otherwise the offers go out at once (status paid). One video per creator per campaign. 503 if Gate-E can't make the payment page (try again).
          */
         post: operations["PaymentsController_checkout"];
         delete?: never;
@@ -732,7 +732,7 @@ export interface paths {
         put?: never;
         /**
          * Top up the balance
-         * @description Brand accounts. A card payment that becomes balance once the card provider confirms it.
+         * @description Brand accounts. A card payment that becomes balance once paid: on Gate-E's page (pay_url) when it's set up, otherwise when an admin confirms it.
          */
         post: operations["PaymentsController_topUp"];
         delete?: never;
@@ -841,6 +841,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/payments/{id}/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check a card payment
+         * @description Your own. Back from Gate-E's page: asks Gate-E now rather than waiting for its callback. Pending until Gate-E says it was paid or ended.
+         */
+        post: operations["PaymentsController_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/gate-e/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Gate-E's callback
+         * @description Gate-E calls it after each attempt on its page, with payment_id and payment_code (our payment id) in the address. The body isn't signed, so it's not used: Gate-E is asked about the payment instead. Repeats change nothing. 404 for a payment we don't have.
+         */
+        post: operations["PaymentsController_gateeCallback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/payments/{id}/confirm": {
         parameters: {
             query?: never;
@@ -852,7 +892,7 @@ export interface paths {
         put?: never;
         /**
          * Mark a card payment paid (admin)
-         * @description Stands in for the card provider's webhook until the provider is chosen. Completes the payment: balance, or a live campaign and its offers.
+         * @description Without Gate-E set up, or when its answer went astray. Completes the payment: balance, or a live campaign and its offers.
          */
         post: operations["PaymentsController_confirm"];
         delete?: never;
@@ -872,7 +912,7 @@ export interface paths {
         put?: never;
         /**
          * Mark a card payment failed (admin)
-         * @description Stands in for the card provider's webhook. Nothing else changes.
+         * @description The card wasn't paid: a balance part it held is freed. Nothing else changes.
          */
         post: operations["PaymentsController_fail"];
         delete?: never;
@@ -2243,6 +2283,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/devices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save this phone for push
+         * @description On sign-in, when FCM gives a new token, and when the app's language or a notification switch changes. A token another account had moves to this one.
+         */
+        put: operations["PushController_save"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/devices/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Forget this phone
+         * @description On sign-out: no more pushes to it for this account.
+         */
+        delete: operations["PushController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3117,6 +3197,12 @@ export interface components {
              * @default true
              */
             use_balance: boolean;
+            /**
+             * @description The language of the card payment page
+             * @default en
+             * @enum {string}
+             */
+            language: "en" | "ar";
         };
         /** @enum {string} */
         PaymentKind: "checkout" | "top_up";
@@ -3151,6 +3237,8 @@ export interface components {
             status: components["schemas"]["PaymentStatus"];
             provider: string | null;
             provider_ref: string | null;
+            /** @description The card provider's page for this payment: where the brand pays (again) while it's pending */
+            pay_url: string | null;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -3167,6 +3255,12 @@ export interface components {
              * @example 50
              */
             amount: number;
+            /**
+             * @description The language of the card payment page
+             * @default en
+             * @enum {string}
+             */
+            language: "en" | "ar";
         };
         Balance: {
             /** @description BHD available to spend (or withdraw): held amounts are already taken off */
@@ -3216,6 +3310,8 @@ export interface components {
             status: components["schemas"]["PaymentStatus"];
             provider: string | null;
             provider_ref: string | null;
+            /** @description The card provider's page for this payment: where the brand pays (again) while it's pending */
+            pay_url: string | null;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -3228,6 +3324,11 @@ export interface components {
             account: components["schemas"]["PaymentAccount"];
             /** @description The campaign's title (checkouts) */
             campaign_title: string | null;
+        };
+        CallbackReply: {
+            /** @example 1 */
+            status: number;
+            code_id: string;
         };
         ProviderResultDto: {
             /** @example tap */
@@ -3812,6 +3913,8 @@ export interface components {
              * @example 96
              */
             offer_hours: number;
+            /** @description Card parts are paid online straight away, on Gate-E's page. False: Gate-E isn't set up, so laqta sends a payment link and confirms it by hand. */
+            card_online: boolean;
             /** Format: date-time */
             updated_at: string;
             /**
@@ -4381,6 +4484,31 @@ export interface components {
             admin_id: string;
             admin_name_ar: string | null;
             admin_name_en: string | null;
+        };
+        /** @enum {string} */
+        DevicePlatform: "android" | "ios";
+        /**
+         * @description The app's language on this phone: pushes are written in it
+         * @enum {string}
+         */
+        DeviceLocale: "ar" | "en";
+        /**
+         * @description The kinds turned off in the app's Settings
+         * @enum {string}
+         */
+        PushKind: "offers" | "updates" | "money" | "messages";
+        SaveDeviceDto: {
+            /** @description The phone's FCM registration token */
+            token: string;
+            platform: components["schemas"]["DevicePlatform"];
+            /** @description The app's language on this phone: pushes are written in it */
+            locale: components["schemas"]["DeviceLocale"];
+            /** @description The kinds turned off in the app's Settings */
+            muted: components["schemas"]["PushKind"][];
+        };
+        SavedDevice: {
+            /** @description Whether this API sends pushes. False when push isn't set up on the server: the app then shows its own notifications while open. */
+            sending: boolean;
         };
     };
     responses: never;
@@ -6642,6 +6770,14 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     PaymentsController_topUp: {
@@ -6685,6 +6821,14 @@ export interface operations {
             };
             /** @description Not allowed */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6892,6 +7036,95 @@ export interface operations {
             };
             /** @description Not found, or not yours */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_gateeCallback: {
+        parameters: {
+            query: {
+                /** @description Our payment id */
+                payment_code: unknown;
+                /** @description Gate-E's payment id */
+                payment_id: unknown;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallbackReply"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11305,6 +11538,76 @@ export interface operations {
             };
             /** @description Not allowed */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PushController_save: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveDeviceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedDevice"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PushController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Forgotten (or it wasn't saved) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

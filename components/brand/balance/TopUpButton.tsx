@@ -2,16 +2,20 @@
 
 import { useActionState, useEffect, useId, useState } from "react";
 import { Plus } from "lucide-react";
-import { topUpBalance, type FormState } from "@/app/actions/brand";
+import { topUpBalance, type TopUpState } from "@/app/actions/brand";
 import { PaymentFields } from "@/components/brand/cart/PaymentFields";
+import { CardRedirect } from "@/components/brand/payments/CardRedirect";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Field, Input } from "@/components/ui/Form";
 import { createFormatters } from "@/lib/i18n/format";
 
-/** "Top up wallet": an amount and the card. The balance grows once 100clips confirms the card payment. */
-export function TopUpButton() {
+/**
+ * "Top up wallet": an amount, then the card on Gate-E's page (`cardOnline`), or a payment link from
+ * laqta. The balance grows once the card payment is paid.
+ */
+export function TopUpButton({ cardOnline }: { cardOnline: boolean }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   return (
@@ -21,28 +25,29 @@ export function TopUpButton() {
         {t("walletPage.topUp")}
       </Button>
       <Drawer open={open} onClose={() => setOpen(false)} title={t("walletPage.topUp")}>
-        <TopUpForm onDone={() => setOpen(false)} />
+        <TopUpForm cardOnline={cardOnline} onDone={() => setOpen(false)} />
       </Drawer>
     </>
   );
 }
 
-function TopUpForm({ onDone }: { onDone: () => void }) {
+function TopUpForm({ cardOnline, onDone }: { cardOnline: boolean; onDone: () => void }) {
   const { t, locale } = useI18n();
   const f = createFormatters(locale);
   const formId = useId();
-  const [state, run, pending] = useActionState<FormState, FormData>(topUpBalance, null);
+  const [state, run, pending] = useActionState<TopUpState, FormData>(topUpBalance, null);
   const [amount, setAmount] = useState(() => state?.values.amount ?? "");
   useEffect(() => {
-    if (state && Object.keys(state.errors).length === 0) onDone();
+    // With Gate-E the drawer stays open while its page loads (CardRedirect).
+    if (state && Object.keys(state.errors).length === 0 && !state.payUrl) onDone();
   }, [state, onDone]);
   const err = (name: string) => {
     const key = state?.errors[name];
     return key ? t(key) : undefined;
   };
-  const v = (name: string) => state?.values[name];
   const value = Number(amount);
   const valid = Number.isFinite(value) && value >= 1;
+  if (state?.payUrl) return <CardRedirect url={state.payUrl} />;
   return (
     <form id={formId} action={run} noValidate className="flex flex-col gap-5">
       <Field label={t("walletPage.topUpAmount")} htmlFor={`${formId}-amount`} error={err("amount")}>
@@ -57,7 +62,7 @@ function TopUpForm({ onDone }: { onDone: () => void }) {
           aria-invalid={!!err("amount")}
         />
       </Field>
-      <PaymentFields balance={0} useBalance={false} onUseBalance={() => {}} byCard={1} err={err} v={v} />
+      <PaymentFields balance={0} useBalance={false} onUseBalance={() => {}} byCard={1} cardOnline={cardOnline} topUp err={err} />
       <Button type="submit" variant="primary" aria-busy={pending} disabled={pending} className="w-full">
         {valid ? t("walletPage.topUpPay", { amount: f.money(value) }) : t("walletPage.topUp")}
       </Button>

@@ -1,4 +1,5 @@
 import { ArrowDownLeft, ArrowUpFromLine, ArrowUpRight, CreditCard, Hourglass, Undo2 } from "lucide-react";
+import Link from "next/link";
 import { TopUpButton } from "@/components/brand/balance/TopUpButton";
 import { WithdrawButton } from "@/components/brand/wallet/WithdrawButton";
 import { Avatar } from "@/components/ui/Avatar";
@@ -8,7 +9,7 @@ import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { api } from "@/lib/api";
 import type { components } from "@/lib/api-types";
 import { cn } from "@/lib/cn";
-import { workspace } from "@/lib/data/live";
+import { cardOnline, workspace } from "@/lib/data/live";
 import type { Order, Withdrawal } from "@/lib/data/types";
 import { expectedArrival, myBankAccount, myWithdrawals, WITHDRAWAL_DAYS } from "@/lib/data/wallet";
 import { brandPaid } from "@/lib/fees";
@@ -32,13 +33,14 @@ const typeIcon = { topUp: ArrowDownLeft, card: CreditCard, hold: Hourglass, paym
 
 export default async function WalletPage() {
   const { t, f } = await getI18n();
-  const [ws, ledger, pending, failed, withdrawals, bank] = await Promise.all([
+  const [ws, ledger, pending, failed, withdrawals, bank, online] = await Promise.all([
     workspace(),
     api<LedgerEntry[]>("/me/ledger?limit=200"),
     api<Payment[]>("/me/payments?status=pending"),
     api<Payment[]>("/me/payments?status=failed&limit=50"),
     myWithdrawals(),
     myBankAccount(),
+    cardOnline(),
   ]);
   const { orders } = ws;
   const held = orders.filter((o) => o.status === "pending" || o.status === "in_progress" || o.status === "delivered").reduce((sum, o) => sum + brandPaid(o), 0);
@@ -123,6 +125,12 @@ export default async function WalletPage() {
           <span className="text-small text-text-muted">{t("walletPage.available")}</span>
           <span className="text-display font-medium tabular-nums">{f.money(ws.balance)}</span>
           {waitingByCard > 0 && <p className="text-small text-text-muted">{t("walletPage.cardPending", { amount: f.money(waitingByCard) })}</p>}
+          {/* Card payments still open on Gate-E: back to their page. */}
+          {pending.filter((p) => p.pay_url).map((p) => (
+            <Link key={p.id} href={`/payments/${p.id}`} className="text-small font-medium text-primary underline-offset-4 hover:underline">
+              {t("payment.payNow", { amount: f.money(p.by_card) })}
+            </Link>
+          ))}
           {heldForCard > 0 && <p className="text-small text-text-muted">{t("walletPage.heldForCard", { amount: f.money(heldForCard) })}</p>}
           {pendingOut && (
             <p className="text-small text-text-muted">
@@ -130,7 +138,7 @@ export default async function WalletPage() {
             </p>
           )}
           <div className="mt-auto flex flex-col gap-2">
-            <TopUpButton />
+            <TopUpButton cardOnline={online} />
             <WithdrawButton balance={ws.balance} bank={bank && { holder: bank.holder, iban: maskIban(bank.iban) }} days={WITHDRAWAL_DAYS} />
           </div>
         </Card>

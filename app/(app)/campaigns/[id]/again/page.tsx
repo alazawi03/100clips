@@ -5,7 +5,7 @@ import { payCampaignAgain } from "@/app/actions/brand";
 import { AgainForm } from "@/components/brand/campaigns/AgainForm";
 import { inviteView, pickerLists, productOf } from "@/components/brand/campaigns/campaignView";
 import { NICHES } from "@/lib/data/creatorFilters";
-import { workspace } from "@/lib/data/live";
+import { cardOnline, workspace } from "@/lib/data/live";
 import type { ContentFormat } from "@/lib/data/types";
 import { getI18n } from "@/lib/i18n/server";
 import { daysUntil } from "@/lib/orderFlow";
@@ -25,7 +25,7 @@ const addDays = (iso: string, days: number) => {
  */
 export default async function RunAgainPage({ params }: PageProps<"/campaigns/[id]/again">) {
   const { id } = await params;
-  const ws = await workspace();
+  const [ws, online] = await Promise.all([workspace(), cardOnline()]);
   const campaign = ws.campaign(id);
   if (!campaign || campaign.status === "draft") notFound();
   const i18n = await getI18n();
@@ -79,6 +79,7 @@ export default async function RunAgainPage({ params }: PageProps<"/campaigns/[id
         }}
         minDeadline={nextDay(day)}
         balance={ws.balance}
+        cardOnline={online}
       />
     </div>
   );

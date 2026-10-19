@@ -3,7 +3,7 @@ import { inviteView, pickerLists } from "@/components/brand/campaigns/campaignVi
 import { NeedBrandOnArrival } from "@/components/brand/campaigns/NeedBrandDialog";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { NICHES } from "@/lib/data/creatorFilters";
-import { workspace } from "@/lib/data/live";
+import { cardOnline, workspace } from "@/lib/data/live";
 import type { ContentFormat } from "@/lib/data/types";
 import { getI18n } from "@/lib/i18n/server";
 import { nextDay, today } from "@/lib/today";
@@ -16,7 +16,7 @@ import { checkoutBrands } from "@/components/brand/cart/checkoutBrands";
 export default async function NewCampaignPage({ searchParams }: PageProps<"/campaigns/new">) {
   const i18n = await getI18n();
   const { t, f } = i18n;
-  const ws = await workspace();
+  const [ws, online] = await Promise.all([workspace(), cardOnline()]);
   const raw = (await searchParams).draft;
   const draft = typeof raw === "string" ? ws.campaigns.find((c) => c.id === raw && c.status === "draft") : undefined;
   const lists = await pickerLists(ws, i18n);
@@ -47,6 +47,7 @@ export default async function NewCampaignPage({ searchParams }: PageProps<"/camp
         minDeadline={nextDay(today())}
         total={0}
         balance={ws.balance}
+        cardOnline={online}
         picker={{
           lists,
           explore: { creators: ws.bookable.map((c) => inviteView(c, i18n)), niches: NICHES.map((n) => ({ id: n, label: t(`niches.${n}`) })) },

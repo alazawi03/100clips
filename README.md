@@ -12,8 +12,10 @@ campaigns (drafts, checkout, invite, run again, edit details, extend deadline), 
 revision, approve, rate, collect), notifications, messages (chat), problem reports on orders, the balance and its history, and the bank account and withdrawals (Settings). `lib/data/live.ts` loads the account's data once per request in the
 dashboard's shapes (`lib/data/types.ts`). Files are in Cloudflare R2.
 
-Card payments aren't live yet: the card form is a mock, and a payment with a card part waits until an
-admin confirms it (`POST /admin/payments/{id}/confirm`, standing in for the card provider). Then the offers go out.
+There are no card fields: the card part of a checkout or top-up is paid on Gate-E's page. With Gate-E set up
+on the API (`GET /settings` says `card_online`), the brand goes to its page and comes back to `/payments/{id}`, which
+checks until it's paid or failed. Without it, laqta sends a payment link and an admin confirms the payment
+(`POST /admin/payments/{id}/confirm`). Then the offers go out.
 
 ## Run it
 

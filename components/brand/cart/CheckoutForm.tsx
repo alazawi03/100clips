@@ -8,6 +8,7 @@ import { autosaveCampaignDraft, checkout, type CheckoutState } from "@/app/actio
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { PaymentSuccess } from "@/components/brand/campaigns/PaymentSuccess";
+import { CardRedirect } from "@/components/brand/payments/CardRedirect";
 import { useCreatorPicker, type PickerOptions } from "@/components/brand/campaigns/CreatorPicker";
 import { ProductForm } from "@/components/brand/products/ProductForm";
 import { Button, buttonClass } from "@/components/ui/Button";
@@ -64,6 +65,8 @@ type Props = {
   picker?: PickerOptions & { draftId?: string };
   total: number;
   balance: number;
+  /** Card parts are paid on Gate-E's page (true), or laqta sends a payment link. */
+  cardOnline: boolean;
 };
 
 /** Steps after the creators step: what to promote, brief, payment. */
@@ -75,7 +78,7 @@ const styleIcon: Record<VideoStyle, LucideIcon> = { ad: Megaphone, review: Star,
 
 /** Which step holds a field, so a server error can send you back to it. */
 const baseStepOf = (name: string) =>
-  name.startsWith("card") || name === "pay" ? 2 : name.startsWith("reference-") || ["title", "brief", "videoStyle", "deadline", "uploadDate", "keyMessage", "mustInclude", "avoid"].includes(name) ? 1 : 0;
+  name === "pay" ? 2 : name.startsWith("reference-") || ["title", "brief", "videoStyle", "deadline", "uploadDate", "keyMessage", "mustInclude", "avoid"].includes(name) ? 1 : 0;
 
 /** What DateInput sends for a full, real date. */
 const isIsoDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -93,7 +96,7 @@ function isUrl(value: string) {
  * Every step lives in one form so a single submit sends it all; Next checks the current step
  * with the same rules as the server, and the server's answer is the final word.
  */
-export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadline, total: cartTotal, balance, picker }: Props) {
+export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadline, total: cartTotal, balance, cardOnline, picker }: Props) {
   const { t, tp, locale } = useI18n();
   const f = createFormatters(locale);
   const form = useRef<HTMLFormElement>(null);
@@ -117,7 +120,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
   const busy = useRef<Promise<void> | null>(null);
   const again = useRef(false);
 
-  /** Saves now: only once something real is filled in, never card details. One save at a time. */
+  /** Saves now: only once something real is filled in. One save at a time. */
   async function saveDraft() {
     if (!fromPicker || !form.current) return;
     if (busy.current) {
@@ -125,7 +128,6 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
       return;
     }
     const data = new FormData(form.current);
-    for (const key of [...data.keys()]) if (key.startsWith("card")) data.delete(key);
     const meaningful = pk.invitees > 0 || ["title", "brief", "productId"].some((k) => String(data.get(k) ?? "").trim());
     if (!meaningful && !draftRef.current) return;
     data.set("draftId", draftRef.current ?? "");
@@ -168,7 +170,8 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
   // After paying: wait on the success screen, then open the campaign. replace() keeps checkout out of history,
   // and the full load refreshes the cart, balance and counts in the header.
   useEffect(() => {
-    if (!paid) return;
+    // With Gate-E, CardRedirect opens its page instead.
+    if (!paid || paid.payUrl) return;
     window.scrollTo({ top: 0 });
     const timer = setTimeout(() => window.location.replace(paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`), REDIRECT_MS);
     return () => clearTimeout(timer);
@@ -289,6 +292,9 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
 
   const titles = [...(fromPicker ? [t("invite.fromList")] : []), t("checkout.stepWhat"), t("checkout.stepBrief"), t("checkout.payment")];
 
+  // A card part with Gate-E: its payment page opens; it sends the brand back to /payments/{id}.
+  if (paid?.payUrl) return <CardRedirect url={paid.payUrl} />;
+
   // Paid: the success screen replaces the form, then the campaign opens after a few seconds.
   if (paid) {
     const href = paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`;
@@ -315,7 +321,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
           const input = e.target as unknown as HTMLInputElement;
           const name = input.dataset.field || input.name;
           if (name) clear(name);
-          if (!name.startsWith("card")) scheduleSave();
+          scheduleSave();
         }}
         // Enter in a field moves to the next step instead of submitting early.
         onSubmit={(e) => {
@@ -641,7 +647,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
               {/* Step 3: payment */}
               <div hidden={step !== offset + 2}>
                 <div className="flex flex-col gap-5">
-                  <PaymentFields balance={balance} useBalance={useBalance} onUseBalance={setUseBalance} byCard={byCard} err={err} v={v} />
+                  <PaymentFields balance={balance} useBalance={useBalance} onUseBalance={setUseBalance} byCard={byCard} cardOnline={cardOnline} err={err} />
                 </div>
               </div>
             </div>

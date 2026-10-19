@@ -329,8 +329,11 @@ export function priceLines(ws: Pick<Workspace, "creator" | "isBookable">, picks:
 /** The cart, priced. */
 export const priceCart = (ws: Workspace) => priceLines(ws, ws.cart.map((l) => ({ creatorId: l.creatorId, format: l.items[0].format })));
 
-/** Campaigns with a card payment still waiting to be confirmed: their offers go out once it is. */
-export const pendingPayments = cache(async (): Promise<Set<string>> => {
+/** Campaigns with a card payment still waiting, and that payment's id: their offers go out once it's paid. */
+export const pendingPayments = cache(async (): Promise<Map<string, string>> => {
   const rows = await api<components["schemas"]["Payment"][]>("/me/payments?status=pending");
-  return new Set(rows.flatMap((p) => p.campaign_id ?? []));
+  return new Map(rows.flatMap((p) => (p.campaign_id ? [[p.campaign_id, p.id] as const] : [])));
 });
+
+/** Card parts are paid online on Gate-E's page; false: laqta sends a payment link and confirms it by hand. */
+export const cardOnline = cache(async (): Promise<boolean> => (await api<components["schemas"]["Settings"]>("/settings")).card_online === true);

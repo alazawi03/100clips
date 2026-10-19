@@ -5,7 +5,7 @@ import { inviteToCampaign } from "@/app/actions/brand";
 import { InviteForm } from "@/components/brand/campaigns/InviteForm";
 import { inviteView, pickerLists } from "@/components/brand/campaigns/campaignView";
 import { NICHES } from "@/lib/data/creatorFilters";
-import { workspace } from "@/lib/data/live";
+import { cardOnline, workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 import { isActiveOrder } from "@/lib/statuses";
 
@@ -15,7 +15,7 @@ import { isActiveOrder } from "@/lib/statuses";
  */
 export default async function InvitePage({ params, searchParams }: PageProps<"/campaigns/[id]/invite">) {
   const { id } = await params;
-  const ws = await workspace();
+  const [ws, online] = await Promise.all([workspace(), cardOnline()]);
   const campaign = ws.campaign(id);
   if (!campaign || campaign.status !== "in_progress") notFound();
   const i18n = await getI18n();
@@ -48,6 +48,7 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/c
         initialListId={listId ?? lists.find((l) => l.creators.length > 0)?.id ?? "explore"}
         tickList={!!listId}
         balance={ws.balance}
+        cardOnline={online}
       />
     </div>
   );
