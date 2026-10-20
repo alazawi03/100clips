@@ -2,7 +2,9 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { apiOrNothing } from "@/lib/api";
 import type { MessageKey } from "@/lib/i18n/messages";
+import type { Me } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 
 /** error: a translation key. values: what was typed (never the password), to show it again. sentTo: a link went to this email. */
@@ -50,6 +52,12 @@ export async function signIn(_prev: AuthFormState, form: FormData): Promise<Auth
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password: String(form.get("password") ?? "") });
   if (error) return { error: authError(error.code), values };
+  // An admin: signed out again right here, and the form says why (no trip through /auth/brands-only).
+  const me = await apiOrNothing<Me>("/me").catch(() => undefined);
+  if (me?.account.role === "admin") {
+    await supabase.auth.signOut({ scope: "local" });
+    return { error: "auth.errors.brandsOnly", values };
+  }
   redirect(safeNext(text(form, "next")));
 }
 
