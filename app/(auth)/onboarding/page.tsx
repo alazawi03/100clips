@@ -11,6 +11,7 @@ import { ensureBrandAccount } from "@/lib/session";
 export default async function OnboardingPage() {
   const { t } = await getI18n();
   const me = await ensureBrandAccount();
+  if (me.account.role === "admin") redirect("/auth/brands-only");
   if (me.account.role === "creator") {
     return (
       <div className="flex flex-col gap-6">

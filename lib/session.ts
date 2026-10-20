@@ -16,12 +16,12 @@ export const getUser = cache(async () => {
 /** Account, creator profile and brands from the API, or undefined before onboarding. Once per request. */
 export const getMe = cache(() => apiOrNothing<Me>("/me"));
 
-/** For the brand dashboard's pages: a brand owner account, else onboarding (creators) or the admin portal (admins). */
+/** For the brand dashboard's pages: a brand owner account, else onboarding (creators) or signed out (admins). */
 export async function requireBrandAccount(): Promise<Me> {
   const me = await getMe();
   if (!me || me.account.role === "creator") redirect("/onboarding");
-  // Admins own no brand: lists, cart and checkout aren't theirs. They work in the admin portal (laqta-admin).
-  if (me.account.role === "admin") redirect(process.env.ADMIN_APP_URL ?? "http://localhost:3001");
+  // Admins own no brand: lists, cart and checkout aren't theirs. Login tells them this is for brands only.
+  if (me.account.role === "admin") redirect("/auth/brands-only");
   return me;
 }
 

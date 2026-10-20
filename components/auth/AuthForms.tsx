@@ -7,6 +7,7 @@ import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
 import { Field, FieldError, Input } from "@/components/ui/Form";
 import { Notice } from "@/components/ui/Notice";
+import type { MessageKey } from "@/lib/i18n/messages";
 import { createClient } from "@/lib/supabase/client";
 
 /** The form's error, under the fields: Supabase answers for the whole form, not one field. */
@@ -73,9 +74,10 @@ function Or() {
   );
 }
 
-export function LoginForm({ next, linkError }: { next: string; linkError?: boolean }) {
+/** error: why they're back here (an expired link, or an account that isn't a brand's). */
+export function LoginForm({ next, error }: { next: string; error?: MessageKey }) {
   const { t } = useI18n();
-  const [state, action, pending] = useActionState(signIn, linkError ? { error: "auth.errors.linkExpired" } : null);
+  const [state, action, pending] = useActionState(signIn, error ? { error } : null);
   return (
     <div className="flex flex-col gap-6">
       <GoogleButton next={next} />

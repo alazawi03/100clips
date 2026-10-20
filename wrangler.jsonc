@@ -19,8 +19,6 @@
     // Non-secret: just hostnames. API_URL and NEXT_PUBLIC_* also get baked in
     // at build time (see .github/workflows/deploy.yml) since Next.js server
     // actions re-read process.env at runtime too — both places need them.
-    "API_URL": "https://api.golaqta.com",
-    // Where admins who sign in here are sent (lib/session.ts): the laqta-admin Worker.
-    "ADMIN_APP_URL": "https://admin.golaqta.com"
+    "API_URL": "https://api.golaqta.com"
   }
 }

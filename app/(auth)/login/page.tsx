@@ -8,7 +8,10 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader title={t("auth.loginTitle")} subtitle={t("auth.loginSubtitle")} />
-      <LoginForm next={typeof next === "string" ? next : "/dashboard"} linkError={error === "link"} />
+      <LoginForm
+        next={typeof next === "string" ? next : "/dashboard"}
+        error={error === "link" ? "auth.errors.linkExpired" : error === "brands-only" ? "auth.errors.brandsOnly" : undefined}
+      />
     </div>
   );
 }

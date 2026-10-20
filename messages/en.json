@@ -1334,6 +1334,7 @@
       "emailInvalid": "Enter a valid email, like name@company.com",
       "nameRequired": "Enter your name.",
       "linkExpired": "This link expired or was already used. Ask for a new one.",
+      "brandsOnly": "This account can’t log in here. The dashboard is for brands only.",
       "failed": "Something went wrong. Try again."
     },
     "creatorTitle": "This is a creator account",
