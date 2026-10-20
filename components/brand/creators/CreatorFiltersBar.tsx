@@ -2,7 +2,7 @@
 
 import { LayoutGrid, MonitorPlay, ScanFace, Search, Users, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { faceEmoji, genderEmoji, nicheEmoji } from "@/lib/data/emojis";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
@@ -18,7 +18,6 @@ export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
   const params = useSearchParams();
   const [pending, startTransition] = useTransition();
   const [query, setQuery] = useState(params.get("q") ?? "");
-  const firstRun = useRef(true);
 
   function update(key: string, value: string) {
     const next = new URLSearchParams(params.toString());
@@ -27,12 +26,10 @@ export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
     startTransition(() => router.replace(`${pathname}${next.size ? `?${next}` : ""}`, { scroll: false }));
   }
 
-  // Search as you type, a beat after the last keystroke.
+  // Search as you type, a beat after the last keystroke. Nothing while the box matches the address
+  // (on opening, which in development runs this twice, and after a search went through).
   useEffect(() => {
-    if (firstRun.current) {
-      firstRun.current = false;
-      return;
-    }
+    if (query.trim() === (params.get("q") ?? "")) return;
     const id = setTimeout(() => update("q", query.trim()), 250);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps

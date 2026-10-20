@@ -63,6 +63,9 @@ export async function myBrand(id: string): Promise<Brand | undefined> {
 export const productsOf = cache(async (brandId: string): Promise<Product[]> =>
   (await api<ProductRow[]>(`/brands/${brandId}/products`)).map(toProduct));
 
+/** Every product of the account's brands, in one call: no waiting for the brands first. */
+export const myProducts = cache(async (): Promise<Product[]> => (await api<ProductRow[]>("/me/products")).map(toProduct));
+
 export async function getProduct(id: string): Promise<Product | undefined> {
   const row = await apiOrNothing<ProductRow>(`/products/${id}`);
   return row && toProduct(row);

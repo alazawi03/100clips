@@ -5,7 +5,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { getProduct, myBrands, productsOf } from "@/lib/data/brandsApi";
+import { getProduct, myBrands } from "@/lib/data/brandsApi";
 import { workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 
@@ -23,19 +23,17 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
   // A product linked from elsewhere (e.g. Shipping): open its drawer.
   const showId = typeof query.show === "string" ? query.show : undefined;
 
-  const rows = await Promise.all(
-    brands.map(async (brand) => {
-      const products = await productsOf(brand.id);
-      return {
-        id: brand.id,
-        name: f.pick(brand.name),
-        logo: brand.logo,
-        industry: t(`industries.${brand.industry}`),
-        productsLabel: tp("brandsPage.products", products.length),
-        products: products.map((p) => productView(p, i18n, ws)),
-      };
-    }),
-  );
+  const rows = brands.map((brand) => {
+    const products = ws.productsOf(brand.id);
+    return {
+      id: brand.id,
+      name: f.pick(brand.name),
+      logo: brand.logo,
+      industry: t(`industries.${brand.industry}`),
+      productsLabel: tp("brandsPage.products", products.length),
+      products: products.map((p) => productView(p, i18n, ws)),
+    };
+  });
 
   // Open the brand the user just worked on, or the one with the linked product.
   const openId = doneProduct?.brandId ?? doneBrand?.id ?? rows.find((b) => b.products.some((p) => p.id === showId))?.id;

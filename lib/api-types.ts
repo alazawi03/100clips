@@ -218,6 +218,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My brands' products
+         * @description Every brand's, oldest first: the same as each brand's list, in one call.
+         */
+        get: operations["ProductsController_mine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/products/{id}": {
         parameters: {
             query?: never;
@@ -633,6 +653,26 @@ export interface paths {
          * @description Admins only. Requests from countries we aren't in yet (the creator app and brands' "I'm not in Bahrain"), most wanted first.
          */
         get: operations["AdminController_waitlist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/waitlist/{country}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Who asked from one country
+         * @description Admins only. Their phone and/or email, newest first: who to tell once we launch there.
+         */
+        get: operations["AdminController_waitlistCountry"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3136,6 +3176,21 @@ export interface components {
              */
             latest: string;
         };
+        WaitlistRequest: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description ISO country code
+             * @example SA
+             */
+            country: string;
+            /** @example +966501234567 */
+            phone: string | null;
+            /** @example reem@example.com */
+            email: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
         DecideCreatorDto: {
             /** @enum {string} */
             decision: "approved" | "changes_requested" | "rejected";
@@ -5153,6 +5208,34 @@ export interface operations {
             };
         };
     };
+    ProductsController_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Product"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     ProductsController_get: {
         parameters: {
             query?: never;
@@ -6512,6 +6595,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WaitlistCountry"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminController_waitlistCountry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ISO country code (two letters) */
+                country: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WaitlistRequest"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description Not signed in, or the session expired */

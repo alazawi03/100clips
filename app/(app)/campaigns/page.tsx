@@ -6,7 +6,7 @@ import { FilterTabs } from "@/components/ui/FilterTabs";
 import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { BrandFilter } from "@/components/brand/BrandFilter";
 import { brandFilterOf, hasManyBrands, href } from "@/lib/brandFilter";
-import { workspace } from "@/lib/data/live";
+import { pendingPayments, workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 import { CAMPAIGN_STATUS, CAMPAIGN_STATUSES, campaignProgress } from "@/lib/statuses";
 
@@ -15,7 +15,8 @@ export default async function CampaignsPage({ searchParams }: PageProps<"/campai
   const i18n = await getI18n();
   const { t, f } = i18n;
   const query = await searchParams;
-  const { brands, campaigns: allCampaigns, orders } = await workspace();
+  // pendingPayments: each campaign card reads it; loading it now saves a wait.
+  const [{ brands, campaigns: allCampaigns, orders }] = await Promise.all([workspace(), pendingPayments()]);
   const brandId = brandFilterOf(query.brand, brands);
   const campaigns = brandId ? allCampaigns.filter((c) => c.brandId === brandId) : allCampaigns;
   const raw = query.status;

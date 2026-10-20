@@ -6,7 +6,7 @@ import { problemReasonFromApi } from "@/lib/reportReasons";
 import { requireBrandAccount } from "@/lib/session";
 import { isActiveOrder } from "@/lib/statuses";
 import { dayOf } from "@/lib/today";
-import { myBrands, productsOf } from "./brandsApi";
+import { myBrands, myProducts } from "./brandsApi";
 import { exploreCreators } from "./creatorsApi";
 import { publicUrl } from "./storage";
 import type {
@@ -81,15 +81,13 @@ const balanceNow = cache(async () => (await brandOnly(api<{ balance: number }>("
 const cartNow = cache(async (): Promise<CartLine[]> =>
   (await brandOnly(api<CartRow[]>("/me/cart"))).map((r) => ({ creatorId: r.creator_id, items: [{ format: r.format, quantity: 1 }] })),
 );
-// Right after the brands, not after everything else.
-const brandProducts = cache(async () => (await Promise.all((await myBrands()).map((b) => productsOf(b.id)))).flat());
 const bookableCreators = cache(exploreCreators);
 
 /** The account's data for this request. */
 export const workspace = cache(async (): Promise<Workspace> => {
   const [brands, products, campaignRows, orderRows, balance, cart, bookable] = await Promise.all([
     myBrands(),
-    brandProducts(),
+    myProducts(),
     everything<CampaignRow>("/campaigns"),
     everything<OrderRow>("/orders"),
     balanceNow(),
@@ -127,7 +125,7 @@ export type Shopping = Pick<Workspace, "brands" | "balance" | "cart" | "bookable
 
 /** What the cart and checkout need: the brands and their products, the balance, the cart and who can be booked. No campaigns or orders. */
 export const shopping = cache(async (): Promise<Shopping> => {
-  const [brands, products, balance, cart, bookable] = await Promise.all([myBrands(), brandProducts(), balanceNow(), cartNow(), bookableCreators()]);
+  const [brands, products, balance, cart, bookable] = await Promise.all([myBrands(), myProducts(), balanceNow(), cartNow(), bookableCreators()]);
   // Only bookable creators can be priced (priceLines), so the ones known from orders aren't needed here.
   const creators = new Map(bookable.map((c) => [c.id, c]));
   return {

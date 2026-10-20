@@ -4,6 +4,7 @@ import { CreatorFiltersBar } from "@/components/brand/creators/CreatorFiltersBar
 import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { filterCreators, parseFilters } from "@/lib/data/creatorFilters";
 import { workspace } from "@/lib/data/live";
+import { allLists } from "@/lib/data/lists";
 import { getI18n } from "@/lib/i18n/server";
 
 export default async function CreatorsPage({ searchParams }: PageProps<"/explore">) {
@@ -11,7 +12,8 @@ export default async function CreatorsPage({ searchParams }: PageProps<"/explore
   const { t, tp } = i18n;
   const query = await searchParams;
   const filters = parseFilters(query);
-  const ws = await workspace();
+  // allLists: each creator card reads it; loading it now saves a wait.
+  const [ws] = await Promise.all([workspace(), allLists()]);
   const results = filterCreators(ws.bookable, filters);
   const inCart = new Set(ws.cart.map((l) => l.creatorId));
 
