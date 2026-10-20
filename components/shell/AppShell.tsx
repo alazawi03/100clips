@@ -20,14 +20,10 @@ import { BottomNav, SideNav } from "./SideNav";
 
 export async function AppShell({ children }: { children: ReactNode }) {
   // Signed in (proxy.ts) with a brand owner's account; otherwise onboarding first.
-  const me = await requireBrandAccount();
-  const user = await getUser();
-  const i18n = await getI18n();
+  const [me, i18n] = await Promise.all([requireBrandAccount(), getI18n()]);
   const { t, f } = i18n;
-  const ws = await workspace();
-  const notifications = await notificationRows(i18n, 8);
+  const [user, ws, notifications, unread, theme] = await Promise.all([getUser(), workspace(), notificationRows(i18n, 8), unreadCount(), getTheme()]);
   const cartCount = ws.cart.length;
-  const unread = await unreadCount();
   const balanceLabel = t("header.balanceShort", { amount: f.money(ws.balance) });
   // Everyone the top-bar search can find, top rated first like Explore. Matched in the browser as you type.
   const searchable: SearchCreator[] = filterCreators(ws.bookable, parseFilters({})).map((c) => ({
@@ -97,7 +93,7 @@ export async function AppShell({ children }: { children: ReactNode }) {
               id={me.account.id}
               name={displayName(me, i18n.locale, user?.email)}
               email={user?.email ?? ""}
-              theme={await getTheme()}
+              theme={theme}
             />} />
         {/* Pages marked data-hug (messages) sit right beside the sidebar instead of centred. */}
         <main className="min-w-0 flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-12 md:pt-8 md:has-[[data-hug]]:ps-4">

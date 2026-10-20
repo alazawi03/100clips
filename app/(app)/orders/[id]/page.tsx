@@ -28,7 +28,7 @@ import { getI18n } from "@/lib/i18n/server";
 
 export default async function OrderDetailPage({ params, searchParams }: PageProps<"/orders/[id]">) {
   const { id } = await params;
-  const ws = await workspace();
+  const [ws, chats] = await Promise.all([workspace(), conversations()]);
   const order = ws.order(id);
   if (!order) notFound();
   const { t, tp, f } = await getI18n();
@@ -50,7 +50,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const watchable = clip && (order.status === "delivered" || order.status === "approved");
   const active = isActiveOrder(order);
   const report = order.problem;
-  const unread = (await conversations()).find((c) => c.brandId === order.brandId && c.creatorId === order.creatorId)?.unread ?? 0;
+  const unread = chats.find((c) => c.brandId === order.brandId && c.creatorId === order.creatorId)?.unread ?? 0;
   // Just approved: the celebration, bigger when this was the campaign's last clip.
   const justApproved = done === "approved" && order.status === "approved";
   const progress = justApproved && campaign ? campaignProgress(campaign, ws.orders) : undefined;

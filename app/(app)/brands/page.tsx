@@ -14,8 +14,11 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
   const { t, tp, f } = i18n;
   const query = await searchParams;
   const done = typeof query.done === "string" ? query.done : undefined;
-  const [brands, ws] = await Promise.all([myBrands(), workspace()]);
-  const doneProduct = typeof query.product === "string" ? await getProduct(query.product) : undefined;
+  const [brands, ws, doneProduct] = await Promise.all([
+    myBrands(),
+    workspace(),
+    typeof query.product === "string" ? getProduct(query.product) : undefined,
+  ]);
   const doneBrand = typeof query.brand === "string" ? brands.find((b) => b.id === query.brand) : undefined;
   // A product linked from elsewhere (e.g. Shipping): open its drawer.
   const showId = typeof query.show === "string" ? query.show : undefined;

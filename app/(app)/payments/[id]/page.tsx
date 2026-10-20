@@ -15,14 +15,14 @@ type Payment = components["schemas"]["Payment"];
 export default async function PaymentPage({ params }: PageProps<"/payments/[id]">) {
   const { id } = await params;
   const { t, f } = await getI18n();
-  let payment: Payment;
-  try {
-    payment = await api<Payment>(`/payments/${id}`);
-  } catch (e) {
-    if (e instanceof ApiError && (e.status === 404 || e.status === 400)) notFound();
-    throw e;
-  }
-  const campaign = (await workspace()).campaign(payment.campaign_id ?? undefined);
+  const [payment, ws] = await Promise.all([
+    api<Payment>(`/payments/${id}`).catch((e: unknown) => {
+      if (e instanceof ApiError && (e.status === 404 || e.status === 400)) notFound();
+      throw e;
+    }),
+    workspace(),
+  ]);
+  const campaign = ws.campaign(payment.campaign_id ?? undefined);
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
       <PageHeader title={t("payment.title")} />

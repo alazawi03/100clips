@@ -16,12 +16,11 @@ import { today } from "@/lib/today";
 export default async function ConversationPage({ params, searchParams }: PageProps<"/messages/[id]">) {
   const { id } = await params;
   const query = await searchParams;
-  const conversation = await getConversation(id);
+  const [conversation, i18n, ws] = await Promise.all([getConversation(id), getI18n(), workspace()]);
   const messages = conversation && (await messagesOf(conversation.id));
   if (!conversation || !messages) notFound();
   // Opening it reads everything so far (the inbox hides this chat's badge meanwhile).
   if (conversation.unread > 0) await markRead(conversation.id);
-  const [i18n, ws] = await Promise.all([getI18n(), workspace()]);
   const { t, f } = i18n;
   const day = today();
   const creator = { id: conversation.creatorId, ...conversation.creator };

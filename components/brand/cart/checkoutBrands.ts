@@ -3,7 +3,7 @@ import type { I18n } from "@/lib/i18n/server";
 import { describePrice } from "@/lib/pricing";
 
 /** The account's brands and their products, as checkout's first step lists them. */
-export function checkoutBrands(ws: Workspace, i18n: I18n) {
+export function checkoutBrands(ws: Pick<Workspace, "brands" | "productsOf">, i18n: I18n) {
   const { t, f } = i18n;
   return ws.brands.map((b) => ({
     id: b.id,

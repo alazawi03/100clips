@@ -45,7 +45,7 @@ export default async function CampaignDetailPage({ params, searchParams }: PageP
   const { id } = await params;
   // Set by the ⋯ menu after saving: confirm it, and mark what changed.
   const { done } = await searchParams;
-  const ws = await workspace();
+  const [ws, chats] = await Promise.all([workspace(), conversations()]);
   const campaign = ws.campaign(id);
   if (!campaign) notFound();
   // A draft has nothing to show yet: it opens where it was left.
@@ -57,7 +57,6 @@ export default async function CampaignDetailPage({ params, searchParams }: PageP
   const { product } = productOf(campaign, ws);
   const productName = product ? f.pick(product.name) : "";
   const its = ws.orders.filter((o) => o.campaignId === campaign.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  const chats = await conversations();
   const views = its.map((o) => ({
     ...orderCardView(o, campaign, i18n, ws),
     unread: chats.find((c) => c.brandId === o.brandId && c.creatorId === o.creatorId)?.unread ?? 0,

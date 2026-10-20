@@ -35,13 +35,12 @@ function Stars({ rating, label }: { rating: number; label: string }) {
 
 export default async function CreatorProfilePage({ params }: PageProps<"/creators/[id]">) {
   const { id } = await params;
-  const profile = await creatorProfile(id);
+  const [profile, ws, lists] = await Promise.all([creatorProfile(id), workspace(), allLists()]);
   // Brands only see creators where 100clips runs; the rest are on the waitlist.
   if (!profile || !isActiveMarket(profile.creator.country)) notFound();
   const { creator, reviews } = profile;
   const i18n = await getI18n();
   const { t, f } = i18n;
-  const [ws, lists] = await Promise.all([workspace(), allLists()]);
   // No active bundle: hidden from brands, unless this brand already worked with them (their orders link here).
   if (!hasActiveBundle(creator) && !ws.orders.some((o) => o.creatorId === creator.id)) notFound();
   const name = f.pick(creator.name);

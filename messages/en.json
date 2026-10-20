@@ -9,7 +9,8 @@
     "cancel": "Cancel",
     "all": "All",
     "notFound": "We couldn't find this page.",
-    "fromPrice": "From {price}"
+    "fromPrice": "From {price}",
+    "loading": "Loading…"
   },
   "header": {
     "account": "Your account",

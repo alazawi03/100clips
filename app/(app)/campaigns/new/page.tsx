@@ -4,6 +4,7 @@ import { NeedBrandOnArrival } from "@/components/brand/campaigns/NeedBrandDialog
 import { PageHeader } from "@/components/ui/PageHeader";
 import { NICHES } from "@/lib/data/creatorFilters";
 import { cardOnline, workspace } from "@/lib/data/live";
+import { allLists } from "@/lib/data/lists";
 import type { ContentFormat } from "@/lib/data/types";
 import { getI18n } from "@/lib/i18n/server";
 import { nextDay, today } from "@/lib/today";
@@ -16,7 +17,8 @@ import { checkoutBrands } from "@/components/brand/cart/checkoutBrands";
 export default async function NewCampaignPage({ searchParams }: PageProps<"/campaigns/new">) {
   const i18n = await getI18n();
   const { t, f } = i18n;
-  const [ws, online] = await Promise.all([workspace(), cardOnline()]);
+  // allLists: pickerLists below reads it; loading it now saves a wait.
+  const [ws, online] = await Promise.all([workspace(), cardOnline(), allLists()]);
   const raw = (await searchParams).draft;
   const draft = typeof raw === "string" ? ws.campaigns.find((c) => c.id === raw && c.status === "draft") : undefined;
   const lists = await pickerLists(ws, i18n);

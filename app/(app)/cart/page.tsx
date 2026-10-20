@@ -5,13 +5,13 @@ import { FeeTotal } from "@/components/brand/cart/FeeTotal";
 import { LinkButton } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
-import { priceCart, workspace } from "@/lib/data/live";
+import { priceCart, shopping } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 import { priceForBrand } from "@/lib/fees";
 
 export default async function CartPage() {
   const { t, tp, f } = await getI18n();
-  const ws = await workspace();
+  const ws = await shopping();
   const { lines, total } = priceCart(ws);
   const clips = lines.reduce((n, l) => n + l.clips, 0);
 

@@ -65,22 +65,37 @@ async function everything<T>(path: string): Promise<T[]> {
 const same = (text: string | null | undefined): Localized => ({ ar: text ?? "", en: text ?? "" });
 const names = (ar: string | null | undefined, en: string | null | undefined): Localized => ({ ar: ar || en || "", en: en || ar || "" });
 
-/** The account's data for this request. */
-export const workspace = cache(async (): Promise<Workspace> => {
-  const [brands, campaignRows, orderRows, { balance }, cartRows, bookable] = await Promise.all([
-    myBrands(),
-    everything<CampaignRow>("/campaigns"),
-    everything<OrderRow>("/orders"),
-    api<{ balance: number }>("/me/balance"),
-    api<CartRow[]>("/me/cart"),
-    exploreCreators(),
-  ]).catch(async (e: unknown) => {
-    // The cart and balance are brand accounts' only. The layout sends admins and creators elsewhere, but the
-    // page renders alongside it: send them the same way here instead of failing on the 403.
+/**
+ * The cart and balance are brand accounts' only. The layout sends admins and creators elsewhere, but the
+ * page renders alongside it: send them the same way here instead of failing on the 403.
+ */
+function brandOnly<T>(request: Promise<T>): Promise<T> {
+  return request.catch(async (e: unknown) => {
     if (e instanceof ApiError && e.status === 403) await requireBrandAccount();
     throw e;
   });
-  const products = (await Promise.all(brands.map((b) => productsOf(b.id)))).flat();
+}
+
+/* Each part loads once per request, and all of them at the same time: pages that need less load less. */
+const balanceNow = cache(async () => (await brandOnly(api<{ balance: number }>("/me/balance"))).balance);
+const cartNow = cache(async (): Promise<CartLine[]> =>
+  (await brandOnly(api<CartRow[]>("/me/cart"))).map((r) => ({ creatorId: r.creator_id, items: [{ format: r.format, quantity: 1 }] })),
+);
+// Right after the brands, not after everything else.
+const brandProducts = cache(async () => (await Promise.all((await myBrands()).map((b) => productsOf(b.id)))).flat());
+const bookableCreators = cache(exploreCreators);
+
+/** The account's data for this request. */
+export const workspace = cache(async (): Promise<Workspace> => {
+  const [brands, products, campaignRows, orderRows, balance, cart, bookable] = await Promise.all([
+    myBrands(),
+    brandProducts(),
+    everything<CampaignRow>("/campaigns"),
+    everything<OrderRow>("/orders"),
+    balanceNow(),
+    cartNow(),
+    bookableCreators(),
+  ]);
   // Admins can open the dashboard too: only the account's own brands' work shows here.
   const own = new Set(brands.map((b) => b.id));
 
@@ -96,7 +111,7 @@ export const workspace = cache(async (): Promise<Workspace> => {
     campaigns,
     orders,
     balance,
-    cart: cartRows.map((r) => ({ creatorId: r.creator_id, items: [{ format: r.format, quantity: 1 }] })),
+    cart,
     bookable,
     brand: (id) => brands.find((b) => b.id === id),
     product: (id) => products.find((p) => p.id === id),
@@ -105,6 +120,24 @@ export const workspace = cache(async (): Promise<Workspace> => {
     order: (id) => orders.find((o) => o.id === id),
     creator: (id) => (id ? creators.get(id) : undefined),
     isBookable: (id) => bookableIds.has(id),
+  };
+});
+
+export type Shopping = Pick<Workspace, "brands" | "balance" | "cart" | "bookable" | "productsOf" | "creator" | "isBookable">;
+
+/** What the cart and checkout need: the brands and their products, the balance, the cart and who can be booked. No campaigns or orders. */
+export const shopping = cache(async (): Promise<Shopping> => {
+  const [brands, products, balance, cart, bookable] = await Promise.all([myBrands(), brandProducts(), balanceNow(), cartNow(), bookableCreators()]);
+  // Only bookable creators can be priced (priceLines), so the ones known from orders aren't needed here.
+  const creators = new Map(bookable.map((c) => [c.id, c]));
+  return {
+    brands,
+    balance,
+    cart,
+    bookable,
+    productsOf: (brandId) => products.filter((p) => p.brandId === brandId),
+    creator: (id) => (id ? creators.get(id) : undefined),
+    isBookable: (id) => creators.has(id),
   };
 });
 
@@ -333,7 +366,7 @@ export function priceLines(ws: Pick<Workspace, "creator" | "isBookable">, picks:
 }
 
 /** The cart, priced. */
-export const priceCart = (ws: Workspace) => priceLines(ws, ws.cart.map((l) => ({ creatorId: l.creatorId, format: l.items[0].format })));
+export const priceCart = (ws: Pick<Workspace, "cart" | "creator" | "isBookable">) => priceLines(ws, ws.cart.map((l) => ({ creatorId: l.creatorId, format: l.items[0].format })));
 
 /** Campaigns with a card payment still waiting, and that payment's id: their offers go out once it's paid. */
 export const pendingPayments = cache(async (): Promise<Map<string, string>> => {
