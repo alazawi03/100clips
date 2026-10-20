@@ -1,8 +1,9 @@
 import { cache } from "react";
-import { api } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import type { components } from "@/lib/api-types";
 import { serviceFee, withFee } from "@/lib/fees";
 import { problemReasonFromApi } from "@/lib/reportReasons";
+import { requireBrandAccount } from "@/lib/session";
 import { isActiveOrder } from "@/lib/statuses";
 import { dayOf } from "@/lib/today";
 import { myBrands, productsOf } from "./brandsApi";
@@ -73,7 +74,12 @@ export const workspace = cache(async (): Promise<Workspace> => {
     api<{ balance: number }>("/me/balance"),
     api<CartRow[]>("/me/cart"),
     exploreCreators(),
-  ]);
+  ]).catch(async (e: unknown) => {
+    // The cart and balance are brand accounts' only. The layout sends admins and creators elsewhere, but the
+    // page renders alongside it: send them the same way here instead of failing on the 403.
+    if (e instanceof ApiError && e.status === 403) await requireBrandAccount();
+    throw e;
+  });
   const products = (await Promise.all(brands.map((b) => productsOf(b.id)))).flat();
   // Admins can open the dashboard too: only the account's own brands' work shows here.
   const own = new Set(brands.map((b) => b.id));
