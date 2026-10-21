@@ -1,6 +1,14 @@
 import { LoginForm } from "@/components/auth/AuthForms";
 import { PageHeader } from "@/components/ui/PageHeader";
+import type { MessageKey } from "@/lib/i18n/messages";
 import { getI18n } from "@/lib/i18n/server";
+
+/** Why they're back at login (?error=): an expired link, an admin's account, an erased account. */
+const ERRORS = {
+  link: "auth.errors.linkExpired",
+  "brands-only": "auth.errors.brandsOnly",
+  erased: "auth.errors.erased",
+} as const satisfies Record<string, MessageKey>;
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { t } = await getI18n();
@@ -10,7 +18,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <PageHeader title={t("auth.loginTitle")} subtitle={t("auth.loginSubtitle")} />
       <LoginForm
         next={typeof next === "string" ? next : "/dashboard"}
-        error={error === "link" ? "auth.errors.linkExpired" : error === "brands-only" ? "auth.errors.brandsOnly" : undefined}
+        error={typeof error === "string" && error in ERRORS ? ERRORS[error as keyof typeof ERRORS] : undefined}
       />
     </div>
   );

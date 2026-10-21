@@ -1,7 +1,11 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 /** The 100clips API (the 100clips-backend repo), reached from the server only. */
 const API_URL = process.env.API_URL ?? "http://localhost:4000";
+
+/** The API's answer to every request from an account laqta erased. */
+const ERASED = "This account was erased";
 
 /** The API said no: its status and its message for people (a list for input checks). */
 export class ApiError extends Error {
@@ -41,6 +45,8 @@ export async function api<T = unknown>(path: string, init: { method?: string; bo
   const json = (await res.json().catch(() => ({}))) as { message?: string | string[] };
   if (!res.ok) {
     const messages = Array.isArray(json.message) ? json.message : [json.message ?? res.statusText];
+    // An erased account's session still works until it expires: sign it out (app/auth/erased).
+    if (res.status === 403 && messages[0] === ERASED) redirect("/auth/erased");
     throw new ApiError(res.status, messages.join(". "), messages);
   }
   return json as T;
