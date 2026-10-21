@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
-import { ChevronDown, CircleAlert, CircleCheck, CircleX, Ellipsis, ImageOff, ListChecks, ListPlus, LoaderCircle, Megaphone, MessageSquare, PackageOpen, Pencil, Plus, Star, Sun, X, type LucideIcon } from "lucide-react";
+import { ChevronDown, CircleAlert, CircleCheck, CircleX, Ellipsis, ImageOff, ListChecks, ListPlus, Megaphone, MessageSquare, PackageOpen, Pencil, Plus, Star, Sun, X, type LucideIcon } from "lucide-react";
 import { autosaveCampaignDraft, checkout, type CheckoutState } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Avatar } from "@/components/ui/Avatar";
@@ -661,10 +661,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
               ) : (
                 <Button type="submit" variant="hero" aria-busy={pending} disabled={pending} className="w-full disabled:opacity-80 sm:w-auto">
                   {pending ? (
-                    <>
-                      <LoaderCircle aria-hidden className="animate-spin" />
-                      {t("checkout.paying")}
-                    </>
+                    t("checkout.paying")
                   ) : byCard > 0 ? (
                     t("checkout.pay", { amount: f.money(byCard) })
                   ) : (

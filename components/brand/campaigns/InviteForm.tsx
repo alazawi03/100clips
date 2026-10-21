@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useState, type ReactNode } from "react";
-import { LoaderCircle } from "lucide-react";
 import type { CheckoutState } from "@/app/actions/brand";
 import { FeeTotal } from "@/components/brand/cart/FeeTotal";
 import { PaymentTerms } from "@/components/brand/cart/PaymentTerms";
@@ -129,10 +128,7 @@ export function InviteForm({ action: pay, details, balance, cardOnline, ...picke
           className={cn("w-full disabled:opacity-40 disabled:shadow-none", !ready && !pending && "cursor-not-allowed opacity-40 shadow-none hover:brightness-100")}
         >
           {pending ? (
-            <>
-              <LoaderCircle aria-hidden className="animate-spin" />
-              {t("checkout.paying")}
-            </>
+            t("checkout.paying")
           ) : byCard > 0 ? (
             t("checkout.pay", { amount: f.money(byCard) })
           ) : (
