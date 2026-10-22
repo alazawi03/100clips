@@ -4,7 +4,7 @@ import { productView } from "@/components/brand/brands/productView";
 import { LinkButton } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/Card";
 import { Notice } from "@/components/ui/Notice";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { EmptyState, PageHeader } from "@/components/ui/PageHeader";
 import { getProduct, myBrands } from "@/lib/data/brandsApi";
 import { workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
@@ -52,12 +52,27 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
 
       <section aria-labelledby="brands-title">
         <SectionHeader id="brands-title" title={t("brandsPage.myBrands")}>
-          <LinkButton href="/brands/new" variant="secondary" className="shrink-0">
-            <Plus aria-hidden />
-            {t("brandsPage.addBrand")}
-          </LinkButton>
+          {rows.length > 0 && (
+            <LinkButton href="/brands/new" variant="secondary" className="shrink-0">
+              <Plus aria-hidden />
+              {t("brandsPage.addBrand")}
+            </LinkButton>
+          )}
         </SectionHeader>
-        <BrandsTable brands={rows} openId={openId} showId={showId} />
+        {rows.length > 0 ? (
+          <BrandsTable brands={rows} openId={openId} showId={showId} />
+        ) : (
+          <EmptyState
+            title={t("brandsPage.noBrands")}
+            hint={t("brandsPage.noBrandsHint")}
+            action={
+              <LinkButton href="/brands/new" variant="primary">
+                <Plus aria-hidden />
+                {t("brandsPage.createFirstBrand")}
+              </LinkButton>
+            }
+          />
+        )}
       </section>
     </div>
   );

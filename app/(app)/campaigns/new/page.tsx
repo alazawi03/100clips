@@ -2,7 +2,6 @@ import { CheckoutForm } from "@/components/brand/cart/CheckoutForm";
 import { inviteView, pickerLists } from "@/components/brand/campaigns/campaignView";
 import { NeedBrandOnArrival } from "@/components/brand/campaigns/NeedBrandDialog";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { NICHES } from "@/lib/data/creatorFilters";
 import { cardOnline, workspace } from "@/lib/data/live";
 import { allLists } from "@/lib/data/lists";
 import type { ContentFormat } from "@/lib/data/types";
@@ -52,7 +51,7 @@ export default async function NewCampaignPage({ searchParams }: PageProps<"/camp
         cardOnline={online}
         picker={{
           lists,
-          explore: { creators: ws.bookable.map((c) => inviteView(c, i18n)), niches: NICHES.map((n) => ({ id: n, label: t(`niches.${n}`) })) },
+          explore: { creators: ws.bookable.map((c) => inviteView(c, i18n)) },
           initialListId: lists.find((l) => l.creators.length > 0)?.id ?? "explore",
           initialPicked: picks.map((p) => p.creatorId),
           defaultFormats: Object.fromEntries(picks.map((p) => [p.creatorId, p.format])) as Record<string, ContentFormat>,

@@ -180,7 +180,7 @@
   "explore": {
     "title": "صنّاع المحتوى",
     "search": "ابحث بالاسم أو المعرّف",
-    "niche": "المجال",
+    "area": "المنطقة",
     "gender": "الجنس",
     "sort": "الترتيب",
     "sortRating": "الأعلى تقييمًا",
@@ -899,6 +899,9 @@
     "productsOf": "منتجات {brand}",
     "addProduct": "أضف منتج",
     "editProduct": "عدّل {name}",
+    "noBrands": "ما عندك علامة تجارية بعد",
+    "noBrandsHint": "أنشئ علامتك التجارية عشان تضيف منتجاتك وتبدأ حملاتك مع صنّاع المحتوى.",
+    "createFirstBrand": "أنشئ علامتك",
     "noProducts": "ما فيه منتجات بعد",
     "noProductsHint": "أضف منتج عشان صنّاع المحتوى يعرفون شنو يصوّرون.",
     "products": {
@@ -1159,7 +1162,7 @@
     "previousPage": "الصفحة السابقة",
     "nextPage": "الصفحة التالية",
     "pageRange": "{from}–{to} من {total}",
-    "allNiches": "الكل"
+    "allAreas": "كل المناطق"
   },
   "countries": {
     "bh": "البحرين",

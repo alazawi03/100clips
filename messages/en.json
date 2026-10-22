@@ -171,7 +171,7 @@
   "explore": {
     "title": "Content creators",
     "search": "Search by name or handle",
-    "niche": "Niche",
+    "area": "Area",
     "gender": "Gender",
     "sort": "Sort",
     "sortRating": "Top rated",
@@ -864,6 +864,9 @@
     "productsOf": "{brand} products",
     "addProduct": "Add product",
     "editProduct": "Edit {name}",
+    "noBrands": "No brand yet",
+    "noBrandsHint": "Create your brand to add your products and start campaigns with creators.",
+    "createFirstBrand": "Create your brand",
     "noProducts": "No products yet",
     "noProductsHint": "Add a product so creators know what to film.",
     "products": {
@@ -1091,7 +1094,7 @@
     "previousPage": "Previous page",
     "nextPage": "Next page",
     "pageRange": "{from}–{to} of {total}",
-    "allNiches": "All"
+    "allAreas": "All areas"
   },
   "countries": {
     "bh": "Bahrain",

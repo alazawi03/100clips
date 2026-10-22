@@ -1,17 +1,18 @@
 "use client";
 
-import { LayoutGrid, MonitorPlay, ScanFace, Search, Users, X } from "lucide-react";
+import { MapPin, MonitorPlay, ScanFace, Search, Users, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useI18n } from "@/components/i18n/I18nProvider";
-import { faceEmoji, genderEmoji, nicheEmoji } from "@/lib/data/emojis";
+import { faceEmoji, genderEmoji } from "@/lib/data/emojis";
 import { PlatformLogo } from "@/components/ui/PlatformLogo";
 import { FilterMenu, type FilterOption } from "./FilterMenu";
 import { SortMenu } from "./SortMenu";
 import { cn } from "@/lib/cn";
-import { FACES, GENDERS, NICHES, PLATFORMS, SORTS } from "@/lib/data/creatorFilters";
+import { FACES, GENDERS, PLATFORMS, SORTS } from "@/lib/data/creatorFilters";
 
-export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
+/** `areas`: the areas creators are in, to filter by (none: no area filter). */
+export function CreatorFiltersBar({ resultsLabel, areas }: { resultsLabel: string; areas: string[] }) {
   const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
@@ -35,7 +36,7 @@ export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
-  const active = ["platform", "niche", "gender", "face"].some((k) => params.get(k)) || !!params.get("q");
+  const active = ["platform", "area", "gender", "face"].some((k) => params.get(k)) || !!params.get("q");
 
   const icon = "size-4 shrink-0";
   const filters: Array<{ key: string; label: string; icon: ReactNode; options: FilterOption[] }> = [
@@ -46,10 +47,10 @@ export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
       options: PLATFORMS.map((p) => ({ value: p, label: t(`platforms.${p}`), icon: <PlatformLogo platform={p} className="size-5" /> })),
     },
     {
-      key: "niche",
-      label: t("explore.niche"),
-      icon: <LayoutGrid aria-hidden className={icon} />,
-      options: NICHES.map((n) => ({ value: n, label: t(`niches.${n}`), icon: <span aria-hidden className="text-base leading-none">{nicheEmoji[n]}</span> })),
+      key: "area",
+      label: t("explore.area"),
+      icon: <MapPin aria-hidden className={icon} />,
+      options: areas.map((a) => ({ value: a, label: a })),
     },
     {
       key: "gender",
@@ -82,7 +83,7 @@ export function CreatorFiltersBar({ resultsLabel }: { resultsLabel: string }) {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {filters.map((f) => (
+        {filters.filter((f) => f.options.length > 0).map((f) => (
           <FilterMenu
             key={f.key}
             label={f.label}

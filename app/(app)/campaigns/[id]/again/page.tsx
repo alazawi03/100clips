@@ -4,7 +4,6 @@ import { ChevronRight } from "lucide-react";
 import { payCampaignAgain } from "@/app/actions/brand";
 import { AgainForm } from "@/components/brand/campaigns/AgainForm";
 import { inviteView, pickerLists, productOf } from "@/components/brand/campaigns/campaignView";
-import { NICHES } from "@/lib/data/creatorFilters";
 import { cardOnline, workspace } from "@/lib/data/live";
 import type { ContentFormat } from "@/lib/data/types";
 import { getI18n } from "@/lib/i18n/server";
@@ -64,7 +63,7 @@ export default async function RunAgainPage({ params }: PageProps<"/campaigns/[id
       <AgainForm
         action={payCampaignAgain.bind(null, id)}
         lists={lists}
-        explore={{ creators: ws.bookable.map((c) => inviteView(c, i18n)), niches: NICHES.map((n) => ({ id: n, label: t(`niches.${n}`) })) }}
+        explore={{ creators: ws.bookable.map((c) => inviteView(c, i18n)) }}
         defaultFormats={defaultFormats}
         defaults={{
           title: f.pick(campaign.title),

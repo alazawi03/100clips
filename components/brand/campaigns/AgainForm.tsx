@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { DateInput } from "@/components/ui/DateInput";
 import { Field, FieldError, Input, Textarea } from "@/components/ui/Form";
 import { createFormatters } from "@/lib/i18n/format";
-import type { ContentFormat, Niche } from "@/lib/data/types";
+import type { ContentFormat } from "@/lib/data/types";
 import { InviteForm, type InviteCreator } from "./InviteForm";
 
 /** What the new campaign starts with: the old one's brief and details, and a deadline as far out as before. */
@@ -50,7 +50,7 @@ export function AgainForm({
 }: {
   action: (prev: CheckoutState, form: FormData) => Promise<CheckoutState>;
   lists: Array<{ id: string; name: string; creators: InviteCreator[] }>;
-  explore: { creators: InviteCreator[]; niches: Array<{ id: Niche; label: string }> };
+  explore: { creators: InviteCreator[] };
   defaultFormats: Record<string, ContentFormat>;
   defaults: AgainDefaults;
   minDeadline: string;

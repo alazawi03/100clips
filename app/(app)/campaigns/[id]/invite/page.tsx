@@ -4,7 +4,6 @@ import { ChevronRight } from "lucide-react";
 import { inviteToCampaign } from "@/app/actions/brand";
 import { InviteForm } from "@/components/brand/campaigns/InviteForm";
 import { inviteView, pickerLists } from "@/components/brand/campaigns/campaignView";
-import { NICHES } from "@/lib/data/creatorFilters";
 import { cardOnline, workspace } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 import { isActiveOrder } from "@/lib/statuses";
@@ -43,7 +42,7 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/c
       <InviteForm
         action={inviteToCampaign.bind(null, id)}
         lists={lists}
-        explore={{ creators: ws.bookable.map(view), niches: NICHES.map((n) => ({ id: n, label: t(`niches.${n}`) })) }}
+        explore={{ creators: ws.bookable.map(view) }}
         preset={preset.length > 0 ? preset.map(view) : undefined}
         initialListId={listId ?? lists.find((l) => l.creators.length > 0)?.id ?? "explore"}
         tickList={!!listId}

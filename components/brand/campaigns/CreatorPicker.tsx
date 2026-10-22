@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronLeft, ChevronRight, Compass, LayoutGrid, ListChecks, MonitorPlay, Plus, ScanFace, Search, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Compass, ListChecks, MapPin, MonitorPlay, Plus, ScanFace, Search, X } from "lucide-react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { FilterMenu } from "@/components/brand/creators/FilterMenu";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { FieldError, Input } from "@/components/ui/Form";
 import { FormatLogo, PlatformLogo } from "@/components/ui/PlatformLogo";
-import { faceEmoji, nicheEmoji } from "@/lib/data/emojis";
+import { faceEmoji } from "@/lib/data/emojis";
 import { cn } from "@/lib/cn";
-import { FACES, matchesFace, PLATFORMS, type Face } from "@/lib/data/creatorFilters";
+import { areasOf, FACES, matchesArea, matchesFace, PLATFORMS, type Face } from "@/lib/data/creatorFilters";
 import { platformOf, type ContentFormat, type Niche, type Platform } from "@/lib/data/types";
 import { createFormatters } from "@/lib/i18n/format";
 import { priceForBrand } from "@/lib/fees";
@@ -31,8 +31,8 @@ export type InviteCreator = {
 
 export type PickerOptions = {
   lists: Array<{ id: string; name: string; creators: InviteCreator[] }>;
-  /** "Explore": every creator, to search and filter by niche, platform and face, offered next to the lists. */
-  explore?: { creators: InviteCreator[]; niches: Array<{ id: Niche; label: string }> };
+  /** "Explore": every creator, to search and filter by area, platform and face, offered next to the lists. */
+  explore?: { creators: InviteCreator[] };
   /** Coming from creator cards or a profile (?creators=): just these creators, already ticked. */
   preset?: InviteCreator[];
   initialListId?: string;
@@ -66,9 +66,9 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
   });
   const [formats, setFormats] = useState<Map<string, ContentFormat>>(() => new Map(Object.entries(defaultFormats ?? {})));
   const everyone = new Map([...lists.flatMap((l) => l.creators), ...(explore?.creators ?? []), ...(preset ?? [])].map((c) => [c.id, c]));
-  // Explore's filters: text (name or handle), categories, platforms, face or faceless (any of each matches).
+  // Explore's filters: text (name or handle), areas, platforms, face or faceless (any of each matches).
   const [query, setQuery] = useState("");
-  const [niches, setNiches] = useState<Niche[]>([]);
+  const [areas, setAreas] = useState<string[]>([]);
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [faces, setFaces] = useState<Face[]>([]);
   // The page of the current list (5 creators each); back to the first on any list or filter change.
@@ -97,17 +97,18 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
   // Everyone picked so far, from any list, in the order they were added. Switching lists never drops them.
   const picked = [...ticked].map((id) => everyone.get(id)).filter((c): c is InviteCreator => !!c);
   const exploring = listId === EXPLORE && !!explore;
+  const exploreAreas = areasOf((explore?.creators ?? []).map((c) => c.city));
   const q = query.trim().toLowerCase().replace(/^@/, "");
   const listCreators = exploring
     ? explore.creators.filter(
         (c) =>
           (!q || c.name.toLowerCase().includes(q) || c.handle.toLowerCase().includes(q)) &&
-          (niches.length === 0 || c.niches.some((n) => niches.includes(n))) &&
+          matchesArea(c.city, areas) &&
           (platforms.length === 0 || c.packages.some((p) => platforms.includes(platformOf[p.format]))) &&
           matchesFace(c, faces),
       )
     : (lists.find((l) => l.id === listId)?.creators ?? []);
-  const filtered = exploring && (!!q || niches.length > 0 || platforms.length > 0 || faces.length > 0);
+  const filtered = exploring && (!!q || areas.length > 0 || platforms.length > 0 || faces.length > 0);
   const pages = Math.max(1, Math.ceil(listCreators.length / PAGE));
   const current = Math.min(page, pages - 1);
   const visible = listCreators.slice(current * PAGE, current * PAGE + PAGE);
@@ -185,25 +186,27 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                     className="ps-9"
                   />
                 </div>
-                {/* Phones: category chips in one row to swipe, then platform and face chips (same choices as the menus below). */}
+                {/* Phones: area chips in one row to swipe, then platform and face chips (same choices as the menus below). */}
                 <div className="flex flex-col gap-2 sm:hidden">
-                  <div role="group" aria-label={t("explore.niche")} className="scrollbar-none -mx-5 flex gap-1.5 overflow-x-auto px-5">
-                    {[{ id: null, label: t("invite.allNiches") }, ...explore.niches].map((n) => {
-                      const on = n.id ? niches.includes(n.id) : niches.length === 0;
-                      return (
-                        <button
-                          key={n.id ?? "all"}
-                          type="button"
-                          aria-pressed={on}
-                          onClick={() => (setNiches(n.id ? (on ? niches.filter((x) => x !== n.id) : [...niches, n.id]) : []), resetMore())}
-                          className={cn("inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-small transition-colors", on ? "border-brand-soft bg-brand-soft font-medium text-brand-on-soft" : "border-border text-text-muted hover:bg-surface")}
-                        >
-                          {n.id && <span aria-hidden>{nicheEmoji[n.id]}</span>}
-                          {n.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {exploreAreas.length > 0 && (
+                    <div role="group" aria-label={t("explore.area")} className="scrollbar-none -mx-5 flex gap-1.5 overflow-x-auto px-5">
+                      {[null, ...exploreAreas].map((a) => {
+                        const on = a ? areas.includes(a) : areas.length === 0;
+                        return (
+                          <button
+                            key={a ?? "all"}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => (setAreas(a ? (on ? areas.filter((x) => x !== a) : [...areas, a]) : []), resetMore())}
+                            className={cn("inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-small transition-colors", on ? "border-brand-soft bg-brand-soft font-medium text-brand-on-soft" : "border-border text-text-muted hover:bg-surface")}
+                          >
+                            {a && <MapPin aria-hidden className="size-3.5" />}
+                            {a ?? t("invite.allAreas")}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                   <div className="flex flex-wrap items-center gap-1.5">
                     {PLATFORMS.map((p) => {
                       const on = platforms.includes(p);
@@ -240,13 +243,15 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                 </div>
                 {/* Wider screens: the creators page's own filter menus, one compact row. */}
                 <div className="hidden flex-wrap items-center gap-2 sm:flex">
-                  <FilterMenu
-                    label={t("explore.niche")}
-                    icon={<LayoutGrid aria-hidden className="size-4 shrink-0" />}
-                    options={explore.niches.map((n) => ({ value: n.id, label: n.label, icon: <span aria-hidden className="text-base leading-none">{nicheEmoji[n.id]}</span> }))}
-                    selected={niches}
-                    onChange={(next) => (setNiches(next as Niche[]), resetMore())}
-                  />
+                  {exploreAreas.length > 0 && (
+                    <FilterMenu
+                      label={t("explore.area")}
+                      icon={<MapPin aria-hidden className="size-4 shrink-0" />}
+                      options={exploreAreas.map((a) => ({ value: a, label: a }))}
+                      selected={areas}
+                      onChange={(next) => (setAreas(next), resetMore())}
+                    />
+                  )}
                   <FilterMenu
                     label={t("explore.platform")}
                     icon={<MonitorPlay aria-hidden className="size-4 shrink-0" />}
@@ -271,7 +276,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                 {filtered && (
                   <button
                     type="button"
-                    onClick={() => (setQuery(""), setNiches([]), setPlatforms([]), setFaces([]))}
+                    onClick={() => (setQuery(""), setAreas([]), setPlatforms([]), setFaces([]))}
                     className="rounded-[var(--radius-sm)] px-2 py-1 font-medium text-primary hover:bg-surface"
                   >
                     {t("explore.clear")}

@@ -1,11 +1,15 @@
-import { fromPrice, platformOf, type Creator, type Gender, type Niche, type Platform } from "./types";
+import { fromPrice, platformOf, type Creator, type Gender, type Platform } from "./types";
 
-export const NICHES: Niche[] = ["general", "food", "beauty", "fashion", "family", "fitness", "travel", "tech", "gaming"];
 export const GENDERS: Gender[] = ["male", "female"];
 export const PLATFORMS: Platform[] = ["tiktok", "instagram"];
 /** Whether the creator's face is in their videos (what they set in the creator app). */
 export type Face = "shows" | "faceless";
 export const FACES: Face[] = ["shows", "faceless"];
+
+/** A creator's area is the city they typed in the creator app. The areas to filter by: the ones creators have set, A to Z. */
+export const areasOf = (cities: string[]) => [...new Set(cities.map((c) => c.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ar"));
+/** Creators who haven't set an area match only when none is picked. */
+export const matchesArea = (city: string, areas: string[]) => areas.length === 0 || areas.includes(city.trim());
 
 /** Creators who haven't said match neither choice. */
 export const matchesFace = (c: Pick<Creator, "showsFace">, faces: Face[]) => faces.length === 0 || (c.showsFace !== undefined && faces.includes(c.showsFace ? "shows" : "faceless"));
@@ -13,10 +17,10 @@ export const matchesFace = (c: Pick<Creator, "showsFace">, faces: Face[]) => fac
 export const SORTS = ["rating", "priceLow", "priceHigh", "orders"] as const;
 export type Sort = (typeof SORTS)[number];
 
-/** Every filter takes several values (any of them matches). In the URL they are comma-separated: ?niche=food,beauty */
+/** Every filter takes several values (any of them matches). In the URL they are comma-separated: ?platform=tiktok,instagram */
 export type CreatorFilters = {
   q?: string;
-  niche: Niche[];
+  area: string[];
   gender: Gender[];
   platform: Platform[];
   face: Face[];
@@ -37,7 +41,7 @@ export function parseFilters(params: Record<string, string | string[] | undefine
   const q = typeof params.q === "string" ? params.q.trim() : "";
   return {
     q: q || undefined,
-    niche: pickMany(params.niche, NICHES),
+    area: typeof params.area === "string" ? [...new Set(params.area.split(",").map((a) => a.trim()).filter(Boolean))] : [],
     gender: pickMany(params.gender, GENDERS),
     platform: pickMany(params.platform, PLATFORMS),
     face: pickMany(params.face, FACES),
@@ -49,7 +53,7 @@ export function filterCreators(all: Creator[], f: CreatorFilters): Creator[] {
   const q = f.q?.toLowerCase();
   const result = all.filter((c) => {
     if (q && ![c.name.ar, c.name.en.toLowerCase(), c.handle].some((s) => s.includes(q))) return false;
-    if (f.niche.length && !c.niches.some((n) => f.niche.includes(n))) return false;
+    if (!matchesArea(c.city.ar, f.area)) return false;
     if (f.gender.length && !f.gender.includes(c.gender)) return false;
     if (f.platform.length && !c.formats.some((o) => f.platform.includes(platformOf[o.format]))) return false;
     if (!matchesFace(c, f.face)) return false;
