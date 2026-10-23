@@ -1,6 +1,5 @@
 import { ArrowDownLeft, ArrowUpFromLine, ArrowUpRight, CreditCard, Hourglass, Undo2 } from "lucide-react";
 import { TopUpButton } from "@/components/brand/balance/TopUpButton";
-import { WithdrawButton } from "@/components/brand/wallet/WithdrawButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import { Card, SectionHeader } from "@/components/ui/Card";
@@ -10,7 +9,7 @@ import type { components } from "@/lib/api-types";
 import { cn } from "@/lib/cn";
 import { workspace } from "@/lib/data/live";
 import type { Order, Withdrawal } from "@/lib/data/types";
-import { expectedArrival, myBankAccount, myWithdrawals, WITHDRAWAL_DAYS } from "@/lib/data/wallet";
+import { expectedArrival, myWithdrawals } from "@/lib/data/wallet";
 import { brandPaid } from "@/lib/fees";
 import { maskIban } from "@/lib/iban";
 import { eventsOf } from "@/lib/orderFlow";
@@ -32,13 +31,12 @@ const typeIcon = { topUp: ArrowDownLeft, card: CreditCard, hold: Hourglass, paym
 
 export default async function WalletPage() {
   const { t, f } = await getI18n();
-  const [ws, ledger, pending, failed, withdrawals, bank] = await Promise.all([
+  const [ws, ledger, pending, failed, withdrawals] = await Promise.all([
     workspace(),
     api<LedgerEntry[]>("/me/ledger?limit=200"),
     api<Payment[]>("/me/payments?status=pending"),
     api<Payment[]>("/me/payments?status=failed&limit=50"),
     myWithdrawals(),
-    myBankAccount(),
   ]);
   const { orders } = ws;
   const held = orders.filter((o) => o.status === "pending" || o.status === "in_progress" || o.status === "delivered").reduce((sum, o) => sum + brandPaid(o), 0);
@@ -131,7 +129,6 @@ export default async function WalletPage() {
           )}
           <div className="mt-auto flex flex-col gap-2">
             <TopUpButton />
-            <WithdrawButton balance={ws.balance} bank={bank && { holder: bank.holder, iban: maskIban(bank.iban) }} days={WITHDRAWAL_DAYS} />
           </div>
         </Card>
         <Card className="flex flex-col gap-2 p-5">
