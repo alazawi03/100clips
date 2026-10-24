@@ -18,14 +18,8 @@ const notifications: NavItem = { href: "/notifications", label: "nav.notificatio
 const lists: NavItem = { href: "/lists", label: "nav.lists", icon: Bookmark };
 const settings: NavItem = { href: "/settings", label: "nav.settings", icon: Settings };
 
-export type NavGroup = { label?: MessageKey; items: NavItem[] };
-
-/** Desktop sidebar. Balance isn't here: it's always on show in the top bar. */
-export const sidebarGroups: NavGroup[] = [
-  { items: [dashboard] },
-  { label: "nav.groupDiscover", items: [explore, lists] },
-  { label: "nav.groupManage", items: [campaigns, orders, shipping, brands, messages] },
-];
+/** Desktop sidebar, one plain list. Balance isn't here: it's always on show in the top bar. */
+export const sidebarItems: NavItem[] = [dashboard, explore, lists, campaigns, orders, shipping, brands, messages];
 
 /** Mobile tab bar, followed by a "More" tab that opens moreItems. Labels are short to fit five across. */
 export const tabItems: NavItem[] = [{ ...dashboard, label: "nav.home" }, { ...explore, label: "nav.creatorsShort" }, campaigns, orders];

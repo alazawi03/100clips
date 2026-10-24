@@ -9,14 +9,14 @@ import { useI18n } from "@/components/i18n/I18nProvider";
 import { buttonClass } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { LanguageToggle } from "./LanguageToggle";
-import { isActive, moreItems, sidebarGroups, tabItems, type NavItem } from "./nav";
+import { isActive, moreItems, sidebarItems, tabItems, type NavItem } from "./nav";
 
 /** Unread counts by nav href, e.g. { "/messages": 3 }. */
 type Unread = Partial<Record<string, number>>;
 
 /**
  * Desktop sidebar. Sits on the inline start: right in Arabic, left in English.
- * The main action (a new campaign) on top, then the pages in small labelled groups.
+ * The main action (a new campaign) on top, then the pages in one list.
  */
 export function SideNav({ account, unread = {} }: { account: ReactNode; unread?: Unread }) {
   const pathname = usePathname();
@@ -30,13 +30,8 @@ export function SideNav({ account, unread = {} }: { account: ReactNode; unread?:
           <Plus aria-hidden />
           {t("newCampaign.button")}
         </Link>
-        {sidebarGroups.map((group, i) => (
-          <div key={i} role="group" aria-label={group.label && t(group.label)} className="flex flex-col gap-1">
-            {group.label && <p aria-hidden className="px-3 pb-1 pt-4 text-caption font-medium text-text-muted">{t(group.label)}</p>}
-            {group.items.map((item) => (
-              <SideLink key={item.href} item={item} active={isActive(item, pathname)} label={t(item.label)} count={unread[item.href]} />
-            ))}
-          </div>
+        {sidebarItems.map((item) => (
+          <SideLink key={item.href} item={item} active={isActive(item, pathname)} label={t(item.label)} count={unread[item.href]} />
         ))}
       </div>
       <div className="mt-1 border-t border-border pt-3">{account}</div>
@@ -52,10 +47,10 @@ function SideLink({ item, active, label, count = 0 }: { item: NavItem; active: b
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        // DESIGN.md Sidebar: 40px rows (44 in the mobile sheet); active is the surface fill with a 3px pink bar on the inline-start edge.
+        // DESIGN.md Sidebar: 40px rows (44 in the mobile sheet); active is the surface fill with a 2px pink bar on the inline-start edge.
         "relative flex h-11 items-center gap-3 rounded-[var(--radius-md)] px-3 transition-colors duration-[120ms] md:h-10",
         active
-          ? "bg-surface font-medium text-text before:absolute before:inset-y-2 before:start-0 before:w-[3px] before:rounded-full before:bg-brand"
+          ? "bg-surface font-medium text-text before:absolute before:inset-y-2 before:start-0 before:w-[2px] before:rounded-full before:bg-brand"
           : "text-text hover:bg-surface",
       )}
     >
