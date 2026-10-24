@@ -28,6 +28,15 @@ const SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-
  * Gate-E's page centres its card when the frame is more than 520px wide (the top-up drawer is wide for that); narrower,
  * on phones, it sits at the bottom like a phone sheet. The frame is about a card's height, so there's little space around.
  */
+/**
+ * Before the tab leaves for BENEFIT's or Gate-E's page: this page's address becomes the payment's, so the browser's Back
+ * comes to the waiting payment (and its panel) rather than an empty checkout or top-up. What the brand entered is
+ * already saved: the payment, and for a checkout its draft campaign.
+ */
+function backToPayment(paymentId: string) {
+  window.history.replaceState(window.history.state, "", `/payments/${paymentId}`);
+}
+
 export function CardPanel({ url, paymentId, onCancelled }: {
   url: string;
   paymentId: string;
@@ -64,6 +73,7 @@ export function CardPanel({ url, paymentId, onCancelled }: {
     const onBlocked = async (e: SecurityPolicyViolationEvent) => {
       if (leaving || !e.effectiveDirective.startsWith("frame-src")) return;
       leaving = true;
+      backToPayment(paymentId);
       const benefit = /benefit-gateway\.bh/.test(e.blockedURI);
       setMoving(benefit ? "benefit" : "gatee");
       go(benefit ? await benefitPage(paymentId).catch(() => url) : url);
@@ -88,7 +98,12 @@ export function CardPanel({ url, paymentId, onCancelled }: {
         <p className="text-text-muted">{t("payment.panelBody")}</p>
         <p className="text-small text-text-muted">
           {t("payment.panelTrouble")}{" "}
-          <a href={url} className="font-medium text-primary underline-offset-4 hover:underline">
+          <a
+            href={url}
+            // In this tab only (a new tab leaves this one as it is).
+            onClick={(e) => !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) && backToPayment(paymentId)}
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
             {t("payment.openPage")}
           </a>
         </p>
