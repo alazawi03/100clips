@@ -82,10 +82,16 @@ export function CardPanel({ url, paymentId, onCancelled }: {
   }, [url, paymentId]);
 
   return (
-    <Card className="flex flex-col gap-4 overflow-hidden px-0 pb-4 pt-5">
+    <Card className="flex flex-col gap-4 overflow-hidden px-0 pb-0 pt-5">
       <div className="flex flex-col gap-1 px-5">
         <h2 className="text-h2 font-medium">{t("payment.panelTitle")}</h2>
         <p className="text-text-muted">{t("payment.panelBody")}</p>
+        <p className="text-small text-text-muted">
+          {t("payment.panelTrouble")}{" "}
+          <a href={url} className="font-medium text-primary underline-offset-4 hover:underline">
+            {t("payment.openPage")}
+          </a>
+        </p>
       </div>
       <div className="relative">
         <iframe src={url} title={t("payment.panelTitle")} allow="payment" sandbox={SANDBOX} className="h-[560px] w-full border-0 bg-surface sm:h-[640px]" />
@@ -96,12 +102,6 @@ export function CardPanel({ url, paymentId, onCancelled }: {
           </div>
         )}
       </div>
-      <p className="px-5 text-small text-text-muted">
-        {t("payment.panelTrouble")}{" "}
-        <a href={url} className="font-medium text-primary underline-offset-4 hover:underline">
-          {t("payment.openPage")}
-        </a>
-      </p>
     </Card>
   );
 }
