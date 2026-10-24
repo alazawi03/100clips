@@ -1344,8 +1344,7 @@
   "legal": {
     "label": "Terms and privacy",
     "terms": "Terms of use",
-    "privacy": "Privacy policy",
-    "deleteAccount": "Delete account"
+    "privacy": "Privacy policy"
   },
   "payment": {
     "title": "Card payment",
