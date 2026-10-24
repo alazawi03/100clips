@@ -1423,9 +1423,7 @@
   "payment": {
     "title": "الدفع بالبطاقة",
     "panelTitle": "ادفع هنا",
-    "panelBody": "ادفع بالبطاقة أو BenefitPay في صفحة Gate-E الآمنة هنا.",
-    "benefitHint": "تدفع ببطاقة BENEFIT؟ تنفتح في صفحة BENEFIT نفسها، وبعدها ترجع هنا.",
-    "benefitButton": "ادفع بـ BENEFIT",
+    "panelBody": "ادفع في صفحة Gate-E الآمنة هنا. وBENEFIT تنفتح في صفحتها، وبعدها ترجع هنا.",
     "panelTrouble": "الصفحة ما ظهرت؟",
     "openPage": "افتح صفحة الدفع",
     "waitingTitle": "بانتظار الدفع بالبطاقة",
