@@ -88,7 +88,7 @@ more time.
 ## Clips and how they're used
 
 - **Posting.** The creator posts the approved clip on their own account, as the brief says, and keeps it
-  up. Taking it down needs laqta's approval.
+  up for at least 365 days from the day it's posted. Taking it down sooner needs laqta's approval.
 - **Ads.** If the brand wants to run the clip as an ad from the creator's account, the creator shares a
   Spark Ads code (TikTok) or a Partnership Ads code (Instagram), valid for the period they agree on.
 - **Using the clip:** once a clip is approved and paid for, the creator gives the
@@ -224,7 +224,8 @@ most problems are solved by talking.
 
 ## المقاطع وكيف تنستخدم
 
-- **النشر.** صانع المحتوى ينشر المقطع المعتمد في حسابه حسب المطلوب، ويخليه منشور. وحذفه يحتاج موافقة لقطة.
+- **النشر.** صانع المحتوى ينشر المقطع المعتمد في حسابه حسب المطلوب، ويخليه منشور 365 يوم على الأقل من يوم نشره. وحذفه
+  قبلها يحتاج موافقة لقطة.
 - **الإعلانات.** إذا العلامة تبي تشغّل المقطع كإعلان من حساب صانع المحتوى، صانع المحتوى يعطيها كود Spark Ads (تيك
   توك) أو كود Partnership Ads (إنستغرام)، صالح للمدة اللي يتفقون عليها.
 - **استخدام المقطع:** أول ما ينعتمد المقطع وينّدفع، صانع المحتوى يعطي العلامة حق استخدامه
