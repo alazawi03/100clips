@@ -1425,6 +1425,8 @@
     "panelTitle": "ادفع هنا",
     "panelBody": "ادفع في صفحة Gate-E الآمنة هنا. وBENEFIT تنفتح في صفحتها، وبعدها ترجع هنا.",
     "panelTrouble": "الصفحة ما ظهرت؟",
+    "toBenefit": "ننقلك لصفحة BENEFIT…",
+    "toGatee": "ننقلك لصفحة الدفع…",
     "openPage": "افتح صفحة الدفع",
     "waitingTitle": "بانتظار الدفع بالبطاقة",
     "checking": "نتأكد من دفعتك مع Gate-E…",

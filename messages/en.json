@@ -1351,6 +1351,8 @@
     "panelTitle": "Pay here",
     "panelBody": "Pay on Gate-E's secure page, right here. BENEFIT opens on its own page, then brings you back.",
     "panelTrouble": "Page not showing?",
+    "toBenefit": "Taking you to BENEFIT…",
+    "toGatee": "Taking you to the payment page…",
     "openPage": "Open the payment page",
     "waitingTitle": "Waiting for your card payment",
     "checking": "Checking your payment with Gate-E…",

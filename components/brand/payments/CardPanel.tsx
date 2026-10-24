@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { LoaderCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { benefitPage, checkPayment } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Card } from "@/components/ui/Card";
@@ -27,6 +28,8 @@ const SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-
  */
 export function CardPanel({ url, paymentId }: { url: string; paymentId: string }) {
   const { t } = useI18n();
+  // Leaving for BENEFIT's page (or Gate-E's full one): covers the frame's "blocked" page while its address comes.
+  const [moving, setMoving] = useState<"benefit" | "gatee">();
 
   useEffect(() => {
     let leaving = false;
@@ -42,7 +45,9 @@ export function CardPanel({ url, paymentId }: { url: string; paymentId: string }
     const onBlocked = async (e: SecurityPolicyViolationEvent) => {
       if (leaving || !e.effectiveDirective.startsWith("frame-src")) return;
       leaving = true;
-      go(/benefit-gateway\.bh/.test(e.blockedURI) ? await benefitPage(paymentId).catch(() => url) : url);
+      const benefit = /benefit-gateway\.bh/.test(e.blockedURI);
+      setMoving(benefit ? "benefit" : "gatee");
+      go(benefit ? await benefitPage(paymentId).catch(() => url) : url);
     };
     addEventListener("message", onMessage);
     document.addEventListener("securitypolicyviolation", onBlocked);
@@ -63,7 +68,15 @@ export function CardPanel({ url, paymentId }: { url: string; paymentId: string }
         <h2 className="text-h2 font-medium">{t("payment.panelTitle")}</h2>
         <p className="text-text-muted">{t("payment.panelBody")}</p>
       </div>
-      <iframe src={url} title={t("payment.panelTitle")} allow="payment" sandbox={SANDBOX} className="h-[720px] w-full border-0 bg-surface" />
+      <div className="relative">
+        <iframe src={url} title={t("payment.panelTitle")} allow="payment" sandbox={SANDBOX} className="h-[720px] w-full border-0 bg-surface" />
+        {moving && (
+          <div role="status" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface text-center">
+            <LoaderCircle aria-hidden className="size-8 text-primary motion-safe:animate-spin" strokeWidth={1.5} />
+            <p className="font-medium">{t(moving === "benefit" ? "payment.toBenefit" : "payment.toGatee")}</p>
+          </div>
+        )}
+      </div>
       <p className="px-5 text-small text-text-muted">
         {t("payment.panelTrouble")}{" "}
         <a href={url} className="font-medium text-primary underline-offset-4 hover:underline">
