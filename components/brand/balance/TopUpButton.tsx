@@ -48,7 +48,8 @@ function TopUpForm({ cardOnline, onDone }: { cardOnline: boolean; onDone: () => 
   };
   const value = Number(amount);
   const valid = Number.isFinite(value) && value >= 1;
-  if (state?.payUrl && state.paymentId) return <CardPanel url={state.payUrl} paymentId={state.paymentId} />;
+  // Cancelled on Gate-E's page: nothing to show (unpaid top-ups aren't listed), so the drawer just closes.
+  if (state?.payUrl && state.paymentId) return <CardPanel url={state.payUrl} paymentId={state.paymentId} onCancelled={onDone} />;
   return (
     <form id={formId} action={run} noValidate className="flex flex-col gap-5">
       <Field label={t("walletPage.topUpAmount")} htmlFor={`${formId}-amount`} error={err("amount")}>

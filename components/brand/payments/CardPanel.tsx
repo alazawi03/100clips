@@ -1,7 +1,7 @@
 "use client";
 
 import { LoaderCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { benefitPage, checkPayment } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Card } from "@/components/ui/Card";
@@ -28,10 +28,19 @@ const SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-
  * Gate-E's page centres its card when the frame is more than 520px wide (the top-up drawer is wide for that); narrower,
  * on phones, it sits at the bottom like a phone sheet. The frame is about a card's height, so there's little space around.
  */
-export function CardPanel({ url, paymentId }: { url: string; paymentId: string }) {
+export function CardPanel({ url, paymentId, onCancelled }: {
+  url: string;
+  paymentId: string;
+  /** Cancelled with Gate-E's close button: this instead of the payment page (a top-up just closes its drawer). */
+  onCancelled?: () => void;
+}) {
   const { t } = useI18n();
   // Leaving for BENEFIT's page (or Gate-E's full one): covers the frame's "blocked" page while its address comes.
   const [moving, setMoving] = useState<"benefit" | "gatee">();
+  const cancelled = useRef(onCancelled);
+  useEffect(() => {
+    cancelled.current = onCancelled;
+  });
 
   useEffect(() => {
     let leaving = false;
@@ -40,8 +49,16 @@ export function CardPanel({ url, paymentId }: { url: string; paymentId: string }
       window.location.assign(to);
     };
     const result = () => !leaving && go(`/payments/${paymentId}`);
+    const onCancel = () => {
+      if (leaving) return;
+      if (!cancelled.current) return result();
+      leaving = true;
+      // Ended on laqta's side now too (the API asks Gate-E), rather than when its hour is up.
+      void checkPayment(paymentId).catch(() => undefined);
+      cancelled.current();
+    };
     const onMessage = (e: MessageEvent) => {
-      if (e.origin === new URL(url).origin && e.data?.action === "paymentCancelled") result();
+      if (e.origin === new URL(url).origin && e.data?.action === "paymentCancelled") onCancel();
       if (e.origin === window.location.origin && e.data?.type === "laqta:payment-returned") result();
     };
     const onBlocked = async (e: SecurityPolicyViolationEvent) => {
