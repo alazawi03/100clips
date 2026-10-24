@@ -696,12 +696,19 @@
     "notInCountry": {
       "toggle": "I'm not in {country}",
       "label": "Where are you?",
-      "placeholder": "Type your country",
+      "placeholder": "Search for your country",
       "hint": "We'll take it into consideration and let you know when laqta reaches you.",
       "send": "Send",
       "thanks": "Got it, thanks. We'll take it into consideration and let you know when we reach your country.",
-      "unknown": "We didn't recognise that country. Pick its name from the list.",
-      "failed": "We couldn't send that right now. Try again."
+      "unknown": "Choose your country from the list.",
+      "failed": "We couldn't send that right now. Try again.",
+      "notListed": "My country isn't listed",
+      "noCountry": "No country by that name",
+      "groups": {
+        "gulf": "Gulf",
+        "arab": "Arab countries",
+        "rest": "All countries"
+      }
     }
   },
   "images": {
