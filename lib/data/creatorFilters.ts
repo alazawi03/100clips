@@ -17,6 +17,16 @@ export const matchesFace = (c: Pick<Creator, "showsFace">, faces: Face[]) => fac
 export const SORTS = ["rating", "priceLow", "priceHigh", "orders"] as const;
 export type Sort = (typeof SORTS)[number];
 
+/** What sorting looks at, so the creators page and the campaign picker sort the same way. */
+export type Sortable = { rating?: number; completedOrders: number; fromPrice?: number };
+export const bySort: Record<Sort, (a: Sortable, b: Sortable) => number> = {
+  rating: (a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.completedOrders - a.completedOrders,
+  // No price yet: last either way.
+  priceLow: (a, b) => (a.fromPrice ?? Infinity) - (b.fromPrice ?? Infinity),
+  priceHigh: (a, b) => (b.fromPrice ?? -Infinity) - (a.fromPrice ?? -Infinity),
+  orders: (a, b) => b.completedOrders - a.completedOrders,
+};
+
 /** Every filter takes several values (any of them matches). In the URL they are comma-separated: ?platform=tiktok,instagram */
 export type CreatorFilters = {
   q?: string;
@@ -59,12 +69,6 @@ export function filterCreators(all: Creator[], f: CreatorFilters): Creator[] {
     if (!matchesFace(c, f.face)) return false;
     return true;
   });
-  const by: Record<Sort, (a: Creator, b: Creator) => number> = {
-    rating: (a, b) => (b.rating ?? 0) - (a.rating ?? 0) || b.completedOrders - a.completedOrders,
-    // No price yet: last either way.
-    priceLow: (a, b) => (fromPrice(a) ?? Infinity) - (fromPrice(b) ?? Infinity),
-    priceHigh: (a, b) => (fromPrice(b) ?? -Infinity) - (fromPrice(a) ?? -Infinity),
-    orders: (a, b) => b.completedOrders - a.completedOrders,
-  };
-  return result.sort(by[f.sort]);
+  const sortable = (c: Creator): Sortable => ({ rating: c.rating, completedOrders: c.completedOrders, fromPrice: fromPrice(c) });
+  return result.sort((a, b) => bySort[f.sort](sortable(a), sortable(b)));
 }

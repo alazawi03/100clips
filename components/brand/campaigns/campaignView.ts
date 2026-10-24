@@ -4,7 +4,7 @@ import { allLists, creatorsIn } from "@/lib/data/lists";
 import { platformOf, type Creator, type AdCode, type AdPlatform, type Campaign, type Clip, type ClipVersion, type DeclineReason, type Order, type OrderShipping, type OrderStatus, type ShipTo } from "@/lib/data/types";
 import { brandPaid } from "@/lib/fees";
 import type { I18n } from "@/lib/i18n/server";
-import { actionWaitingDays, clipVersions, currentStep, isLate, nextAction, offerHoursLeft, revisionUsed, stepsFor, waitingFor, type NextAction, type OrderStep, type Waiting } from "@/lib/orderFlow";
+import { actionWaitingDays, clipVersions, currentStep, isLate, nextAction, offerHoursLeft, stepsFor, waitingFor, type NextAction, type OrderStep, type Waiting } from "@/lib/orderFlow";
 import { nowIso, today } from "@/lib/today";
 
 /** Everything an order card on the campaign page shows, already worked out on the server. */
@@ -28,7 +28,6 @@ export type OrderCardView = {
   refund: number;
   /** Every uploaded version of the clip, oldest first. */
   versions: ClipVersion[];
-  revisionsLeft: number;
   steps: OrderStep[];
   step: OrderStep;
   action?: NextAction;
@@ -110,7 +109,6 @@ export function orderCardView(order: Order, campaign: Campaign, i18n: I18n, ws: 
     declineNote: order.declineNote,
     refund: brandPaid(order),
     versions: clipVersions(order, clip),
-    revisionsLeft: revisionUsed(order) ? 0 : 1,
     steps: stepsFor(physical),
     step: currentStep(order, physical),
     action,
@@ -142,8 +140,11 @@ export function inviteView(c: Creator, { t, f }: I18n, inCampaign = false): Invi
     handle: c.handle,
     city: f.pick(c.city),
     niches: c.niches,
+    gender: c.gender,
     inCampaign,
     showsFace: c.showsFace,
+    rating: c.rating,
+    completedOrders: c.completedOrders,
     photo: c.photo,
     packages: c.formats.map((o) => ({ format: o.format, label: t(`formats.${o.format}`), price: o.price })),
   };

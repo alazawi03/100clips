@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronLeft, ChevronRight, Compass, ListChecks, MapPin, MonitorPlay, Plus, ScanFace, Search, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Compass, ListChecks, MapPin, MonitorPlay, Plus, ScanFace, Search, Users, X } from "lucide-react";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { FilterMenu } from "@/components/brand/creators/FilterMenu";
+import { SortMenu } from "@/components/brand/creators/SortMenu";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { FieldError, Input } from "@/components/ui/Form";
 import { FormatLogo, PlatformLogo } from "@/components/ui/PlatformLogo";
-import { faceEmoji } from "@/lib/data/emojis";
+import { faceEmoji, genderEmoji } from "@/lib/data/emojis";
 import { cn } from "@/lib/cn";
-import { areasOf, FACES, matchesArea, matchesFace, PLATFORMS, type Face } from "@/lib/data/creatorFilters";
-import { platformOf, type ContentFormat, type Niche, type Platform } from "@/lib/data/types";
+import { areasOf, bySort, FACES, GENDERS, matchesArea, matchesFace, PLATFORMS, SORTS, type Face, type Sort } from "@/lib/data/creatorFilters";
+import { platformOf, type ContentFormat, type Gender, type Niche, type Platform } from "@/lib/data/types";
 import { createFormatters } from "@/lib/i18n/format";
 import { priceForBrand } from "@/lib/fees";
 
@@ -22,8 +23,12 @@ export type InviteCreator = {
   handle: string;
   city: string;
   niches: Niche[];
+  gender: Gender;
   /** Face in their videos; undefined until they say. */
   showsFace?: boolean;
+  /** For sorting, as on the creators page. */
+  rating?: number;
+  completedOrders: number;
   inCampaign: boolean;
   packages: Array<{ format: ContentFormat; label: string; price: number }>;
   photo?: string;
@@ -31,7 +36,7 @@ export type InviteCreator = {
 
 export type PickerOptions = {
   lists: Array<{ id: string; name: string; creators: InviteCreator[] }>;
-  /** "Explore": every creator, to search and filter by area, platform and face, offered next to the lists. */
+  /** "Explore": every creator, to search, filter and sort as on the creators page, offered next to the lists. */
   explore?: { creators: InviteCreator[] };
   /** Coming from creator cards or a profile (?creators=): just these creators, already ticked. */
   preset?: InviteCreator[];
@@ -46,6 +51,13 @@ export type PickerOptions = {
 
 /** Creators per page in the picker. */
 const PAGE = 5;
+
+/** What sorting compares: the cheapest package stands for the price, as on the creators page. */
+const sortable = (c: InviteCreator) => ({
+  rating: c.rating,
+  completedOrders: c.completedOrders,
+  fromPrice: c.packages.length ? Math.min(...c.packages.map((p) => p.price)) : undefined,
+});
 /** The "list" id of Explore: every creator, filterable. */
 const EXPLORE = "explore";
 
@@ -66,11 +78,14 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
   });
   const [formats, setFormats] = useState<Map<string, ContentFormat>>(() => new Map(Object.entries(defaultFormats ?? {})));
   const everyone = new Map([...lists.flatMap((l) => l.creators), ...(explore?.creators ?? []), ...(preset ?? [])].map((c) => [c.id, c]));
-  // Explore's filters: text (name or handle), areas, platforms, face or faceless (any of each matches).
+  // Explore's filters, as on the creators page: text (name or handle), platforms, areas, genders, face or
+  // faceless (any of each matches), and the order.
   const [query, setQuery] = useState("");
   const [areas, setAreas] = useState<string[]>([]);
   const [platforms, setPlatforms] = useState<Platform[]>([]);
+  const [genders, setGenders] = useState<Gender[]>([]);
   const [faces, setFaces] = useState<Face[]>([]);
+  const [sort, setSort] = useState<Sort>("rating");
   // The page of the current list (5 creators each); back to the first on any list or filter change.
   const [page, setPage] = useState(0);
   const resetMore = () => setPage(0);
@@ -105,10 +120,20 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
           (!q || c.name.toLowerCase().includes(q) || c.handle.toLowerCase().includes(q)) &&
           matchesArea(c.city, areas) &&
           (platforms.length === 0 || c.packages.some((p) => platforms.includes(platformOf[p.format]))) &&
+          (genders.length === 0 || genders.includes(c.gender)) &&
           matchesFace(c, faces),
-      )
+      ).sort((a, b) => bySort[sort](sortable(a), sortable(b)))
     : (lists.find((l) => l.id === listId)?.creators ?? []);
-  const filtered = exploring && (!!q || areas.length > 0 || platforms.length > 0 || faces.length > 0);
+  const filtered = exploring && (!!q || areas.length > 0 || platforms.length > 0 || genders.length > 0 || faces.length > 0);
+  const sortLabels = { rating: t("explore.sortRating"), priceLow: t("explore.sortPriceLow"), priceHigh: t("explore.sortPriceHigh"), orders: t("explore.sortOrders") };
+  const sortMenu = (
+    <SortMenu
+      label={t("explore.sort")}
+      value={sort}
+      options={SORTS.map((s) => ({ value: s, label: sortLabels[s] }))}
+      onChange={(v) => (setSort(v as Sort), resetMore())}
+    />
+  );
   const pages = Math.max(1, Math.ceil(listCreators.length / PAGE));
   const current = Math.min(page, pages - 1);
   const visible = listCreators.slice(current * PAGE, current * PAGE + PAGE);
@@ -223,6 +248,21 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                         </button>
                       );
                     })}
+                    {GENDERS.map((g) => {
+                      const on = genders.includes(g);
+                      return (
+                        <button
+                          key={g}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => (setGenders(on ? genders.filter((x) => x !== g) : [...genders, g]), resetMore())}
+                          className={cn("inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-small transition-colors", on ? "border-brand-soft bg-brand-soft font-medium text-brand-on-soft" : "border-border text-text-muted hover:bg-surface")}
+                        >
+                          <span aria-hidden>{genderEmoji[g]}</span>
+                          {t(`genders.${g}`)}
+                        </button>
+                      );
+                    })}
                     {FACES.map((v) => {
                       const on = faces.includes(v);
                       return (
@@ -238,11 +278,21 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                         </button>
                       );
                     })}
-                    <span className="ms-auto text-small text-text-muted">{tp("explore.results", listCreators.length)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-small text-text-muted">{tp("explore.results", listCreators.length)}</span>
+                    {sortMenu}
                   </div>
                 </div>
-                {/* Wider screens: the creators page's own filter menus, one compact row. */}
+                {/* Wider screens: the creators page's own filter menus, in its order, one compact row. */}
                 <div className="hidden flex-wrap items-center gap-2 sm:flex">
+                  <FilterMenu
+                    label={t("explore.platform")}
+                    icon={<MonitorPlay aria-hidden className="size-4 shrink-0" />}
+                    options={PLATFORMS.map((p) => ({ value: p, label: t(`platforms.${p}`), icon: <PlatformLogo platform={p} className="size-5" /> }))}
+                    selected={platforms}
+                    onChange={(next) => (setPlatforms(next as Platform[]), resetMore())}
+                  />
                   {exploreAreas.length > 0 && (
                     <FilterMenu
                       label={t("explore.area")}
@@ -253,11 +303,11 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                     />
                   )}
                   <FilterMenu
-                    label={t("explore.platform")}
-                    icon={<MonitorPlay aria-hidden className="size-4 shrink-0" />}
-                    options={PLATFORMS.map((p) => ({ value: p, label: t(`platforms.${p}`), icon: <PlatformLogo platform={p} className="size-5" /> }))}
-                    selected={platforms}
-                    onChange={(next) => (setPlatforms(next as Platform[]), resetMore())}
+                    label={t("explore.gender")}
+                    icon={<Users aria-hidden className="size-4 shrink-0" />}
+                    options={GENDERS.map((g) => ({ value: g, label: t(`genders.${g}`), icon: <span aria-hidden className="text-base leading-none">{genderEmoji[g]}</span> }))}
+                    selected={genders}
+                    onChange={(next) => (setGenders(next as Gender[]), resetMore())}
                   />
                   <FilterMenu
                     label={t("explore.face")}
@@ -267,6 +317,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                     onChange={(next) => (setFaces(next as Face[]), resetMore())}
                   />
                   <span className="ms-auto text-small text-text-muted">{tp("explore.results", listCreators.length)}</span>
+                  {sortMenu}
                 </div>
               </div>
             )}
@@ -276,7 +327,7 @@ export function useCreatorPicker({ lists, explore, preset, initialListId, tickLi
                 {filtered && (
                   <button
                     type="button"
-                    onClick={() => (setQuery(""), setAreas([]), setPlatforms([]), setFaces([]))}
+                    onClick={() => (setQuery(""), setAreas([]), setPlatforms([]), setGenders([]), setFaces([]))}
                     className="rounded-[var(--radius-sm)] px-2 py-1 font-medium text-primary hover:bg-surface"
                   >
                     {t("explore.clear")}

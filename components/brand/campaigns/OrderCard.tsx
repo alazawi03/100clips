@@ -156,7 +156,7 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                 <ClipVersions versions={order.versions} title={order.name} className="w-full max-w-[220px] shrink-0 sm:w-[200px]" />
                 <div className="flex min-w-0 flex-1 flex-col gap-4">
-                  {order.status === "delivered" && <ReviewActions orderId={order.id} creatorName={order.name} revisionsLeft={order.revisionsLeft} />}
+                  {order.status === "delivered" && <ReviewActions orderId={order.id} creatorName={order.name} />}
                   {order.status === "approved" && (
                     <div className="flex flex-col gap-2">
                       <h3 className="text-small font-medium text-text-muted">{order.rating ? t("campaignDetail.rated", { name: order.name }) : t("campaignDetail.rate", { name: order.name })}</h3>

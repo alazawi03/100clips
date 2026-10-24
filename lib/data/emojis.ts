@@ -1,21 +1,8 @@
 import type { Face } from "./creatorFilters";
-import type { Country, Gender, Industry, Niche, VenueKind } from "./types";
+import type { Country, Gender, Niche, VenueKind } from "./types";
 
 /** Flags shown next to country names. */
 export const countryFlag: Record<Country, string> = { bh: "🇧🇭", sa: "🇸🇦", ae: "🇦🇪", kw: "🇰🇼", qa: "🇶🇦", om: "🇴🇲" };
-
-/** Shown before industry names in pickers. Emojis read the same in every language. */
-export const industryEmoji: Record<Industry, string> = {
-  food_beverage: "🍽️",
-  fashion: "👕",
-  tech: "💻",
-  real_estate: "🏠",
-  automotive: "🚗",
-  health: "🩺",
-  education: "🎓",
-  home_living: "🛋️",
-  other: "✨",
-};
 
 /** Before venue kinds in the product form. */
 export const venueEmoji: Record<VenueKind, string> = {

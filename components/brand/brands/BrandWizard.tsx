@@ -12,19 +12,19 @@ import type { MessageKey } from "@/lib/i18n/messages";
 import { ProductFields, type ProductValues } from "@/components/brand/products/ProductForm";
 import { AboutFields, BasicsFields, ExtrasFields, type BrandValues } from "./BrandFields";
 
-const STEP_FIELDS = [["nameAr", "logo", "industry"], ["about"], ["countries"]];
+const STEP_FIELDS = [["nameAr", "logo"], ["about"], ["countries"]];
 /** Per-country fields (cr_bh, vat_bh, …) belong to the business details step. */
 const stepOfField = (field: string) => (/^(cr|vat)_/.test(field) ? 2 : STEP_FIELDS.findIndex((fields) => fields.includes(field)));
 const PRODUCT_STEP = STEP_FIELDS.length;
 
 /**
  * Create a brand in three steps (basics, about and links, business details), then its first product, which can be skipped.
- * Every step lives in one form so a single submit sends it all. Required: name and industry (step 1).
+ * Every step lives in one form so a single submit sends it all. Required: a name (step 1).
  */
-export function BrandWizard({ mode, then }: { mode: "onboarding" | "add"; /** Where to carry on once saved: New campaign, or the cart's checkout. */ then?: "campaign" | "checkout" }) {
+export function BrandWizard({ then }: { /** Where to carry on once saved: New campaign, or the cart's checkout. */ then?: "campaign" | "checkout" }) {
   const { t } = useI18n();
   const form = useRef<HTMLFormElement>(null);
-  const [state, action, pending] = useActionState<BrandFormState, FormData>(createBrand.bind(null, mode), null);
+  const [state, action, pending] = useActionState<BrandFormState, FormData>(createBrand, null);
   const [step, setStep] = useState(0);
   const [clientErrors, setClientErrors] = useState<Record<string, MessageKey>>({});
 
@@ -48,7 +48,6 @@ export function BrandWizard({ mode, then }: { mode: "onboarding" | "add"; /** Wh
     const data = new FormData(form.current!);
     const found: Record<string, MessageKey> = {};
     if (!String(data.get("nameAr")).trim() && !String(data.get("nameEn")).trim()) found.nameAr = "forms.errors.brandNameRequired";
-    if (!data.get("industry")) found.industry = "forms.errors.industryRequired";
     setClientErrors(found);
     return Object.keys(found).length === 0;
   }

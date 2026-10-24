@@ -18,7 +18,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/cn";
 import { conversations } from "@/lib/data/chatApi";
 import { clipOf, workspace } from "@/lib/data/live";
-import { clipVersions, currentStep, nextAction, offerHoursLeft, revisionUsed, stepsFor, waitingFor } from "@/lib/orderFlow";
+import { clipVersions, currentStep, nextAction, offerHoursLeft, stepsFor, waitingFor } from "@/lib/orderFlow";
 import { ShipButton, ShipToLines, Stars } from "@/components/brand/campaigns/OrderCard";
 import { Button, LinkButton, buttonClass } from "@/components/ui/Button";
 import { dayOf, nowIso, today } from "@/lib/today";
@@ -180,7 +180,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
                   {order.status === "delivered" && (
                     <>
                       <p className="text-small text-text-muted">{t("orderDetail.reviewHint")}</p>
-                      <ReviewActions orderId={order.id} creatorName={name} revisionsLeft={revisionUsed(order) ? 0 : 1} />
+                      <ReviewActions orderId={order.id} creatorName={name} />
                     </>
                   )}
                 </>

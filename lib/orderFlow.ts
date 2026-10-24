@@ -93,9 +93,6 @@ export function clipVersions(order: Order, clip: Clip | undefined): ClipVersion[
   return [{ videoSrc: clip.videoSrc, uploadedAt: uploaded }];
 }
 
-/** One revision is included; it's used once asked for (or once a second version exists). */
-export const revisionUsed = (order: Order) => !!order.revisionRequested || (order.versions?.length ?? 0) > 1 || eventsOf(order).some((e) => e.type === "revisionRequested");
-
 /* ---------- Dates ---------- */
 
 /** `days` working days after `iso` (a date or date-time), skipping the Gulf weekend (Friday and Saturday). yyyy-mm-dd. */

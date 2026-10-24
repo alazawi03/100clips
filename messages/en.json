@@ -62,7 +62,7 @@
     "step2Title": "Write the brief and pay",
     "step2Body": "Pay once. If a creator says no, you get their share back.",
     "step3Title": "Approve the clips",
-    "step3Body": "Watch each clip, then approve it or ask for one revision.",
+    "step3Body": "Watch each clip, then approve it or ask for a revision.",
     "setupTitle": "Before you start",
     "spendTitle": "Spending by month",
     "spendHint": "The last 6 months, service fee included. Orders whose money came back don't count.",
@@ -128,7 +128,6 @@
       "pickProduct": "Choose the product the clip will feature.",
       "cartEmpty": "Your cart is empty. Add a creator first.",
       "brandNameRequired": "Add the brand name in Arabic or English.",
-      "industryRequired": "Choose the brand's industry.",
       "urlInvalid": "Enter a full link that starts with https://",
       "handleInvalid": "Enter the handle without spaces, like @nouf.abayas",
       "imageType": "Choose a PNG, JPG or WebP image.",
@@ -401,11 +400,6 @@
     "reviewLabel": "Comment",
     "reviewPlaceholder": "Write what you liked about the clip",
     "approveConfirm": "Approve and release payment",
-    "revisionsLeft": {
-      "zero": "No revisions left",
-      "one": "1 revision left",
-      "other": "{count} revisions left"
-    },
     "problem": {
       "cardTitle": "Need help?",
       "hint": "Something wrong with this order? laqta support will look into it.",
@@ -536,7 +530,7 @@
     "remove": "Remove from cart",
     "removeName": "Remove {name} from cart",
     "subtotal": "Subtotal",
-    "serviceFee": "Service fee ({rate})",
+    "includesFee": "Includes laqta platform fee ({rate})",
     "total": "Total",
     "creators": {
       "zero": "No creators",
@@ -601,7 +595,6 @@
       "serviceNote": "Nothing to set up here. Explain how the service works in the brief.",
       "promoPlaceholder": "Enter the code"
     },
-    "revisionNote": "Includes 1 revision per clip.",
     "stepWhat": "What to promote",
     "stepBrief": "Brief",
     "stepper": "Checkout steps",
@@ -656,7 +649,6 @@
     "stepProduct": "First product",
     "stepper": "Brand setup steps",
     "stepOf": "Step {n} of {total}",
-    "createTitle": "Create your brand",
     "createSubtitle": "Start with the basics. You can change everything later.",
     "addTitle": "Add a brand",
     "editTitle": "Edit {name}",
@@ -667,8 +659,6 @@
     "nameHint": "Add both if you have them, or just one.",
     "logo": "Logo",
     "logoHint": "A square PNG or JPG.",
-    "industry": "Industry",
-    "industryPlaceholder": "Choose an industry",
     "about": "About the brand",
     "aboutPlaceholder": "Write about your brand",
     "aboutHint": "Two or three lines. Creators read this before they accept your request.",
@@ -1354,8 +1344,7 @@
   "legal": {
     "label": "Terms and privacy",
     "terms": "Terms of use",
-    "privacy": "Privacy policy",
-    "deleteAccount": "Delete account"
+    "privacy": "Privacy policy"
   },
   "payment": {
     "title": "Card payment",

@@ -22,8 +22,8 @@ export function withFee(creatorsTotal: number): number {
 }
 
 /**
- * A creator's price as brands see it: with the service fee already in. Brands never see the fee on its
- * own; every price, total and refund they see includes it.
+ * A creator's price as brands see it: with the service fee already in. Every price, total and refund
+ * brands see includes it; payment summaries also say how much of the total is the fee (FeeTotal).
  */
 export const priceForBrand = (creatorPrice: number) => withFee(creatorPrice);
 

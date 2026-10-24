@@ -112,7 +112,8 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
   const nameAr = text(form, "nameAr");
   const nameEn = text(form, "nameEn");
   const logo = text(form, "logo");
-  const industry = oneOf<Industry>(text(form, "industry"), INDUSTRIES);
+  // Not asked in the form: new brands are "other", edits keep what the brand has.
+  const industry = oneOf<Industry>(text(form, "industry"), INDUSTRIES) ?? "other";
   const about = text(form, "about");
   const website = withScheme(text(form, "website"));
   const instagram = handle(text(form, "instagram"));
@@ -134,7 +135,6 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
 
   if (!nameAr && !nameEn) errors.nameAr = "forms.errors.brandNameRequired";
   if (logo && !isImage(logo)) errors.logo = "forms.errors.imageType";
-  if (!industry) errors.industry = "forms.errors.industryRequired";
   if (about.length > 300) errors.about = "forms.errors.aboutTooLong";
   if (website && !isUrl(website)) errors.website = "forms.errors.urlInvalid";
   if (instagram === null) errors.instagram = "forms.errors.handleInvalid";
@@ -147,7 +147,7 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
       // As typed: an empty one stays empty (the API stores each language in its own column).
       name: { ar: nameAr, en: nameEn },
       logo: logo || undefined,
-      industry: industry!,
+      industry,
       about: about ? same(about) : undefined,
       website: website || undefined,
       instagram: instagram || undefined,
@@ -162,7 +162,7 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
  * The brand wizard sends everything at once: brand fields from steps 1–3 and, unless skipped,
  * the first product from step 4. Nothing is saved until both are valid.
  */
-export async function createBrand(mode: "onboarding" | "add", _prev: BrandFormState, form: FormData): Promise<BrandFormState> {
+export async function createBrand(_prev: BrandFormState, form: FormData): Promise<BrandFormState> {
   const brandResult = parseBrand(form);
   const withProduct = form.get("intent") !== "skipProduct";
   const productResult = withProduct ? parseProduct(form) : undefined;
@@ -180,7 +180,7 @@ export async function createBrand(mode: "onboarding" | "add", _prev: BrandFormSt
   // Started from "New campaign" or the cart without a brand: carry on there.
   if (form.get("then") === "campaign") redirect("/campaigns/new");
   if (form.get("then") === "checkout") redirect("/checkout");
-  redirect(mode === "onboarding" ? "/dashboard" : "/brands?done=brandCreated");
+  redirect("/brands?done=brandCreated");
 }
 
 export async function updateBrand(brandId: string, _prev: BrandFormState, form: FormData): Promise<BrandFormState> {

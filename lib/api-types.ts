@@ -592,7 +592,7 @@ export interface paths {
         put?: never;
         /**
          * Send for review
-         * @description Needs an intro video and an Instagram or TikTok account (the name is already there). Samples, city, niches, prices and photo come after approval. Again after changes were requested or a rejection (the intro can be left out then).
+         * @description Needs an intro video (the name is already there); social accounts are optional. Samples, city, niches, prices and photo come after approval. Again after changes were requested or a rejection (the intro can be left out then).
          */
         post: operations["CreatorProfileController_submit"];
         delete?: never;
@@ -1072,7 +1072,7 @@ export interface paths {
         put?: never;
         /**
          * Send the clip (creator)
-         * @description Upload the file to the clips bucket under the order's folder ({order id}/...) first, then send its path. Version 1, or 2 after the revision. A physical product must have arrived. An ad code can come with it.
+         * @description Upload the file to the clips bucket under the order's folder ({order id}/...) first, then send its path. Version 1, then a new one after each revision. A physical product must have arrived. An ad code can come with it.
          */
         post: operations["OrdersController_submitClip"];
         delete?: never;
@@ -1172,7 +1172,7 @@ export interface paths {
         put?: never;
         /**
          * Ask for a revision (brand)
-         * @description Once per order, while the clip waits for review. Say what should change (10+ characters).
+         * @description While the clip waits for review, as often as needed until approval. Say what should change (10+ characters).
          */
         post: operations["OrdersController_revision"];
         delete?: never;
@@ -1766,7 +1766,7 @@ export interface paths {
         put?: never;
         /**
          * Invite an admin
-         * @description Owners only. They sign in to the admin portal with this email and accept.
+         * @description Owners only. Emailed when invite emails are set up (`emailed`): the link signs them in to choose a password and accept. Otherwise they sign in to the admin portal with this email and accept.
          */
         post: operations["AdminsController_invite"];
         delete?: never;
@@ -1802,7 +1802,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * My admin invite
+         * @description Signed in: the invite waiting for this email and its level, so the portal can offer it. 404 when there's none.
+         */
+        get: operations["AdminsController_mine"];
         put?: never;
         /**
          * Accept an admin invite
@@ -2212,7 +2216,7 @@ export interface paths {
         };
         /**
          * One order in short (admin)
-         * @description Admins only. With the brand's account; GET /orders/{id} has the full order.
+         * @description Admins only. With the brand's account and the campaign's product; GET /orders/{id} has the full order.
          */
         get: operations["DirectoryController_order"];
         put?: never;
@@ -3439,8 +3443,7 @@ export interface components {
         OrderClip: {
             /** Format: uuid */
             id: string;
-            /** @enum {integer} */
-            version: 1 | 2;
+            version: number;
             /** @description Path in the clips bucket */
             video_path: string;
             duration_sec: number | null;
@@ -4029,6 +4032,33 @@ export interface components {
             email: string;
             level: components["schemas"]["AdminLevel"];
         };
+        /** @enum {string} */
+        InviteEmailed: "sent" | "has_login" | "off" | "failed";
+        NewAdminInvite: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            level: components["schemas"]["AdminLevel"];
+            /** Format: uuid */
+            invited_by: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            accepted_at: string | null;
+            /**
+             * Format: uuid
+             * @description The admin account it became
+             */
+            accepted_by: string | null;
+            /** Format: date-time */
+            revoked_at: string | null;
+            emailed: components["schemas"]["InviteEmailed"];
+        };
+        MyAdminInvite: {
+            level: components["schemas"]["AdminLevel"];
+            /** Format: date-time */
+            created_at: string;
+        };
         AdminNameDto: {
             /**
              * @description How the team sees them (accepting an invite)
@@ -4408,6 +4438,47 @@ export interface components {
             reason: components["schemas"]["AttentionReason"];
             /** Format: date-time */
             since: string;
+        };
+        OrderProduct: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            currency: components["schemas"]["Currency"];
+            pricing: components["schemas"]["Pricing"] | null;
+        };
+        DirectoryOrderDetail: {
+            /** Format: uuid */
+            id: string;
+            /** @description Shown as "ord-1043" */
+            number: number;
+            status: components["schemas"]["OrderStatus"];
+            format: components["schemas"]["ContentFormat"];
+            /** @description The creator's pay (BHD) */
+            amount: number;
+            /** @description laqta's fee (BHD) */
+            fee: number | null;
+            campaign_title: string | null;
+            /** Format: uuid */
+            brand_id: string;
+            /**
+             * Format: uuid
+             * @description The brand's account (its owner)
+             */
+            brand_account_id: string;
+            brand_name_ar: string | null;
+            brand_name_en: string | null;
+            /** Format: uuid */
+            creator_id: string;
+            creator_name_ar: string | null;
+            creator_name_en: string | null;
+            /** Format: date */
+            deadline: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            approved_at: string | null;
+            /** @description None when the campaign has no product */
+            product: components["schemas"]["OrderProduct"] | null;
         };
         MonthLine: {
             /** @example 2026-10 */
@@ -10025,7 +10096,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AdminInvite"];
+                    "application/json": components["schemas"]["NewAdminInvite"];
                 };
             };
             /** @description Invalid input */
@@ -10104,6 +10175,43 @@ export interface operations {
             };
             /** @description Not allowed */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminsController_mine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyAdminInvite"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11371,7 +11479,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DirectoryOrder"];
+                    "application/json": components["schemas"]["DirectoryOrderDetail"];
                 };
             };
             /** @description Invalid input */

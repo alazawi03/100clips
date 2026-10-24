@@ -8,7 +8,6 @@ export async function LegalLinks({ className }: { className?: string }) {
   const links = [
     { href: "/terms", label: t("legal.terms") },
     { href: "/privacy", label: t("legal.privacy") },
-    { href: "/delete-account", label: t("legal.deleteAccount") },
   ];
   return (
     <nav aria-label={t("legal.label")} className={cn("flex flex-wrap gap-x-5 gap-y-2 text-small text-text-muted", className)}>

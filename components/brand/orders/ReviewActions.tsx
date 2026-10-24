@@ -11,16 +11,14 @@ import { cn } from "@/lib/cn";
 type Props = {
   orderId: string;
   creatorName: string;
-  /** Revisions still available on this clip (one is included). */
-  revisionsLeft: number;
 };
 
 /**
  * Approve the delivered clip (green, then a confirmation with stars and an optional comment),
- * or ask for a revision while one is still left.
+ * or ask for a revision (as often as needed, until approving).
  */
-export function ReviewActions({ orderId, creatorName, revisionsLeft }: Props) {
-  const { t, tp } = useI18n();
+export function ReviewActions({ orderId, creatorName }: Props) {
+  const { t } = useI18n();
   const [revising, setRevising] = useState(false);
   const [state, sendRevision, pending] = useActionState<FormState, FormData>(requestRevision.bind(null, orderId), null);
   const error = state?.errors.note ? t(state.errors.note) : undefined;
@@ -52,12 +50,11 @@ export function ReviewActions({ orderId, creatorName, revisionsLeft }: Props) {
           <Check aria-hidden />
           {t("orderDetail.approve")}
         </Button>
-        <Button variant="secondary" className="flex-1 disabled:cursor-not-allowed disabled:opacity-50" disabled={revisionsLeft === 0} onClick={() => setRevising(true)}>
+        <Button variant="secondary" className="flex-1" onClick={() => setRevising(true)}>
           <PencilLine aria-hidden />
           {t("orderDetail.requestRevision")}
         </Button>
       </div>
-      <p className="text-caption text-text-muted">{tp("orderDetail.revisionsLeft", revisionsLeft)}</p>
 
       {/* Confirm approval: rate the creator and leave a comment (both optional), then release the payment. */}
       <dialog

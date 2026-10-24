@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useI18n } from "@/components/i18n/I18nProvider";
-import { Field, Input, Select, Textarea } from "@/components/ui/Form";
+import { Field, Input, Textarea } from "@/components/ui/Form";
 import { FileInput } from "@/components/ui/FileInput";
 import { ImageInput } from "@/components/ui/ImageInput";
 import { NotInCountry } from "./NotInCountry";
-import { countryFlag, industryEmoji } from "@/lib/data/emojis";
+import { countryFlag } from "@/lib/data/emojis";
 import { brandCountries } from "@/lib/data/markets";
-import { INDUSTRIES, type Country } from "@/lib/data/types";
+import type { Country } from "@/lib/data/types";
 
 /** Starting values for every brand field, as plain strings. */
 export type BrandValues = Partial<Record<"nameAr" | "nameEn" | "logo" | "industry" | "about" | "website" | "instagram" | "tiktok", string>> & {
@@ -26,7 +26,10 @@ function described(err: SectionProps["err"], name: string) {
   return err(name) ? `${name}-error` : undefined;
 }
 
-/** Required: name (Arabic or English) and industry. The logo is optional. Every brand is in Bahrain for now. */
+/**
+ * Required: a name (Arabic or English). The logo is optional. Every brand is in Bahrain for now. Industry isn't asked:
+ * new brands are "other", and an existing brand keeps the one it has (the API needs one).
+ */
 export function BasicsFields({ v, err }: SectionProps) {
   const { t } = useI18n();
   return (
@@ -40,18 +43,7 @@ export function BasicsFields({ v, err }: SectionProps) {
         </Field>
       </div>
       <ImageInput name="logo" label={t("brandForm.logo")} hint={t("brandForm.logoHint")} defaultValue={v.logo} shape="square" error={err("logo")} />
-      <Field label={t("brandForm.industry")} htmlFor="industry" error={err("industry")} required>
-        <Select id="industry" name="industry" aria-required defaultValue={v.industry ?? ""} aria-invalid={!!err("industry")} aria-describedby={described(err, "industry")}>
-          <option value="" disabled>
-            {t("brandForm.industryPlaceholder")}
-          </option>
-          {INDUSTRIES.map((i) => (
-            <option key={i} value={i}>
-              {industryEmoji[i]} {t(`industries.${i}`)}
-            </option>
-          ))}
-        </Select>
-      </Field>
+      <input type="hidden" name="industry" value={v.industry || "other"} />
     </div>
   );
 }

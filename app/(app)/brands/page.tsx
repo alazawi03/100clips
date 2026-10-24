@@ -29,7 +29,8 @@ export default async function BrandsPage({ searchParams }: PageProps<"/brands">)
       id: brand.id,
       name: f.pick(brand.name),
       logo: brand.logo,
-      industry: t(`industries.${brand.industry}`),
+      // "Other" says nothing, so it isn't shown.
+      industry: brand.industry === "other" ? "" : t(`industries.${brand.industry}`),
       productsLabel: tp("brandsPage.products", products.length),
       products: products.map((p) => productView(p, i18n, ws)),
     };

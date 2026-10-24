@@ -77,7 +77,7 @@ function BrandCard({ brand, expanded, onToggle, onOpenProduct }: { brand: BrandR
             <span className="block truncate text-small text-text-muted">
               <span className="sm:hidden">
                 {brand.productsLabel}
-                {t("common.separator")}
+                {brand.industry && t("common.separator")}
               </span>
               {brand.industry}
             </span>

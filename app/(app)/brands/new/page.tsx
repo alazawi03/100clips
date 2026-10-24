@@ -10,7 +10,7 @@ export default async function NewBrandPage({ searchParams }: PageProps<"/brands/
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <PageHeader title={t("brandForm.addTitle")} subtitle={t("brandForm.createSubtitle")} back={{ href: "/brands", label: t("brandsPage.title") }} />
-      <BrandWizard mode="add" then={then} />
+      <BrandWizard then={then} />
     </div>
   );
 }
