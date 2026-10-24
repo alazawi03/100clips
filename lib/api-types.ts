@@ -32,9 +32,29 @@ export interface paths {
         put?: never;
         /**
          * Join the waitlist
-         * @description "Tell me when you launch" in the creator app. Works before signing in.
+         * @description Brands' "I'm not in Bahrain" (signed in, with `contact`: the brands' list) and the creator app's "Tell me when you launch" sheet (works before signing in: the creators' list, as GET /admin/creator-waitlist shows). The landing page uses POST /creator-waitlist.
          */
         post: operations["WaitlistController_join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/creator-waitlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Join the creators' waitlist
+         * @description The landing page's creator waitlist. Works before signing in. The creator app's sheet sends POST /waitlist, which puts creators on this list too; brands stay on theirs.
+         */
+        post: operations["CreatorWaitlistController_join"];
         delete?: never;
         options?: never;
         head?: never;
@@ -592,7 +612,7 @@ export interface paths {
         put?: never;
         /**
          * Send for review
-         * @description Needs an intro video (the name is already there); social accounts are optional. Samples, city, niches, prices and photo come after approval. Again after changes were requested or a rejection (the intro can be left out then).
+         * @description Needs an intro video and the governorate (the name is already there); social accounts are optional. Samples, niches, prices and photo come after approval. Again after changes were requested or a rejection (the intro can be left out then).
          */
         post: operations["CreatorProfileController_submit"];
         delete?: never;
@@ -650,7 +670,7 @@ export interface paths {
         };
         /**
          * Waitlist by country
-         * @description Admins only. Requests from countries we aren't in yet (the creator app and brands' "I'm not in Bahrain"), most wanted first.
+         * @description Admins only. Brands' "I'm not in Bahrain" (and the creator app's older sheet), most wanted first. Creators from the landing page are in GET /admin/creator-waitlist.
          */
         get: operations["AdminController_waitlist"];
         put?: never;
@@ -673,6 +693,46 @@ export interface paths {
          * @description Admins only. Their phone and/or email, newest first: who to tell once we launch there.
          */
         get: operations["AdminController_waitlistCountry"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/creator-waitlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Creators' waitlist by country
+         * @description Admins only. Creators waiting for laqta (the landing page), most wanted first.
+         */
+        get: operations["AdminController_creatorWaitlist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/creator-waitlist/{country}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Creators waiting from one country
+         * @description Admins only. Name, phone, and how to reach them, newest first.
+         */
+        get: operations["AdminController_creatorWaitlistCountry"];
         put?: never;
         post?: never;
         delete?: never;
@@ -895,6 +955,26 @@ export interface paths {
          * @description Your own. Back from Gate-E's page: asks Gate-E now rather than waiting for its callback. Pending until Gate-E says it was paid or ended.
          */
         post: operations["PaymentsController_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/payments/{id}/benefit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pay a card payment with BENEFIT
+         * @description Your own, pending on Gate-E. BENEFIT's page for it, to open in the whole tab: BENEFIT can't be shown inside another site, so it can't be paid in the payment panel. direct is false when it's Gate-E's page instead, where the brand picks BENEFIT.
+         */
+        post: operations["PaymentsController_benefit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2413,6 +2493,42 @@ export interface components {
              */
             code?: string;
         };
+        JoinCreatorWaitlistDto: {
+            /**
+             * @description ISO country code
+             * @example BH
+             */
+            country: string;
+            /** @example Reem */
+            name?: string;
+            /**
+             * @description The phone they film on
+             * @example ios
+             * @enum {string}
+             */
+            platform?: "ios" | "android";
+            /**
+             * @description How they want to be reached
+             * @example whatsapp
+             * @enum {string}
+             */
+            method: "whatsapp" | "instagram" | "tiktok" | "email";
+            /**
+             * @description Phone number with its dial code (WhatsApp)
+             * @example +97336001234
+             */
+            phone?: string;
+            /**
+             * @description Email
+             * @example reem@example.com
+             */
+            email?: string;
+            /**
+             * @description Instagram or TikTok username, with or without the @
+             * @example reem.films
+             */
+            handle?: string;
+        };
         /** @enum {string} */
         Role: "creator" | "brand" | "admin";
         /** @enum {string} */
@@ -3083,8 +3199,11 @@ export interface components {
              * @default BH
              */
             country: string;
-            /** @example Manama */
-            city?: string;
+            /**
+             * @description The governorate, in Arabic or English, saved in Arabic. Bahrain: العاصمة (Capital), المحرق (Muharraq), الشمالية (Northern) or الجنوبية (Southern). Kuwait has its own six.
+             * @example العاصمة
+             */
+            city: string;
             bio?: string;
             gender?: components["schemas"]["Gender"];
             /** @description Does the creator show their face in videos? */
@@ -3108,7 +3227,10 @@ export interface components {
              * @default BH
              */
             country: string;
-            /** @example Manama */
+            /**
+             * @description The governorate, in Arabic or English, saved in Arabic. Bahrain: العاصمة (Capital), المحرق (Muharraq), الشمالية (Northern) or الجنوبية (Southern). Kuwait has its own six.
+             * @example العاصمة
+             */
             city?: string;
             bio?: string;
             gender?: components["schemas"]["Gender"];
@@ -3195,6 +3317,40 @@ export interface components {
             /** Format: date-time */
             created_at: string;
         };
+        CreatorWaitlistRequest: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description ISO country code
+             * @example BH
+             */
+            country: string;
+            /** @example Reem */
+            name: string | null;
+            /**
+             * @description The phone they film on
+             * @example ios
+             * @enum {string|null}
+             */
+            platform: "ios" | "android" | null;
+            /**
+             * @description How they want to be reached
+             * @example whatsapp
+             * @enum {string}
+             */
+            contact_method: "whatsapp" | "instagram" | "tiktok" | "email";
+            /** @example +97336001234 */
+            phone: string | null;
+            /** @example reem@example.com */
+            email: string | null;
+            /**
+             * @description Instagram or TikTok username, without the @
+             * @example reem.films
+             */
+            handle: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
         DecideCreatorDto: {
             /** @enum {string} */
             decision: "approved" | "changes_requested" | "rejected";
@@ -3275,6 +3431,11 @@ export interface components {
             price: number;
             /** @description laqta's fee on this pick, fixed at checkout (BHD) */
             fee: number;
+            /**
+             * @description The fee as a percentage of the price, fixed at checkout (10 = 10%). Missing on payments from before it was kept.
+             * @example 10
+             */
+            fee_percent?: number;
         };
         /** @enum {string} */
         PaymentStatus: "pending" | "paid" | "failed";
@@ -3383,6 +3544,12 @@ export interface components {
             account: components["schemas"]["PaymentAccount"];
             /** @description The campaign's title (checkouts) */
             campaign_title: string | null;
+        };
+        BenefitPage: {
+            /** @example https://www.benefit-gateway.bh/payment/paymentpage.htm?PaymentID=158202629730929488 */
+            url: string;
+            /** @description true: BENEFIT's own page. false: Gate-E's page (BENEFIT's couldn't be had), where the brand picks BENEFIT. */
+            direct: boolean;
         };
         CallbackReply: {
             /** @example 1 */
@@ -4674,6 +4841,37 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["JoinWaitlistDto"];
+            };
+        };
+        responses: {
+            /** @description Added to the list */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    CreatorWaitlistController_join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinCreatorWaitlistDto"];
             };
         };
         responses: {
@@ -6737,6 +6935,92 @@ export interface operations {
             };
         };
     };
+    AdminController_creatorWaitlist: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WaitlistCountry"][];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminController_creatorWaitlistCountry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description ISO country code (two letters) */
+                country: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatorWaitlistRequest"][];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     AdminController_decide: {
         parameters: {
             query?: never;
@@ -7287,6 +7571,63 @@ export interface operations {
             };
             /** @description Not found, or not yours */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_benefit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenefitPage"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

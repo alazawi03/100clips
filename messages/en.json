@@ -1349,7 +1349,9 @@
   "payment": {
     "title": "Card payment",
     "panelTitle": "Pay here",
-    "panelBody": "Pay on Gate-E's secure page, right here. If you choose BENEFIT, it opens BENEFIT's page, then brings you back.",
+    "panelBody": "Pay by card or BenefitPay on Gate-E's secure page, right here.",
+    "benefitHint": "Paying with a BENEFIT debit card? It opens on BENEFIT's own page, then brings you back here.",
+    "benefitButton": "Pay with BENEFIT",
     "panelTrouble": "Page not showing?",
     "openPage": "Open the payment page",
     "waitingTitle": "Waiting for your card payment",

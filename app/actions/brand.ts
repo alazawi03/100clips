@@ -180,6 +180,14 @@ export async function checkPayment(id: string): Promise<PaymentView> {
   return { id, kind, status, campaign_id, by_card, picks, provider, pay_url };
 }
 
+/**
+ * Paying the card part with BENEFIT: BENEFIT's own page for it (it can't be shown inside laqta's), or Gate-E's page
+ * when the API couldn't get BENEFIT's, where the brand picks BENEFIT. Opened in the whole tab.
+ */
+export async function benefitPage(id: string): Promise<string> {
+  return (await api<components["schemas"]["BenefitPage"]>(`/payments/${id}/benefit`, { method: "POST" })).url;
+}
+
 /** The API refused the payment: a message in the brand's language on the payment step (or the deadline). */
 function payFailed(error: unknown, values: Record<string, string>): CheckoutState {
   logFailure("Payment", error);
