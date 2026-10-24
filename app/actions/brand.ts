@@ -131,14 +131,15 @@ export type CheckoutState =
         creators: Array<{ id: string; name: Localized }>;
         /** Part is paid by card and waits for it: the offers go out then. */
         pending?: boolean;
-        /** Gate-E's page for the card part: the brand goes there straight away. */
+        /** Gate-E's page for the card part, and its payment: the brand pays there straight away (CardPanel). */
         payUrl?: string;
+        paymentId?: string;
       };
     })
   | null;
 
 /** The top-up's result: like a form's, plus Gate-E's page when the card is paid there. */
-export type TopUpState = (NonNullable<FormState> & { payUrl?: string }) | null;
+export type TopUpState = (NonNullable<FormState> & { payUrl?: string; paymentId?: string }) | null;
 
 /** "Card payments aren't available right now" (Gate-E couldn't make the page) or another refusal, for the pay step. */
 function payErrorKey(error: unknown): MessageKey {
@@ -167,7 +168,7 @@ export async function topUpBalance(_prev: TopUpState, form: FormData): Promise<T
     return { errors: { pay: payErrorKey(e) }, values };
   }
   revalidatePath("/", "layout");
-  return { errors: {}, values: {}, ...(payment.pay_url ? { payUrl: payment.pay_url } : {}) };
+  return { errors: {}, values: {}, ...(payment.pay_url ? { payUrl: payment.pay_url, paymentId: payment.id } : {}) };
 }
 
 /** What the payment page shows and keeps checking. */
@@ -213,7 +214,7 @@ const paidState = (campaignId: string, lines: PricedLine[], payment: Payment): C
     campaignId,
     creators: lines.map((l) => ({ id: l.creator.id, name: l.creator.name })),
     pending: payment.status === "pending",
-    ...(payment.pay_url ? { payUrl: payment.pay_url } : {}),
+    ...(payment.pay_url ? { payUrl: payment.pay_url, paymentId: payment.id } : {}),
   },
 });
 

@@ -24,6 +24,12 @@ export function PaymentReturn({ initial, campaignTitle, campaignDraft }: { initi
   const [payment, setPayment] = useState(initial);
   const [tries, setTries] = useState(0);
   const online = payment.provider === "gate-e" && !!payment.pay_url;
+
+  // Paid inside the payment panel (CardPanel): Gate-E sends the brand back here within its frame, so
+  // this page takes over the whole tab (next.config lets only laqta's own pages frame /payments).
+  useEffect(() => {
+    if (window.top && window.top !== window.self) window.top.location.replace(window.location.href);
+  }, []);
   const checking = payment.status === "pending" && online && tries < POLL_TRIES;
 
   useEffect(() => {

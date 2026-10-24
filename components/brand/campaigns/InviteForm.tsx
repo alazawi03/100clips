@@ -13,7 +13,7 @@ import { cn } from "@/lib/cn";
 import { priceForBrand, withFee } from "@/lib/fees";
 import { createFormatters } from "@/lib/i18n/format";
 import { useCreatorPicker, type PickerOptions } from "./CreatorPicker";
-import { CardRedirect } from "@/components/brand/payments/CardRedirect";
+import { CardPanel } from "@/components/brand/payments/CardPanel";
 import { PaymentSuccess } from "./PaymentSuccess";
 
 export type { InviteCreator } from "./CreatorPicker";
@@ -55,14 +55,14 @@ export function InviteForm({ action: pay, details, balance, cardOnline, ...picke
   const paid = state?.paid;
 
   useEffect(() => {
-    // With Gate-E, CardRedirect opens its page instead.
+    // With Gate-E, its page shows instead (CardPanel).
     if (!paid || paid.payUrl) return;
     window.scrollTo({ top: 0 });
     const timer = setTimeout(() => window.location.replace(paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`), REDIRECT_MS);
     return () => clearTimeout(timer);
   }, [paid]);
 
-  if (paid?.payUrl) return <CardRedirect url={paid.payUrl} />;
+  if (paid?.payUrl && paid.paymentId) return <CardPanel url={paid.payUrl} paymentId={paid.paymentId} />;
 
   if (paid) {
     return (

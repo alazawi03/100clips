@@ -1348,9 +1348,10 @@
   },
   "payment": {
     "title": "Card payment",
-    "toGateeTitle": "Taking you to the payment page",
-    "toGateeBody": "You pay by card on Gate-E's secure page, then come straight back here.",
-    "continue": "Continue to payment",
+    "panelTitle": "Pay here",
+    "panelBody": "Pay on Gate-E's secure page, right here. If you choose BENEFIT, it opens BENEFIT's page, then brings you back.",
+    "panelTrouble": "Page not showing?",
+    "openPage": "Open the payment page",
     "waitingTitle": "Waiting for your card payment",
     "checking": "Checking your payment with Gate-E…",
     "notPaidYet": "Not paid yet. If you've just paid, it shows here as soon as Gate-E confirms it.",

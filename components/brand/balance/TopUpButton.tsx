@@ -4,7 +4,7 @@ import { useActionState, useEffect, useId, useState } from "react";
 import { Plus } from "lucide-react";
 import { topUpBalance, type TopUpState } from "@/app/actions/brand";
 import { PaymentFields } from "@/components/brand/cart/PaymentFields";
-import { CardRedirect } from "@/components/brand/payments/CardRedirect";
+import { CardPanel } from "@/components/brand/payments/CardPanel";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
@@ -38,7 +38,7 @@ function TopUpForm({ cardOnline, onDone }: { cardOnline: boolean; onDone: () => 
   const [state, run, pending] = useActionState<TopUpState, FormData>(topUpBalance, null);
   const [amount, setAmount] = useState(() => state?.values.amount ?? "");
   useEffect(() => {
-    // With Gate-E the drawer stays open while its page loads (CardRedirect).
+    // With Gate-E the drawer stays open: its page shows inside (CardPanel).
     if (state && Object.keys(state.errors).length === 0 && !state.payUrl) onDone();
   }, [state, onDone]);
   const err = (name: string) => {
@@ -47,7 +47,7 @@ function TopUpForm({ cardOnline, onDone }: { cardOnline: boolean; onDone: () => 
   };
   const value = Number(amount);
   const valid = Number.isFinite(value) && value >= 1;
-  if (state?.payUrl) return <CardRedirect url={state.payUrl} />;
+  if (state?.payUrl && state.paymentId) return <CardPanel url={state.payUrl} paymentId={state.paymentId} />;
   return (
     <form id={formId} action={run} noValidate className="flex flex-col gap-5">
       <Field label={t("walletPage.topUpAmount")} htmlFor={`${formId}-amount`} error={err("amount")}>

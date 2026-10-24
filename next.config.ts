@@ -23,6 +23,15 @@ const nextConfig: NextConfig = {
         { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
       ],
     },
+    {
+      // Where Gate-E sends the brand back, which can be inside the payment panel (CardPanel) on laqta's own
+      // page: framed by laqta only (these replace the two above for this path), and it then takes the tab.
+      source: "/payments/:path*",
+      headers: [
+        { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+      ],
+    },
   ],
 };
 
