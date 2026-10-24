@@ -489,7 +489,7 @@
         "tooMuch": "That's more than your available balance."
       }
     },
-    "cardPending": "{amount} by card, waiting for confirmation",
+    "cardPending": "{amount} by card, waiting for payment",
     "heldForCard": "{amount} of your balance is held for that payment. It's charged once the card is confirmed, or freed if it fails.",
     "cardPaymentLabel": "Paid by card"
   },
