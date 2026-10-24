@@ -33,7 +33,7 @@ const typeIcon = { topUp: ArrowDownLeft, card: CreditCard, hold: Hourglass, paym
 
 export default async function WalletPage() {
   const { t, f } = await getI18n();
-  const [ws, ledger, pending, failed, withdrawals, bank, online] = await Promise.all([
+  const [ws, ledger, unpaid, refused, withdrawals, bank, online] = await Promise.all([
     workspace(),
     api<LedgerEntry[]>("/me/ledger?limit=200"),
     api<Payment[]>("/me/payments?status=pending"),
@@ -43,6 +43,11 @@ export default async function WalletPage() {
     cardOnline(),
   ]);
   const { orders } = ws;
+  // Top-ups not paid (still open on Gate-E for their hour, or ended unpaid) aren't shown: nothing moved, and the
+  // brand just tops up again. A late payment still lands in the balance. Checkouts waiting for the card are shown:
+  // their campaign waits for them, and part of the balance may be held.
+  const pending = unpaid.filter((p) => p.kind !== "top_up");
+  const failed = refused.filter((p) => p.kind !== "top_up");
   const held = orders.filter((o) => o.status === "pending" || o.status === "in_progress" || o.status === "delivered").reduce((sum, o) => sum + brandPaid(o), 0);
   const netSpent = orders.filter((o) => o.status === "approved").reduce((sum, o) => sum + brandPaid(o), 0);
   const moneyIn = ledger.filter((e) => e.type === "top_up" || e.type === "card_payment");
