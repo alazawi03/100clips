@@ -1181,7 +1181,6 @@
     },
     "paymentFailed": {
       "title": "Your card payment didn't go through",
-      "topUp": "Top-up of {amount} · nothing was charged",
       "checkout": "{campaign} · {amount} · the offers weren't sent"
     },
     "details": {

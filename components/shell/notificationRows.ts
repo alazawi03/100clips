@@ -49,9 +49,10 @@ export async function notificationRows({ t, f }: I18n, limit?: number): Promise<
   // "Mark all as read" sets this; a new account has seen nothing yet.
   const seenAt = me?.account.notifications_seen_at ?? "";
   const orderNotes = brandNotifications(ws.orders, day, ws);
-  // A card payment that didn't go through: a top-up, or offers that never went out.
+  // A checkout's card payment that didn't go through: offers that never went out. Not top-ups: one not paid just
+  // ends (Balance doesn't list it either), and a refused card already showed on Gate-E's page.
   const paymentNotes = failed
-    .filter((p) => p.failed_at)
+    .filter((p) => p.failed_at && p.kind !== "top_up")
     .map((p): NotificationRow & { at: string } => {
       const at = p.failed_at!;
       const campaign = ws.campaign(p.campaign_id ?? undefined);
@@ -60,10 +61,7 @@ export async function notificationRows({ t, f }: I18n, limit?: number): Promise<
         key: `payment-${p.id}`,
         kind: "paymentFailed",
         title: t("notifications.paymentFailed.title"),
-        detail:
-          p.kind === "top_up"
-            ? t("notifications.paymentFailed.topUp", { amount })
-            : t("notifications.paymentFailed.checkout", { amount, campaign: campaign ? f.pick(campaign.title) || t("newCampaign.untitled") : "" }),
+        detail: t("notifications.paymentFailed.checkout", { amount, campaign: campaign ? f.pick(campaign.title) || t("newCampaign.untitled") : "" }),
         time: f.messageTime(at, day),
         section: sectionOf(at, day),
         href: !campaign ? "/balance" : campaign.status === "draft" ? `/campaigns/new?draft=${campaign.id}` : `/campaigns/${campaign.id}`,

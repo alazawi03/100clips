@@ -1249,7 +1249,6 @@
     },
     "paymentFailed": {
       "title": "ما تم الدفع بالبطاقة",
-      "topUp": "شحن {amount} · ما انخصم شي",
       "checkout": "{campaign} · {amount} · ما انرسلت العروض"
     },
     "details": {
