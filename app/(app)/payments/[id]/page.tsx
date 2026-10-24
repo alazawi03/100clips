@@ -9,11 +9,13 @@ import { getI18n } from "@/lib/i18n/server";
 type Payment = components["schemas"]["Payment"];
 
 /**
- * A card payment: where Gate-E sends the brand back (it adds ?payment_id=…&payment_code=…, which
- * aren't needed: the id is in the path), and where Campaigns and Balance open a pending one again.
+ * A card payment: where Gate-E sends the brand back (it adds ?payment_id=…&payment_code=…; the id is in
+ * the path, so they only say the brand is back from paying), and where Campaigns and Balance open a
+ * pending one again, to pay it in the payment panel.
  */
-export default async function PaymentPage({ params }: PageProps<"/payments/[id]">) {
+export default async function PaymentPage({ params, searchParams }: PageProps<"/payments/[id]">) {
   const { id } = await params;
+  const returned = !!(await searchParams).payment_id;
   const { t, f } = await getI18n();
   const [payment, ws] = await Promise.all([
     api<Payment>(`/payments/${id}`).catch((e: unknown) => {
@@ -28,6 +30,7 @@ export default async function PaymentPage({ params }: PageProps<"/payments/[id]"
       <PageHeader title={t("payment.title")} />
       <PaymentReturn
         initial={payment}
+        returned={returned}
         campaignTitle={campaign ? f.pick(campaign.title) || t("newCampaign.untitled") : undefined}
         campaignDraft={campaign?.status === "draft"}
       />

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { checkPayment, type PaymentView } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
-import { Button, buttonClass } from "@/components/ui/Button";
+import { CardPanel } from "@/components/brand/payments/CardPanel";
+import { buttonClass } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { createFormatters } from "@/lib/i18n/format";
 
@@ -14,11 +15,17 @@ const POLL_MS = 3000;
 const POLL_TRIES = 40;
 
 /**
- * A card payment, back from Gate-E's page or opened again from Campaigns or Balance. While it's
- * pending on Gate-E, it asks the API (which asks Gate-E) every few seconds and offers the page again;
- * then it says paid or failed and where to go next. Without Gate-E, laqta sends a payment link.
+ * A card payment, back from Gate-E's page (`returned`) or opened again from Campaigns or Balance. Back from
+ * Gate-E, it asks the API (which asks Gate-E) every few seconds for a while; opened again, once. Still
+ * pending on Gate-E after that, it's paid here in the payment panel (CardPanel, with Pay with BENEFIT).
+ * Paid or failed, it says so and where to go next. Without Gate-E, laqta sends a payment link.
  */
-export function PaymentReturn({ initial, campaignTitle, campaignDraft }: { initial: PaymentView; campaignTitle?: string; campaignDraft: boolean }) {
+export function PaymentReturn({ initial, returned, campaignTitle, campaignDraft }: {
+  initial: PaymentView;
+  returned: boolean;
+  campaignTitle?: string;
+  campaignDraft: boolean;
+}) {
   const { t, tp, locale } = useI18n();
   const f = createFormatters(locale);
   const [payment, setPayment] = useState(initial);
@@ -30,7 +37,8 @@ export function PaymentReturn({ initial, campaignTitle, campaignDraft }: { initi
   useEffect(() => {
     if (window.top && window.top !== window.self) window.top.location.replace(window.location.href);
   }, []);
-  const checking = payment.status === "pending" && online && tries < POLL_TRIES;
+  const waiting = payment.status === "pending" && online;
+  const checking = waiting && tries < (returned ? POLL_TRIES : 1);
 
   useEffect(() => {
     if (!checking) return;
@@ -61,6 +69,17 @@ export function PaymentReturn({ initial, campaignTitle, campaignDraft }: { initi
           ? [checking ? LoaderCircle : CreditCard, "text-primary", t("payment.waitingTitle"), checking ? t("payment.checking") : t("payment.notPaidYet")]
           : [CreditCard, "text-primary", t("campaignDetail.cardPendingTitle"), topUp ? t("walletPage.topUpByLink") : t("checkout.cardByLink")];
 
+  if (waiting && !checking) {
+    return (
+      <div className="flex flex-col items-center gap-4">
+        <CardPanel url={payment.pay_url!} paymentId={payment.id} />
+        <Link href={next.href} className={buttonClass("ghost")}>
+          {next.label}
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <Card role="status" aria-live="polite" className="flex flex-col items-center gap-4 px-5 py-10 text-center">
       <Icon aria-hidden className={`size-12 ${tone} ${Icon === LoaderCircle ? "motion-safe:animate-spin" : ""}`} strokeWidth={1.5} />
@@ -70,17 +89,7 @@ export function PaymentReturn({ initial, campaignTitle, campaignDraft }: { initi
         <p className="text-text-muted">{body}</p>
       </div>
       <div className="mt-2 flex flex-col items-center gap-3 sm:flex-row">
-        {payment.status === "pending" && online && (
-          <a href={payment.pay_url!} className={buttonClass("primary")}>
-            {t("payment.payNow", { amount: f.money(payment.by_card) })}
-          </a>
-        )}
-        {payment.status === "pending" && online && !checking && (
-          <Button variant="secondary" onClick={() => setTries(0)}>
-            {t("payment.checkAgain")}
-          </Button>
-        )}
-        <Link href={next.href} className={buttonClass(payment.status === "pending" && online ? "ghost" : "primary")}>
+        <Link href={next.href} className={buttonClass(waiting ? "ghost" : "primary")}>
           {next.label}
         </Link>
       </div>
