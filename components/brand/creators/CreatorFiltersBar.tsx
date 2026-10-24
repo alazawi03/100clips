@@ -10,10 +10,11 @@ import { FilterMenu, type FilterOption } from "./FilterMenu";
 import { SortMenu } from "./SortMenu";
 import { cn } from "@/lib/cn";
 import { FACES, GENDERS, PLATFORMS, SORTS } from "@/lib/data/creatorFilters";
+import { cityName } from "@/lib/data/governorates";
 
 /** `areas`: the areas creators are in, to filter by (none: no area filter). */
 export function CreatorFiltersBar({ resultsLabel, areas }: { resultsLabel: string; areas: string[] }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -50,7 +51,8 @@ export function CreatorFiltersBar({ resultsLabel, areas }: { resultsLabel: strin
       key: "area",
       label: t("explore.area"),
       icon: <MapPin aria-hidden className={icon} />,
-      options: areas.map((a) => ({ value: a, label: a })),
+      // Filtered by the Arabic name (the address stays the same in both languages), shown in the page's language.
+      options: areas.map((a) => ({ value: a, label: cityName(a)[locale === "ar" ? "ar" : "en"] })),
     },
     {
       key: "gender",

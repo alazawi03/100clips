@@ -1,5 +1,6 @@
 import { api, apiOrNothing } from "@/lib/api";
 import type { components } from "@/lib/api-types";
+import { cityName } from "./governorates";
 import { publicUrl } from "./storage";
 import { hasActiveBundle, type Creator, type Localized, type Review } from "./types";
 
@@ -21,7 +22,7 @@ export async function exploreCreators(): Promise<Creator[]> {
     id: r.id,
     name: names(r.name_ar, r.name_en),
     handle: r.handle,
-    city: same(r.city),
+    city: cityName(r.city),
     // Gender is asked at sign-up; a missing one only drops them from gender filters.
     gender: (r.gender ?? "female") as Creator["gender"],
     niches: r.niches,
@@ -47,7 +48,7 @@ export async function creatorProfile(id: string): Promise<{ creator: Creator; re
     id: c.id,
     name: names(c.name_ar, c.name_en),
     handle: c.handle,
-    city: same(c.city),
+    city: cityName(c.city),
     gender: (c.gender ?? "female") as Creator["gender"],
     niches: c.niches,
     formats: p.formats,

@@ -6,7 +6,7 @@ export const PLATFORMS: Platform[] = ["tiktok", "instagram"];
 export type Face = "shows" | "faceless";
 export const FACES: Face[] = ["shows", "faceless"];
 
-/** A creator's area is the city they typed in the creator app. The areas to filter by: the ones creators have set, A to Z. */
+/** A creator's area is their governorate, picked in the creator app (kept in Arabic; lib/data/governorates names it in English). The areas to filter by: the ones creators have set, A to Z. */
 export const areasOf = (cities: string[]) => [...new Set(cities.map((c) => c.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ar"));
 /** Creators who haven't set an area match only when none is picked. */
 export const matchesArea = (city: string, areas: string[]) => areas.length === 0 || areas.includes(city.trim());
