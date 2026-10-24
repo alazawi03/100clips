@@ -188,6 +188,16 @@ export async function benefitPage(id: string): Promise<string> {
   return (await api<components["schemas"]["BenefitPage"]>(`/payments/${id}/benefit`, { method: "POST" })).url;
 }
 
+/**
+ * "Start a new payment": the same top-up, or the same creators on the same campaign, as a new payment with its own
+ * Gate-E page (BENEFIT allows one try per payment). The API ends the one it replaces. The new payment's id.
+ */
+export async function payAgain(id: string): Promise<string> {
+  const payment = await api<Payment>(`/payments/${id}/again`, { method: "POST", body: { language: await getLocale() } });
+  revalidatePath("/", "layout");
+  return payment.id;
+}
+
 /** The API refused the payment: a message in the brand's language on the payment step (or the deadline). */
 function payFailed(error: unknown, values: Record<string, string>): CheckoutState {
   logFailure("Payment", error);

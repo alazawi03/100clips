@@ -17,6 +17,15 @@ const CHECK_MS = 5_000;
 const SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-top-navigation-to-custom-protocols";
 
 /**
+ * Before the tab leaves for BENEFIT's or Gate-E's page: this page's address becomes `to`, the waiting payment's page, so
+ * the browser's Back comes to it (and its panel) rather than an empty checkout or top-up. What the brand entered is
+ * already saved: the payment, and for a checkout its draft campaign.
+ */
+function backTo(to: string) {
+  window.history.replaceState(window.history.state, "", to);
+}
+
+/**
  * After paying with a card part, when Gate-E is set up: its payment page inside laqta's. Cards (with the bank's
  * code step, which Gate-E shows in its own frame) and BenefitPay are paid right here. BENEFIT's page can't be shown
  * inside another site: picked here, Gate-E's page opens it in the frame, which laqta's frame rule (next.config,
@@ -29,22 +38,16 @@ const SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-
  * on phones or a narrow window, it sits at the bottom like a phone sheet. The frame is about the card's height in each layout
  * (shorter for the sheet), so there's little space around it; taller steps scroll inside.
  */
-/**
- * Before the tab leaves for BENEFIT's or Gate-E's page: this page's address becomes the payment's, so the browser's Back
- * comes to the waiting payment (and its panel) rather than an empty checkout or top-up. What the brand entered is
- * already saved: the payment, and for a checkout its draft campaign.
- */
-function backToPayment(paymentId: string) {
-  window.history.replaceState(window.history.state, "", `/payments/${paymentId}`);
-}
-
-export function CardPanel({ url, paymentId, onCancelled }: {
+export function CardPanel({ url, paymentId, back, onCancelled }: {
   url: string;
   paymentId: string;
+  /** Where the browser's Back lands after BENEFIT's or Gate-E's page: the payment page unless said (a checkout's own). */
+  back?: string;
   /** Cancelled with Gate-E's close button: this instead of the payment page (a top-up just closes its drawer). */
   onCancelled?: () => void;
 }) {
   const { t } = useI18n();
+  const waiting = back ?? `/payments/${paymentId}`;
   // Leaving for BENEFIT's page (or Gate-E's full one): covers the frame's "blocked" page while its address comes.
   const [moving, setMoving] = useState<"benefit" | "gatee">();
   const cancelled = useRef(onCancelled);
@@ -74,7 +77,7 @@ export function CardPanel({ url, paymentId, onCancelled }: {
     const onBlocked = async (e: SecurityPolicyViolationEvent) => {
       if (leaving || !e.effectiveDirective.startsWith("frame-src")) return;
       leaving = true;
-      backToPayment(paymentId);
+      backTo(waiting);
       const benefit = /benefit-gateway\.bh/.test(e.blockedURI);
       setMoving(benefit ? "benefit" : "gatee");
       go(benefit ? await benefitPage(paymentId).catch(() => url) : url);
@@ -90,7 +93,7 @@ export function CardPanel({ url, paymentId, onCancelled }: {
       document.removeEventListener("securitypolicyviolation", onBlocked);
       clearInterval(timer);
     };
-  }, [url, paymentId]);
+  }, [url, paymentId, waiting]);
 
   return (
     <Card className="flex flex-col gap-4 overflow-hidden px-0 pb-0 pt-5">
@@ -102,7 +105,7 @@ export function CardPanel({ url, paymentId, onCancelled }: {
           <a
             href={url}
             // In this tab only (a new tab leaves this one as it is).
-            onClick={(e) => !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) && backToPayment(paymentId)}
+            onClick={(e) => !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) && backTo(waiting)}
             className="font-medium text-primary underline-offset-4 hover:underline"
           >
             {t("payment.openPage")}

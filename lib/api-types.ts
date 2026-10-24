@@ -961,6 +961,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/payments/{id}/again": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pay again
+         * @description Your own payment not paid: the same top-up, or the same creators on the same campaign (their notes, at their prices now). The one replaced, if still waiting, ends first and frees any balance it held; its card paid after all goes to your balance. For BENEFIT, which allows one try per payment, and for a payment that failed.
+         */
+        post: operations["PaymentsController_again"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/payments/{id}/benefit": {
         parameters: {
             query?: never;
@@ -3544,6 +3564,14 @@ export interface components {
             account: components["schemas"]["PaymentAccount"];
             /** @description The campaign's title (checkouts) */
             campaign_title: string | null;
+        };
+        PayAgainDto: {
+            /**
+             * @description The language of the card payment page
+             * @default en
+             * @enum {string}
+             */
+            language: "en" | "ar";
         };
         BenefitPage: {
             /** @example https://www.benefit-gateway.bh/payment/paymentpage.htm?PaymentID=158202629730929488 */
@@ -7571,6 +7599,84 @@ export interface operations {
             };
             /** @description Not found, or not yours */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PaymentsController_again: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PayAgainDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

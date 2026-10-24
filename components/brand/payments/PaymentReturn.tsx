@@ -6,8 +6,10 @@ import { useEffect, useState } from "react";
 import { checkPayment, type PaymentView } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { CardPanel } from "@/components/brand/payments/CardPanel";
+import { PayAgain } from "@/components/brand/payments/PayAgain";
 import { buttonClass } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { cn } from "@/lib/cn";
 import { createFormatters } from "@/lib/i18n/format";
 
 /** Gate-E's answer usually comes within seconds; after about two minutes the brand checks by hand. */
@@ -71,9 +73,11 @@ export function PaymentReturn({ initial, returned, campaignTitle, campaignDraft 
 
   if (waiting && !checking) {
     return (
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col gap-4">
         <CardPanel url={payment.pay_url!} paymentId={payment.id} />
-        <Link href={next.href} className={buttonClass("ghost")}>
+        {/* BENEFIT allows one try per payment: a new one to try it again. */}
+        <PayAgain paymentId={payment.id} then="payment" />
+        <Link href={next.href} className={cn(buttonClass("ghost"), "self-center")}>
           {next.label}
         </Link>
       </div>

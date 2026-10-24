@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { NeedBrandOnArrival } from "@/components/brand/campaigns/NeedBrandDialog";
 import { CheckoutForm } from "@/components/brand/cart/CheckoutForm";
+import { WaitingCheckout } from "@/components/brand/cart/WaitingCheckout";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getCheckoutStart } from "@/lib/data/checkoutStart";
 import { cardOnline, priceCart, shopping } from "@/lib/data/live";
@@ -8,7 +9,10 @@ import { getI18n } from "@/lib/i18n/server";
 import { nextDay, today } from "@/lib/today";
 import { checkoutBrands } from "@/components/brand/cart/checkoutBrands";
 
-export default async function CheckoutPage() {
+export default async function CheckoutPage({ searchParams }: PageProps<"/checkout">) {
+  // Back from BENEFIT's or Gate-E's page: the checkout whose card part is waiting (WaitingCheckout).
+  const { payment } = await searchParams;
+  if (typeof payment === "string") return <WaitingCheckout paymentId={payment} />;
   const i18n = await getI18n();
   const { t, f } = i18n;
   const [ws, online] = await Promise.all([shopping(), cardOnline()]);

@@ -292,8 +292,9 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
 
   const titles = [...(fromPicker ? [t("invite.fromList")] : []), t("checkout.stepWhat"), t("checkout.stepBrief"), t("checkout.payment")];
 
-  // A card part with Gate-E: its payment page opens; it sends the brand back to /payments/{id}.
-  if (paid?.payUrl && paid.paymentId) return <CardPanel url={paid.payUrl} paymentId={paid.paymentId} />;
+  // A card part with Gate-E: its payment page opens; it sends the brand back to /payments/{id}. Back from
+  // BENEFIT's or Gate-E's own page comes to this checkout's waiting view (/checkout?payment=), with the summary.
+  if (paid?.payUrl && paid.paymentId) return <CardPanel url={paid.payUrl} paymentId={paid.paymentId} back={`/checkout?payment=${paid.paymentId}`} />;
 
   // Paid: the success screen replaces the form, then the campaign opens after a few seconds.
   if (paid) {
