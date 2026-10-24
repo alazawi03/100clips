@@ -25,6 +25,8 @@ const SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-
  * step the frame can't show goes on in Gate-E's full page. Gate-E brings the brand back to /payments/{id}: inside the
  * frame, that page tells this one; laqta also checks every few seconds, and Gate-E's close button ends here too.
  * The link opens Gate-E's page in the tab if the frame doesn't show it.
+ * Gate-E's page centres its card when the frame is more than 520px wide (the top-up drawer is wide for that); narrower,
+ * on phones, it sits at the bottom like a phone sheet. The frame is about a card's height, so there's little space around.
  */
 export function CardPanel({ url, paymentId }: { url: string; paymentId: string }) {
   const { t } = useI18n();
@@ -69,7 +71,7 @@ export function CardPanel({ url, paymentId }: { url: string; paymentId: string }
         <p className="text-text-muted">{t("payment.panelBody")}</p>
       </div>
       <div className="relative">
-        <iframe src={url} title={t("payment.panelTitle")} allow="payment" sandbox={SANDBOX} className="h-[720px] w-full border-0 bg-surface" />
+        <iframe src={url} title={t("payment.panelTitle")} allow="payment" sandbox={SANDBOX} className="h-[560px] w-full border-0 bg-surface sm:h-[640px]" />
         {moving && (
           <div role="status" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface text-center">
             <LoaderCircle aria-hidden className="size-8 text-primary motion-safe:animate-spin" strokeWidth={1.5} />

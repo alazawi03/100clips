@@ -24,7 +24,8 @@ export function TopUpButton({ cardOnline }: { cardOnline: boolean }) {
         <Plus aria-hidden />
         {t("walletPage.topUp")}
       </Button>
-      <Drawer open={open} onClose={() => setOpen(false)} title={t("walletPage.topUp")}>
+      {/* Wide: Gate-E's page in the payment panel (CardPanel) needs more than 520px for its centred card. */}
+      <Drawer wide open={open} onClose={() => setOpen(false)} title={t("walletPage.topUp")}>
         <TopUpForm cardOnline={cardOnline} onDone={() => setOpen(false)} />
       </Drawer>
     </>

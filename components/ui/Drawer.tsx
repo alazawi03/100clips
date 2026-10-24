@@ -12,9 +12,16 @@ const subscribe = () => () => {};
  * Side drawer on the inline end (left in Arabic); a full-screen sheet on phones.
  * Rendered in a portal so it can open from inside a form without nesting forms.
  * Children mount only while open, so a form inside starts fresh each time.
- * `footer` is pinned to the bottom edge, outside the scrolling body.
+ * `footer` is pinned to the bottom edge, outside the scrolling body. `wide`: 600px instead of 520px on larger screens.
  */
-export function Drawer({ open, onClose, title, footer, children }: { open: boolean; onClose: () => void; title: string; footer?: ReactNode; children: ReactNode }) {
+export function Drawer({ open, onClose, title, footer, wide, children }: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  footer?: ReactNode;
+  wide?: boolean;
+  children: ReactNode;
+}) {
   const { t } = useI18n();
   const dialog = useRef<HTMLDialogElement>(null);
   // False during server render and hydration, true after: the portal needs document.body.
@@ -34,7 +41,10 @@ export function Drawer({ open, onClose, title, footer, children }: { open: boole
       aria-label={title}
       onClose={onClose}
       onClick={(e) => e.target === dialog.current && onClose()}
-      className="fixed inset-y-0 m-0 ms-auto me-0 h-dvh max-h-none w-full max-w-none bg-background p-0 text-text backdrop:bg-[var(--overlay)] sm:max-w-[520px] sm:border-s sm:border-border"
+      className={cn(
+        "fixed inset-y-0 m-0 ms-auto me-0 h-dvh max-h-none w-full max-w-none bg-background p-0 text-text backdrop:bg-[var(--overlay)] sm:border-s sm:border-border",
+        wide ? "sm:max-w-[600px]" : "sm:max-w-[520px]",
+      )}
     >
       {open && (
         <div className="flex h-full flex-col">
