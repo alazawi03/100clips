@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { checkPayment, type PaymentView } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { CardPanel } from "@/components/brand/payments/CardPanel";
-import { PayAgain } from "@/components/brand/payments/PayAgain";
 import { buttonClass } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/cn";
@@ -75,8 +74,6 @@ export function PaymentReturn({ initial, returned, campaignTitle, campaignDraft 
     return (
       <div className="flex flex-col gap-4">
         <CardPanel url={payment.pay_url!} paymentId={payment.id} />
-        {/* BENEFIT allows one try per payment: a new one to try it again. */}
-        <PayAgain paymentId={payment.id} then="payment" />
         <Link href={next.href} className={cn(buttonClass("ghost"), "self-center")}>
           {next.label}
         </Link>

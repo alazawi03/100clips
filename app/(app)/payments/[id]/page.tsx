@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PaymentReturn } from "@/components/brand/payments/PaymentReturn";
+import { RenewPayment } from "@/components/brand/payments/RenewPayment";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { api, ApiError } from "@/lib/api";
 import type { components } from "@/lib/api-types";
@@ -15,7 +16,8 @@ type Payment = components["schemas"]["Payment"];
  */
 export default async function PaymentPage({ params, searchParams }: PageProps<"/payments/[id]">) {
   const { id } = await params;
-  const returned = !!(await searchParams).payment_id;
+  const query = await searchParams;
+  const returned = !!query.payment_id;
   const { t, f } = await getI18n();
   const [payment, ws] = await Promise.all([
     api<Payment>(`/payments/${id}`).catch((e: unknown) => {
@@ -25,15 +27,26 @@ export default async function PaymentPage({ params, searchParams }: PageProps<"/
     workspace(),
   ]);
   const campaign = ws.campaign(payment.campaign_id ?? undefined);
+  // Back from BENEFIT's or Gate-E's page (?renew=1, set by CardPanel): a fresh payment unless it went through.
+  const renew = query.renew === "1" && payment.provider === "gate-e" && (payment.status === "pending" || payment.status === "failed");
+  const view = (
+    <PaymentReturn
+      initial={payment}
+      returned={returned}
+      campaignTitle={campaign ? f.pick(campaign.title) || t("newCampaign.untitled") : undefined}
+      campaignDraft={campaign?.status === "draft"}
+    />
+  );
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
       <PageHeader title={t("payment.title")} />
-      <PaymentReturn
-        initial={payment}
-        returned={returned}
-        campaignTitle={campaign ? f.pick(campaign.title) || t("newCampaign.untitled") : undefined}
-        campaignDraft={campaign?.status === "draft"}
-      />
+      {renew ? (
+        <RenewPayment paymentId={payment.id} then="payment">
+          {view}
+        </RenewPayment>
+      ) : (
+        view
+      )}
     </div>
   );
 }

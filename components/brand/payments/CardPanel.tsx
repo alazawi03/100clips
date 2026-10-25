@@ -18,11 +18,14 @@ const SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-
 
 /**
  * Before the tab leaves for BENEFIT's or Gate-E's page: this page's address becomes `to`, the waiting payment's page, so
- * the browser's Back comes to it (and its panel) rather than an empty checkout or top-up. What the brand entered is
- * already saved: the payment, and for a checkout its draft campaign.
+ * the browser's Back comes to it rather than an empty checkout or top-up (what the brand entered is already saved: the
+ * payment, and for a checkout its draft campaign). With ?renew=1: back there, the payment is swapped for a fresh one
+ * unless it went through (RenewPayment), since BENEFIT allows one try per payment.
  */
 function backTo(to: string) {
-  window.history.replaceState(window.history.state, "", to);
+  const back = new URL(to, window.location.origin);
+  back.searchParams.set("renew", "1");
+  window.history.replaceState(window.history.state, "", back.pathname + back.search);
 }
 
 /**

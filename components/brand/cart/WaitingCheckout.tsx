@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { CardPanel } from "@/components/brand/payments/CardPanel";
-import { PayAgain } from "@/components/brand/payments/PayAgain";
+import { RenewPayment } from "@/components/brand/payments/RenewPayment";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -13,14 +13,16 @@ type Payment = components["schemas"]["Payment"];
 
 /**
  * /checkout?payment=: a checkout whose card part is still waiting, where Back from BENEFIT's or Gate-E's own page
- * lands. The order as it was paid for (its campaign, creators and amounts) beside its payment panel, and "Start a new
- * payment" for BENEFIT, which allows one try per payment. Anything else (paid, failed, a top-up) goes to the payment
- * page, which says what happened.
+ * lands. The order as it was paid for (its campaign, creators and amounts) beside its payment panel. Back from there
+ * (`renew`), the payment is first swapped for a fresh one (RenewPayment): BENEFIT allows one try per payment. Anything
+ * else (paid, failed, a top-up) goes to the payment page, which says what happened.
  */
-export async function WaitingCheckout({ paymentId }: { paymentId: string }) {
+export async function WaitingCheckout({ paymentId, renew }: { paymentId: string; renew: boolean }) {
   const { t, f } = await getI18n();
   const [payment, ws] = await Promise.all([api<Payment>(`/payments/${paymentId}`).catch(() => undefined), workspace()]);
-  if (!payment || payment.kind !== "checkout" || payment.status !== "pending" || !payment.pay_url) redirect(`/payments/${paymentId}`);
+  // Renewing, a payment that ended (cancelled on BENEFIT's page) is paid afresh too.
+  const open = payment?.status === "pending" || (renew && payment?.status === "failed");
+  if (!payment || payment.kind !== "checkout" || !open || !payment.pay_url) redirect(`/payments/${paymentId}`);
   const campaign = ws.campaign(payment.campaign_id ?? undefined);
   const picks = payment.picks ?? [];
   const fee = picks.reduce((sum, p) => sum + p.fee, 0);
@@ -30,8 +32,13 @@ export async function WaitingCheckout({ paymentId }: { paymentId: string }) {
       <PageHeader title={t("checkout.title")} subtitle={t("payment.checkoutWaiting")} />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
         <div className="flex min-w-0 flex-col gap-4">
-          <CardPanel url={payment.pay_url} paymentId={payment.id} back={`/checkout?payment=${payment.id}`} />
-          <PayAgain paymentId={payment.id} then="checkout" />
+          {renew ? (
+            <RenewPayment paymentId={payment.id} then="checkout">
+              <CardPanel url={payment.pay_url} paymentId={payment.id} back={`/checkout?payment=${payment.id}`} />
+            </RenewPayment>
+          ) : (
+            <CardPanel url={payment.pay_url} paymentId={payment.id} back={`/checkout?payment=${payment.id}`} />
+          )}
         </div>
         <Card className="flex flex-col gap-4 p-5 lg:sticky lg:top-24">
           <div className="flex flex-col gap-1">
