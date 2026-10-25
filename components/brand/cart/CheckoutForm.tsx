@@ -8,7 +8,7 @@ import { autosaveCampaignDraft, checkout, type CheckoutState } from "@/app/actio
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { PaymentSuccess } from "@/components/brand/campaigns/PaymentSuccess";
-import { CardPanel } from "@/components/brand/payments/CardPanel";
+import { ToWaitingCheckout } from "@/components/brand/payments/ToWaitingCheckout";
 import { useCreatorPicker, type PickerOptions } from "@/components/brand/campaigns/CreatorPicker";
 import { ProductForm } from "@/components/brand/products/ProductForm";
 import { Button, buttonClass } from "@/components/ui/Button";
@@ -176,7 +176,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
   // After paying: wait on the success screen, then open the campaign. replace() keeps checkout out of history,
   // and the full load refreshes the cart, balance and counts in the header.
   useEffect(() => {
-    // With Gate-E, its page shows instead (CardPanel).
+    // With Gate-E, the checkout's waiting view opens instead (ToWaitingCheckout).
     if (!paid || paid.payUrl) return;
     window.scrollTo({ top: 0 });
     const timer = setTimeout(() => window.location.replace(paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`), REDIRECT_MS);
@@ -299,9 +299,9 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
 
   const titles = [...(fromPicker ? [t("invite.fromList")] : []), t("checkout.stepWhat"), t("checkout.stepBrief"), t("checkout.payment")];
 
-  // A card part with Gate-E: its payment page opens; it sends the brand back to /payments/{id}. Back from
-  // BENEFIT's or Gate-E's own page comes to this checkout's waiting view (/checkout?payment=), with the summary.
-  if (paid?.payUrl && paid.paymentId) return <CardPanel url={paid.payUrl} paymentId={paid.paymentId} back={`/checkout?payment=${paid.paymentId}`} />;
+  // A card part with Gate-E: it's paid on the checkout's waiting view (/checkout?payment=), with the summary; Back
+  // from there comes to this step again, filled in from the draft.
+  if (paid?.payUrl && paid.paymentId) return <ToWaitingCheckout paymentId={paid.paymentId} />;
 
   // Paid: the success screen replaces the form, then the campaign opens after a few seconds.
   if (paid) {

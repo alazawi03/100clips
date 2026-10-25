@@ -1228,7 +1228,7 @@
       "bodyOrder": "Your order becomes a campaign for one of your brands and the product its clips show. It takes a couple of minutes, and you'll come straight back to finish your order.",
       "step3Order": "Come back and finish your order: the brief and payment."
     },
-    "cardPending": "Waiting for the card payment"
+    "cardPending": "Waiting for payment"
   },
   "offer": {
     "waiting": "Waiting for {name} to accept",

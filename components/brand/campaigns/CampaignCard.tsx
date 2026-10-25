@@ -20,7 +20,7 @@ export async function CampaignCard({ campaign, i18n, showBrand }: { campaign: Ca
   const [ws, pending] = await Promise.all([workspace(), pendingPayments()]);
   const progress = campaignProgress(campaign, ws.orders);
   const draft = campaign.status === "draft";
-  // Paid partly by card, and the card payment isn't confirmed yet: the offers go out once it is. The card opens the payment.
+  // Paid partly by card, and the card isn't paid yet: the offers go out once it is. The card opens the checkout's waiting view.
   const cardPending = draft && pending.has(campaign.id);
   const brand = showBrand && hasManyBrands(ws.brands) ? ws.brand(campaign.brandId) : undefined;
   const productId = campaign.productIds?.[0] ?? (draft ? campaign.draft?.values.productId : undefined);
@@ -33,7 +33,7 @@ export async function CampaignCard({ campaign, i18n, showBrand }: { campaign: Ca
   return (
     <div className="relative h-full">
       <Link
-        href={cardPending ? `/payments/${pending.get(campaign.id)}` : draft ? `/campaigns/new?draft=${campaign.id}` : `/campaigns/${campaign.id}`}
+        href={cardPending ? `/checkout?payment=${pending.get(campaign.id)}` : draft ? `/campaigns/new?draft=${campaign.id}` : `/campaigns/${campaign.id}`}
         className="group block h-full rounded-[var(--radius-lg)]"
       >
         <Card className="flex h-full flex-col gap-4 p-5 transition-colors duration-200 group-hover:border-icon-inactive">
