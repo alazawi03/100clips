@@ -295,6 +295,9 @@ export async function checkout(_prev: CheckoutState, form: FormData): Promise<Ch
       must_include: details.mustInclude ?? null,
       avoid: details.avoid ?? null,
       logistics: delivery.logistics,
+      // The form and the creators too, as New campaign saves a draft: until the card is paid (paying clears it),
+      // the campaign's card shows its creators and amount, and opening it brings the form back filled in.
+      draft: formDraft(form, picks),
     };
     let campaignId: string;
     if (draft?.status === "draft" && draft.brandId === brand!.id) {
@@ -467,15 +470,20 @@ export async function payCampaignAgain(campaignId: string, _prev: CheckoutState,
   }
 }
 
+/** The form as it is and the chosen creators, as a campaign's `draft` (New campaign's autosave, and checkout's). */
+function formDraft(form: FormData, picks: Array<{ creatorId: string; format: ContentFormat }>) {
+  const values = Object.fromEntries(Object.entries(submitted(form)).filter(([k]) => !["pick", "mode", "draftId", "reference"].includes(k)));
+  values.references = form.getAll("reference").map(String).filter(Boolean).join("\n");
+  return { values, picks, savedAt: new Date().toISOString() };
+}
+
 /**
  * New campaign saves itself as a draft while it's filled in: the form as it is and
  * the chosen creators, in the campaign's `draft`. Returns the draft's id, so the page keeps updating the
  * same one. A draft belongs to one brand: choosing another brand starts a new draft.
  */
 export async function autosaveCampaignDraft(form: FormData): Promise<{ id: string }> {
-  const values = Object.fromEntries(Object.entries(submitted(form)).filter(([k]) => !["pick", "mode", "draftId", "reference"].includes(k)));
-  values.references = form.getAll("reference").map(String).filter(Boolean).join("\n");
-  const draft = { values, picks: parsePicks(form), savedAt: new Date().toISOString() };
+  const draft = formDraft(form, parsePicks(form));
   const draftId = text(form, "draftId");
   const brandId = text(form, "brandId") || (await myBrands())[0]?.id;
   if (!brandId) return { id: draftId };
