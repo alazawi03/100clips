@@ -15,18 +15,33 @@ type Payment = components["schemas"]["Payment"];
 type CampaignRow = components["schemas"]["Campaign"];
 type Draft = { values: Record<string, string>; picks: unknown[] };
 
+/** How long an order left unpaid is picked up again rather than started afresh. */
+const UNFINISHED_DAYS = 7;
+
 /**
- * A checkout of exactly these creators still waiting for its card, newest first, with its draft campaign's saved
- * form: what checkout opens at the payment step to go on with (Back from BENEFIT's page lands here, as does the
- * cart's button). Undefined when there's none.
+ * The latest unfinished checkout of exactly these creators: its card still waiting, or ended unpaid in the last
+ * UNFINISHED_DAYS (left, cancelled, or its hour up), with its campaign still a draft that saved its form. What checkout
+ * opens at the payment step to go on with, on that draft (Back from BENEFIT's page lands here, as does the cart's
+ * button), rather than an empty form and a second draft. Undefined when there's none; deleting the draft starts afresh.
  */
-async function waitingCheckout(creatorIds: string[]) {
+async function unfinishedCheckout(creatorIds: string[]) {
   const want = [...creatorIds].sort().join();
-  const payments = await api<Payment[]>("/me/payments?status=pending").catch(() => []);
-  const payment = payments.find((p) => p.kind === "checkout" && p.campaign_id && (p.picks ?? []).map((x) => x.creator_id).sort().join() === want);
-  if (!payment?.campaign_id) return undefined;
-  const row = await api<CampaignRow>(`/campaigns/${payment.campaign_id}`).catch(() => undefined);
-  const draft = row?.status === "draft" ? (row.draft as Draft | null) : null;
+  const since = new Date(Date.now() - UNFINISHED_DAYS * 86_400_000).toISOString();
+  const payments = await api<Payment[]>("/me/payments?limit=50").catch(() => []);
+  const tries = payments.filter((p) =>
+    p.kind === "checkout" && p.campaign_id && (p.status === "pending" || (p.status === "failed" && p.created_at >= since)) &&
+    (p.picks ?? []).map((x) => x.creator_id).sort().join() === want);
+  // Newest first; the same draft can have several tries.
+  const seen = new Set<string>();
+  let row: CampaignRow | undefined;
+  let draft: Draft | null = null;
+  for (const p of tries) {
+    if (seen.has(p.campaign_id!)) continue;
+    seen.add(p.campaign_id!);
+    row = await api<CampaignRow>(`/campaigns/${p.campaign_id}`).catch(() => undefined);
+    draft = row?.status === "draft" ? (row.draft as Draft | null) : null;
+    if (draft?.values) break;
+  }
   if (!row || !draft?.values) return undefined;
   const references = (draft.values.references ?? "").split("\n").filter(Boolean);
   return {
@@ -56,7 +71,7 @@ export default async function CheckoutPage({ searchParams }: PageProps<"/checkou
     summary: l.items.map((i) => t(`formats.${i.format}`)).join(t("common.separator")),
   }));
 
-  const waiting = await waitingCheckout(lines.map((l) => l.creator.id));
+  const unfinished = await unfinishedCheckout(lines.map((l) => l.creator.id));
 
   // No brand yet (the address bar, or the last one deleted): the dialog first; "Not now" goes back to the cart.
   if (ws.brands.length === 0) {
@@ -74,9 +89,9 @@ export default async function CheckoutPage({ searchParams }: PageProps<"/checkou
       <CheckoutForm
         creators={creators}
         brands={checkoutBrands(ws, i18n)}
-        // A waiting checkout of these creators goes on (at the payment step); else "Find creators for this product".
-        initial={waiting?.initial ?? (await getCheckoutStart())}
-        resume={waiting && { draftId: waiting.draftId }}
+        // An unfinished checkout of these creators goes on (at the payment step); else "Find creators for this product".
+        initial={unfinished?.initial ?? (await getCheckoutStart())}
+        resume={unfinished && { draftId: unfinished.draftId }}
         minDeadline={nextDay(today())}
         total={total}
         balance={ws.balance}

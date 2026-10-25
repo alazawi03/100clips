@@ -64,9 +64,9 @@ type Props = {
    */
   picker?: PickerOptions & { draftId?: string };
   /**
-   * A checkout of the cart's creators still waiting for its card, opened again (Back from BENEFIT's page, or the
-   * cart's button): it goes on at the payment step, filled in from its draft (`initial`), on that same draft campaign,
-   * so paying replaces the waiting payment.
+   * An unfinished checkout of the cart's creators (its card still waiting, or ended unpaid lately), opened again (Back
+   * from BENEFIT's page, or the cart's button), or New campaign's draft with a payment waiting: it goes on at the
+   * payment step, filled in from its draft (`initial`), on that same draft campaign (paying replaces a waiting payment).
    */
   resume?: { draftId: string };
   total: number;
