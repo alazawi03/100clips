@@ -100,7 +100,11 @@ export const workspace = cache(async (): Promise<Workspace> => {
   const creators = new Map(bookable.map((c) => [c.id, c]));
   for (const row of orderRows) if (row.creator && !creators.has(row.creator_id)) creators.set(row.creator_id, creatorOf(row.creator));
   const orders = orderRows.filter((r) => own.has(r.brand_id)).map(toOrder);
-  const campaigns = campaignRows.filter((r) => own.has(r.brand_id)).map((r) => toCampaign(r, { products, orders, creators }));
+  // Not a cancelled campaign that never went live: a draft the brand deleted after a card payment was tried on it,
+  // which the API keeps (cancelled) for the payment's sake.
+  const campaigns = campaignRows
+    .filter((r) => own.has(r.brand_id) && !(r.status === "cancelled" && !r.launched_at))
+    .map((r) => toCampaign(r, { products, orders, creators }));
   const bookableIds = new Set(bookable.map((c) => c.id));
 
   return {
