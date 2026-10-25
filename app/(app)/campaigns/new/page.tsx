@@ -2,7 +2,7 @@ import { CheckoutForm } from "@/components/brand/cart/CheckoutForm";
 import { inviteView, pickerLists } from "@/components/brand/campaigns/campaignView";
 import { NeedBrandOnArrival } from "@/components/brand/campaigns/NeedBrandDialog";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { cardOnline, pendingPayments, workspace } from "@/lib/data/live";
+import { cardOnline, unfinishedTries, workspace } from "@/lib/data/live";
 import { allLists } from "@/lib/data/lists";
 import type { ContentFormat } from "@/lib/data/types";
 import { getI18n } from "@/lib/i18n/server";
@@ -17,7 +17,7 @@ export default async function NewCampaignPage({ searchParams }: PageProps<"/camp
   const i18n = await getI18n();
   const { t, f } = i18n;
   // allLists: pickerLists below reads it; loading it now saves a wait.
-  const [ws, online, pending] = await Promise.all([workspace(), cardOnline(), pendingPayments(), allLists()]);
+  const [ws, online, tries] = await Promise.all([workspace(), cardOnline(), unfinishedTries(), allLists()]);
   const raw = (await searchParams).draft;
   const draft = typeof raw === "string" ? ws.campaigns.find((c) => c.id === raw && c.status === "draft") : undefined;
   const lists = await pickerLists(ws, i18n);
@@ -27,8 +27,8 @@ export default async function NewCampaignPage({ searchParams }: PageProps<"/camp
   const references = (values.references ?? "").split("\n").filter(Boolean);
   const initialValues = { ...values, ...Object.fromEntries(references.map((r, i) => [`reference-${i}`, r])) };
   const picks = draft?.draft?.picks ?? [];
-  // Paid with a card part still waiting (Back from its payment page): it goes on at the payment step.
-  const waiting = !!draft && pending.has(draft.id);
+  // Paid with a card part not paid yet (still waiting, or left lately): it goes on at the payment step, editable.
+  const waiting = !!draft && tries.some((p) => p.campaign_id === draft.id);
 
   // A campaign needs a brand (and a product) to advertise: say so first, in a dialog.
   if (ws.brands.length === 0) {

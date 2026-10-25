@@ -376,5 +376,18 @@ export const pendingPayments = cache(async (): Promise<Map<string, string>> => {
   return new Map(rows.flatMap((p) => (p.campaign_id ? [[p.campaign_id, p.id] as const] : [])));
 });
 
+/** How long an order left unpaid is picked up again (at its payment step) rather than started afresh. */
+export const UNFINISHED_DAYS = 7;
+
+/**
+ * The brand's checkouts with a card try not paid: still waiting, or ended unpaid (left, cancelled, its hour up) in the
+ * last UNFINISHED_DAYS. Newest first. Checkout and New campaign open such an order at its payment step, filled in.
+ */
+export const unfinishedTries = cache(async (): Promise<components["schemas"]["Payment"][]> => {
+  const since = new Date(Date.now() - UNFINISHED_DAYS * 86_400_000).toISOString();
+  const rows = await api<components["schemas"]["Payment"][]>("/me/payments?limit=50").catch(() => []);
+  return rows.filter((p) => p.kind === "checkout" && p.campaign_id && (p.status === "pending" || (p.status === "failed" && p.created_at >= since)));
+});
+
 /** Card parts are paid online on Gate-E's page; false: laqta sends a payment link and confirms it by hand. */
 export const cardOnline = cache(async (): Promise<boolean> => (await api<components["schemas"]["Settings"]>("/settings")).card_online === true);

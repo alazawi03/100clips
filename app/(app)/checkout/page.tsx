@@ -6,17 +6,13 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { api } from "@/lib/api";
 import type { components } from "@/lib/api-types";
 import { getCheckoutStart } from "@/lib/data/checkoutStart";
-import { cardOnline, priceCart, shopping } from "@/lib/data/live";
+import { cardOnline, priceCart, shopping, unfinishedTries } from "@/lib/data/live";
 import { getI18n } from "@/lib/i18n/server";
 import { nextDay, today } from "@/lib/today";
 import { checkoutBrands } from "@/components/brand/cart/checkoutBrands";
 
-type Payment = components["schemas"]["Payment"];
 type CampaignRow = components["schemas"]["Campaign"];
 type Draft = { values: Record<string, string>; picks: unknown[] };
-
-/** How long an order left unpaid is picked up again rather than started afresh. */
-const UNFINISHED_DAYS = 7;
 
 /**
  * The latest unfinished checkout of exactly these creators: its card still waiting, or ended unpaid in the last
@@ -26,11 +22,7 @@ const UNFINISHED_DAYS = 7;
  */
 async function unfinishedCheckout(creatorIds: string[]) {
   const want = [...creatorIds].sort().join();
-  const since = new Date(Date.now() - UNFINISHED_DAYS * 86_400_000).toISOString();
-  const payments = await api<Payment[]>("/me/payments?limit=50").catch(() => []);
-  const tries = payments.filter((p) =>
-    p.kind === "checkout" && p.campaign_id && (p.status === "pending" || (p.status === "failed" && p.created_at >= since)) &&
-    (p.picks ?? []).map((x) => x.creator_id).sort().join() === want);
+  const tries = (await unfinishedTries()).filter((p) => (p.picks ?? []).map((x) => x.creator_id).sort().join() === want);
   // Newest first; the same draft can have several tries.
   const seen = new Set<string>();
   let row: CampaignRow | undefined;
