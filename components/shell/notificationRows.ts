@@ -39,20 +39,23 @@ function sectionOf(at: string, day: string): NotificationSection {
 
 /** The brand's notifications as rows, newest first (all of them, or the latest `limit`). */
 export async function notificationRows({ t, f }: I18n, limit?: number): Promise<{ rows: NotificationRow[]; unread: number }> {
-  const [ws, me, failed, withdrawals] = await Promise.all([
+  const [ws, me, payments, withdrawals] = await Promise.all([
     workspace(),
     getMe(),
-    api<Payment[]>("/me/payments?status=failed&limit=50").catch(() => []),
+    // Every recent payment: a failed checkout is told only when no newer payment replaced it.
+    api<Payment[]>("/me/payments?limit=200").catch(() => []),
     myWithdrawals().catch(() => []),
   ]);
   const day = today();
   // "Mark all as read" sets this; a new account has seen nothing yet.
   const seenAt = me?.account.notifications_seen_at ?? "";
   const orderNotes = brandNotifications(ws.orders, day, ws);
-  // A checkout's card payment that didn't go through: offers that never went out. Not top-ups: one not paid just
-  // ends (Balance doesn't list it either), and a refused card already showed on Gate-E's page.
-  const paymentNotes = failed
-    .filter((p) => p.failed_at && p.kind !== "top_up")
+  // A checkout's card payment that didn't go through: offers that never went out. Not one a newer payment for its
+  // campaign replaced (Pay again, back from BENEFIT), and not top-ups: one not paid just ends (Balance doesn't list it
+  // either), and a refused card already showed on Gate-E's page.
+  const replaced = (p: Payment) => payments.some((q) => q.campaign_id === p.campaign_id && q.id !== p.id && q.created_at > p.created_at);
+  const paymentNotes = payments
+    .filter((p) => p.status === "failed" && p.failed_at && p.kind !== "top_up" && !replaced(p))
     .map((p): NotificationRow & { at: string } => {
       const at = p.failed_at!;
       const campaign = ws.campaign(p.campaign_id ?? undefined);

@@ -26,28 +26,27 @@ type Payment = components["schemas"]["Payment"];
  * ended without work (declined, expired, withdrawn). Money out: held for running orders, paid for
  * approved ones, withdrawn to the bank (a rejected withdrawal shows struck through: it came back).
  */
-type EntryType = "topUp" | "card" | "hold" | "payment" | "refund" | "failed" | "withdrawal";
+type EntryType = "topUp" | "card" | "hold" | "payment" | "refund" | "withdrawal";
 type Entry = { id: string; date: string; label: string; detail?: string; type: EntryType; amount: number; creatorId?: string; badge: { tone: BadgeTone; label: string }; struck?: boolean };
 
-const typeIcon = { topUp: ArrowDownLeft, card: CreditCard, hold: Hourglass, payment: ArrowUpRight, refund: Undo2, failed: CreditCard, withdrawal: ArrowUpFromLine };
+const typeIcon = { topUp: ArrowDownLeft, card: CreditCard, hold: Hourglass, payment: ArrowUpRight, refund: Undo2, withdrawal: ArrowUpFromLine };
 
 export default async function WalletPage() {
   const { t, f } = await getI18n();
-  const [ws, ledger, unpaid, refused, withdrawals, bank, online] = await Promise.all([
+  const [ws, ledger, unpaid, withdrawals, bank, online] = await Promise.all([
     workspace(),
     api<LedgerEntry[]>("/me/ledger?limit=200"),
     api<Payment[]>("/me/payments?status=pending"),
-    api<Payment[]>("/me/payments?status=failed&limit=50"),
     myWithdrawals(),
     myBankAccount(),
     cardOnline(),
   ]);
   const { orders } = ws;
-  // Top-ups not paid (still open on Gate-E for their hour, or ended unpaid) aren't shown: nothing moved, and the
-  // brand just tops up again. A late payment still lands in the balance. Checkouts waiting for the card are shown:
-  // their campaign waits for them, and part of the balance may be held.
+  // Card payments not paid aren't lines: nothing moved. Not even listed when a top-up waits (still open on Gate-E for
+  // its hour; the brand just tops up again; a late payment still lands in the balance), nor once one ended unpaid (a
+  // checkout's campaign shows it didn't go live). Checkouts waiting for the card are listed: their campaign waits for
+  // them, and part of the balance may be held.
   const pending = unpaid.filter((p) => p.kind !== "top_up");
-  const failed = refused.filter((p) => p.kind !== "top_up");
   const held = orders.filter((o) => o.status === "pending" || o.status === "in_progress" || o.status === "delivered").reduce((sum, o) => sum + brandPaid(o), 0);
   const netSpent = orders.filter((o) => o.status === "approved").reduce((sum, o) => sum + brandPaid(o), 0);
   const moneyIn = ledger.filter((e) => e.type === "top_up" || e.type === "card_payment");
@@ -106,19 +105,6 @@ export default async function WalletPage() {
     })),
     ...orders.map(orderEntry),
     ...withdrawals.map(withdrawalEntry),
-    // The card was refused: shown so the brand knows, but no money moved.
-    ...failed.map((p): Entry => {
-      const campaign = ws.campaign(p.campaign_id ?? undefined);
-      return {
-        id: p.id,
-        date: dayOf(p.failed_at ?? p.created_at),
-        label: p.kind === "top_up" ? t("walletPage.topUpLabel") : t("walletPage.cardPaymentLabel"),
-        detail: campaign ? f.pick(campaign.title) || t("newCampaign.untitled") : undefined,
-        type: "failed",
-        amount: p.by_card,
-        badge: { tone: "error", label: t("walletPage.typeFailed") },
-      };
-    }),
   ].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
@@ -193,11 +179,7 @@ export default async function WalletPage() {
                     <Badge tone={entry.badge.tone} className="hidden sm:inline-flex">
                       {entry.badge.label}
                     </Badge>
-                    {entry.type === "failed" ? (
-                      <span className="min-w-24 text-end font-medium tabular-nums text-text-muted line-through">{f.money(entry.amount)}</span>
-                    ) : (
-                      <span className={cn("min-w-24 text-end font-medium tabular-nums", entry.amount > 0 && "text-success", entry.struck && "text-text-muted line-through")}>{f.signedMoney(entry.amount)}</span>
-                    )}
+                    <span className={cn("min-w-24 text-end font-medium tabular-nums", entry.amount > 0 && "text-success", entry.struck && "text-text-muted line-through")}>{f.signedMoney(entry.amount)}</span>
                   </li>
                 );
               })}
