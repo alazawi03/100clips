@@ -63,6 +63,12 @@ type Props = {
    * from the cart, and the whole form can be saved as a draft. `draftId` when continuing one.
    */
   picker?: PickerOptions & { draftId?: string };
+  /**
+   * A checkout of the cart's creators still waiting for its card, opened again (Back from BENEFIT's page, or the
+   * cart's button): it goes on at the payment step, filled in from its draft (`initial`), on that same draft campaign,
+   * so paying replaces the waiting payment.
+   */
+  resume?: { draftId: string };
   total: number;
   balance: number;
   /** Card parts are paid on Gate-E's page (true), or laqta sends a payment link. */
@@ -96,7 +102,7 @@ function isUrl(value: string) {
  * Every step lives in one form so a single submit sends it all; Next checks the current step
  * with the same rules as the server, and the server's answer is the final word.
  */
-export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadline, total: cartTotal, balance, cardOnline, picker }: Props) {
+export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadline, total: cartTotal, balance, cardOnline, picker, resume }: Props) {
   const { t, tp, locale } = useI18n();
   const f = createFormatters(locale);
   const form = useRef<HTMLFormElement>(null);
@@ -114,8 +120,8 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
 
   /* ---------- New campaign: saves itself as a draft ---------- */
   // The draft being filled in (none until the first real change), and what the save line says.
-  const [draftId, setDraftId] = useState(picker?.draftId);
-  const draftRef = useRef(picker?.draftId);
+  const [draftId, setDraftId] = useState(picker?.draftId ?? resume?.draftId);
+  const draftRef = useRef(picker?.draftId ?? resume?.draftId);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const busy = useRef<Promise<void> | null>(null);
   const again = useRef(false);
@@ -176,7 +182,7 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
     const timer = setTimeout(() => window.location.replace(paid.pending ? "/campaigns" : `/campaigns/${paid.campaignId}`), REDIRECT_MS);
     return () => clearTimeout(timer);
   }, [paid]);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(resume ? LAST : 0);
   const [clientErrors, setClientErrors] = useState<Partial<Record<string, MessageKey>>>({});
   const [cleared, setCleared] = useState<string[]>([]);
 
@@ -205,7 +211,8 @@ export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadl
   const selected = brand?.products.filter((p) => p.id === productId) ?? [];
   // Unboxing needs a box: only offered for physical products.
   const styles = VIDEO_STYLES.filter((s) => s !== "unboxing" || selected[0]?.type === "physical");
-  const [useBalance, setUseBalance] = useState(balance > 0 && (state ? state.values.useBalance === "on" : true));
+  // On unless turned off: in the last try, or in the waiting checkout being resumed.
+  const [useBalance, setUseBalance] = useState(balance > 0 && (state ? state.values.useBalance === "on" : resume ? initial?.values?.useBalance === "on" : true));
   // Creators' prices plus the service fee.
   const toPay = withFee(total);
   const fromBalance = useBalance ? Math.min(balance, toPay) : 0;

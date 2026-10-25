@@ -282,8 +282,9 @@ export async function checkout(_prev: CheckoutState, form: FormData): Promise<Ch
   // A campaign made here (not the draft being filled in) goes again if paying fails.
   let made: string | undefined;
   try {
-    // The draft being filled in becomes the campaign (a new one when it was for another brand).
-    const draft = fromPicker && draftId ? ws.campaign(draftId) : undefined;
+    // The draft being filled in (or the waiting checkout's, resumed) becomes the campaign (a new one when it was for
+    // another brand).
+    const draft = draftId ? ws.campaign(draftId) : undefined;
     const fields = {
       product_id: product!.id,
       title,
