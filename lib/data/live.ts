@@ -217,9 +217,17 @@ function toOrder(row: OrderRow): Order {
     declineReason: row.decline_reason ? DECLINE_REASON[row.decline_reason] : undefined,
     declineNote: row.decline_note ?? undefined,
     createdAt: row.created_at,
-    // The latest version is the clip; every version can be watched (links last an hour).
+    // The latest version is the clip; every version can be watched (links last an hour), the watermarked copy until approved.
     clipId: row.clips.at(-1)?.id,
-    versions: row.clips.filter((c) => c.url).map((c) => ({ videoSrc: c.url!, uploadedAt: c.uploaded_at, durationSec: c.duration_sec ?? undefined })),
+    versions: row.clips
+      .filter((c) => c.url || c.preview)
+      .map((c) => ({
+        videoSrc: c.url ?? undefined,
+        uploadedAt: c.uploaded_at,
+        durationSec: c.duration_sec ?? undefined,
+        watermarked: c.watermarked || undefined,
+        preview: c.preview ?? undefined,
+      })),
     adCode: row.ad_code ? { platform: platformOf[row.format], code: row.ad_code, expiresAt: row.ad_code_expires_at?.slice(0, 10) } : undefined,
     shipping,
     shipTo: ship
@@ -250,10 +258,10 @@ function posterHues(id: string) {
   return { from: h, to: (h + 40) % 360 };
 }
 
-/** The order's latest clip, ready for posters and players. Undefined before the first upload. */
+/** The order's latest clip, ready for posters and players. Undefined before the first upload, and while its watermarked copy is made. */
 export function clipOf(order: Order, ws: Pick<Workspace, "brand" | "creator">): Clip | undefined {
   const latest = order.versions?.at(-1);
-  if (!latest || !order.clipId) return undefined;
+  if (!latest?.videoSrc || !order.clipId) return undefined;
   const niche: Niche = ws.creator(order.creatorId)?.niches[0] ?? "general";
   return {
     id: order.clipId,

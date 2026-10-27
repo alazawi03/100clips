@@ -187,8 +187,11 @@ export type OrderShipping = { sentAt?: string; note?: string; receivedAt?: strin
  */
 export type DeclineReason = "busy" | "notMyNiche" | "other" | "expired";
 
-/** One uploaded version of the clip. */
-export type ClipVersion = { videoSrc: string; uploadedAt: string; durationSec?: number };
+/**
+ * One uploaded version of the clip. Until the brand approves, it watches a copy with laqta's watermark
+ * (watermarked); there's no videoSrc while that copy is made ("preparing"), or if it couldn't be ("failed").
+ */
+export type ClipVersion = { videoSrc?: string; uploadedAt: string; durationSec?: number; watermarked?: boolean; preview?: "preparing" | "failed" };
 
 /** A copy of the creator's address and phone, made when they accept a physical product: where the brand ships. */
 export type ShipTo = { type: "home" | "work"; label?: string; address: string; latitude?: number; longitude?: number; phone?: string };

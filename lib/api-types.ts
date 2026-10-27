@@ -339,7 +339,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a draft
-         * @description Drafts only (409 once live).
+         * @description Drafts only (409 once live). One a card payment was tried on is cancelled instead, kept for its payment records (a payment still waiting on it ends).
          */
         delete: operations["CampaignsController_remove"];
         options?: never;
@@ -3635,6 +3635,11 @@ export interface components {
             /** @description A physical product goes back to the brand after filming */
             product_returns: boolean;
         };
+        /**
+         * @description For the brand before approving, while there's no link yet: the watermarked copy is being made, or couldn't be (the creator uploads the clip again)
+         * @enum {string}
+         */
+        ClipPreview: "preparing" | "failed";
         OrderClip: {
             /** Format: uuid */
             id: string;
@@ -3648,6 +3653,10 @@ export interface components {
             uploaded_at: string;
             /** @description A link to watch it, for an hour */
             url: string | null;
+            /** @description The link is to the copy with laqta's watermark: what the brand watches until it approves (then the original) */
+            watermarked: boolean;
+            /** @description For the brand before approving, while there's no link yet: the watermarked copy is being made, or couldn't be (the creator uploads the clip again) */
+            preview: components["schemas"]["ClipPreview"] | null;
         };
         /** @enum {string} */
         OrderEventType: "offered" | "accepted" | "declined" | "expired" | "cancelled" | "sent" | "received" | "uploaded" | "revision_requested" | "approved" | "returned" | "ad_code_added" | "deadline_moved" | "deadline_passed";

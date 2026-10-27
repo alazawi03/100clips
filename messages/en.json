@@ -365,6 +365,7 @@
     "waitingPending": "Waiting for {name} to accept the offer.",
     "waitingProgress": "{name} is filming the clip.",
     "reviewHint": "Watch the clip, then approve it or request a revision. The creator is paid once you approve.",
+    "reviewHintPreview": "Watch the preview, then approve it or request a revision. Approving pays the creator and gives you the clip without the watermark.",
     "approve": "Approve clip",
     "requestRevision": "Request revision",
     "revisionLabel": "What should change?",
@@ -396,6 +397,7 @@
     "yourNote": "Your note to the creator",
     "approveTitle": "Approve {name}’s clip?",
     "approveHint": "This releases the payment to {name}. Approving can’t be undone.",
+    "approveClean": "The clip without the watermark is yours right away.",
     "rateLabel": "Rate {name}",
     "reviewLabel": "Comment",
     "reviewPlaceholder": "Write what you liked about the clip",
@@ -1263,7 +1265,10 @@
     "tab": "Version {n}",
     "latest": "Version {n}, the latest, after your revision.",
     "only": "Version 1",
-    "older": "Version {n}, before your revision. The latest is version {latest}."
+    "older": "Version {n}, before your revision. The latest is version {latest}.",
+    "preparing": "Preparing the preview…",
+    "failed": "We couldn't prepare a preview of this version. Ask the creator to upload it again.",
+    "watermarked": "A preview with laqta's watermark. You get the clean clip once you approve it."
   },
   "settings": {
     "bank": {

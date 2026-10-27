@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
-import { CircleSlash, Hourglass, Undo2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { CircleSlash, Hourglass, LoaderCircle, Undo2 } from "lucide-react";
 import { withdrawOffer } from "@/app/actions/brand";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
@@ -140,6 +141,7 @@ export function ClipVersions({ versions, title, className }: { versions: ClipVer
   const { t, locale } = useI18n();
   const f = createFormatters(locale);
   const [shown, setShown] = useState(versions.length - 1);
+  useRefreshWhilePreparing(versions.some((v) => v.preview === "preparing"));
   const version = versions[shown] ?? versions.at(-1);
   if (!version) return null;
   return (
@@ -164,23 +166,50 @@ export function ClipVersions({ versions, title, className }: { versions: ClipVer
           ))}
         </div>
       )}
-      <video
-        key={version.videoSrc + shown}
-        dir="ltr"
-        src={version.videoSrc}
-        controls
-        playsInline
-        preload="metadata"
-        aria-label={t("profile.play", { title })}
-        className="aspect-[9/16] w-full rounded-[var(--radius-md)] bg-black object-cover"
-      />
+      {version.videoSrc ? (
+        <video
+          key={version.videoSrc + shown}
+          dir="ltr"
+          src={version.videoSrc}
+          controls
+          playsInline
+          preload="metadata"
+          // The watermarked copy is to watch, not to keep: the original comes once approved.
+          controlsList={version.watermarked ? "nodownload" : undefined}
+          aria-label={t("profile.play", { title })}
+          className="aspect-[9/16] w-full rounded-[var(--radius-md)] bg-black object-cover"
+        />
+      ) : (
+        <div
+          role="status"
+          className="flex aspect-[9/16] w-full flex-col items-center justify-center gap-3 rounded-[var(--radius-md)] bg-surface px-5 text-center text-small text-text-muted"
+        >
+          {version.preview === "failed" ? (
+            <CircleSlash aria-hidden className="size-6" />
+          ) : (
+            <LoaderCircle aria-hidden className="size-6 text-primary motion-safe:animate-spin" strokeWidth={1.5} />
+          )}
+          {t(version.preview === "failed" ? "versions.failed" : "versions.preparing")}
+        </div>
+      )}
       <p className="text-caption text-text-muted">
         {shown === versions.length - 1
           ? versions.length > 1
             ? t("versions.latest", { n: shown + 1 })
             : t("versions.only")
           : t("versions.older", { n: shown + 1, latest: versions.length })}
+        {version.watermarked && ` ${t("versions.watermarked")}`}
       </p>
     </div>
   );
+}
+
+/** While a version's watermarked copy is being made (a minute or two), the page checks again every few seconds. */
+function useRefreshWhilePreparing(preparing: boolean) {
+  const router = useRouter();
+  useEffect(() => {
+    if (!preparing) return;
+    const timer = setInterval(() => router.refresh(), 8000);
+    return () => clearInterval(timer);
+  }, [preparing, router]);
 }

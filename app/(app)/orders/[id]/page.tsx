@@ -47,7 +47,11 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   const steps = stepsFor(physical);
   const stepIndex = steps.indexOf(currentStep(order, physical));
   const action = nextAction(order, { physical, returns });
-  const watchable = clip && (order.status === "delivered" || order.status === "approved");
+  // Its versions, even while the watermarked copy of the latest is still being made.
+  const versions = clipVersions(order, clip);
+  const watchable = versions.length > 0 && (order.status === "delivered" || order.status === "approved");
+  // Before approving the brand watches copies with laqta's watermark: approving gives it the clip without.
+  const watermarked = versions.some((v) => v.watermarked || v.preview);
   const active = isActiveOrder(order);
   const report = order.problem;
   const unread = chats.find((c) => c.brandId === order.brandId && c.creatorId === order.creatorId)?.unread ?? 0;
@@ -175,12 +179,12 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
               <h2 className="font-medium">{t("orderDetail.clip")}</h2>
               {watchable ? (
                 <>
-                  <ClipVersions versions={clipVersions(order, clip)} title={f.pick(clip.title)} className="mx-auto w-full max-w-[320px]" />
+                  <ClipVersions versions={versions} title={f.pick(order.title)} className="mx-auto w-full max-w-[320px]" />
                   {adPlatformOf(order) && <AdCode orderId={order.id} platform={adPlatformOf(order)!} code={order.adCode} today={today()} />}
                   {order.status === "delivered" && (
                     <>
-                      <p className="text-small text-text-muted">{t("orderDetail.reviewHint")}</p>
-                      <ReviewActions orderId={order.id} creatorName={name} />
+                      <p className="text-small text-text-muted">{t(watermarked ? "orderDetail.reviewHintPreview" : "orderDetail.reviewHint")}</p>
+                      <ReviewActions orderId={order.id} creatorName={name} watermarked={watermarked} />
                     </>
                   )}
                 </>

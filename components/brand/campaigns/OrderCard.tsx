@@ -151,12 +151,14 @@ export function OrderCard({ order, productName }: { order: OrderCardView; produc
           )}
 
           <Section title={t("campaignDetail.clip")}>
-            {order.clip && (order.status === "delivered" || order.status === "approved") ? (
+            {order.versions.length > 0 && (order.status === "delivered" || order.status === "approved") ? (
               // The clip on one side; what to do with it beside it, so neither column sits empty.
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                 <ClipVersions versions={order.versions} title={order.name} className="w-full max-w-[220px] shrink-0 sm:w-[200px]" />
                 <div className="flex min-w-0 flex-1 flex-col gap-4">
-                  {order.status === "delivered" && <ReviewActions orderId={order.id} creatorName={order.name} />}
+                  {order.status === "delivered" && (
+                    <ReviewActions orderId={order.id} creatorName={order.name} watermarked={order.versions.some((v) => v.watermarked || v.preview)} />
+                  )}
                   {order.status === "approved" && (
                     <div className="flex flex-col gap-2">
                       <h3 className="text-small font-medium text-text-muted">{order.rating ? t("campaignDetail.rated", { name: order.name }) : t("campaignDetail.rate", { name: order.name })}</h3>
