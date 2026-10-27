@@ -1348,7 +1348,8 @@
   "legal": {
     "label": "Terms and privacy",
     "terms": "Terms of use",
-    "privacy": "Privacy policy"
+    "privacy": "Privacy policy",
+    "deleteAccount": "Delete account"
   },
   "payment": {
     "title": "Card payment",
