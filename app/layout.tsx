@@ -30,12 +30,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const { locale, dir } = await getI18n();
+  const { locale, dir, country } = await getI18n();
   const theme = await getTheme();
   return (
     <html lang={locale} dir={dir} data-theme={theme === "system" ? undefined : theme} className={`${thmanyah.variable} ${readex.variable} antialiased`}>
       <body>
-        <I18nProvider locale={locale}>{children}</I18nProvider>
+        <I18nProvider locale={locale} country={country}>
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );

@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { ApiError } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import * as store from "@/lib/data/brandsApi";
 import { pathOfPublicUrl, storeDocument } from "@/lib/data/storage";
-import { isActiveMarket } from "@/lib/data/markets";
+import { isActiveMarket, marketOf } from "@/lib/data/markets";
+import { getMe } from "@/lib/session";
 import {
   APP_PLATFORMS,
   COUNTRIES,
@@ -118,10 +119,10 @@ function parseBrand(form: FormData): { brand?: Omit<Brand, "id">; errors: NonNul
   const website = withScheme(text(form, "website"));
   const instagram = handle(text(form, "instagram"));
   const tiktok = handle(text(form, "tiktok"));
-  // Only active markets (Bahrain for the MVP) can be picked.
-  const countries = all(form, "countries").filter((c): c is Country => (COUNTRIES as string[]).includes(c) && isActiveMarket(c));
-  // For each chosen country: its CR number (cr_bh) and VAT certificate (vat_bh), a newly picked
-  // file or the one already saved (vat_bhKeep). Both optional.
+  // One country, an active market: the account's (lib/data/markets.ts).
+  const countries = all(form, "countries").filter((c): c is Country => (COUNTRIES as string[]).includes(c) && isActiveMarket(c)).slice(0, 1);
+  // The country's CR number (cr_bh) and VAT certificate (vat_bh), a newly picked file or the one
+  // already saved (vat_bhKeep). Both optional; Kuwait has no VAT, so no certificate.
   const registrations: NonNullable<Brand["registrations"]> = {};
   for (const country of countries) {
     const crNumber = text(form, `cr_${country}`);
@@ -168,6 +169,8 @@ export async function createBrand(_prev: BrandFormState, form: FormData): Promis
   const productResult = withProduct ? parseProduct(form) : undefined;
   const errors = { ...brandResult.errors, ...productResult?.errors };
   if (!brandResult.brand || (withProduct && !productResult?.product)) return { errors, values: submitted(form) };
+  const locked = await setMarket(brandResult.brand);
+  if (locked) return { errors: { countries: locked }, values: submitted(form) };
 
   try {
     const created = await store.createBrand(brandResult.brand);
@@ -186,6 +189,8 @@ export async function createBrand(_prev: BrandFormState, form: FormData): Promis
 export async function updateBrand(brandId: string, _prev: BrandFormState, form: FormData): Promise<BrandFormState> {
   const { brand, errors } = parseBrand(form);
   if (!brand) return { errors, values: submitted(form) };
+  const locked = await setMarket(brand);
+  if (locked) return { errors: { countries: locked }, values: submitted(form) };
   try {
     await store.updateBrand(brandId, brand);
     await saveRegistration(brandId, form, brand);
@@ -198,16 +203,34 @@ export async function updateBrand(brandId: string, _prev: BrandFormState, form: 
 }
 
 /**
- * Bahrain's CR number and VAT certificate (the MVP's one market). A newly picked certificate is
- * uploaded to private-docs; otherwise the saved one is kept, unless Bahrain was unticked.
+ * The country picked on the brand form is the account's market, for all its brands: their creators and money. It moves
+ * only until the account's first payment; after that the API refuses, and the form says so (a message key).
+ */
+async function setMarket(brand: Omit<Brand, "id">): Promise<MessageKey | undefined> {
+  const picked = brand.countries?.[0];
+  if (!picked || marketOf((await getMe())?.account.country) === picked) return undefined;
+  try {
+    await api("/me", { method: "PATCH", body: { country: picked.toUpperCase() } });
+  } catch (e) {
+    if (e instanceof ApiError && (e.status === 409 || e.status === 400)) return "forms.errors.countryLocked";
+    throw e;
+  }
+  return undefined;
+}
+
+/**
+ * The CR number and VAT certificate in the country picked (a brand has one registration). A newly picked
+ * certificate is uploaded to private-docs; otherwise the saved one is kept, unless there's none in the form
+ * (Kuwait has no VAT).
  */
 async function saveRegistration(brandId: string, form: FormData, brand: Omit<Brand, "id">) {
-  const bh = brand.registrations?.bh;
-  const file = form.get("vat_bh");
+  const country = brand.countries?.[0] ?? "bh";
+  const registration = brand.registrations?.[country];
+  const file = form.get(`vat_${country}`);
   const picked = file instanceof File && file.size > 0 ? file : undefined;
   const saved = await store.registrationOf(brandId);
-  const vatPath = picked ? await storeDocument(picked) : bh?.vatCertificate ? (saved?.vat_certificate_path ?? null) : null;
-  const crNumber = bh?.crNumber ?? null;
+  const vatPath = picked ? await storeDocument(picked) : registration?.vatCertificate ? (saved?.vat_certificate_path ?? null) : null;
+  const crNumber = registration?.crNumber ?? null;
   if (crNumber === (saved?.cr_number ?? null) && vatPath === (saved?.vat_certificate_path ?? null)) return;
   await store.setRegistration(brandId, crNumber, vatPath);
 }

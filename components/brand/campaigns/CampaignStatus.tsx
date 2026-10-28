@@ -11,8 +11,8 @@ import type { CampaignProgress } from "@/lib/statuses";
  * and under them "1 of 2 clips approved" with a thin bar (approved / active orders).
  */
 export function CampaignStatus({ progress, showReview = true, className }: { progress: CampaignProgress; showReview?: boolean; className?: string }) {
-  const { t, tp, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, tp, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const percent = progress.active > 0 ? Math.round((progress.approved / progress.active) * 100) : 0;
   return (
     <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>

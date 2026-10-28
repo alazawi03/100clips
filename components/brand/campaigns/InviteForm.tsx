@@ -35,8 +35,8 @@ const REDIRECT_MS = 3000;
  * video, one order), and pay up front. Then the success screen, then the campaign.
  */
 export function InviteForm({ action: pay, details, balance, cardOnline, ...pickerOptions }: Props) {
-  const { t, tp, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, tp, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [state, action, pending] = useActionState<CheckoutState, FormData>(pay, null);
   const picker = useCreatorPicker(pickerOptions);
   const { chosen, invitees, missing, total } = picker;

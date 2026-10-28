@@ -68,8 +68,8 @@ const EXPLORE = "explore";
  * ("creatorId|format") the server reads. `bare` drops the cards' own frames, for use inside another card.
  */
 export function useCreatorPicker({ lists, explore, preset, initialListId, tickList, initialPicked, defaultFormats }: PickerOptions) {
-  const { t, tp, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, tp, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [listId, setListId] = useState(initialListId);
   // Chosen creators, and the platform picked for each (none at first, unless known from last time).
   const [ticked, setTicked] = useState<Set<string>>(() => {

@@ -6,8 +6,8 @@ import { SERVICE_FEE_RATE, serviceFee, withFee } from "@/lib/fees";
 
 /** What the brand pays for creators costing `creatorsTotal`: the total, then the laqta fee it includes. <dl> rows. */
 export function FeeTotal({ creatorsTotal }: { creatorsTotal: number }) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   return (
     <>
       <div className="flex justify-between gap-2 text-body">

@@ -27,8 +27,8 @@ type Props = {
  * Switching format or removing is saved straight away; the totals refresh from the server.
  */
 export function CartLineEditor({ creatorId, creatorName, photo, location, offers, quantities }: Props) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [format, setFormat] = useState<ContentFormat | undefined>(() => offers.find((o) => (quantities[o.format] ?? 0) > 0)?.format);
   const [pending, startTransition] = useTransition();
   const chosen = offers.filter((o) => o.format === format);

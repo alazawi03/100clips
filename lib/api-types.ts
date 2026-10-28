@@ -109,6 +109,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Can I delete my account?
+         * @description What's in the way of Delete account: money in the balance, orders still running, a withdrawal waiting. No blockers: it can go.
+         */
+        get: operations["MeController_deletion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Delete my account
+         * @description Erases the caller's personal data and login, as the delete-account page says (money and tax records, orders and the clips brands received stay). The session must have signed in with an emailed code in the last 10 minutes (403 otherwise: the app sends one first). Refused (409) while GET /me/deletion lists blockers. Their session is turned away from then on (403).
+         */
+        post: operations["MeController_deleteAccount"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/creators": {
         parameters: {
             query?: never;
@@ -850,7 +890,7 @@ export interface paths {
         };
         /**
          * My balance
-         * @description BHD: top-ups, card payments and refunds in, offers paid out.
+         * @description In the account's money: top-ups, card payments and refunds in, offers paid out.
          */
         get: operations["PaymentsController_balance"];
         put?: never;
@@ -2336,7 +2376,7 @@ export interface paths {
         };
         /**
          * laqta's money for a period
-         * @description Finance admins. Fees and pay on approved clips, money in and out, and what's held or owed now.
+         * @description Finance admins. Fees and pay on approved clips, money in and out, and what's held or owed now, in one market's money.
          */
         get: operations["MoneyController_summary"];
         put?: never;
@@ -2560,6 +2600,11 @@ export interface components {
             name_ar: string | null;
             name_en: string | null;
             phone: string | null;
+            /**
+             * @description Brand accounts: the country it does business in (BH, KW), for all its brands; its balance and payments are in that country's money. Null for creators (theirs is on their profile) and admins.
+             * @example BH
+             */
+            country: string | null;
             /** Format: date-time */
             notifications_seen_at: string;
             /** Format: date-time */
@@ -2646,6 +2691,12 @@ export interface components {
             name_en?: string;
             /** @example +97333123456 */
             phone?: string;
+            /**
+             * @description Brand accounts: the country it does business in, one where laqta runs. It can change until the account's first payment (PATCH /me), not after. Creators set theirs on their profile.
+             * @default BH
+             * @example KW
+             */
+            country: string;
         };
         UpdateAccountDto: {
             /**
@@ -2660,13 +2711,33 @@ export interface components {
             name_en?: string;
             /** @example +97333123456 */
             phone?: string;
+            /**
+             * @description Brand accounts: the country it does business in, one where laqta runs. It can change until the account's first payment (PATCH /me), not after. Creators set theirs on their profile.
+             * @default BH
+             * @example KW
+             */
+            country: string;
+        };
+        /** @enum {string} */
+        DeletionBlocker: "balance" | "running_orders" | "withdrawal";
+        AccountDeletion: {
+            blockers: components["schemas"]["DeletionBlocker"][];
+            /** @description BHD left in the balance: withdraw it first (blocker "balance") */
+            balance: number;
+        };
+        DeleteAccountDto: {
+            /**
+             * @description true: yes, delete it (so a stray call can't)
+             * @enum {boolean}
+             */
+            confirm: true;
         };
         /** @enum {string} */
         ContentFormat: "tiktok_video" | "instagram_reel" | "instagram_story";
         FormatPriceDto: {
             format: components["schemas"]["ContentFormat"];
             /**
-             * @description What the creator gets per clip, in BHD (brands see it plus the fee)
+             * @description What the creator gets per clip, in their country's money: BHD in Bahrain, KWD in Kuwait (brands see it plus the fee)
              * @example 35
              */
             price: number;
@@ -2694,7 +2765,7 @@ export interface components {
             /** @description Average stars, null before the first review */
             rating: number | null;
             review_count: number;
-            /** @description Lowest format price in BHD, before the platform fee */
+            /** @description Lowest format price in the creator's country's money, before the platform fee */
             from_price: number | null;
             /** @description Each format they offer, at the creator's price (before the fee) */
             formats: components["schemas"]["FormatPriceDto"][];
@@ -2725,7 +2796,7 @@ export interface components {
         };
         FormatPrice: {
             format: components["schemas"]["ContentFormat"];
-            /** @description BHD, before the platform fee */
+            /** @description In the creator's country's money (BHD, KWD), before the platform fee */
             price: number;
         };
         /** @enum {string} */
@@ -3441,15 +3512,20 @@ export interface components {
         };
         /** @enum {string} */
         PaymentKind: "checkout" | "top_up";
+        /**
+         * @description The brand account's money: BHD (Bahrain) or KWD (Kuwait)
+         * @enum {string}
+         */
+        MarketCurrency: "BHD" | "KWD";
         PaidPick: {
             /** Format: uuid */
             creator_id: string;
             format: components["schemas"]["ContentFormat"];
             /** @description The brand's note to this creator, sent with the offer */
             note?: string;
-            /** @description The creator's price, fixed at checkout (BHD, before the fee) */
+            /** @description The creator's price, fixed at checkout (before the fee) */
             price: number;
-            /** @description laqta's fee on this pick, fixed at checkout (BHD) */
+            /** @description laqta's fee on this pick, fixed at checkout */
             fee: number;
             /**
              * @description The fee as a percentage of the price, fixed at checkout (10 = 10%). Missing on payments from before it was kept.
@@ -3467,12 +3543,14 @@ export interface components {
             kind: components["schemas"]["PaymentKind"];
             /** Format: uuid */
             campaign_id: string | null;
-            /** @description BHD: creators' prices plus the fee */
+            /** @description Creators' prices plus the fee */
             total: number;
-            /** @description BHD taken from the balance */
+            /** @description Taken from the balance */
             from_balance: number;
-            /** @description BHD to pay by card (0: paid at once from the balance) */
+            /** @description To pay by card (0: paid at once from the balance) */
             by_card: number;
+            /** @description The brand account's money: BHD (Bahrain) or KWD (Kuwait) */
+            currency: components["schemas"]["MarketCurrency"];
             picks: components["schemas"]["PaidPick"][] | null;
             status: components["schemas"]["PaymentStatus"];
             provider: string | null;
@@ -3491,7 +3569,7 @@ export interface components {
         };
         TopUpDto: {
             /**
-             * @description BHD
+             * @description In the brand account's money (BHD or KWD)
              * @example 50
              */
             amount: number;
@@ -3503,10 +3581,12 @@ export interface components {
             language: "en" | "ar";
         };
         Balance: {
-            /** @description BHD available to spend (or withdraw): held amounts are already taken off */
+            /** @description Available to spend (or withdraw): held amounts are already taken off */
             balance: number;
-            /** @description BHD held for checkouts waiting for the card: charged when the card is paid, freed if it fails */
+            /** @description Held for checkouts waiting for the card: charged when the card is paid, freed if it fails */
             held: number;
+            /** @description The account's money: a brand account's country's, a creator's where they live */
+            currency: components["schemas"]["MarketCurrency"];
         };
         /** @enum {string} */
         LedgerType: "top_up" | "card_payment" | "charge" | "refund" | "earning" | "payout" | "withdrawal" | "withdrawal_returned" | "adjustment";
@@ -3514,8 +3594,10 @@ export interface components {
             /** Format: uuid */
             id: string;
             type: components["schemas"]["LedgerType"];
-            /** @description BHD: in is positive, out is negative */
+            /** @description In is positive, out is negative */
             amount: number;
+            /** @description BHD (Bahrain) or KWD (Kuwait): the money the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             /** Format: uuid */
             order_id: string | null;
             /** Format: uuid */
@@ -3540,12 +3622,14 @@ export interface components {
             kind: components["schemas"]["PaymentKind"];
             /** Format: uuid */
             campaign_id: string | null;
-            /** @description BHD: creators' prices plus the fee */
+            /** @description Creators' prices plus the fee */
             total: number;
-            /** @description BHD taken from the balance */
+            /** @description Taken from the balance */
             from_balance: number;
-            /** @description BHD to pay by card (0: paid at once from the balance) */
+            /** @description To pay by card (0: paid at once from the balance) */
             by_card: number;
+            /** @description The brand account's money: BHD (Bahrain) or KWD (Kuwait) */
+            currency: components["schemas"]["MarketCurrency"];
             picks: components["schemas"]["PaidPick"][] | null;
             status: components["schemas"]["PaymentStatus"];
             provider: string | null;
@@ -3711,8 +3795,10 @@ export interface components {
             /** Format: uuid */
             payment_id: string | null;
             format: components["schemas"]["ContentFormat"];
-            /** @description The creator's price in BHD, fixed when ordered (what they're paid) */
+            /** @description The creator's price, fixed when ordered (what they're paid) */
             amount: number;
+            /** @description The money of the brand's and creator's country: BHD (Bahrain) or KWD (Kuwait) */
+            currency: components["schemas"]["MarketCurrency"];
             /** @description The brand's note to this creator */
             note: string | null;
             status: components["schemas"]["OrderStatus"];
@@ -3762,7 +3848,7 @@ export interface components {
             review: string | null;
             /** Format: date-time */
             rated_at: string | null;
-            /** @description 100clips' fee the brand paid on top (BHD). Null for creators. */
+            /** @description 100clips' fee the brand paid on top, in the order's currency. Null for creators. */
             fee: number | null;
             brand: components["schemas"]["OrderBrand"];
             creator: components["schemas"]["OrderCreator"] | null;
@@ -4108,8 +4194,10 @@ export interface components {
             creator_id: string;
             name_ar: string | null;
             name_en: string | null;
-            /** @description BHD sent */
+            /** @description Sent */
             amount: number;
+            /** @description BHD (Bahrain) or KWD (Kuwait): the money the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             /** Format: date-time */
             sent_at: string;
             /** @description The bank's reference for the transfer */
@@ -4127,7 +4215,7 @@ export interface components {
              * @example 1043
              */
             number: number;
-            /** @description The creator's pay in BHD */
+            /** @description The creator's pay, in the owed currency */
             amount: number;
             /** Format: date-time */
             approved_at: string;
@@ -4141,8 +4229,10 @@ export interface components {
             name_en: string | null;
             handle: string;
             photo_path: string | null;
-            /** @description BHD owed: the orders' total */
+            /** @description Owed: the orders' total */
             amount: number;
+            /** @description The orders' money; a creator owed in both is listed once for each */
+            currency: components["schemas"]["MarketCurrency"];
             /**
              * Format: date-time
              * @description The longest-waiting order's approval
@@ -4275,8 +4365,9 @@ export interface components {
         Withdrawal: {
             /** Format: uuid */
             id: string;
-            /** @description BHD */
             amount: number;
+            /** @description The brand account's money */
+            currency: components["schemas"]["MarketCurrency"];
             status: components["schemas"]["TransferStatus"];
             /** Format: date-time */
             requested_at: string;
@@ -4297,7 +4388,7 @@ export interface components {
         };
         RequestWithdrawalDto: {
             /**
-             * @description BHD, at most the balance
+             * @description At most the balance, in its money
              * @example 50
              */
             amount: number;
@@ -4309,14 +4400,15 @@ export interface components {
             name_en: string | null;
             /** @description The account's brands, English name first */
             brands: string[];
-            /** @description BHD left in the balance now */
+            /** @description Left in the balance now, in the withdrawal's currency */
             balance: number;
         };
         AdminWithdrawal: {
             /** Format: uuid */
             id: string;
-            /** @description BHD */
             amount: number;
+            /** @description The brand account's money */
+            currency: components["schemas"]["MarketCurrency"];
             status: components["schemas"]["TransferStatus"];
             /** Format: date-time */
             requested_at: string;
@@ -4418,12 +4510,14 @@ export interface components {
             /** @description Every order, any status */
             orders: number;
             approved: number;
-            /** @description BHD earned on approved orders */
+            /** @description Earned on approved orders */
             earned: number;
-            /** @description BHD sent to their bank */
+            /** @description Sent to their bank */
             paid_out: number;
-            /** @description BHD in their balance now */
+            /** @description In their balance now */
             balance: number;
+            /** @description The money of the country they live in, which the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             /** @description Average stars from brands */
             rating: number | null;
             suspended: boolean;
@@ -4441,10 +4535,12 @@ export interface components {
             number: number;
             status: components["schemas"]["OrderStatus"];
             format: components["schemas"]["ContentFormat"];
-            /** @description The creator's pay (BHD) */
+            /** @description The creator's pay */
             amount: number;
-            /** @description laqta's fee (BHD) */
+            /** @description laqta's fee */
             fee: number | null;
+            /** @description BHD (Bahrain) or KWD (Kuwait): the money the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             campaign_title: string | null;
             /** Format: uuid */
             brand_id: string;
@@ -4470,6 +4566,8 @@ export interface components {
             /** Format: uuid */
             id: string;
             amount: number;
+            /** @description BHD (Bahrain) or KWD (Kuwait): the money the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             /** Format: date-time */
             sent_at: string;
             bank_ref: string;
@@ -4490,12 +4588,14 @@ export interface components {
             /** @description Every order, any status */
             orders: number;
             approved: number;
-            /** @description BHD earned on approved orders */
+            /** @description Earned on approved orders */
             earned: number;
-            /** @description BHD sent to their bank */
+            /** @description Sent to their bank */
             paid_out: number;
-            /** @description BHD in their balance now */
+            /** @description In their balance now */
             balance: number;
+            /** @description The money of the country they live in, which the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             /** @description Average stars from brands */
             rating: number | null;
             suspended: boolean;
@@ -4538,9 +4638,16 @@ export interface components {
             phone: string | null;
             /** Format: date-time */
             created_at: string;
-            /** @description BHD in the balance now */
+            /**
+             * @description The country the account does business in
+             * @example BH
+             */
+            country: string;
+            /** @description Its country's money, which the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
+            /** @description In the balance now */
             balance: number;
-            /** @description BHD charged for orders, less refunds */
+            /** @description Charged for orders, less refunds */
             spent: number;
             orders: number;
             suspended: boolean;
@@ -4573,6 +4680,8 @@ export interface components {
             kind: components["schemas"]["PaymentKind"];
             total: number;
             by_card: number;
+            /** @description BHD (Bahrain) or KWD (Kuwait): the money the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             status: components["schemas"]["PaymentStatus"];
             /** Format: date-time */
             created_at: string;
@@ -4586,9 +4695,16 @@ export interface components {
             phone: string | null;
             /** Format: date-time */
             created_at: string;
-            /** @description BHD in the balance now */
+            /**
+             * @description The country the account does business in
+             * @example BH
+             */
+            country: string;
+            /** @description Its country's money, which the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
+            /** @description In the balance now */
             balance: number;
-            /** @description BHD charged for orders, less refunds */
+            /** @description Charged for orders, less refunds */
             spent: number;
             orders: number;
             suspended: boolean;
@@ -4615,10 +4731,12 @@ export interface components {
             number: number;
             status: components["schemas"]["OrderStatus"];
             format: components["schemas"]["ContentFormat"];
-            /** @description The creator's pay (BHD) */
+            /** @description The creator's pay */
             amount: number;
-            /** @description laqta's fee (BHD) */
+            /** @description laqta's fee */
             fee: number | null;
+            /** @description BHD (Bahrain) or KWD (Kuwait): the money the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             campaign_title: string | null;
             /** Format: uuid */
             brand_id: string;
@@ -4657,10 +4775,12 @@ export interface components {
             number: number;
             status: components["schemas"]["OrderStatus"];
             format: components["schemas"]["ContentFormat"];
-            /** @description The creator's pay (BHD) */
+            /** @description The creator's pay */
             amount: number;
-            /** @description laqta's fee (BHD) */
+            /** @description laqta's fee */
             fee: number | null;
+            /** @description BHD (Bahrain) or KWD (Kuwait): the money the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             campaign_title: string | null;
             /** Format: uuid */
             brand_id: string;
@@ -4706,6 +4826,8 @@ export interface components {
             from: string;
             /** Format: date */
             to: string;
+            /** @description Every amount here is in it; the other market's money is left out */
+            currency: components["schemas"]["MarketCurrency"];
             /** @description laqta's fees on clips approved in the period */
             revenue: number;
             /** @description Creators' pay on those clips */
@@ -4742,8 +4864,10 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             type: components["schemas"]["LedgerType"];
-            /** @description BHD: positive adds to the balance */
+            /** @description Positive adds to the balance */
             amount: number;
+            /** @description BHD (Bahrain) or KWD (Kuwait): the money the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             note: string | null;
             /** Format: uuid */
             account_id: string;
@@ -4765,8 +4889,10 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             type: components["schemas"]["LedgerType"];
-            /** @description BHD: positive adds to the balance */
+            /** @description Positive adds to the balance */
             amount: number;
+            /** @description BHD (Bahrain) or KWD (Kuwait): the money the amounts are in */
+            currency: components["schemas"]["MarketCurrency"];
             note: string | null;
             /** Format: uuid */
             account_id: string;
@@ -4788,7 +4914,7 @@ export interface components {
         };
         AdjustmentDto: {
             /**
-             * @description BHD: positive adds to the balance, negative takes from it (never below zero)
+             * @description In the account's money: positive adds to the balance, negative takes from it (never below zero)
              * @example 5
              */
             amount: number;
@@ -5095,6 +5221,119 @@ export interface operations {
             };
             /** @description Not found, or not yours */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MeController_deletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountDeletion"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MeController_deleteAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAccountDto"];
+            };
+        };
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not found, or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Already exists, or the wrong state for this */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -11983,6 +12222,8 @@ export interface operations {
                 from?: string;
                 /** @description Last day, included. Default: today */
                 to?: string;
+                /** @description Bahrain's (BHD) or Kuwait's (KWD) money */
+                currency?: components["schemas"]["MarketCurrency"];
             };
             header?: never;
             path?: never;
@@ -12037,6 +12278,8 @@ export interface operations {
                 type?: components["schemas"]["LedgerType"];
                 /** @description One account's entries */
                 account_id?: string;
+                /** @description One currency's lines; both if left out */
+                currency?: components["schemas"]["MarketCurrency"];
                 limit?: components["schemas"]["Object"];
             };
             header?: never;

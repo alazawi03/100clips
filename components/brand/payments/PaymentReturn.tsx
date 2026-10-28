@@ -27,8 +27,8 @@ export function PaymentReturn({ initial, returned, campaignTitle, campaignDraft 
   campaignTitle?: string;
   campaignDraft: boolean;
 }) {
-  const { t, tp, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, tp, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [payment, setPayment] = useState(initial);
   const [tries, setTries] = useState(0);
   const online = payment.provider === "gate-e" && !!payment.pay_url;

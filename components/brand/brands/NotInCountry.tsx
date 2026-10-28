@@ -19,7 +19,12 @@ const NOT_LISTED = "OTHER";
  * listed", which opens a search over every country (lib/data/countries.ts), grouped Gulf, Arab countries, then the
  * rest. Countries laqta already runs in (Bahrain) aren't offered.
  */
-export function NotInCountry({ country, children }: { country: string; /** The "in Bahrain for now" line, on the same row. */ children: ReactNode }) {
+export function NotInCountry({ country, children }: {
+  /** The one market laqta is in; none when there are several to pick from. */
+  country?: string;
+  /** The "in Bahrain for now" line, on the same row. */
+  children?: ReactNode;
+}) {
   const { t, locale } = useI18n();
   const lang = locale === "ar" ? "ar" : "en";
   const id = useId();
@@ -48,7 +53,7 @@ export function NotInCountry({ country, children }: { country: string; /** The "
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         {children}
         <button type="button" aria-expanded={open} aria-controls={`${id}-panel`} onClick={() => setOpen((o) => !o)} className="shrink-0 text-small font-medium text-primary underline-offset-4 hover:underline">
-          {t("brandForm.notInCountry.toggle", { country })}
+          {country ? t("brandForm.notInCountry.toggle", { country }) : t("brandForm.notInCountry.toggleOther")}
         </button>
       </div>
       {open && (
@@ -61,6 +66,8 @@ export function NotInCountry({ country, children }: { country: string; /** The "
           ) : (
             <Field label={t("brandForm.notInCountry.label")} htmlFor={`${id}-country`} error={error} hint={t("brandForm.notInCountry.hint")}>
               <div className="flex flex-col gap-2">
+                {/* Only with a country to offer first (Kuwait while it isn't open): otherwise the search alone. */}
+                {quick.length > 0 && (
                 <Select
                   id={`${id}-country`}
                   value={choice}
@@ -76,6 +83,7 @@ export function NotInCountry({ country, children }: { country: string; /** The "
                   ))}
                   <option value={NOT_LISTED}>{t("brandForm.notInCountry.notListed")}</option>
                 </Select>
+                )}
                 {choice === NOT_LISTED && (
                   <CountrySearch
                     value={other}

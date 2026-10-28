@@ -19,8 +19,8 @@ const FILTERS = ["all", "delivered", "approved"] as const;
 
 /** Every clip in the campaign in one grid, filtered by creator and status. */
 export function ClipsGallery({ items }: { items: Item[] }) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [creator, setCreator] = useState("");
   const [status, setStatus] = useState<(typeof FILTERS)[number]>("all");
   const creators = [...new Map(items.map((i) => [i.creatorId, i.name])).entries()];

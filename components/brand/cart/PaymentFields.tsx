@@ -23,8 +23,8 @@ type Props = {
  * No card fields: the card is entered on Gate-E's page, so card numbers never reach laqta.
  */
 export function PaymentFields({ balance, useBalance, onUseBalance, byCard, cardOnline, topUp, err }: Props) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const cardNote = cardOnline ? t("checkout.cardOnline") : topUp ? t("walletPage.topUpByLink") : t("checkout.cardByLink");
   return (
     <>

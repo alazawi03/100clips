@@ -7,12 +7,16 @@ function tag(locale: Locale) {
 }
 
 
-export function createFormatters(locale: Locale) {
+/**
+ * `currency` is the brand account's money (BHD, or KWD in Kuwait: lib/data/markets.ts): what its balance, creators'
+ * prices and payments are in.
+ */
+export function createFormatters(locale: Locale, currency: string = "BHD") {
   // Whole dinars show no decimals; anything else shows all three fils digits (1,240.500).
-  const wholeMoney = new Intl.NumberFormat(tag(locale), { style: "currency", currency: "BHD", maximumFractionDigits: 0 });
-  const money = new Intl.NumberFormat(tag(locale), { style: "currency", currency: "BHD", minimumFractionDigits: 3 });
-  const signedWhole = new Intl.NumberFormat(tag(locale), { style: "currency", currency: "BHD", maximumFractionDigits: 0, signDisplay: "exceptZero" });
-  const signed = new Intl.NumberFormat(tag(locale), { style: "currency", currency: "BHD", minimumFractionDigits: 3, signDisplay: "exceptZero" });
+  const wholeMoney = new Intl.NumberFormat(tag(locale), { style: "currency", currency, maximumFractionDigits: 0 });
+  const money = new Intl.NumberFormat(tag(locale), { style: "currency", currency, minimumFractionDigits: 3 });
+  const signedWhole = new Intl.NumberFormat(tag(locale), { style: "currency", currency, maximumFractionDigits: 0, signDisplay: "exceptZero" });
+  const signed = new Intl.NumberFormat(tag(locale), { style: "currency", currency, minimumFractionDigits: 3, signDisplay: "exceptZero" });
   const number = new Intl.NumberFormat(tag(locale));
   const compact = new Intl.NumberFormat(tag(locale), { notation: "compact", maximumFractionDigits: 1 });
   const shortDate = new Intl.DateTimeFormat(tag(locale), { day: "numeric", month: "short", timeZone: "Asia/Bahrain" });
@@ -34,13 +38,13 @@ export function createFormatters(locale: Locale) {
   };
 
   return {
-    /** Amount in BHD, or in another currency when given. */
-    money: (amount: number, currency = "BHD") => {
-      if (currency === "BHD") return (Number.isInteger(amount) ? wholeMoney : money).format(amount);
-      const { whole, exact } = inCurrency(currency);
+    /** Amount in the account's money, or in another currency when given (a product's price). */
+    money: (amount: number, other = currency) => {
+      if (other === currency) return (Number.isInteger(amount) ? wholeMoney : money).format(amount);
+      const { whole, exact } = inCurrency(other);
       return (Number.isInteger(amount) ? whole : exact).format(amount);
     },
-    /** Amount in BHD with a + or − sign placed the way the locale expects. */
+    /** Amount in the account's money with a + or − sign placed the way the locale expects. */
     signedMoney: (amount: number) => (Number.isInteger(amount) ? signedWhole : signed).format(amount),
     number: (value: number) => number.format(value),
     compact: (value: number) => compact.format(value),

@@ -23,8 +23,8 @@ type Props = {
  * copy it, see until when it works. Without one (it's optional for creators), ask for it in the chat.
  */
 export function AdCode({ orderId, platform, code, today }: Props) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [copied, setCopied] = useState(false);
   const expired = !!code?.expiresAt && code.expiresAt < today;
 

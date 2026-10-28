@@ -14,7 +14,7 @@ export const platformOf: Record<ContentFormat, Platform> = {
   instagram_story: "instagram",
 };
 
-export type FormatOffer = { format: ContentFormat; /** In BHD, per clip. */ price: number };
+export type FormatOffer = { format: ContentFormat; /** In the creator's country's money, per clip. */ price: number };
 
 export type Creator = {
   id: string;
@@ -104,7 +104,7 @@ export type Campaign = {
   brief: Localized;
   niche: Niche;
   clipsCount: number;
-  /** What the creators are paid in total, in BHD (the brand pays the service fee on top, lib/fees.ts). */
+  /** What the creators are paid in total, in the account's money (the brand pays the service fee on top, lib/fees.ts). */
   budget: number;
   /** What the clips promote: the brand itself, or specific products (productIds). Defaults to products. */
   promote?: "brand" | "products";
@@ -210,9 +210,9 @@ export type Order = {
   items: OrderItem[];
   /** Total number of clips across items. */
   clips: number;
-  /** What the creator is paid, in BHD (their price). */
+  /** What the creator is paid, in the order's money (their price). */
   amount: number;
-  /** 100clips' service fee the brand paid on top, in BHD (lib/fees.ts). Missing when none was stored (lib/fees.ts works it out). */
+  /** 100clips' service fee the brand paid on top, in the order's money (lib/fees.ts). Missing when none was stored (lib/fees.ts works it out). */
   fee?: number;
   status: OrderStatus;
   revisionRequested?: boolean;
@@ -245,7 +245,7 @@ export type Order = {
   problem?: ProblemReport;
 };
 
-export type OrderItem = { format: ContentFormat; quantity: number; /** In BHD, per clip. */ price: number };
+export type OrderItem = { format: ContentFormat; quantity: number; /** In the account's money, per clip. */ price: number };
 
 export type Industry =
   | "food_beverage"
@@ -268,7 +268,7 @@ export type Account = {
   name: Localized;
   email: string;
   phone: string;
-  /** Shared by every brand on the account, in BHD. */
+  /** Shared by every brand on the account, in its money (BHD, or KWD in Kuwait). */
   balance: number;
 };
 

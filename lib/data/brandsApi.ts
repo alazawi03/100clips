@@ -1,8 +1,10 @@
 import { cache } from "react";
 import { api, apiOrNothing } from "@/lib/api";
 import type { components } from "@/lib/api-types";
+import { getMe } from "@/lib/session";
+import { marketOf } from "./markets";
 import { publicUrl, storeImage } from "./storage";
-import type { Brand, Currency, Localized, Pricing, Product, ProductDetails } from "./types";
+import type { Brand, Country, Currency, Localized, Pricing, Product, ProductDetails } from "./types";
 
 /** The signed-in owner's brands and products, from the API, in the dashboard's shapes (types.ts). */
 
@@ -15,7 +17,8 @@ function localized(ar: string | null | undefined, en: string | null | undefined)
   return { ar: ar || en || "", en: en || ar || "" };
 }
 
-function toBrand(row: BrandRow, registration?: Registration): Brand {
+/** `market`: the account's country, which a brand's one registration (CR number, VAT certificate) is in. */
+function toBrand(row: BrandRow, registration?: Registration, market: Country = "bh"): Brand {
   const registered = registration && (registration.cr_number || registration.vat_certificate_path);
   return {
     id: row.id,
@@ -26,10 +29,10 @@ function toBrand(row: BrandRow, registration?: Registration): Brand {
     website: row.website ?? undefined,
     instagram: row.instagram ?? undefined,
     tiktok: row.tiktok ?? undefined,
-    // Bahrain only for the MVP: a registration means the brand works there.
-    countries: registered ? ["bh"] : undefined,
+    // A registration means the brand works in the account's country.
+    countries: registered ? [market] : undefined,
     registrations: registered
-      ? { bh: { crNumber: registration.cr_number ?? undefined, vatCertificate: registration.vat_certificate_path?.split("/").at(-1) } }
+      ? { [market]: { crNumber: registration.cr_number ?? undefined, vatCertificate: registration.vat_certificate_path?.split("/").at(-1) } }
       : undefined,
   };
 }
@@ -57,7 +60,8 @@ export const myBrands = cache(async (): Promise<Brand[]> => (await api<BrandRow[
 export async function myBrand(id: string): Promise<Brand | undefined> {
   const row = (await api<BrandRow[]>("/brands")).find((b) => b.id === id);
   if (!row) return undefined;
-  return toBrand(row, await apiOrNothing<Registration>(`/brands/${id}/registration`));
+  const [registration, me] = await Promise.all([apiOrNothing<Registration>(`/brands/${id}/registration`), getMe()]);
+  return toBrand(row, registration, marketOf(me?.account.country));
 }
 
 export const productsOf = cache(async (brandId: string): Promise<Product[]> =>

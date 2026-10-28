@@ -63,11 +63,11 @@ export type Results = {
   onTheWay: number;
   /** Of those, clips delivered and waiting for the brand. */
   toReview: number;
-  /** In BHD, service fee included: what approved clips cost, and what's held for the ones on the way. */
+  /** In the account's money, service fee included: what approved clips cost, and what's held for the ones on the way. */
   spent: number;
   held: number;
   /**
-   * In BHD, service fee included: paid this calendar month (and last month, to compare) for offers that
+   * In the account's money, service fee included: paid this calendar month (and last month, to compare) for offers that
    * are still going or done. Withdrawn, declined and expired ones don't count: that money came back.
    */
   spentThisMonth: number;

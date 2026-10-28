@@ -8,10 +8,10 @@ import type { Order } from "@/lib/data/types";
 
 export const SERVICE_FEE_RATE = 0.1;
 
-/** BHD has 3 decimals (fils). */
+/** Dinars, Bahraini or Kuwaiti, have 3 decimals (fils). The fee is the same in both markets, with no VAT on top. */
 const fils = (n: number) => Math.round(n * 1000) / 1000;
 
-/** The service fee on top of what creators are paid, in BHD. */
+/** The service fee on top of what creators are paid, in the account's money. */
 export function serviceFee(creatorsTotal: number): number {
   return fils(creatorsTotal * SERVICE_FEE_RATE);
 }

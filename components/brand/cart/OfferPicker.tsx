@@ -25,8 +25,8 @@ type Props = {
 
 /** The creator's price list: choose one platform (one order = one video) and add it to the cart. */
 export function OfferPicker({ creatorId, creatorName, offers, inCart, variant = "card" }: Props) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [chosen, setChosen] = useState<ContentFormat | undefined>(() => offers.find((o) => (inCart?.[o.format] ?? 0) > 0)?.format);
   const [justAdded, setJustAdded] = useState(false);
   const [open, setOpen] = useState(false);

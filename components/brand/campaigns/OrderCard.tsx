@@ -26,8 +26,8 @@ import type { OrderCardView } from "./campaignView";
  * Opens inline to show messages, shipping, the clip, payment, and rating once it's done.
  */
 export function OrderCard({ order, productName }: { order: OrderCardView; productName: string }) {
-  const { t, tp, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, tp, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [open, setOpen] = useState(false);
   const card = useRef<HTMLDivElement>(null);
   const panelId = `order-${order.id}`;

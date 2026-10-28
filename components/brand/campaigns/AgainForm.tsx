@@ -85,8 +85,8 @@ function AgainDetails({
   err: (name: string) => string | undefined;
   v: (name: string) => string | undefined;
 }) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const hasError =
     FIELDS.some((n) => err(n)) ||
     defaults.references.some((_, i) => err(`reference-${i}`));

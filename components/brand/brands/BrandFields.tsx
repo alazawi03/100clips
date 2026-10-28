@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useI18n } from "@/components/i18n/I18nProvider";
-import { Field, Input, Textarea } from "@/components/ui/Form";
+import { Field, FieldError, Input, Textarea } from "@/components/ui/Form";
 import { FileInput } from "@/components/ui/FileInput";
 import { ImageInput } from "@/components/ui/ImageInput";
 import { NotInCountry } from "./NotInCountry";
 import { countryFlag } from "@/lib/data/emojis";
-import { brandCountries } from "@/lib/data/markets";
+import { brandCountries, hasVat, marketOf } from "@/lib/data/markets";
 import type { Country } from "@/lib/data/types";
 
 /** Starting values for every brand field, as plain strings. */
@@ -82,17 +82,13 @@ export function AboutFields({ v, err, links = true }: SectionProps & { links?: b
  * (Bahrain for the MVP) there's nothing to pick, so its registration shows straight away.
  */
 export function ExtrasFields({ v, err }: SectionProps) {
-  const { t } = useI18n();
+  const { t, country } = useI18n();
   const offered = brandCountries();
   const only = offered.length === 1 ? offered[0] : undefined;
-  const [chosen, setChosen] = useState<Set<Country>>(() => (only ? new Set([only]) : new Set((Array.isArray(v.countries) ? v.countries : v.countries ? [v.countries] : []).filter((c): c is Country => offered.includes(c as Country)))));
-  const toggle = (c: Country) =>
-    setChosen((set) => {
-      const next = new Set(set);
-      if (next.has(c)) next.delete(c);
-      else next.add(c);
-      return next;
-    });
+  // One country: the account's market (its creators and money), the one it's in unless the form says another.
+  const sent = (Array.isArray(v.countries) ? v.countries : v.countries ? [v.countries] : []).find((c): c is Country => offered.includes(c as Country));
+  const [picked, setPicked] = useState<Country>(() => only ?? sent ?? (offered.includes(marketOf(country)) ? marketOf(country) : offered[0]));
+  const chosen = new Set([picked]);
   const field = (name: string) => (typeof v[name] === "string" ? (v[name] as string) : undefined);
 
   return (
@@ -116,7 +112,7 @@ export function ExtrasFields({ v, err }: SectionProps) {
                 key={c}
                 className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-border px-4 text-small font-medium transition-colors duration-[120ms] hover:bg-surface has-[:checked]:border-brand-soft has-[:checked]:bg-brand-soft has-[:checked]:text-brand-on-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary"
               >
-                <input type="checkbox" name="countries" value={c} checked={chosen.has(c)} onChange={() => toggle(c)} className="sr-only" />
+                <input type="radio" name="countries" value={c} checked={picked === c} onChange={() => setPicked(c)} className="sr-only" />
                 <span aria-hidden className="text-base leading-none">
                   {countryFlag[c]}
                 </span>
@@ -124,6 +120,9 @@ export function ExtrasFields({ v, err }: SectionProps) {
               </label>
             ))}
           </div>
+          {err("countries") && <FieldError>{err("countries")}</FieldError>}
+          {/* Several open: no "only in X" line, and the waitlist is for the countries that aren't. */}
+          <NotInCountry />
         </fieldset>
       )}
 
@@ -136,12 +135,14 @@ export function ExtrasFields({ v, err }: SectionProps) {
               <span aria-hidden className="text-lg leading-none">
                 {countryFlag[c]}
               </span>
-              {t("brandForm.registrationIn", { country: t(`countries.${c}`) })}
+              {t(hasVat(c) ? "brandForm.registrationIn" : "brandForm.registrationInNoVat", { country: t(`countries.${c}`) })}
             </h3>
             <Field label={t("brandForm.crNumber")} htmlFor={`cr_${c}`}>
               <Input id={`cr_${c}`} name={`cr_${c}`} dir="ltr" inputMode="numeric" defaultValue={field(`cr_${c}`)} placeholder={t("brandForm.crPlaceholder")} />
             </Field>
-            <FileInput name={`vat_${c}`} label={t("brandForm.vatCertificate")} hint={t("brandForm.vatHint")} defaultName={field(`vat_${c}`)} error={err(`vat_${c}`)} />
+            {hasVat(c) && (
+              <FileInput name={`vat_${c}`} label={t("brandForm.vatCertificate")} hint={t("brandForm.vatHint")} defaultName={field(`vat_${c}`)} error={err(`vat_${c}`)} />
+            )}
           </section>
         ))}
       {chosen.size === 0 && <p className="text-small text-text-muted">{t("brandForm.registrationsHint")}</p>}

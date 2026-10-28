@@ -103,8 +103,8 @@ function isUrl(value: string) {
  * with the same rules as the server, and the server's answer is the final word.
  */
 export function CheckoutForm({ creators: cartCreators, brands, initial, minDeadline, total: cartTotal, balance, cardOnline, picker, resume }: Props) {
-  const { t, tp, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, tp, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const form = useRef<HTMLFormElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const [state, action, pending] = useActionState<CheckoutState, FormData>(checkout, null);

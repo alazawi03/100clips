@@ -8,6 +8,7 @@ import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Field, Input } from "@/components/ui/Form";
+import { currencySign } from "@/lib/data/markets";
 import { createFormatters } from "@/lib/i18n/format";
 
 type Props = {
@@ -43,8 +44,8 @@ export function WithdrawButton(props: Props) {
 }
 
 function WithdrawForm({ balance, bank, days, onClose }: Props & { onClose: () => void }) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [state, action, pending] = useActionState<FormState, FormData>(requestWithdrawal, null);
   const error = state?.errors.amount ? t(state.errors.amount) : undefined;
   const sent = state && Object.keys(state.errors).length === 0;
@@ -79,7 +80,7 @@ function WithdrawForm({ balance, bank, days, onClose }: Props & { onClose: () =>
 
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
-      <Field label={t("walletPage.withdraw.amount")} htmlFor="withdraw-amount" error={error} required hint={t("walletPage.withdraw.available", { amount: f.money(balance) })}>
+      <Field label={t("walletPage.withdraw.amount", { currency: currencySign(currency, locale) })} htmlFor="withdraw-amount" error={error} required hint={t("walletPage.withdraw.available", { amount: f.money(balance) })}>
         <Input
           id="withdraw-amount"
           name="amount"

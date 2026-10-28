@@ -16,7 +16,7 @@ type WithdrawalRow = components["schemas"]["Withdrawal"];
 /** Working days a withdrawal takes to arrive. */
 export const WITHDRAWAL_DAYS = { from: 5, to: 7 } as const;
 
-/** The smallest withdrawal, in BHD. */
+/** The smallest withdrawal, in the account's money. */
 export const MIN_WITHDRAWAL = 1;
 
 export const toBankAccount = (row: BankRow): BankAccount => ({ holder: row.holder_name, iban: row.iban });

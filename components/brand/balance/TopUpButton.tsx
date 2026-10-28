@@ -9,6 +9,7 @@ import { useI18n } from "@/components/i18n/I18nProvider";
 import { Button } from "@/components/ui/Button";
 import { Drawer } from "@/components/ui/Drawer";
 import { Field, Input } from "@/components/ui/Form";
+import { currencySign } from "@/lib/data/markets";
 import { createFormatters } from "@/lib/i18n/format";
 
 /**
@@ -33,8 +34,8 @@ export function TopUpButton({ cardOnline }: { cardOnline: boolean }) {
 }
 
 function TopUpForm({ cardOnline, onDone }: { cardOnline: boolean; onDone: () => void }) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const formId = useId();
   const [state, run, pending] = useActionState<TopUpState, FormData>(topUpBalance, null);
   const [amount, setAmount] = useState(() => state?.values.amount ?? "");
@@ -52,7 +53,7 @@ function TopUpForm({ cardOnline, onDone }: { cardOnline: boolean; onDone: () => 
   if (state?.payUrl && state.paymentId) return <CardPanel url={state.payUrl} paymentId={state.paymentId} onCancelled={onDone} />;
   return (
     <form id={formId} action={run} noValidate className="flex flex-col gap-5">
-      <Field label={t("walletPage.topUpAmount")} htmlFor={`${formId}-amount`} error={err("amount")}>
+      <Field label={t("walletPage.topUpAmount", { currency: currencySign(currency, locale) })} htmlFor={`${formId}-amount`} error={err("amount")}>
         <Input
           id={`${formId}-amount`}
           name="amount"

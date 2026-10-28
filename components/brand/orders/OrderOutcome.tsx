@@ -138,8 +138,8 @@ export function OrderClosedNote({
 
 /** The clip, with a switch between versions once there's more than one (the latest first). */
 export function ClipVersions({ versions, title, className }: { versions: ClipVersion[]; title: string; className?: string }) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const [shown, setShown] = useState(versions.length - 1);
   useRefreshWhilePreparing(versions.some((v) => v.preview === "preparing"));
   const version = versions[shown] ?? versions.at(-1);

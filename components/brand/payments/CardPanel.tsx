@@ -49,7 +49,7 @@ export function CardPanel({ url, paymentId, back, onCancelled }: {
   /** Cancelled with Gate-E's close button: this instead of the payment page (a top-up just closes its drawer). */
   onCancelled?: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, currency } = useI18n();
   const waiting = back ?? `/payments/${paymentId}`;
   // Leaving for BENEFIT's page (or Gate-E's full one): covers the frame's "blocked" page while its address comes.
   const [moving, setMoving] = useState<"benefit" | "gatee">();
@@ -102,7 +102,8 @@ export function CardPanel({ url, paymentId, back, onCancelled }: {
     <Card className="flex flex-col gap-4 overflow-hidden px-0 pb-0 pt-5">
       <div className="flex flex-col gap-1 px-5">
         <h2 className="text-h2 font-medium">{t("payment.panelTitle")}</h2>
-        <p className="text-text-muted">{t("payment.panelBody")}</p>
+        {/* BENEFIT in Bahrain; Kuwait's brands pay with KNET or a card. */}
+        <p className="text-text-muted">{t(currency === "KWD" ? "payment.panelBodyKnet" : "payment.panelBody")}</p>
         <p className="text-small text-text-muted">
           {t("payment.panelTrouble")}{" "}
           <a

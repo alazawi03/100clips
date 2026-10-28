@@ -206,8 +206,8 @@ function EditDetailsForm({ campaignId, details, onDone }: Props & { onDone: () =
 
 /** A later deadline; never an earlier one. */
 function ExtendForm({ campaignId, deadline, minDeadline, onDone }: Props & { onDone: () => void }) {
-  const { t, locale } = useI18n();
-  const f = createFormatters(locale);
+  const { t, locale, currency } = useI18n();
+  const f = createFormatters(locale, currency);
   const formId = useId();
   const { state, run, pending } = useDrawerAction(extendDeadline.bind(null, campaignId), onDone);
   const err = state?.errors.deadline ? t(state.errors.deadline) : undefined;

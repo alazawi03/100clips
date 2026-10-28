@@ -372,13 +372,13 @@ function pricingOf(model: PriceModel, f: { amount: string; max: string; period: 
 function PriceFields({ type, v, err }: { type: ProductType; v: ProductValues; err: (name: string) => string | undefined }) {
   const i18n = useI18n();
   const { t, locale } = i18n;
-  const f = useMemo(() => createFormatters(locale), [locale]);
+  const f = useMemo(() => createFormatters(locale, i18n.currency), [locale, i18n.currency]);
   const currencyName = useMemo(() => new Intl.DisplayNames([locale], { type: "currency" }), [locale]);
   const models = PRICE_MODELS_BY_TYPE[type];
   const [picked, setPicked] = useState(v.priceModel ?? "");
   // Switching type keeps the choice only when the new type offers it.
   const model = (models as string[]).includes(picked) ? (picked as PriceModel) : undefined;
-  const [currency, setCurrency] = useState<Currency>((CURRENCIES as string[]).includes(v.currency ?? "") ? (v.currency as Currency) : "BHD");
+  const [currency, setCurrency] = useState<Currency>((CURRENCIES as string[]).includes(v.currency ?? "") ? (v.currency as Currency) : i18n.currency);
   const [amount, setAmount] = useState(v.price ?? "");
   const [max, setMax] = useState(v.priceMax ?? "");
   const [period, setPeriod] = useState<PricePeriod | "">((PRICE_PERIODS as string[]).includes(v.pricePeriod ?? "") ? (v.pricePeriod as PricePeriod) : "");
