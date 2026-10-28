@@ -8,8 +8,8 @@ import { COUNTRIES, type Country } from "./types";
 
 export type MarketStatus = "active" | "waitlist";
 
-/** Launching in Bahrain only. */
-export const ACTIVE_MARKETS: readonly string[] = ["BH"];
+/** Bahrain and Kuwait. */
+export const ACTIVE_MARKETS: readonly string[] = ["BH", "KW"];
 
 export function marketStatus(country: string): MarketStatus {
   return ACTIVE_MARKETS.includes(country.toUpperCase()) ? "active" : "waitlist";
