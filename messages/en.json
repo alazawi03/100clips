@@ -1340,12 +1340,9 @@
       "emailInvalid": "Enter a valid email, like name@company.com",
       "nameRequired": "Enter your name.",
       "linkExpired": "This link expired or was already used. Ask for a new one.",
-      "brandsOnly": "This account can’t log in here. The dashboard is for brands only.",
       "erased": "This account was deleted.",
       "failed": "Something went wrong. Try again."
     },
-    "creatorTitle": "This is a creator account",
-    "creatorBody": "This dashboard is for brands. Creators use the laqta app. Log in with another email to manage a brand.",
     "agree": "By creating an account, you agree to the {terms} and the {privacy}."
   },
   "legal": {

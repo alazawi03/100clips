@@ -19,8 +19,9 @@ export class ApiError extends Error {
 }
 
 /**
- * Calls the API as the signed-in user (their Supabase access token), from Server Components and
- * Server Actions. JSON in and out; a 204 gives undefined. Throws ApiError on 4xx/5xx.
+ * Calls the API as the signed-in user's brand account (their Supabase access token, and X-Laqta-App: the
+ * same login has its own account in the laqta app and the admin portal), from Server Components and Server
+ * Actions. JSON in and out; a 204 gives undefined. Throws ApiError on 4xx/5xx.
  */
 export async function api<T = unknown>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
   const supabase = await createClient();
@@ -31,6 +32,7 @@ export async function api<T = unknown>(path: string, init: { method?: string; bo
     res = await fetch(`${API_URL}${path}`, {
       method: init.method ?? "GET",
       headers: {
+        "x-laqta-app": "brand",
         ...(token ? { authorization: `Bearer ${token}` } : {}),
         ...(init.body === undefined ? {} : { "content-type": "application/json" }),
       },

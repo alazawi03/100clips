@@ -109,6 +109,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/apple-login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Keep a Sign in with Apple login
+         * @description After signing in with Apple, the app sends the authorization code: the API keeps Apple's refresh token for it, only to revoke it when the account is erased (Apple's rule). A no-op where the API has no Apple key.
+         */
+        post: operations["MeController_appleLogin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/deletion": {
         parameters: {
             query?: never;
@@ -2596,6 +2616,11 @@ export interface components {
         Account: {
             /** Format: uuid */
             id: string;
+            /**
+             * Format: uuid
+             * @description The Supabase login it signs in with. A login (an email) has at most one account in each app: its role
+             */
+            login_id: string;
             role: components["schemas"]["Role"];
             name_ar: string | null;
             name_en: string | null;
@@ -2717,6 +2742,10 @@ export interface components {
              * @example KW
              */
             country: string;
+        };
+        AppleLoginDto: {
+            /** @description The authorizationCode Sign in with Apple gave the app (good once, for 5 minutes) */
+            authorization_code: string;
         };
         /** @enum {string} */
         DeletionBlocker: "balance" | "running_orders" | "withdrawal";
@@ -5221,6 +5250,46 @@ export interface operations {
             };
             /** @description Not found, or not yours */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MeController_appleLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppleLoginDto"];
+            };
+        };
+        responses: {
+            /** @description Kept */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not signed in, or the session expired */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

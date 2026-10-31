@@ -3,10 +3,9 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import type { MessageKey } from "@/lib/i18n/messages";
 import { getI18n } from "@/lib/i18n/server";
 
-/** Why they're back at login (?error=): an expired link, an admin's account, an erased account. */
+/** Why they're back at login (?error=): an expired link, an erased account. */
 const ERRORS = {
   link: "auth.errors.linkExpired",
-  "brands-only": "auth.errors.brandsOnly",
   erased: "auth.errors.erased",
 } as const satisfies Record<string, MessageKey>;
 

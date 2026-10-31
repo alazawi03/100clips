@@ -2,9 +2,8 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { apiOrNothing } from "@/lib/api";
 import type { MessageKey } from "@/lib/i18n/messages";
-import type { Me } from "@/lib/session";
+import { keepPendingSignup } from "@/lib/pending-signup";
 import { createClient } from "@/lib/supabase/server";
 
 /** error: a translation key. values: what was typed (never the password), to show it again. sentTo: a link went to this email. */
@@ -52,16 +51,13 @@ export async function signIn(_prev: AuthFormState, form: FormData): Promise<Auth
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password: String(form.get("password") ?? "") });
   if (error) return { error: authError(error.code), values };
-  // An admin: signed out again right here, and the form says why (no trip through /auth/brands-only).
-  const me = await apiOrNothing<Me>("/me").catch(() => undefined);
-  if (me?.account.role === "admin") {
-    await supabase.auth.signOut({ scope: "local" });
-    return { error: "auth.errors.brandsOnly", values };
-  }
   redirect(safeNext(text(form, "next")));
 }
 
-/** Supabase emails a confirmation link; it opens /auth/callback, which signs them in and goes on to onboarding. */
+/**
+ * Supabase emails a confirmation link; it opens /auth/callback, which signs them in and goes on to onboarding. An email
+ * that already signs in to laqta (in the laqta app or the admin portal) signs up the same way: see joinWithLogin.
+ */
 export async function signUp(_prev: AuthFormState, form: FormData): Promise<AuthFormState> {
   const name = text(form, "name");
   const email = text(form, "email");
@@ -76,11 +72,31 @@ export async function signUp(_prev: AuthFormState, form: FormData): Promise<Auth
     password,
     options: { data: { name }, emailRedirectTo: `${await origin()}/auth/callback?next=/onboarding` },
   });
+  // An existing email comes back without identities (Supabase doesn't say so, to protect privacy), or as
+  // user_already_exists when confirmations are off.
+  const existing = (data.user && data.user.identities?.length === 0) || error?.code === "user_already_exists" || error?.code === "email_exists";
+  if (existing) return joinWithLogin(email, password, name, values);
   if (error) return { error: authError(error.code), values };
-  // An existing email comes back without identities (Supabase doesn't say so, to protect privacy).
-  if (data.user && data.user.identities?.length === 0) return { error: "auth.errors.exists", values };
   // Confirmation off in Supabase: already signed in.
   if (data.session) redirect("/onboarding");
+  return { sentTo: email };
+}
+
+/**
+ * Sign-up with an email that already has a laqta login (a creator's, an admin's, or a brand owner's): one login per
+ * email, with a separate account in each app. Supabase makes no second login and sends nothing, so the link comes in
+ * the "Set your laqta password" email (Reset password); this browser keeps what they typed (lib/pending-signup.ts),
+ * and /auth/callback puts it on the login once the email's owner opens the link. So it reads like any sign-up, and
+ * nothing changes unless they own the email. The same "check your email" answer either way.
+ */
+async function joinWithLogin(email: string, password: string, name: string, values: Record<string, string>): Promise<AuthFormState> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${await origin()}/auth/callback?next=/onboarding&set=password`,
+  });
+  // Supabase's one email a minute per address: "too many tries".
+  if (error) return { error: authError(error.code), values };
+  await keepPendingSignup({ email, password, name });
   return { sentTo: email };
 }
 

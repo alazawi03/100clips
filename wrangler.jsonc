@@ -16,6 +16,7 @@
   // Keeps the Worker's logs, server errors included, in Cloudflare (Workers & Pages > laqta-app > Logs).
   "observability": { "enabled": true },
   "vars": {
+    // Secrets aren't here: SIGNUP_COOKIE_KEY is set with `npx wrangler secret put` (.env.example).
     // Non-secret: just hostnames. API_URL and NEXT_PUBLIC_* also get baked in
     // at build time (see .github/workflows/deploy.yml) since Next.js server
     // actions re-read process.env at runtime too — both places need them.

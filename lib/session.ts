@@ -13,19 +13,20 @@ export const getUser = cache(async () => {
   return data.user;
 });
 
-/** Account, creator profile and brands from the API, or undefined before onboarding. Once per request. */
+/** The brand account and its brands from the API, or undefined before onboarding. Once per request. */
 export const getMe = cache(() => apiOrNothing<Me>("/me"));
 
-/** For the brand dashboard's pages: a brand owner account, else onboarding (creators) or signed out (admins). */
+/**
+ * For the brand dashboard's pages: the login's brand account, else onboarding, which makes it. A login from the
+ * laqta app or the admin portal gets its own brand account here, apart from those.
+ */
 export async function requireBrandAccount(): Promise<Me> {
   const me = await getMe();
-  if (!me || me.account.role === "creator") redirect("/onboarding");
-  // Admins own no brand: lists, cart and checkout aren't theirs. Login tells them this is for brands only.
-  if (me.account.role === "admin") redirect("/auth/brands-only");
+  if (!me) redirect("/onboarding");
   return me;
 }
 
-/** First visit after sign-up: make the brand owner's account, named as they signed up. */
+/** First visit after sign-up (or with a login from the laqta app): make the brand owner's account, named as they signed up. */
 export async function ensureBrandAccount(): Promise<Me> {
   const existing = await getMe();
   if (existing) return existing;
